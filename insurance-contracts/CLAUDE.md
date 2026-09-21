@@ -25,7 +25,7 @@
   |---|---|
   | `yakkan/models.py` `build.py` `richtext.py` `schema/` `content/` `dataset/` | `docs/schema.md`（§5・§1.1） |
   | `yakkan/render/` `layout/` `verify/` `numbering.py` `styles/css/` | `docs/rendering.md`（§6） |
-  | `content/` の執筆・`library/clauses/`・QA 執筆 | `docs/style_guide.md`（§7） |
+  | `content/` の執筆・`library/clauses/`・QA 執筆 | `docs/style_guide.md`（§7）＋ `docs/authoring_checklist.md` |
   | `blueprints/` `styles/` `yakkan/scaffold.py` `compose.py` | `docs/blueprints.md`（§4.1・§4.2・付録A/B） |
   | 構造分析・参考URL の扱い | `docs/reference_structures.md`（§3） |
   | ファイル新規作成・配置 | `docs/repo_layout.md`（§10） |
@@ -166,6 +166,8 @@ dataset/manifest.json      # 全文書の一覧（doc_id, genre, style, pages, s
 - 奥付に disclaimer（架空である旨）を必ず入れる。ページごとには入れない（読み取り対象としての自然さを損なうため）。
 - 条文ライブラリの文もオリジナル。同一ジャンル3文書以上では章構成・特約・定義語・数値・図の題材を変え、`lint --similarity` で重複率 30% 超を警告する。
 - 新ジャンル・新スタイルの初回は §7.8 のチェックリストで全ページを目視する。
+- **`docs/authoring_checklist.md` を着手前に必ず読む。** P4-c で 7 文書を reviewer に通して得た
+  「lint が通っても残る欠陥」の一覧（転載の指紋・gold の誤り・表と条文の空振り・定数の衝突ほか）。
 
 ---
 

@@ -444,7 +444,11 @@ def clean(
             if path.is_dir() and path.name not in wanted:
                 targets.append(path)
     for doc_id in doc_ids or []:
-        path = dataset_dir / doc_id
+        # `dataset/<doc_id>` と打たれても効くようにする（黙って何も消さないと事故になる）
+        name = Path(doc_id).name if Path(doc_id).parent.name == dataset_dir.name else doc_id
+        path = dataset_dir / name
+        if not path.is_dir():
+            console.print(f"[yellow]見つからない: {path}[/yellow]")
         if path.is_dir() and path not in targets:
             targets.append(path)
 

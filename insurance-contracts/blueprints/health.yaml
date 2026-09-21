@@ -105,7 +105,10 @@ variants:
   era: { seireki: 0.9, wareki: 0.1 }
   issuer_kind: { stock: 0.8, mutual: 0.2 }
   pet_name: { present: 0.6, absent: 0.4 }
-  order_shuffle: [["ch1", "ch2"]]
+  # 傷害条項（ch1）が先。商品名が「傷害・疾病」の順である以上、疾病から始めると
+  # 前付けの構成図・目的別もくじと読者の期待の両方に反する。章順の多様性は
+  # 基本条項（ch3）の節の並びで確保する。
+  order_shuffle: []
   styles: [nl-a4-2col-mincho, nl-b5-2col-dense]
 
 budget: { chars_min: 14000, chars_max: 25000, footnotes_min: 10, margin_notes_min: 3 }

@@ -143,7 +143,10 @@ variants:
   era: { seireki: 0.8, wareki: 0.2 }
   issuer_kind: { stock: 0.9, mutual: 0.1 }
   pet_name: { present: 0.5, absent: 0.5 }
-  order_shuffle: [["ch1", "ch2", "ch3"]]
+  # 賠償責任（ch1）は必ず先頭に置く。実在の自動車保険で車両補償が賠償責任より前に来る
+  # 構成は無い（P4-c の reviewer 指摘。auto-0001 で実際に逆転した）。
+  # 入れ替えてよいのは人身傷害（ch2）と車両（ch3）の順だけ。
+  order_shuffle: [["ch2", "ch3"]]
   styles: [nl-a4-2col-mincho, nl-b5-2col-dense, nl-a4-1col-gothic]
 
 budget:
