@@ -196,11 +196,6 @@ def render(
         console.print(f"[red]{exc}[/red]")
         raise typer.Exit(code=1) from exc
 
-    # source.json も dataset 側に置く（verify が参照する）
-    from yakkan.models import dump_json
-
-    dump_json(source, result.out_dir / "source.json")
-
     console.print(f"[green]render 完了[/green] {result.out_dir} / {result.page_count} ページ")
     for note in result.notes:
         console.print(f"  [yellow]note[/yellow] {note}")
@@ -342,6 +337,73 @@ def scaffold(
     )
     for note in result.notes:
         console.print(f"  [yellow]note[/yellow] {note}")
+
+
+@app.command()
+def batch(
+    spec: Annotated[Path, typer.Argument(help="specs/<name>.yaml")],
+    only: Annotated[str | None, typer.Option("--only", help="この content_id だけ処理する")] = None,
+    content_root: Annotated[Path, typer.Option("--content", help="content/ のパス")] = Path("content"),
+    dataset_root: Annotated[Path, typer.Option("--dataset", help="dataset/ のパス")] = Path("dataset"),
+) -> None:
+    """spec に並べた content を lint → build → render → verify → qa で一括生成する。
+
+    **失敗しても止まらない。** 最後に段別・原因別の内訳を出すので、
+    そのまま `docs/progress.md` に転記できる（CLAUDE.md §12 P5）。
+    """
+    from yakkan.batch import run as run_batch
+
+    result = run_batch(spec, content_root=content_root, dataset_root=dataset_root, only=only)
+
+    table = Table(title=f"batch {result.name}", title_justify="left", header_style="bold")
+    for column, justify in (
+        ("content_id", "left"),
+        ("genre", "left"),
+        ("style", "left"),
+        ("頁", "right"),
+        ("QA", "right"),
+        ("status", "left"),
+        ("落ちた段/理由", "left"),
+    ):
+        table.add_column(column, justify=justify)
+    for row in result.results:
+        color = {"ready": "green", "failed": "red"}.get(row.status, "yellow")
+        note = ""
+        if row.status != "ready":
+            note = f"{row.stage}: {row.reason[:70]}"
+        table.add_row(
+            row.content_id,
+            row.genre,
+            row.style_id,
+            str(row.pages or ""),
+            str(row.qa_count or ""),
+            f"[{color}]{row.status}[/{color}]",
+            note,
+        )
+    console.print(table)
+
+    if result.failed:
+        stages = Table(title="失敗の内訳", title_justify="left", header_style="bold")
+        stages.add_column("段")
+        stages.add_column("件数", justify="right")
+        for stage, count in result.by_stage().most_common():
+            stages.add_row(stage, str(count))
+        console.print(stages)
+        reasons = Table(title="原因別", title_justify="left", header_style="bold")
+        reasons.add_column("原因")
+        reasons.add_column("件数", justify="right")
+        for reason, count in result.by_reason().most_common():
+            reasons.add_row(reason, str(count))
+        console.print(reasons)
+
+    ready = len(result.ready)
+    total = len(result.results)
+    skipped = sum(1 for r in result.results if r.status == "skipped")
+    summary = f"ready {ready}/{total}（skipped {skipped}）"
+    if result.failed:
+        console.print(f"[red]{summary} / failed {len(result.failed)}[/red]")
+        raise typer.Exit(code=1)
+    console.print(f"[green]{summary}[/green]")
 
 
 @app.command()

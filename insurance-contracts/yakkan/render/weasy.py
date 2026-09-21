@@ -96,6 +96,9 @@ def render_source(
 
     png_paths = rasterize(pdf_path, out_dir / "pages") if render_png else []
     dump_json(layout, out_dir / "layout.json")
+    # source.json も同じ場所に置く。verify / qa / eval はこの 2 つを対で読むので、
+    # 書き出しを呼び出し側に任せると書き忘れる（batch で実際に起きた）。
+    dump_json(source, out_dir / "source.json")
     return RenderResult(
         doc_id=doc_id,
         out_dir=out_dir,
