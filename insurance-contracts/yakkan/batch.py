@@ -195,9 +195,9 @@ def run(
                 answer = build_answer(stored, layout)
                 dump_json(answer, out_dir / "answer.json")
                 qa_path = out_dir / "qa.json"
-                from yakkan.cli import _load_authored
+                from yakkan.cli import _load_authored, _localize_authored
 
-                authored = _load_authored(content_id, qa_path, content_root)
+                authored = _localize_authored(_load_authored(content_id, qa_path, content_root), answer)
                 generated = generate_qa(answer, count=qa_count, seed=qa_seed)
                 qa_set = QASet(doc_id=answer.doc_id, items=generated.items + authored)
                 dump_json(qa_set, qa_path)

@@ -248,6 +248,27 @@ def verify(
     console.print(f"[green]verify 通過[/green]（error 0 件 / warn {warns} 件）")
 
 
+def _localize_authored(items: list, answer) -> list:
+    """執筆 QA の**スタイル依存の値**を、この描画結果に合わせて付け直す。
+
+    執筆 QA は content 側（スタイル非依存）に置くが、`page_hint` と
+    `locate` の答え（ページ番号）は描画するスタイルによって変わる。
+    書かれた値をそのまま使うと、別スタイルで描いたときに L14 が warn を出す。
+    どちらも `evidence` から機械的に決まるので、ここで上書きする。
+    """
+    for item in items:
+        pages: set[int] = set()
+        for element_id in item.evidence:
+            element = answer.layout.elements.get(element_id)
+            if element:
+                pages.update(f.page for f in element.fragments)
+        if pages:
+            item.page_hint = sorted(pages)
+            if item.type == "locate" and item.answer_type == "number":
+                item.answer = float(min(pages))
+    return items
+
+
 def _load_authored(content_id: str, qa_path: Path, content_root: Path = Path("content")) -> list:
     """執筆 QA を読む。`content/<cid>/qa_authored.json` が正、無ければ既存 qa.json から引き継ぐ。"""
     from yakkan.models import QA, QASet
@@ -308,7 +329,7 @@ def qa(
         qa_set = QASet.model_validate_json(qa_path.read_text(encoding="utf-8"))
     else:
         dump_json(answer, doc_dir / "answer.json")
-        authored = _load_authored(source.content_id, qa_path)
+        authored = _localize_authored(_load_authored(source.content_id, qa_path), answer)
         generated = generate(answer, count=count, seed=seed)
         qa_set = QASet(doc_id=answer.doc_id, items=generated.items + authored)
         dump_json(qa_set, qa_path)
