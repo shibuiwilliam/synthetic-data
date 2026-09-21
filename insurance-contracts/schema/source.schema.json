@@ -432,6 +432,13 @@
           },
           "title": "Figures",
           "type": "object"
+        },
+        "toc": {
+          "items": {
+            "$ref": "#/$defs/TocEntry"
+          },
+          "title": "Toc",
+          "type": "array"
         }
       },
       "title": "Derived",
@@ -1845,6 +1852,13 @@
           },
           "title": "Header Path",
           "type": "object"
+        },
+        "auto_labels": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Auto Labels",
+          "type": "object"
         }
       },
       "title": "TableDerived",
@@ -2163,6 +2177,53 @@
         }
       },
       "title": "Toc",
+      "type": "object"
+    },
+    "TocEntry": {
+      "additionalProperties": false,
+      "description": "目次の 1 行。ページ番号は描画時に `target-counter` が入れる（docs/rendering.md §6.5）。",
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "depth": {
+          "title": "Depth",
+          "type": "integer"
+        },
+        "label": {
+          "title": "Label",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "heading_text": {
+          "title": "Heading Text",
+          "type": "string"
+        },
+        "summary": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Summary"
+        }
+      },
+      "required": [
+        "id",
+        "depth",
+        "label",
+        "title",
+        "heading_text"
+      ],
+      "title": "TocEntry",
       "type": "object"
     },
     "Tree": {

@@ -254,6 +254,79 @@ def verify(
 
 
 @app.command()
+def qa(
+    doc_dir: Annotated[Path, typer.Argument(help="dataset/<doc_id> のパス")],
+    count: Annotated[int, typer.Option("--count", help="自動生成する問数")] = 30,
+    seed: Annotated[int, typer.Option("--seed", help="出題の選択に使う乱数種")] = 0,
+    validate_only: Annotated[
+        bool, typer.Option("--validate", help="生成せず、既存の qa.json を検証するだけ")
+    ] = False,
+    report: Annotated[bool, typer.Option("--report", help="種別ごとに作れる候補の数を表示する")] = False,
+) -> None:
+    """`answer.json` を作り、自動 QA を生成して検証する（CLAUDE.md §11）。
+
+    `qa.json` に執筆 QA（`source: "authored"`）が既にあれば**残したまま**、
+    自動 QA だけを入れ替える。執筆した問いを再生成で失わないため。
+    """
+    from yakkan.answer import build_answer
+    from yakkan.models import Layout, QASet, Source, dump_json
+    from yakkan.qa.auto import generate, pool_sizes
+    from yakkan.qa.validate import validate as run_validate
+
+    source_path = doc_dir / "source.json"
+    layout_path = doc_dir / "layout.json"
+    if not source_path.exists() or not layout_path.exists():
+        console.print(f"[red]{doc_dir} に source.json / layout.json が無い[/red]")
+        raise typer.Exit(code=2)
+
+    source = Source.model_validate_json(source_path.read_text(encoding="utf-8"))
+    layout = Layout.model_validate_json(layout_path.read_text(encoding="utf-8"))
+    answer = build_answer(source, layout)
+
+    qa_path = doc_dir / "qa.json"
+    if validate_only:
+        if not qa_path.exists():
+            console.print(f"[red]{qa_path} が無い[/red]")
+            raise typer.Exit(code=2)
+        qa_set = QASet.model_validate_json(qa_path.read_text(encoding="utf-8"))
+    else:
+        dump_json(answer, doc_dir / "answer.json")
+        authored = []
+        if qa_path.exists():
+            existing = QASet.model_validate_json(qa_path.read_text(encoding="utf-8"))
+            authored = [item for item in existing.items if item.source == "authored"]
+        generated = generate(answer, count=count, seed=seed)
+        qa_set = QASet(doc_id=answer.doc_id, items=generated.items + authored)
+        dump_json(qa_set, qa_path)
+
+    if report:
+        table = Table(title="種別ごとの候補数", title_justify="left", header_style="bold")
+        table.add_column("type")
+        table.add_column("候補", justify="right")
+        table.add_column("採用", justify="right")
+        picked: dict[str, int] = {}
+        for item in qa_set.items:
+            picked[item.type] = picked.get(item.type, 0) + 1
+        for key, size in sorted(pool_sizes(answer, seed=seed).items()):
+            table.add_row(key, str(size), str(picked.get(key, 0)))
+        console.print(table)
+
+    findings = run_validate(qa_set, answer)
+    for finding in findings:
+        color = "red" if finding.severity == "error" else "yellow"
+        console.print(f"[{color}]{finding}[/{color}]")
+    errors = sum(1 for f in findings if f.severity == "error")
+    warns = len(findings) - errors
+    auto = sum(1 for i in qa_set.items if i.source == "auto")
+    authored_count = len(qa_set.items) - auto
+    summary = f"QA {len(qa_set.items)} 問（自動 {auto} / 執筆 {authored_count}）"
+    if errors:
+        console.print(f"[red]{summary} / error {errors} 件 / warn {warns} 件[/red]")
+        raise typer.Exit(code=1)
+    console.print(f"[green]{summary} / error 0 件 / warn {warns} 件[/green]")
+
+
+@app.command()
 def scaffold(
     genre: Annotated[str, typer.Option("--genre", help="blueprints/<genre>.yaml")],
     content_id: Annotated[str, typer.Option("--content-id", help="例 auto-0001")],

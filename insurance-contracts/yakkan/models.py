@@ -593,6 +593,40 @@ class Layout(Model):
     figures: dict[str, FigureLayout] = Field(default_factory=dict)
 
 
+class AnswerPage(Model):
+    """1 ページぶんの期待テキスト（docs/schema.md §5.8）。"""
+
+    number: int
+    #: 読み順の本文（欄外注・表を含み、ヘッダ／フッタとページ番号は含まない）
+    text: str
+    #: ヘッダ／フッタも含めた、そのページに実際に出る全文字列
+    text_with_furniture: str
+    #: 繰り返し表頭を除いた文字数（テキスト評価で二重計上しないための目安）
+    chars: int
+
+
+class OutlineEntry(Model):
+    """見出しツリー 1 行（評価の outline F1 用）。"""
+
+    id: str
+    depth: int
+    label: str
+    title: str
+    heading_text: str
+    page: int
+
+
+class Answer(Model):
+    """`answer.json`：source ＋ layout ＋ 派生（ページ別テキスト・アウトライン）。"""
+
+    schema_version: Literal["1.0"] = SCHEMA_VERSION
+    doc_id: str
+    source: Source
+    layout: Layout
+    pages: list[AnswerPage] = Field(default_factory=list)
+    outline: list[OutlineEntry] = Field(default_factory=list)
+
+
 class QA(Model):
     id: str
     type: QAType
@@ -645,5 +679,6 @@ EXPORTED_SCHEMAS: dict[str, type[BaseModel]] = {
     "source_draft": SourceDraft,
     "source": Source,
     "layout": Layout,
+    "answer": Answer,
     "qa": QASet,
 }
