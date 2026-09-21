@@ -248,6 +248,26 @@ def verify(
     console.print(f"[green]verify 通過[/green]（error 0 件 / warn {warns} 件）")
 
 
+def _load_authored(content_id: str, qa_path: Path, content_root: Path = Path("content")) -> list:
+    """執筆 QA を読む。`content/<cid>/qa_authored.json` が正、無ければ既存 qa.json から引き継ぐ。"""
+    from yakkan.models import QA, QASet
+
+    authored_path = content_root / content_id / "qa_authored.json"
+    if authored_path.exists():
+        data = json.loads(authored_path.read_text(encoding="utf-8"))
+        items = data.get("items", data) if isinstance(data, dict) else data
+        out = []
+        for index, raw in enumerate(items, start=1):
+            raw.setdefault("source", "authored")
+            raw.setdefault("id", f"qa_auth_{index:03d}")
+            out.append(QA.model_validate(raw))
+        return out
+    if qa_path.exists():
+        existing = QASet.model_validate_json(qa_path.read_text(encoding="utf-8"))
+        return [item for item in existing.items if item.source == "authored"]
+    return []
+
+
 @app.command()
 def qa(
     doc_dir: Annotated[Path, typer.Argument(help="dataset/<doc_id> のパス")],
@@ -260,8 +280,10 @@ def qa(
 ) -> None:
     """`answer.json` を作り、自動 QA を生成して検証する（CLAUDE.md §11）。
 
-    `qa.json` に執筆 QA（`source: "authored"`）が既にあれば**残したまま**、
-    自動 QA だけを入れ替える。執筆した問いを再生成で失わないため。
+    執筆 QA は **`content/<content_id>/qa_authored.json`** に置く。
+    `dataset/` は生成物で手編集を禁じている（§0.4-3）ので、執筆した問いは content 側に持ち、
+    ここで自動 QA と合流させる。content 側に無ければ、既存 `qa.json` の
+    `source: "authored"` を引き継ぐ（移行のための後方互換）。
     """
     from yakkan.answer import build_answer
     from yakkan.models import Layout, QASet, Source, dump_json
@@ -286,10 +308,7 @@ def qa(
         qa_set = QASet.model_validate_json(qa_path.read_text(encoding="utf-8"))
     else:
         dump_json(answer, doc_dir / "answer.json")
-        authored = []
-        if qa_path.exists():
-            existing = QASet.model_validate_json(qa_path.read_text(encoding="utf-8"))
-            authored = [item for item in existing.items if item.source == "authored"]
+        authored = _load_authored(source.content_id, qa_path)
         generated = generate(answer, count=count, seed=seed)
         qa_set = QASet(doc_id=answer.doc_id, items=generated.items + authored)
         dump_json(qa_set, qa_path)

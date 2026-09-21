@@ -195,10 +195,9 @@ def run(
                 answer = build_answer(stored, layout)
                 dump_json(answer, out_dir / "answer.json")
                 qa_path = out_dir / "qa.json"
-                authored = []
-                if qa_path.exists():
-                    existing = QASet.model_validate_json(qa_path.read_text(encoding="utf-8"))
-                    authored = [i for i in existing.items if i.source == "authored"]
+                from yakkan.cli import _load_authored
+
+                authored = _load_authored(content_id, qa_path, content_root)
                 generated = generate_qa(answer, count=qa_count, seed=qa_seed)
                 qa_set = QASet(doc_id=answer.doc_id, items=generated.items + authored)
                 dump_json(qa_set, qa_path)
