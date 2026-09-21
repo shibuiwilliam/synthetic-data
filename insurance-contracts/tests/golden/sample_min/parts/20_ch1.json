@@ -1,0 +1,93 @@
+{
+  "target": "body",
+  "items": [
+    {
+      "id": "ch1",
+      "kind": "chapter",
+      "title": "賠償責任条項",
+      "summary": "他人を死傷させたり、他人の財物を壊したりした場合の補償を定めます。",
+      "children": [
+        {
+          "id": "ch1_a1",
+          "kind": "article",
+          "title": "この条項の補償内容",
+          "children": [
+            {
+              "id": "ch1_a1_p1",
+              "kind": "paragraph",
+              "text": "当会社は、{term:insured}が{term:insured_car}の所有、使用または管理に起因して他人を死傷させた場合に、この条項に従い、対人賠償保険金を支払います。"
+            },
+            {
+              "id": "ch1_a1_p2",
+              "kind": "paragraph",
+              "text": "当会社が{ref:ch1_a1_p1}により支払う保険金の額は、{const:bodily_limit}とします。"
+            }
+          ]
+        },
+        {
+          "id": "ch1_a2",
+          "kind": "article",
+          "title": "保険金を支払わない場合",
+          "children": [
+            {
+              "id": "ch1_a2_p1",
+              "kind": "paragraph",
+              "text": "当会社は、次に掲げる事由のいずれかにより生じた損害については、保険金を支払いません。",
+              "blocks": [
+                {
+                  "type": "table",
+                  "id": "tbl_exclusions",
+                  "semantic_type": "enumeration",
+                  "layout": {
+                    "header_rows": 0,
+                    "header_cols": 1,
+                    "repeat_header": false,
+                    "style": "grid"
+                  },
+                  "grid": [
+                    [
+                      {
+                        "id": "tbl_exclusions__r0c0",
+                        "text": "{auto_label}",
+                        "role": "stub"
+                      },
+                      {
+                        "id": "tbl_exclusions__r0c1",
+                        "text": "{term:policyholder}または{term:insured}の故意によって生じた損害",
+                        "role": "body"
+                      }
+                    ],
+                    [
+                      {
+                        "id": "tbl_exclusions__r1c0",
+                        "text": "{auto_label}",
+                        "role": "stub"
+                      },
+                      {
+                        "id": "tbl_exclusions__r1c1",
+                        "text": "戦争、内乱その他これらに類似の事変{fn:1}によって生じた損害",
+                        "role": "body"
+                      }
+                    ]
+                  ]
+                }
+              ]
+            }
+          ],
+          "blocks": [
+            {
+              "type": "footnotes",
+              "id": "fn_ch1_a2",
+              "notes": [
+                {
+                  "n": 1,
+                  "text": "事変には、暴動その他の著しい秩序の混乱であって、当会社が別に定めるものを含みます。"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,42 @@
+{
+  "clause_id": "disclosure_duty",
+  "scheme": "nonlife",
+  "title_options": ["告知義務", "契約締結時の告知義務"],
+  "constants": { "disclosure_notice_days": "30日" },
+  "terms_used": ["policyholder", "insured"],
+  "variants": [
+    {
+      "id": "v1",
+      "tone": "standard",
+      "paragraphs": [
+        { "text": "{term:policyholder}または{term:insured}は、保険契約の締結に際し、当会社が書面等によって告知を求めた事項について、事実を正確に告げなければなりません。" },
+        { "text": "当会社は、{ref:$p1}に規定する事項について、事実と異なる告知がなされ、かつ、そのことが{term:policyholder}または{term:insured}の故意または重大な過失によるものであった場合には、保険契約を解除することができます。" },
+        { "text": "当会社が{ref:$p2}の事実を知った時から{const:disclosure_notice_days}を経過したとき、または保険契約の締結の時から５年を経過したときは、{ref:$p2}の解除を行うことはできません。" },
+        { "text": "{ref:$p2}の解除が行われた場合には、当会社は、解除がなされた時までに生じた損害に対しても保険金を支払いません。ただし、告げられなかった事実または事実と異なる告知がなされた事項が、その損害の発生に影響を及ぼさなかったときは、この限りではありません。" }
+      ]
+    },
+    {
+      "id": "v2",
+      "tone": "detailed",
+      "paragraphs": [
+        { "text": "保険契約の締結にあたり、{term:policyholder}および{term:insured}は、当会社が告知を求めた事項{fn:1}について、ありのままを当会社に申し出なければなりません。" },
+        { "text": "{ref:$p1}に違反した事実があり、その違反が故意または重大な過失によるものであるときは、当会社は、{term:policyholder}に対する書面による通知をもって保険契約を解除することができます。" },
+        { "text": "次に掲げるいずれかに該当する場合には、当会社は{ref:$p2}の解除を行いません。", "blocks": [
+          { "type": "table", "id": "tbl_disclosure_exempt", "semantic_type": "enumeration",
+            "layout": { "header_rows": 0, "header_cols": 1, "repeat_header": false, "style": "grid" },
+            "grid": [
+              [ { "id": "tbl_disclosure_exempt__r0c0", "text": "{auto_label}", "role": "stub" },
+                { "id": "tbl_disclosure_exempt__r0c1", "text": "当会社が保険契約の締結の時において、告げられなかった事実または事実と異なることを知っていたとき。", "role": "body" } ],
+              [ { "id": "tbl_disclosure_exempt__r1c0", "text": "{auto_label}", "role": "stub" },
+                { "id": "tbl_disclosure_exempt__r1c1", "text": "当会社のために保険契約の締結の媒介を行う者が、正確な告知を妨げたとき。", "role": "body" } ],
+              [ { "id": "tbl_disclosure_exempt__r2c0", "text": "{auto_label}", "role": "stub" },
+                { "id": "tbl_disclosure_exempt__r2c1", "text": "当会社が解除の原因があることを知った時から{const:disclosure_notice_days}を経過したとき。", "role": "body" } ]
+            ] } ] },
+        { "text": "{ref:$p2}の解除は、将来に向かってのみその効力を生じます。ただし、解除がなされた時までに生じた損害については、当会社は保険金を支払いません。" }
+      ],
+      "footnotes": [
+        { "n": 1, "text": "告知を求めた事項とは、申込書その他の書類に当会社が記載を求めた事項をいい、口頭で述べた事項を含みません。" }
+      ]
+    }
+  ]
+}

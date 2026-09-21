@@ -1,0 +1,21 @@
+{
+  "clause_id": "surplus_distribution",
+  "scheme": "teikan",
+  "title_options": [
+    "剰余金の処分"
+  ],
+  "variants": [
+    {
+      "id": "v1",
+      "tone": "standard",
+      "paragraphs": [
+        {
+          "text": "当会社は、毎事業年度末の剰余金について、法令の定めるところにより、これを処分する。"
+        },
+        {
+          "text": "社員に対する剰余金の分配は、取締役会の決議によって定める方法により行う。"
+        }
+      ]
+    }
+  ]
+}

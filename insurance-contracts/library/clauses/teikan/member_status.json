@@ -1,0 +1,21 @@
+{
+  "clause_id": "member_status",
+  "scheme": "teikan",
+  "title_options": [
+    "社員の資格"
+  ],
+  "variants": [
+    {
+      "id": "v1",
+      "tone": "standard",
+      "paragraphs": [
+        {
+          "text": "当会社と保険契約を締結した者は、その保険契約の成立の時に社員となる。"
+        },
+        {
+          "text": "社員は、保険契約が消滅した時にその資格を失う。"
+        }
+      ]
+    }
+  ]
+}

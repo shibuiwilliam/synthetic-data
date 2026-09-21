@@ -1,0 +1,214 @@
+{
+  "target": "appendices",
+  "items": [
+    {
+      "id": "app1",
+      "kind": "appendix",
+      "title": "後遺障害等級表（抜粋）",
+      "children": [
+        {
+          "id": "app1_s1",
+          "kind": "appendix_section",
+          "title": "等級と保険金支払割合",
+          "children": [
+            {
+              "id": "app1_s1_p1",
+              "kind": "paragraph",
+              "text": "後遺障害の等級は、身体に残った障害の程度に応じて次表のとおり区分します。",
+              "blocks": [
+                {
+                  "type": "table",
+                  "id": "tbl_grade",
+                  "semantic_type": "grade_schedule",
+                  "caption": "後遺障害等級と支払割合",
+                  "layout": {
+                    "header_rows": 1,
+                    "header_cols": 1,
+                    "repeat_header": true,
+                    "style": "grid"
+                  },
+                  "grid": [
+                    [
+                      {
+                        "id": "tbl_grade__r0c0",
+                        "text": "等級",
+                        "role": "header",
+                        "align": "center"
+                      },
+                      {
+                        "id": "tbl_grade__r0c1",
+                        "text": "障害の程度",
+                        "role": "header",
+                        "align": "center"
+                      },
+                      {
+                        "id": "tbl_grade__r0c2",
+                        "text": "支払割合",
+                        "role": "header",
+                        "align": "center"
+                      }
+                    ],
+                    [
+                      {
+                        "id": "tbl_grade__r1c0",
+                        "text": "第一級",
+                        "role": "stub",
+                        "align": "center"
+                      },
+                      {
+                        "id": "tbl_grade__r1c1",
+                        "text": "日常生活のすべての場面で他人の介助が欠かせない状態が続くもの",
+                        "role": "body"
+                      },
+                      {
+                        "id": "tbl_grade__r1c2",
+                        "text": "１００％",
+                        "role": "body",
+                        "align": "right"
+                      }
+                    ],
+                    [
+                      {
+                        "id": "tbl_grade__r2c0",
+                        "text": "第二級",
+                        "role": "stub",
+                        "align": "center"
+                      },
+                      {
+                        "id": "tbl_grade__r2c1",
+                        "text": "日常生活の多くの場面で他人の介助が欠かせない状態が続くもの",
+                        "role": "body"
+                      },
+                      {
+                        "id": "tbl_grade__r2c2",
+                        "text": "９０％",
+                        "role": "body",
+                        "align": "right"
+                      }
+                    ],
+                    [
+                      {
+                        "id": "tbl_grade__r3c0",
+                        "text": "第三級",
+                        "role": "stub",
+                        "align": "center"
+                      },
+                      {
+                        "id": "tbl_grade__r3c1",
+                        "text": "生涯にわたり就労することができない状態が続くもの",
+                        "role": "body"
+                      },
+                      {
+                        "id": "tbl_grade__r3c2",
+                        "text": "８０％",
+                        "role": "body",
+                        "align": "right"
+                      }
+                    ],
+                    [
+                      {
+                        "id": "tbl_grade__r4c0",
+                        "text": "第四級",
+                        "role": "stub",
+                        "align": "center"
+                      },
+                      {
+                        "id": "tbl_grade__r4c1",
+                        "text": "就労できる業務の範囲が著しく狭くなったもの",
+                        "role": "body"
+                      },
+                      {
+                        "id": "tbl_grade__r4c2",
+                        "text": "７０％",
+                        "role": "body",
+                        "align": "right"
+                      }
+                    ],
+                    [
+                      {
+                        "id": "tbl_grade__r5c0",
+                        "text": "第五級",
+                        "role": "stub",
+                        "align": "center"
+                      },
+                      {
+                        "id": "tbl_grade__r5c1",
+                        "text": "従前の業務に復することができず、軽易な業務に限られるもの",
+                        "role": "body"
+                      },
+                      {
+                        "id": "tbl_grade__r5c2",
+                        "text": "６０％",
+                        "role": "body",
+                        "align": "right"
+                      }
+                    ],
+                    [
+                      {
+                        "id": "tbl_grade__r6c0",
+                        "text": "第六級",
+                        "role": "stub",
+                        "align": "center"
+                      },
+                      {
+                        "id": "tbl_grade__r6c1",
+                        "text": "片方の手足の機能に大きな制限が残ったもの",
+                        "role": "body"
+                      },
+                      {
+                        "id": "tbl_grade__r6c2",
+                        "text": "５２％",
+                        "role": "body",
+                        "align": "right"
+                      }
+                    ]
+                  ],
+                  "notes": [
+                    "支払割合は、保険証券に記載された保険金額に対する割合です。"
+                  ],
+                  "records": [
+                    {
+                      "等級": "第一級",
+                      "障害の程度": "日常生活のすべての場面で他人の介助が欠かせない状態が続くもの",
+                      "支払割合": "１００％"
+                    },
+                    {
+                      "等級": "第二級",
+                      "障害の程度": "日常生活の多くの場面で他人の介助が欠かせない状態が続くもの",
+                      "支払割合": "９０％"
+                    },
+                    {
+                      "等級": "第三級",
+                      "障害の程度": "生涯にわたり就労することができない状態が続くもの",
+                      "支払割合": "８０％"
+                    },
+                    {
+                      "等級": "第四級",
+                      "障害の程度": "就労できる業務の範囲が著しく狭くなったもの",
+                      "支払割合": "７０％"
+                    },
+                    {
+                      "等級": "第五級",
+                      "障害の程度": "従前の業務に復することができず、軽易な業務に限られるもの",
+                      "支払割合": "６０％"
+                    },
+                    {
+                      "等級": "第六級",
+                      "障害の程度": "片方の手足の機能に大きな制限が残ったもの",
+                      "支払割合": "５２％"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "app1_s1_p2",
+              "kind": "paragraph",
+              "text": "同一の事故により二以上の後遺障害が生じた場合の取扱いは、当会社が別に定める基準によります。"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

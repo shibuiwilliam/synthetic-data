@@ -1,0 +1,25 @@
+# insurance-contracts (yakkan-synth) 固有の .gitignore
+# 親リポジトリ ../.gitignore（Python 汎用テンプレート）の補正と、生成物の除外を行う。
+# 方針は CLAUDE.md §13 / docs/decisions.md（2026-09-21）を参照。
+
+# ---- 親の除外を打ち消す ---------------------------------------------------
+# 親の `parts/`（setuptools 由来）が content/<content_id>/parts/ を無言で除外する。
+# content/ は執筆成果であり必ずコミットする。ディレクトリ単位で除外されていると
+# 配下のファイルは再包含できないため、ディレクトリ自体を否定する。
+!parts/
+!content/**/parts/
+
+# ---- 生成物（コミットしない。specs/ から再生成する） ----------------------
+dataset/
+*.pdf
+*.log
+
+# ---- 環境 -----------------------------------------------------------------
+.venv/
+.DS_Store
+CLAUDE.local.md
+scratch/
+
+# reviewer の指摘一覧（作業用）。実在約款の疑いがある文を引用することがあるので
+# リポジトリには入れない（CLAUDE.md §0.4-1）。
+.review/

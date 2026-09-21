@@ -1,0 +1,82 @@
+# 地震保険（docs/blueprints.md §4.1 quake）
+# 実物（docs/reference_structures.md #3）は B5 相当の 2 段組。数値表と斜線見出しが特徴
+genre: quake
+description: 地震保険の約款。損害の程度の認定基準表と、火災保険との関係が中心
+target_pages: [10, 14]
+numbering_scheme: nonlife
+default_style: nl-b5-2col-dense
+
+front_matter:
+  cover: true
+  preface: false
+  purpose_index: false
+  toc_with_summaries: false
+  toc_depth: 3
+  rider_index: false
+
+required:
+  - { kind: table, subtype: definitions, min_rows: 10 }
+  - { kind: table, subtype: grade_schedule, min_rows: 4, min_cols: 4,
+      note: "損害の程度の認定基準表（全損／大半損／小半損／一部損 × 建物・家財 × 損害割合 × 支払割合）" }
+  - { kind: figure, subtype: tree, note: "火災保険との関係（D1/D7）" }
+  - { kind: figure, subtype: flowchart, note: "損害認定のフロー（D2）" }
+  - { kind: footnotes, min_count: 6 }
+
+skeleton:
+  - id: terms
+    kind: chapter
+    title_options: ["用語の定義"]
+    chars: 1800
+    todo: "10〜15語。建物・家財・損害割合など"
+    required: [ { kind: table, subtype: definitions, min_rows: 10 } ]
+
+  - id: ch1
+    kind: chapter
+    title_options: ["補償条項", "保険金を支払う場合"]
+    children:
+      - { id: ch1_a1, kind: article, title_options: ["この保険契約の補償内容"], chars: 700 }
+      - { id: ch1_a2, kind: article, title_options: ["保険の対象の範囲"], chars: 700,
+          required: [ { kind: table, subtype: enumeration, min_rows: 3 } ] }
+      - { id: ch1_a3, kind: article, title_options: ["保険金を支払わない場合"], chars: 700,
+          required: [ { kind: table, subtype: exclusions, min_rows: 3 } ] }
+      - { id: ch1_a4, kind: article, title_options: ["損害の程度の認定"], chars: 1100,
+          todo: "全損／大半損／小半損／一部損の4区分 × 建物・家財。結合セルを使う",
+          required: [ { kind: table, subtype: grade_schedule, min_rows: 4, min_cols: 4 } ] }
+      - { id: ch1_a5, kind: article, title_options: ["保険金額の制限"], chars: 700,
+          todo: "火災保険の保険金額に対する割合の範囲。算式を1つ入れる",
+          required: [ { kind: formula, subtype: inline_boxes } ] }
+
+  - id: ch2
+    kind: chapter
+    title_options: ["基本条項"]
+    children:
+      - { id: ch2_a1, kind: article, title_options: ["告知義務"], chars: 700, clause: disclosure_duty }
+      - { id: ch2_a2, kind: article, title_options: ["通知義務"], chars: 700, clause: notification_duty }
+      - { id: ch2_a3, kind: article, title_options: ["保険料の払込み"], chars: 600, clause: premium_payment }
+      - { id: ch2_a4, kind: article, title_options: ["事故発生時の義務"], chars: 800, clause: accident_duty }
+      - { id: ch2_a5, kind: article, title_options: ["保険金の請求"], chars: 700, clause: claim_procedure }
+      - { id: ch2_a6, kind: article, title_options: ["保険金の支払時期"], chars: 600, clause: payment_period }
+      - { id: ch2_a7, kind: article, title_options: ["重大事由による解除"], chars: 700,
+          clause: serious_cause_termination }
+      - { id: ch2_a8, kind: article, title_options: ["時効"], chars: 300, clause: prescription }
+      - { id: ch2_a9, kind: article, title_options: ["準拠法および管轄"], chars: 300, clause: governing_law }
+
+riders: { count: [1, 2], pool: [rider_auto_renewal, rider_group_payment] }
+
+appendices:
+  - { id: app1, title_options: ["損害の認定基準"], table: grade_schedule, min_rows: 8,
+      todo: "部位ごとの損害割合。斜線見出しか2段ヘッダを使う" }
+
+variants:
+  digit_style: { fullwidth: 0.5, halfwidth: 0.5 }
+  paren_style: { fullwidth: 0.4, halfwidth: 0.6 }
+  era: { seireki: 0.9, wareki: 0.1 }
+  issuer_kind: { stock: 1.0 }
+  pet_name: { absent: 1.0 }
+  order_shuffle: []
+  # 2スタイル目は A4 1段ゴシック。nl-a4-2col-mincho は現在の内容だと WeasyPrint の
+  # AssertionError を踏む（2026-09-22 実測）。B5 2段 vs A4 1段のほうが版面差も大きく、
+  # レイアウト頑健性のデータとしてはむしろ有利。
+  styles: [nl-b5-2col-dense, nl-a4-1col-gothic]
+
+budget: { chars_min: 7500, chars_max: 13000, footnotes_min: 6, margin_notes_min: 2 }

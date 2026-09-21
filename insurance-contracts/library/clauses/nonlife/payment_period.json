@@ -1,0 +1,26 @@
+{
+  "clause_id": "payment_period",
+  "scheme": "nonlife",
+  "title_options": ["保険金の支払時期", "保険金をお支払いする時期"],
+  "constants": { "payment_days": "30日", "payment_days_special": "60日" },
+  "terms_used": ["insured"],
+  "variants": [
+    {
+      "id": "v1",
+      "tone": "standard",
+      "paragraphs": [
+        { "text": "当会社は、保険金の請求に必要な書類が当会社に到着した日の翌日から起算して{const:payment_days}以内に、保険金を支払うために必要な事項の確認を終えて、保険金を支払います。" },
+        { "text": "{ref:$p1}の確認を行うために特別の照会または調査が必要な場合には、当会社は、{const:payment_days_special}以内に保険金を支払います。この場合において、当会社は、あらかじめその旨と理由を{term:insured}に通知します。" },
+        { "text": "{term:insured}が正当な理由がなく{ref:$p1}または{ref:$p2}の確認を妨げ、またはこれに応じなかった場合には、これにより確認が遅れた期間については、{ref:$p1}および{ref:$p2}の期間に算入しません。" }
+      ]
+    },
+    {
+      "id": "v2",
+      "tone": "concise",
+      "paragraphs": [
+        { "text": "当会社は、保険金の請求に必要な書類を受け取った日の翌日から起算して{const:payment_days}以内に保険金を支払います。" },
+        { "text": "事故の原因の調査その他の特別の確認を要する場合には、{const:payment_days_special}以内に保険金を支払います。この場合は、あらかじめその旨を{term:insured}にお知らせします。" }
+      ]
+    }
+  ]
+}

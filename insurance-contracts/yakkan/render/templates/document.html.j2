@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>{{ source.meta.title }}</title>
+<style>
+{{ css }}
+</style>
+</head>
+<body>
+<section class="cover" id="cover" data-kind="cover">
+  {%- if cover.pet_name %}
+  <div class="cover-petname" id="cover_petname" data-kind="cover_petname">〈{{ cover.pet_name }}〉</div>
+  {%- endif %}
+  <div class="cover-title" id="cover_title" data-kind="cover_title">{{ cover.title }}</div>
+  {%- if cover.subtitle %}
+  <div class="cover-subtitle" id="cover_subtitle" data-kind="cover_subtitle">{{ cover.subtitle }}</div>
+  {%- endif %}
+  <div class="cover-issuer" id="cover_issuer" data-kind="cover_issuer">{{ cover.issuer_name }}</div>
+  {%- for note in cover.notes %}
+  <div class="cover-note" id="cover_note{{ loop.index0 }}" data-kind="cover_note">{{ note_html[loop.index0] }}</div>
+  {%- endfor %}
+  <div class="cover-form" id="cover_form" data-kind="cover_form">{{ cover.form_code }}</div>
+</section>
+
+{# 前付けも段組の外に置く（長い表が段組内にあると以降の内容が消えるため） #}
+{%- if preface_html %}
+<div class="preface" id="preface" data-kind="preface">
+{{ preface_html }}
+</div>
+{%- endif %}
+{%- if purpose_index_html %}
+{{ purpose_index_html }}
+{%- endif %}
+{%- if rider_index_html %}
+{{ rider_index_html }}
+{%- endif %}
+
+{# 目次は段組コンテナの **外** に置く。1 ページを超える column-span: all 要素が
+   段組の中にあると、WeasyPrint 70.0 はそれ以降の内容を黙って捨てる
+   （docs/gotchas.md「段組内の長い段またぎ要素」）。 #}
+{%- if toc %}
+  <nav class="toc" id="toc" data-kind="toc">
+    <h1 id="toc_heading" data-kind="toc_heading">もくじ</h1>
+    {%- for entry in toc %}
+    <span class="toc-line d{{ entry.depth }}" id="toc_{{ entry.id }}" data-kind="toc_line">
+      <a href="#{{ entry.id }}" id="toc_link_{{ entry.id }}"
+         {%- if toc_pages %} class="fixed"{% endif %}>{{ entry.heading_text }}</a>
+      {%- if toc_pages %}<span class="toc-page" id="toc_page_{{ entry.id }}">{{ toc_pages.get(entry.id, "") }}</span>{% endif %}
+    </span>
+    {%- if entry.summary %}
+    <span class="toc-summary" id="toc_sum_{{ entry.id }}" data-kind="toc_summary">{{ entry.summary }}</span>
+    {%- endif %}
+    {%- endfor %}
+  </nav>
+{%- endif %}
+
+<div class="cols" id="doc_body">
+{{ body_html }}
+{{ appendices_html }}
+
+{%- if colophon_html %}
+  <div class="colophon" id="colophon" data-kind="colophon">
+{{ colophon_html }}
+  </div>
+{%- endif %}
+</div>
+</body>
+</html>

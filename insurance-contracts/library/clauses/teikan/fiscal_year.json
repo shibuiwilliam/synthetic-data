@@ -1,0 +1,22 @@
+{
+  "clause_id": "fiscal_year",
+  "scheme": "teikan",
+  "title_options": [
+    "事業年度"
+  ],
+  "constants": {
+    "fiscal_end": "３月３１日",
+    "fiscal_start": "４月１日"
+  },
+  "variants": [
+    {
+      "id": "v1",
+      "tone": "standard",
+      "paragraphs": [
+        {
+          "text": "当会社の事業年度は、毎年{const:fiscal_start}から翌年{const:fiscal_end}までとする。"
+        }
+      ]
+    }
+  ]
+}

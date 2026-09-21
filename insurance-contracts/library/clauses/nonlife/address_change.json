@@ -1,0 +1,24 @@
+{
+  "clause_id": "address_change",
+  "scheme": "nonlife",
+  "title_options": ["保険契約者の住所変更", "ご連絡先の変更"],
+  "terms_used": ["policyholder"],
+  "variants": [
+    {
+      "id": "v1",
+      "tone": "standard",
+      "paragraphs": [
+        { "text": "{term:policyholder}は、その住所または通知先を変更した場合には、遅滞なく、変更後の住所または通知先を当会社に知らせなければなりません。" },
+        { "text": "{term:policyholder}が{ref:$p1}の知らせを怠った場合において、当会社が知っている最後の住所または通知先にあてて発した通知は、通常到達すべき時に{term:policyholder}に到達したものとみなします。" }
+      ]
+    },
+    {
+      "id": "v2",
+      "tone": "concise",
+      "paragraphs": [
+        { "text": "{term:policyholder}の住所または通知先に変更が生じたときは、速やかに当会社にご連絡ください。" },
+        { "text": "ご連絡がない場合には、当会社が把握している最後の住所または通知先にあてて発した通知をもって、{term:policyholder}に到達したものとして取り扱います。" }
+      ]
+    }
+  ]
+}

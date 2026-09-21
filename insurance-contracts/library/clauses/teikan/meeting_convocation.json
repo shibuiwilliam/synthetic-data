@@ -1,0 +1,28 @@
+{
+  "clause_id": "meeting_convocation",
+  "scheme": "teikan",
+  "title_options": [
+    "招集"
+  ],
+  "constants": {
+    "meeting_month": "３か月以内",
+    "notice_days_meeting": "２週間"
+  },
+  "variants": [
+    {
+      "id": "v1",
+      "tone": "standard",
+      "paragraphs": [
+        {
+          "text": "定時総代会は、毎事業年度の終了後{const:meeting_month}に招集する。"
+        },
+        {
+          "text": "臨時総代会は、必要があるときに招集することができる。"
+        },
+        {
+          "text": "総代会を招集するには、会日の{const:notice_days_meeting}前までに各総代に対して通知を発する。"
+        }
+      ]
+    }
+  ]
+}

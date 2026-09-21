@@ -1,0 +1,40 @@
+# 損保約款の標準スタイル（CLAUDE.md 付録A）
+style_id: nl-a4-2col-mincho
+description: A4・2段組・明朝9.5pt。auto / health / quake の標準
+page:
+  size: A4
+  width_mm: 210
+  height_mm: 297
+  margin_mm: { top: 16, right: 14, bottom: 18, left: 14 }
+columns:
+  count: 2
+  gap_mm: 8
+fonts:
+  body: "Noto Serif JP"
+  heading: "Noto Sans JP"
+  symbol_fallback: ["Noto Sans Symbols", "Noto Sans Symbols 2"]
+sizes:
+  body_pt: 9.5
+  line_height: 1.62
+  h1_pt: 13
+  h2_pt: 10.5
+  h3_pt: 10
+  h4_pt: 9.5
+  table_pt: 8.5
+  note_pt: 8
+  toc_pt: 9
+  cover_pt: 20
+palette:
+  text: "#111111"
+  rule: "#333333"
+  accent: "#1f4e79"
+  band: "#eef1f4"
+  note_bg: "#f7f7f4"
+headings:
+  band: true
+table:
+  border: grid
+# 欄外注の位置：float: footnote は WeasyPrint 70.0 が未対応なので条末に置く（docs/decisions.md 2026-09-21）
+margin_note: article_end
+# ページ数の見積り（docs/rendering.md §6.10）
+chars_per_page_estimate: 1787

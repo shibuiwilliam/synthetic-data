@@ -1,0 +1,25 @@
+{
+  "clause_id": "trade_name",
+  "scheme": "teikan",
+  "title_options": [
+    "商号"
+  ],
+  "constants": {
+    "issuer_name": "青葉みなと損害保険株式会社",
+    "issuer_name_en": "AOBA MINATO INSURANCE CO., LTD."
+  },
+  "variants": [
+    {
+      "id": "v1",
+      "tone": "standard",
+      "paragraphs": [
+        {
+          "text": "当会社は、{const:issuer_name}と称する。"
+        },
+        {
+          "text": "当会社は、英文では{const:issuer_name_en}と表示する。"
+        }
+      ]
+    }
+  ]
+}

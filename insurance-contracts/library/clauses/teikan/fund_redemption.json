@@ -1,0 +1,21 @@
+{
+  "clause_id": "fund_redemption",
+  "scheme": "teikan",
+  "title_options": [
+    "基金の償却"
+  ],
+  "variants": [
+    {
+      "id": "v1",
+      "tone": "standard",
+      "paragraphs": [
+        {
+          "text": "基金の償却は、法令の定めるところにより、総代会の決議によって行う。"
+        },
+        {
+          "text": "基金の償却を行う場合には、償却する額に相当する金額を基金償却積立金として積み立てる。"
+        }
+      ]
+    }
+  ]
+}

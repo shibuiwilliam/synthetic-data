@@ -1,0 +1,44 @@
+{
+  "clause_id": "accident_duty",
+  "scheme": "nonlife",
+  "title_options": ["事故発生時の義務", "事故が発生した場合の義務"],
+  "constants": { "accident_notice_days": "30日" },
+  "terms_used": ["policyholder", "insured"],
+  "variants": [
+    {
+      "id": "v1",
+      "tone": "standard",
+      "paragraphs": [
+        { "text": "{term:policyholder}または{term:insured}は、事故が発生したことを知った場合は、下表に掲げる義務を履行しなければなりません。",
+          "blocks": [
+            { "type": "table", "id": "tbl_accident_duties", "semantic_type": "procedure",
+              "caption": "事故が発生した場合の義務",
+              "layout": { "header_rows": 1, "header_cols": 0, "repeat_header": true, "style": "grid" },
+              "grid": [
+                [ { "id": "tbl_accident_duties__r0c0", "text": "義務の名称", "role": "header", "align": "center" },
+                  { "id": "tbl_accident_duties__r0c1", "text": "内容", "role": "header", "align": "center" } ],
+                [ { "id": "tbl_accident_duties__r1c0", "text": "損害防止義務", "role": "stub" },
+                  { "id": "tbl_accident_duties__r1c1", "text": "損害の発生および拡大の防止に努めること。", "role": "body" } ],
+                [ { "id": "tbl_accident_duties__r2c0", "text": "通知義務", "role": "stub" },
+                  { "id": "tbl_accident_duties__r2c1", "text": "事故の発生の日からその日を含めて{const:accident_notice_days}以内に、事故の状況および損害の程度を当会社に通知すること。", "role": "body" } ],
+                [ { "id": "tbl_accident_duties__r3c0", "text": "協力義務", "role": "stub" },
+                  { "id": "tbl_accident_duties__r3c1", "text": "当会社が行う損害の調査に協力し、当会社の求めに応じて必要な書類を提出すること。", "role": "body" } ],
+                [ { "id": "tbl_accident_duties__r4c0", "text": "権利保全義務", "role": "stub" },
+                  { "id": "tbl_accident_duties__r4c1", "text": "他人に損害賠償の請求をすることができる場合に、その権利の保全または行使に必要な手続をとること。", "role": "body" } ]
+              ],
+              "notes": ["やむを得ない事由があるときは、その事由が解消した後、遅滞なく履行してください。"] } ] },
+        { "text": "{term:policyholder}または{term:insured}が正当な理由がなく{ref:$p1}の義務を怠った場合は、当会社は、それによって当会社が被った損害の額を差し引いて保険金を支払います。" },
+        { "text": "{term:policyholder}または{term:insured}が、正当な理由がなく{ref:$p1}の書類に事実と異なる記載をし、またはその書類を偽造し、もしくは変造した場合も、{ref:$p2}と同様とします。" }
+      ]
+    },
+    {
+      "id": "v2",
+      "tone": "concise",
+      "paragraphs": [
+        { "text": "事故が発生したことを知ったときは、{term:insured}は、直ちに損害の発生および拡大の防止に努めるとともに、事故の発生の日からその日を含めて{const:accident_notice_days}以内に当会社に通知してください。" },
+        { "text": "{term:insured}は、当会社が行う損害の調査に協力し、当会社が求める書類を提出しなければなりません。" },
+        { "text": "正当な理由がなく{ref:$p1}または{ref:$p2}の義務が履行されなかったときは、当会社は、それによって当会社が被った損害の額を差し引いて保険金を支払います。" }
+      ]
+    }
+  ]
+}

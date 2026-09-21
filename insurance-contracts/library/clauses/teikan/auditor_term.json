@@ -1,0 +1,21 @@
+{
+  "clause_id": "auditor_term",
+  "scheme": "teikan",
+  "title_options": [
+    "任期"
+  ],
+  "constants": {
+    "auditor_term_years": "４年"
+  },
+  "variants": [
+    {
+      "id": "v1",
+      "tone": "standard",
+      "paragraphs": [
+        {
+          "text": "監査役の任期は、選任後{const:auditor_term_years}以内に終了する事業年度のうち最終のものに関する定時総代会の終結の時までとする。"
+        }
+      ]
+    }
+  ]
+}

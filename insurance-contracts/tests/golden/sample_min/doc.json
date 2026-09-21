@@ -1,0 +1,51 @@
+{
+  "schema_version": "1.0",
+  "content_id": "sample-min",
+  "genre": "auto",
+  "seed": 1,
+  "meta": {
+    "title": "青葉みなと総合自動車保険　普通保険約款（検証用最小サンプル）",
+    "subtitle": "２０２６年１０月１日以降始期契約用",
+    "issuer": {
+      "name": "青葉みなと損害保険株式会社",
+      "kind": "stock",
+      "short_name": "青葉みなと損保"
+    },
+    "product_name": "青葉みなと総合自動車保険",
+    "pet_name": "みなとドライブ",
+    "edition_date": "2026-10-01",
+    "form_code": "Ｄ２６１００１",
+    "numbering_scheme": "nonlife",
+    "digit_style": "fullwidth",
+    "disclaimer": "本冊子は、文書読取技術の検証を目的として作成された架空の約款です。記載の会社・商品・連絡先は実在しません。",
+    "constants": {
+      "notice_days": "３０日",
+      "bodily_limit": "無制限"
+    }
+  },
+  "front_matter": {
+    "cover": {
+      "title": "青葉みなと総合自動車保険　普通保険約款",
+      "subtitle": "２０２６年１０月１日以降始期契約用",
+      "product_name": "青葉みなと総合自動車保険",
+      "pet_name": "みなとドライブ",
+      "issuer_name": "青葉みなと損害保険株式会社",
+      "form_code": "Ｄ２６１００１",
+      "notes": [
+        "この冊子は、ご契約の内容と手続きを定めたものです。お手元の保険証券とあわせてお読みください。"
+      ]
+    },
+    "toc": {
+      "enabled": true,
+      "with_summaries": true,
+      "depth": 3
+    }
+  },
+  "parts": [
+    "10_terms.json",
+    "20_ch1.json",
+    "30_ch4.json",
+    "80_appendix.json",
+    "90_back.json"
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "clause_id": "assistance_settlement",
+  "scheme": "nonlife",
+  "title_options": ["当会社による援助または解決", "示談交渉の援助"],
+  "applies_to": ["auto", "oneday"],
+  "terms_used": ["insured"],
+  "variants": [
+    {
+      "id": "v1",
+      "tone": "standard",
+      "paragraphs": [
+        { "text": "{term:insured}が損害賠償の請求を受けた場合には、当会社は、{term:insured}の負担する法律上の損害賠償責任の内容を確定するため、当会社が支払責任を負う限度において、{term:insured}が行う折衝、示談または調停もしくは訴訟の手続について協力または援助を行います。" },
+        { "text": "当会社は、{term:insured}が当会社の解決条件に同意している場合に限り、当会社の費用により、{term:insured}のために、折衝、示談または調停もしくは訴訟の手続を行うことができます。" },
+        { "text": "次に掲げるいずれかに該当する場合には、当会社は{ref:$p2}の手続を行いません。",
+          "blocks": [
+            { "type": "table", "id": "tbl_no_settlement", "semantic_type": "exclusions",
+              "layout": { "header_rows": 0, "header_cols": 1, "repeat_header": false, "style": "grid" },
+              "grid": [
+                [ { "id": "tbl_no_settlement__r0c0", "text": "{auto_label}", "role": "stub" },
+                  { "id": "tbl_no_settlement__r0c1", "text": "{term:insured}が負担する法律上の損害賠償責任の額が、保険証券に記載された保険金額を明らかに超えると認められる場合。", "role": "body" } ],
+                [ { "id": "tbl_no_settlement__r1c0", "text": "{auto_label}", "role": "stub" },
+                  { "id": "tbl_no_settlement__r1c1", "text": "損害賠償を請求する者が、当会社と直接折衝することに同意しない場合。", "role": "body" } ],
+                [ { "id": "tbl_no_settlement__r2c0", "text": "{auto_label}", "role": "stub" },
+                  { "id": "tbl_no_settlement__r2c1", "text": "正当な理由がなく{term:insured}が{ref:$p1}の協力を拒んだ場合。", "role": "body" } ]
+              ] } ] },
+        { "text": "{term:insured}は、当会社が{ref:$p2}の手続を行う場合には、当会社の求めに応じ、その遂行について当会社に協力しなければなりません。" }
+      ]
+    }
+  ]
+}

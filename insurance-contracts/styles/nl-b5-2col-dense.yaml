@@ -1,0 +1,12 @@
+style_id: nl-b5-2col-dense
+description: B5・2段組・IPAex明朝8.5pt。高密度検証用（付録A）
+page: { size: B5, width_mm: 182, height_mm: 257, margin_mm: { top: 14, right: 12, bottom: 15, left: 12 } }
+columns: { count: 2, gap_mm: 6 }
+fonts: { body: "IPAexMincho", heading: "IPAexGothic", symbol_fallback: ["Noto Sans Symbols", "Noto Sans Symbols 2"] }
+sizes: { body_pt: 8.5, line_height: 1.5, h1_pt: 11.5, h2_pt: 9.5, h3_pt: 9, h4_pt: 8.5,
+         table_pt: 7.5, note_pt: 7, toc_pt: 8, cover_pt: 17 }
+palette: { text: "#111111", rule: "#333333", accent: "#333333", band: "#eeeeee", note_bg: "#f6f6f6" }
+headings: { band: true }
+table: { border: grid }
+margin_note: article_end
+chars_per_page_estimate: 1787

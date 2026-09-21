@@ -1,0 +1,10 @@
+{
+  "clause_id": "policy_loan", "scheme": "life", "title_options": ["契約者貸付"],
+  "terms_used": ["policyholder"],
+  "variants": [{ "id": "v1", "tone": "standard", "paragraphs": [
+    { "text": "{term:policyholder}は、解約返戻金のうち会社が定める範囲内で、貸付を受けることができます。" },
+    { "text": "{ref:$p1}の貸付を受けた場合には、会社が定める利率による利息を付して返済してください。" },
+    { "text": "貸付元利金が解約返戻金の額を超えたときは、会社は、{term:policyholder}に通知したうえで保険契約を消滅させることがあります。" },
+    { "text": "保険金または給付金を支払う場合において、貸付元利金があるときは、会社は、これを差し引いて支払います。" }
+  ]}]
+}

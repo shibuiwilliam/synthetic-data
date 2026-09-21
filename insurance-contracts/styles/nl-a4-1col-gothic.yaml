@@ -1,0 +1,12 @@
+style_id: nl-a4-1col-gothic
+description: A4・1段組・ゴシック10pt。帯付き見出し、横罫の表。oneday / travel 向け（付録A）
+page: { size: A4, width_mm: 210, height_mm: 297, margin_mm: { top: 18, right: 18, bottom: 20, left: 18 } }
+columns: { count: 1, gap_mm: 0 }
+fonts: { body: "Noto Sans JP", heading: "Noto Sans JP", symbol_fallback: ["Noto Sans Symbols", "Noto Sans Symbols 2"] }
+sizes: { body_pt: 10, line_height: 1.7, h1_pt: 14, h2_pt: 11.5, h3_pt: 10.5, h4_pt: 10,
+         table_pt: 9, note_pt: 8.5, toc_pt: 9.5, cover_pt: 21 }
+palette: { text: "#111111", rule: "#333333", accent: "#1f4e79", band: "#eef1f4", note_bg: "#f7f7f4" }
+headings: { band: true }
+table: { border: horizontal }
+margin_note: article_end
+chars_per_page_estimate: 1124

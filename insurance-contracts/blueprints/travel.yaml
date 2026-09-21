@@ -1,0 +1,80 @@
+# 旅行保険（docs/blueprints.md §4.1 travel）
+#
+# **仮案**：docs/reference_structures.md の #5 分析で、参考実物は「リスク細分型海外旅行保険」と判明した。
+# §15 の既定値「海外旅行保険風」と一致するため題材はこのままでよいと提案したが、
+# ユーザーの回答待ち。回答があるまで以下は確定させない（decisions.md 2026-09-21）。
+# 実物に寄せる提案（未適用）：節を使わないフラット階層／小型判 style／全角括弧の項番号。
+genre: travel
+description: 海外旅行保険の約款（仮案）。治療・救援、賠償責任、携行品などの補償を持つ
+target_pages: [10, 16]
+numbering_scheme: nonlife
+default_style: travel-a4-1col-gothic
+
+front_matter:
+  cover: true
+  preface: false
+  purpose_index: false
+  toc_with_summaries: false
+  toc_depth: 2
+  rider_index: false
+
+required:
+  - { kind: table, subtype: definitions, min_rows: 10 }
+  - { kind: table, subtype: benefit_schedule, min_rows: 4, note: "補償項目と保険金額の一覧" }
+  - { kind: table, subtype: rate, min_rows: 5, note: "携行品の品目別限度額表" }
+  - { kind: figure, subtype: steps, note: "サービス利用の流れ（D7・4ステップ）" }
+  - { kind: figure, subtype: timeline, note: "保険期間と旅行行程のタイムライン（D5）" }
+  - { kind: footnotes, min_count: 8 }
+
+skeleton:
+  - id: ch1
+    kind: chapter
+    title_options: ["用語の定義条項"]
+    todo: "条の形をとる定義表。旅行行程・住居・責任期間など"
+    chars: 1800
+    required: [ { kind: table, subtype: definitions, min_rows: 10 } ]
+
+  - id: ch2
+    kind: chapter
+    title_options: ["補償条項"]
+    todo: "治療・救援／賠償責任／携行品／航空機遅延 から3つ以上"
+    children:
+      - { id: ch2_a1, kind: article, title_options: ["治療・救援費用の補償"], chars: 900,
+          required: [ { kind: table, subtype: enumeration, min_rows: 3 } ] }
+      - { id: ch2_a2, kind: article, title_options: ["賠償責任の補償"], chars: 700 }
+      - { id: ch2_a3, kind: article, title_options: ["携行品の補償"], chars: 900,
+          todo: "品目別の限度額表を添える",
+          required: [ { kind: table, subtype: rate, min_rows: 5 } ] }
+      - { id: ch2_a4, kind: article, title_options: ["航空機遅延等の補償"], chars: 700, movable: true }
+      - { id: ch2_a5, kind: article, title_options: ["保険金を支払わない場合"], chars: 800,
+          required: [ { kind: table, subtype: exclusions, min_rows: 4 } ] }
+
+  - id: ch3
+    kind: chapter
+    title_options: ["基本条項"]
+    children:
+      - { id: ch3_a1, kind: article, title_options: ["保険期間および責任の始期・終期"], chars: 800,
+          todo: "初日の午前０時／末日の午後１２時のように時刻で明記する。旅行行程との関係も書く" }
+      - { id: ch3_a2, kind: article, title_options: ["告知義務"], chars: 600, clause: disclosure_duty }
+      - { id: ch3_a3, kind: article, title_options: ["事故発生時の義務"], chars: 800, clause: accident_duty }
+      - { id: ch3_a4, kind: article, title_options: ["保険金の請求"], chars: 800, clause: claim_procedure }
+      - { id: ch3_a5, kind: article, title_options: ["保険金の支払時期"], chars: 600, clause: payment_period }
+      - { id: ch3_a6, kind: article, title_options: ["代位"], chars: 500, clause: subrogation }
+      - { id: ch3_a7, kind: article, title_options: ["時効"], chars: 300, clause: prescription }
+      - { id: ch3_a8, kind: article, title_options: ["準拠法および管轄"], chars: 300, clause: governing_law }
+
+riders: { count: [1, 2], pool: [rider_cancellation, rider_device_damage, rider_pet_care] }
+
+appendices:
+  - { id: app1, title_options: ["携行品の品目区分"], table: rate, min_rows: 5, kind_label: "付表" }
+
+variants:
+  digit_style: { fullwidth: 0.7, halfwidth: 0.3 }
+  paren_style: { fullwidth: 0.8, halfwidth: 0.2 }
+  era: { seireki: 1.0 }
+  issuer_kind: { stock: 1.0 }
+  pet_name: { present: 0.5, absent: 0.5 }
+  order_shuffle: []
+  styles: [travel-a4-1col-gothic, nl-a4-1col-gothic]
+
+budget: { chars_min: 7400, chars_max: 14800, footnotes_min: 8, margin_notes_min: 0 }

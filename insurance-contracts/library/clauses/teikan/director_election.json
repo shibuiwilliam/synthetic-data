@@ -1,0 +1,24 @@
+{
+  "clause_id": "director_election",
+  "scheme": "teikan",
+  "title_options": [
+    "員数および選任"
+  ],
+  "constants": {
+    "director_max": "１５名"
+  },
+  "variants": [
+    {
+      "id": "v1",
+      "tone": "standard",
+      "paragraphs": [
+        {
+          "text": "当会社の取締役は、{const:director_max}以内とする。"
+        },
+        {
+          "text": "取締役は、総代会の決議によって選任する。"
+        }
+      ]
+    }
+  ]
+}

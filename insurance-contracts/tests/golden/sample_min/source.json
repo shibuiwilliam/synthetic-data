@@ -1,0 +1,1701 @@
+{
+  "schema_version": "1.0",
+  "content_id": "sample-min",
+  "genre": "auto",
+  "seed": 1,
+  "meta": {
+    "title": "青葉みなと総合自動車保険　普通保険約款（検証用最小サンプル）",
+    "subtitle": "2026年10月1日以降始期契約用",
+    "issuer": {
+      "name": "青葉みなと損害保険株式会社",
+      "kind": "stock",
+      "short_name": "青葉みなと損保"
+    },
+    "product_name": "青葉みなと総合自動車保険",
+    "pet_name": "みなとドライブ",
+    "edition_date": "2026-10-01",
+    "form_code": "Ｄ２６１００１",
+    "numbering_scheme": "nonlife",
+    "digit_style": "fullwidth",
+    "disclaimer": "本冊子は、文書読取技術の検証を目的として作成された架空の約款です。記載の会社・商品・連絡先は実在しません。",
+    "constants": {
+      "notice_days": "30日",
+      "bodily_limit": "無制限"
+    }
+  },
+  "front_matter": {
+    "cover": {
+      "title": "青葉みなと総合自動車保険　普通保険約款",
+      "subtitle": "2026年10月1日以降始期契約用",
+      "product_name": "青葉みなと総合自動車保険",
+      "pet_name": "みなとドライブ",
+      "issuer_name": "青葉みなと損害保険株式会社",
+      "form_code": "Ｄ２６１００１",
+      "notes": [
+        "この冊子は、ご契約の内容と手続きを定めたものです。お手元の保険証券とあわせてお読みください。"
+      ]
+    },
+    "preface": [],
+    "purpose_index": null,
+    "toc": {
+      "enabled": true,
+      "with_summaries": true,
+      "depth": 3
+    },
+    "rider_index": null,
+    "petname_table": null
+  },
+  "defined_terms": [
+    {
+      "id": "policyholder",
+      "term": "保険契約者",
+      "definition": "当会社に保険契約の申込みをした方で、保険証券にその氏名または名称が記載されている方をいいます。",
+      "index_kana": "ハ",
+      "notes": []
+    },
+    {
+      "id": "insured",
+      "term": "被保険者",
+      "definition": "この約款により補償を受けられる方をいい、その範囲は補償条項ごとに定めます。",
+      "index_kana": "ハ",
+      "notes": []
+    },
+    {
+      "id": "insured_car",
+      "term": "ご契約のお車",
+      "definition": "保険証券に記載された自動車をいい、これに定着または装備された付属品を含みます。",
+      "index_kana": "カ",
+      "notes": [
+        "定着とは、工具を用いなければ取り外せない状態をいいます。"
+      ]
+    }
+  ],
+  "body": [
+    {
+      "id": "ch1",
+      "kind": "chapter",
+      "title": "賠償責任条項",
+      "text": null,
+      "summary": "他人を死傷させたり、他人の財物を壊したりした場合の補償を定めます。",
+      "blocks": [],
+      "children": [
+        {
+          "id": "ch1_a1",
+          "kind": "article",
+          "title": "この条項の補償内容",
+          "text": null,
+          "summary": null,
+          "blocks": [],
+          "children": [
+            {
+              "id": "ch1_a1_p1",
+              "kind": "paragraph",
+              "title": null,
+              "text": "当会社は、{term:insured}が{term:insured_car}の所有、使用または管理に起因して他人を死傷させた場合に、この条項に従い、対人賠償保険金を支払います。",
+              "summary": null,
+              "blocks": [],
+              "children": [],
+              "number_override": null,
+              "number_override_reason": null
+            },
+            {
+              "id": "ch1_a1_p2",
+              "kind": "paragraph",
+              "title": null,
+              "text": "当会社が{ref:ch1_a1_p1}により支払う保険金の額は、{const:bodily_limit}とします。",
+              "summary": null,
+              "blocks": [],
+              "children": [],
+              "number_override": null,
+              "number_override_reason": null
+            }
+          ],
+          "number_override": null,
+          "number_override_reason": null
+        },
+        {
+          "id": "ch1_a2",
+          "kind": "article",
+          "title": "保険金を支払わない場合",
+          "text": null,
+          "summary": null,
+          "blocks": [
+            {
+              "type": "footnotes",
+              "id": "fn_ch1_a2",
+              "notes": [
+                {
+                  "n": 1,
+                  "text": "事変には、暴動その他の著しい秩序の混乱であって、当会社が別に定めるものを含みます。"
+                }
+              ]
+            }
+          ],
+          "children": [
+            {
+              "id": "ch1_a2_p1",
+              "kind": "paragraph",
+              "title": null,
+              "text": "当会社は、次に掲げる事由のいずれかにより生じた損害については、保険金を支払いません。",
+              "summary": null,
+              "blocks": [
+                {
+                  "type": "table",
+                  "id": "tbl_exclusions",
+                  "caption": null,
+                  "semantic_type": "enumeration",
+                  "layout": {
+                    "header_rows": 0,
+                    "header_cols": 1,
+                    "col_widths": null,
+                    "repeat_header": false,
+                    "style": "grid",
+                    "span_columns": false,
+                    "blocks_side_by_side": null
+                  },
+                  "grid": [
+                    [
+                      {
+                        "id": "tbl_exclusions__r0c0",
+                        "text": "{auto_label}",
+                        "rowspan": 1,
+                        "colspan": 1,
+                        "role": "stub",
+                        "align": null,
+                        "vertical_text": false
+                      },
+                      {
+                        "id": "tbl_exclusions__r0c1",
+                        "text": "{term:policyholder}または{term:insured}の故意によって生じた損害",
+                        "rowspan": 1,
+                        "colspan": 1,
+                        "role": "body",
+                        "align": null,
+                        "vertical_text": false
+                      }
+                    ],
+                    [
+                      {
+                        "id": "tbl_exclusions__r1c0",
+                        "text": "{auto_label}",
+                        "rowspan": 1,
+                        "colspan": 1,
+                        "role": "stub",
+                        "align": null,
+                        "vertical_text": false
+                      },
+                      {
+                        "id": "tbl_exclusions__r1c1",
+                        "text": "戦争、内乱その他これらに類似の事変{fn:1}によって生じた損害",
+                        "rowspan": 1,
+                        "colspan": 1,
+                        "role": "body",
+                        "align": null,
+                        "vertical_text": false
+                      }
+                    ]
+                  ],
+                  "records": null,
+                  "notes": []
+                }
+              ],
+              "children": [],
+              "number_override": null,
+              "number_override_reason": null
+            }
+          ],
+          "number_override": null,
+          "number_override_reason": null
+        }
+      ],
+      "number_override": null,
+      "number_override_reason": null
+    },
+    {
+      "id": "ch4",
+      "kind": "chapter",
+      "title": "基本条項",
+      "text": null,
+      "summary": "契約の手続き、保険料の払込み、事故が起きたときの義務など、全条項に共通する事柄を定めます。",
+      "blocks": [],
+      "children": [
+        {
+          "id": "ch4_s1",
+          "kind": "section",
+          "title": "契約手続と義務",
+          "text": null,
+          "summary": null,
+          "blocks": [],
+          "children": [
+            {
+              "id": "ch4_s1_a1",
+              "kind": "article",
+              "title": "告知義務",
+              "text": null,
+              "summary": null,
+              "blocks": [],
+              "children": [
+                {
+                  "id": "ch4_s1_a1_p1",
+                  "kind": "paragraph",
+                  "title": null,
+                  "text": "{term:policyholder}または{term:insured}は、保険契約の締結に際し、当会社が書面等で告知を求めた事項について、事実を正確に告げなければなりません。",
+                  "summary": null,
+                  "blocks": [],
+                  "children": [],
+                  "number_override": null,
+                  "number_override_reason": null
+                },
+                {
+                  "id": "ch4_s1_a1_p2",
+                  "kind": "paragraph",
+                  "title": null,
+                  "text": "当会社は、{ref:ch4_s1_a1_p1}に違反した事実があった場合には、保険契約を解除することができます。ただし、その事実が保険金を支払うべき事由の発生に影響を及ぼさなかったときは、この限りではありません。",
+                  "summary": null,
+                  "blocks": [],
+                  "children": [],
+                  "number_override": null,
+                  "number_override_reason": null
+                }
+              ],
+              "number_override": null,
+              "number_override_reason": null
+            },
+            {
+              "id": "ch4_s1_a2",
+              "kind": "article",
+              "title": "通知義務",
+              "text": null,
+              "summary": null,
+              "blocks": [
+                {
+                  "type": "footnotes",
+                  "id": "fn_ch4_s1_a2",
+                  "notes": [
+                    {
+                      "n": 1,
+                      "text": "運転操作の全部または一部を自動的に行う装置で、当会社所定の基準に該当するものをいいます。"
+                    }
+                  ]
+                },
+                {
+                  "type": "box",
+                  "id": "box_notify_hint",
+                  "style": "margin_note",
+                  "title": "お知らせが必要な場合",
+                  "anchor": "ch4_s1_a2_p1",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "par_notify_hint",
+                      "text": "住所や連絡先が変わったときも、お早めにご連絡ください。ご連絡がないと、大切なお知らせが届かないことがあります。"
+                    }
+                  ]
+                }
+              ],
+              "children": [
+                {
+                  "id": "ch4_s1_a2_p1",
+                  "kind": "paragraph",
+                  "title": null,
+                  "text": "保険契約を締結した後に、下表に掲げる事実のいずれかが生じたときは、{term:policyholder}または{term:insured}は、遅滞なく、書面等により当会社にその旨を知らせなければなりません。ただし、当会社が知らせを受ける前にその事実が消滅したときを除きます。",
+                  "summary": null,
+                  "blocks": [
+                    {
+                      "type": "table",
+                      "id": "tbl_notify_facts",
+                      "caption": null,
+                      "semantic_type": "enumeration",
+                      "layout": {
+                        "header_rows": 0,
+                        "header_cols": 1,
+                        "col_widths": null,
+                        "repeat_header": false,
+                        "style": "grid",
+                        "span_columns": false,
+                        "blocks_side_by_side": null
+                      },
+                      "grid": [
+                        [
+                          {
+                            "id": "tbl_notify_facts__r0c0",
+                            "text": "{auto_label}",
+                            "rowspan": 1,
+                            "colspan": 1,
+                            "role": "stub",
+                            "align": null,
+                            "vertical_text": false
+                          },
+                          {
+                            "id": "tbl_notify_facts__r0c1",
+                            "text": "{term:insured_car}の主な使用地域が、保険証券に記載された都道府県以外に移ったこと。",
+                            "rowspan": 1,
+                            "colspan": 1,
+                            "role": "body",
+                            "align": null,
+                            "vertical_text": false
+                          }
+                        ],
+                        [
+                          {
+                            "id": "tbl_notify_facts__r1c0",
+                            "text": "{auto_label}",
+                            "rowspan": 1,
+                            "colspan": 1,
+                            "role": "stub",
+                            "align": null,
+                            "vertical_text": false
+                          },
+                          {
+                            "id": "tbl_notify_facts__r1c1",
+                            "text": "{term:insured_car}に自動運行装置{fn:1}を後から取り付けたこと、または取り外したこと。",
+                            "rowspan": 1,
+                            "colspan": 1,
+                            "role": "body",
+                            "align": null,
+                            "vertical_text": false
+                          }
+                        ]
+                      ],
+                      "records": null,
+                      "notes": []
+                    }
+                  ],
+                  "children": [],
+                  "number_override": null,
+                  "number_override_reason": null
+                },
+                {
+                  "id": "ch4_s1_a2_p2",
+                  "kind": "paragraph",
+                  "title": null,
+                  "text": "当会社は、{ref:ch4_s1_a2_p1}の知らせを受けたときは、その内容を記載した書類の提出を求めることがあります。",
+                  "summary": null,
+                  "blocks": [],
+                  "children": [],
+                  "number_override": null,
+                  "number_override_reason": null
+                },
+                {
+                  "id": "ch4_s1_a2_p3",
+                  "kind": "paragraph",
+                  "title": null,
+                  "text": "{ref:ch4_s1_a1}に定める告知の内容に変更が生じた場合の取扱いは、{ref:ch4_s1_a1_p2}の例によります。",
+                  "summary": null,
+                  "blocks": [],
+                  "children": [],
+                  "number_override": null,
+                  "number_override_reason": null
+                }
+              ],
+              "number_override": null,
+              "number_override_reason": null
+            }
+          ],
+          "number_override": null,
+          "number_override_reason": null
+        },
+        {
+          "id": "ch4_s2",
+          "kind": "section",
+          "title": "事故発生時の義務",
+          "text": null,
+          "summary": null,
+          "blocks": [],
+          "children": [
+            {
+              "id": "ch4_s2_a1",
+              "kind": "article",
+              "title": "事故が発生した場合の義務",
+              "text": null,
+              "summary": null,
+              "blocks": [
+                {
+                  "type": "figure",
+                  "id": "fig_accident_flow",
+                  "caption": "事故発生から保険金のお支払いまで",
+                  "alt": "事故の発生から当会社への連絡、損害の調査、保険金の支払いまでを、上から下へ矢印でつないだ流れ図。損害の調査の後に、支払いの可否を判断する分岐がある。",
+                  "facts": [
+                    "「事故の発生」の次の段階は「当会社へ連絡」である。",
+                    "「損害の調査」の後に支払いの可否を判断する分岐がある。",
+                    "支払いができない場合は「理由のご説明」に進む。"
+                  ],
+                  "diagram": {
+                    "kind": "flowchart",
+                    "direction": "TB",
+                    "nodes": [
+                      {
+                        "id": "n1",
+                        "label": "事故の発生",
+                        "shape": "start",
+                        "col": 0,
+                        "row": 0
+                      },
+                      {
+                        "id": "n2",
+                        "label": "当会社へ連絡",
+                        "shape": "process",
+                        "col": 0,
+                        "row": 1
+                      },
+                      {
+                        "id": "n3",
+                        "label": "損害の調査",
+                        "shape": "process",
+                        "col": 0,
+                        "row": 2
+                      },
+                      {
+                        "id": "n4",
+                        "label": "お支払いできますか",
+                        "shape": "decision",
+                        "col": 0,
+                        "row": 3
+                      },
+                      {
+                        "id": "n5",
+                        "label": "保険金のお支払い",
+                        "shape": "end",
+                        "col": 0,
+                        "row": 4
+                      },
+                      {
+                        "id": "n6",
+                        "label": "理由のご説明",
+                        "shape": "end",
+                        "col": 1,
+                        "row": 4
+                      }
+                    ],
+                    "edges": [
+                      {
+                        "from": "n1",
+                        "to": "n2",
+                        "label": null,
+                        "style": "solid"
+                      },
+                      {
+                        "from": "n2",
+                        "to": "n3",
+                        "label": null,
+                        "style": "solid"
+                      },
+                      {
+                        "from": "n3",
+                        "to": "n4",
+                        "label": null,
+                        "style": "solid"
+                      },
+                      {
+                        "from": "n4",
+                        "to": "n5",
+                        "label": "はい",
+                        "style": "solid"
+                      },
+                      {
+                        "from": "n4",
+                        "to": "n6",
+                        "label": "いいえ",
+                        "style": "dashed"
+                      }
+                    ]
+                  },
+                  "size": "column"
+                }
+              ],
+              "children": [
+                {
+                  "id": "ch4_s2_a1_p1",
+                  "kind": "paragraph",
+                  "title": null,
+                  "text": "{term:insured}は、事故が発生したことを知った場合は、下表に掲げる義務を履行しなければなりません。",
+                  "summary": null,
+                  "blocks": [
+                    {
+                      "type": "table",
+                      "id": "tbl_duties",
+                      "caption": "事故が発生した場合の義務",
+                      "semantic_type": "procedure",
+                      "layout": {
+                        "header_rows": 1,
+                        "header_cols": 0,
+                        "col_widths": null,
+                        "repeat_header": true,
+                        "style": "grid",
+                        "span_columns": false,
+                        "blocks_side_by_side": null
+                      },
+                      "grid": [
+                        [
+                          {
+                            "id": "tbl_duties__r0c0",
+                            "text": "義務の名称",
+                            "rowspan": 1,
+                            "colspan": 1,
+                            "role": "header",
+                            "align": "center",
+                            "vertical_text": false
+                          },
+                          {
+                            "id": "tbl_duties__r0c1",
+                            "text": "内容",
+                            "rowspan": 1,
+                            "colspan": 1,
+                            "role": "header",
+                            "align": "center",
+                            "vertical_text": false
+                          }
+                        ],
+                        [
+                          {
+                            "id": "tbl_duties__r1c0",
+                            "text": "損害防止義務",
+                            "rowspan": 1,
+                            "colspan": 1,
+                            "role": "stub",
+                            "align": null,
+                            "vertical_text": false
+                          },
+                          {
+                            "id": "tbl_duties__r1c1",
+                            "text": "損害の発生および拡大の防止に努めること。",
+                            "rowspan": 1,
+                            "colspan": 1,
+                            "role": "body",
+                            "align": null,
+                            "vertical_text": false
+                          }
+                        ],
+                        [
+                          {
+                            "id": "tbl_duties__r2c0",
+                            "text": "通知義務",
+                            "rowspan": 1,
+                            "colspan": 1,
+                            "role": "stub",
+                            "align": null,
+                            "vertical_text": false
+                          },
+                          {
+                            "id": "tbl_duties__r2c1",
+                            "text": "事故の発生の日からその日を含めて{const:notice_days}以内に、事故の状況を当会社に通知すること。",
+                            "rowspan": 1,
+                            "colspan": 1,
+                            "role": "body",
+                            "align": null,
+                            "vertical_text": false
+                          }
+                        ],
+                        [
+                          {
+                            "id": "tbl_duties__r3c0",
+                            "text": "協力義務",
+                            "rowspan": 1,
+                            "colspan": 1,
+                            "role": "stub",
+                            "align": null,
+                            "vertical_text": false
+                          },
+                          {
+                            "id": "tbl_duties__r3c1",
+                            "text": "当会社が行う損害の調査に協力すること。",
+                            "rowspan": 1,
+                            "colspan": 1,
+                            "role": "body",
+                            "align": null,
+                            "vertical_text": false
+                          }
+                        ]
+                      ],
+                      "records": [
+                        {
+                          "義務の名称": "損害防止義務",
+                          "内容": "損害の発生および拡大の防止に努めること。"
+                        },
+                        {
+                          "義務の名称": "協力義務",
+                          "内容": "当会社が行う損害の調査に協力すること。"
+                        }
+                      ],
+                      "notes": [
+                        "やむを得ない事由があるときは、その事由が解消した後、遅滞なく履行してください。"
+                      ]
+                    }
+                  ],
+                  "children": [],
+                  "number_override": null,
+                  "number_override_reason": null
+                },
+                {
+                  "id": "ch4_s2_a1_p2",
+                  "kind": "paragraph",
+                  "title": null,
+                  "text": "{term:insured}が正当な理由がなく{ref:ch4_s2_a1_p1}の義務を怠った場合は、当会社は、それによって当会社が被った損害の額を差し引いて保険金を支払います。",
+                  "summary": null,
+                  "blocks": [],
+                  "children": [],
+                  "number_override": null,
+                  "number_override_reason": null
+                }
+              ],
+              "number_override": null,
+              "number_override_reason": null
+            }
+          ],
+          "number_override": null,
+          "number_override_reason": null
+        }
+      ],
+      "number_override": null,
+      "number_override_reason": null
+    }
+  ],
+  "appendices": [
+    {
+      "id": "app1",
+      "kind": "appendix",
+      "title": "後遺障害等級表（抜粋）",
+      "text": null,
+      "summary": null,
+      "blocks": [],
+      "children": [
+        {
+          "id": "app1_s1",
+          "kind": "appendix_section",
+          "title": "等級と保険金支払割合",
+          "text": null,
+          "summary": null,
+          "blocks": [],
+          "children": [
+            {
+              "id": "app1_s1_p1",
+              "kind": "paragraph",
+              "title": null,
+              "text": "後遺障害の等級は、身体に残った障害の程度に応じて次表のとおり区分します。",
+              "summary": null,
+              "blocks": [
+                {
+                  "type": "table",
+                  "id": "tbl_grade",
+                  "caption": "後遺障害等級と支払割合",
+                  "semantic_type": "grade_schedule",
+                  "layout": {
+                    "header_rows": 1,
+                    "header_cols": 1,
+                    "col_widths": null,
+                    "repeat_header": true,
+                    "style": "grid",
+                    "span_columns": false,
+                    "blocks_side_by_side": null
+                  },
+                  "grid": [
+                    [
+                      {
+                        "id": "tbl_grade__r0c0",
+                        "text": "等級",
+                        "rowspan": 1,
+                        "colspan": 1,
+                        "role": "header",
+                        "align": "center",
+                        "vertical_text": false
+                      },
+                      {
+                        "id": "tbl_grade__r0c1",
+                        "text": "障害の程度",
+                        "rowspan": 1,
+                        "colspan": 1,
+                        "role": "header",
+                        "align": "center",
+                        "vertical_text": false
+                      },
+                      {
+                        "id": "tbl_grade__r0c2",
+                        "text": "支払割合",
+                        "rowspan": 1,
+                        "colspan": 1,
+                        "role": "header",
+                        "align": "center",
+                        "vertical_text": false
+                      }
+                    ],
+                    [
+                      {
+                        "id": "tbl_grade__r1c0",
+                        "text": "第一級",
+                        "rowspan": 1,
+                        "colspan": 1,
+                        "role": "stub",
+                        "align": "center",
+                        "vertical_text": false
+                      },
+                      {
+                        "id": "tbl_grade__r1c1",
+                        "text": "常に介護を要する状態が残ったもの",
+                        "rowspan": 1,
+                        "colspan": 1,
+                        "role": "body",
+                        "align": null,
+                        "vertical_text": false
+                      },
+                      {
+                        "id": "tbl_grade__r1c2",
+                        "text": "100％",
+                        "rowspan": 1,
+                        "colspan": 1,
+                        "role": "body",
+                        "align": "right",
+                        "vertical_text": false
+                      }
+                    ],
+                    [
+                      {
+                        "id": "tbl_grade__r2c0",
+                        "text": "第二級",
+                        "rowspan": 1,
+                        "colspan": 1,
+                        "role": "stub",
+                        "align": "center",
+                        "vertical_text": false
+                      },
+                      {
+                        "id": "tbl_grade__r2c1",
+                        "text": "随時介護を要する状態が残ったもの",
+                        "rowspan": 1,
+                        "colspan": 1,
+                        "role": "body",
+                        "align": null,
+                        "vertical_text": false
+                      },
+                      {
+                        "id": "tbl_grade__r2c2",
+                        "text": "89％",
+                        "rowspan": 1,
+                        "colspan": 1,
+                        "role": "body",
+                        "align": "right",
+                        "vertical_text": false
+                      }
+                    ],
+                    [
+                      {
+                        "id": "tbl_grade__r3c0",
+                        "text": "第三級",
+                        "rowspan": 1,
+                        "colspan": 1,
+                        "role": "stub",
+                        "align": "center",
+                        "vertical_text": false
+                      },
+                      {
+                        "id": "tbl_grade__r3c1",
+                        "text": "終身にわたり労務に服することができない状態が残ったもの",
+                        "rowspan": 1,
+                        "colspan": 1,
+                        "role": "body",
+                        "align": null,
+                        "vertical_text": false
+                      },
+                      {
+                        "id": "tbl_grade__r3c2",
+                        "text": "78％",
+                        "rowspan": 1,
+                        "colspan": 1,
+                        "role": "body",
+                        "align": "right",
+                        "vertical_text": false
+                      }
+                    ]
+                  ],
+                  "records": null,
+                  "notes": [
+                    "支払割合は、保険証券に記載された保険金額に対する割合です。"
+                  ]
+                }
+              ],
+              "children": [],
+              "number_override": null,
+              "number_override_reason": null
+            },
+            {
+              "id": "app1_s1_p2",
+              "kind": "paragraph",
+              "title": null,
+              "text": "同一の事故により二以上の後遺障害が生じた場合の取扱いは、当会社が別に定める基準によります。",
+              "summary": null,
+              "blocks": [],
+              "children": [],
+              "number_override": null,
+              "number_override_reason": null
+            }
+          ],
+          "number_override": null,
+          "number_override_reason": null
+        }
+      ],
+      "number_override": null,
+      "number_override_reason": null
+    }
+  ],
+  "back_matter": {
+    "colophon": [
+      {
+        "type": "paragraph",
+        "id": "par_colophon_1",
+        "text": "青葉みなと総合自動車保険　普通保険約款　2026年10月1日改定"
+      },
+      {
+        "type": "paragraph",
+        "id": "par_colophon_2",
+        "text": "青葉みなと損害保険株式会社　お問い合わせ窓口　0120-000-000（受付時間　午前９時から午後５時まで）　example.jp"
+      },
+      {
+        "type": "paragraph",
+        "id": "par_colophon_3",
+        "text": "本冊子は、文書読取技術の検証を目的として作成された架空の約款です。記載の会社・商品・連絡先は実在しません。"
+      }
+    ],
+    "contact": []
+  },
+  "derived": {
+    "labels": {
+      "ch1": {
+        "label": "第１章",
+        "title": "賠償責任条項",
+        "heading_text": "第１章　賠償責任条項",
+        "path": [],
+        "depth": 0
+      },
+      "ch1_a1": {
+        "label": "第１条",
+        "title": "この条項の補償内容",
+        "heading_text": "第１条（この条項の補償内容）",
+        "path": [
+          "第１章　賠償責任条項"
+        ],
+        "depth": 1
+      },
+      "ch1_a1_p1": {
+        "label": "（１）",
+        "title": "",
+        "heading_text": "（１）",
+        "path": [
+          "第１章　賠償責任条項",
+          "第１条（この条項の補償内容）"
+        ],
+        "depth": 2
+      },
+      "ch1_a1_p2": {
+        "label": "（２）",
+        "title": "",
+        "heading_text": "（２）",
+        "path": [
+          "第１章　賠償責任条項",
+          "第１条（この条項の補償内容）"
+        ],
+        "depth": 2
+      },
+      "ch1_a2": {
+        "label": "第２条",
+        "title": "保険金を支払わない場合",
+        "heading_text": "第２条（保険金を支払わない場合）",
+        "path": [
+          "第１章　賠償責任条項"
+        ],
+        "depth": 1
+      },
+      "ch1_a2_p1": {
+        "label": "",
+        "title": "",
+        "heading_text": "",
+        "path": [
+          "第１章　賠償責任条項",
+          "第２条（保険金を支払わない場合）"
+        ],
+        "depth": 2
+      },
+      "ch4": {
+        "label": "第２章",
+        "title": "基本条項",
+        "heading_text": "第２章　基本条項",
+        "path": [],
+        "depth": 0
+      },
+      "ch4_s1": {
+        "label": "第１節",
+        "title": "契約手続と義務",
+        "heading_text": "第１節　契約手続と義務",
+        "path": [
+          "第２章　基本条項"
+        ],
+        "depth": 1
+      },
+      "ch4_s1_a1": {
+        "label": "第１条",
+        "title": "告知義務",
+        "heading_text": "第１条（告知義務）",
+        "path": [
+          "第２章　基本条項",
+          "第１節　契約手続と義務"
+        ],
+        "depth": 2
+      },
+      "ch4_s1_a1_p1": {
+        "label": "（１）",
+        "title": "",
+        "heading_text": "（１）",
+        "path": [
+          "第２章　基本条項",
+          "第１節　契約手続と義務",
+          "第１条（告知義務）"
+        ],
+        "depth": 3
+      },
+      "ch4_s1_a1_p2": {
+        "label": "（２）",
+        "title": "",
+        "heading_text": "（２）",
+        "path": [
+          "第２章　基本条項",
+          "第１節　契約手続と義務",
+          "第１条（告知義務）"
+        ],
+        "depth": 3
+      },
+      "ch4_s1_a2": {
+        "label": "第２条",
+        "title": "通知義務",
+        "heading_text": "第２条（通知義務）",
+        "path": [
+          "第２章　基本条項",
+          "第１節　契約手続と義務"
+        ],
+        "depth": 2
+      },
+      "ch4_s1_a2_p1": {
+        "label": "（１）",
+        "title": "",
+        "heading_text": "（１）",
+        "path": [
+          "第２章　基本条項",
+          "第１節　契約手続と義務",
+          "第２条（通知義務）"
+        ],
+        "depth": 3
+      },
+      "ch4_s1_a2_p2": {
+        "label": "（２）",
+        "title": "",
+        "heading_text": "（２）",
+        "path": [
+          "第２章　基本条項",
+          "第１節　契約手続と義務",
+          "第２条（通知義務）"
+        ],
+        "depth": 3
+      },
+      "ch4_s1_a2_p3": {
+        "label": "（３）",
+        "title": "",
+        "heading_text": "（３）",
+        "path": [
+          "第２章　基本条項",
+          "第１節　契約手続と義務",
+          "第２条（通知義務）"
+        ],
+        "depth": 3
+      },
+      "ch4_s2": {
+        "label": "第２節",
+        "title": "事故発生時の義務",
+        "heading_text": "第２節　事故発生時の義務",
+        "path": [
+          "第２章　基本条項"
+        ],
+        "depth": 1
+      },
+      "ch4_s2_a1": {
+        "label": "第１条",
+        "title": "事故が発生した場合の義務",
+        "heading_text": "第１条（事故が発生した場合の義務）",
+        "path": [
+          "第２章　基本条項",
+          "第２節　事故発生時の義務"
+        ],
+        "depth": 2
+      },
+      "ch4_s2_a1_p1": {
+        "label": "（１）",
+        "title": "",
+        "heading_text": "（１）",
+        "path": [
+          "第２章　基本条項",
+          "第２節　事故発生時の義務",
+          "第１条（事故が発生した場合の義務）"
+        ],
+        "depth": 3
+      },
+      "ch4_s2_a1_p2": {
+        "label": "（２）",
+        "title": "",
+        "heading_text": "（２）",
+        "path": [
+          "第２章　基本条項",
+          "第２節　事故発生時の義務",
+          "第１条（事故が発生した場合の義務）"
+        ],
+        "depth": 3
+      },
+      "app1": {
+        "label": "別表１",
+        "title": "後遺障害等級表（抜粋）",
+        "heading_text": "別表１　後遺障害等級表（抜粋）",
+        "path": [],
+        "depth": 0
+      },
+      "app1_s1": {
+        "label": "第１",
+        "title": "等級と保険金支払割合",
+        "heading_text": "第１　等級と保険金支払割合",
+        "path": [
+          "別表１　後遺障害等級表（抜粋）"
+        ],
+        "depth": 1
+      },
+      "app1_s1_p1": {
+        "label": "１．",
+        "title": "",
+        "heading_text": "１．",
+        "path": [
+          "別表１　後遺障害等級表（抜粋）",
+          "第１　等級と保険金支払割合"
+        ],
+        "depth": 2
+      },
+      "app1_s1_p2": {
+        "label": "２．",
+        "title": "",
+        "heading_text": "２．",
+        "path": [
+          "別表１　後遺障害等級表（抜粋）",
+          "第１　等級と保険金支払割合"
+        ],
+        "depth": 2
+      }
+    },
+    "refs": [
+      {
+        "from_id": "ch1_a1_p2",
+        "to_id": "ch1_a1_p1",
+        "mode": "relative",
+        "rendered": "（１）"
+      },
+      {
+        "from_id": "ch4_s1_a1_p2",
+        "to_id": "ch4_s1_a1_p1",
+        "mode": "relative",
+        "rendered": "（１）"
+      },
+      {
+        "from_id": "ch4_s1_a2_p2",
+        "to_id": "ch4_s1_a2_p1",
+        "mode": "relative",
+        "rendered": "（１）"
+      },
+      {
+        "from_id": "ch4_s1_a2_p3",
+        "to_id": "ch4_s1_a1",
+        "mode": "relative",
+        "rendered": "第１条（告知義務）"
+      },
+      {
+        "from_id": "ch4_s1_a2_p3",
+        "to_id": "ch4_s1_a1_p2",
+        "mode": "relative",
+        "rendered": "第１条（告知義務）（２）"
+      },
+      {
+        "from_id": "ch4_s2_a1_p2",
+        "to_id": "ch4_s2_a1_p1",
+        "mode": "relative",
+        "rendered": "（１）"
+      }
+    ],
+    "term_uses": [
+      {
+        "term_id": "insured",
+        "in_id": "ch1_a1_p1"
+      },
+      {
+        "term_id": "insured_car",
+        "in_id": "ch1_a1_p1"
+      },
+      {
+        "term_id": "policyholder",
+        "in_id": "ch4_s1_a1_p1"
+      },
+      {
+        "term_id": "insured",
+        "in_id": "ch4_s1_a1_p1"
+      },
+      {
+        "term_id": "policyholder",
+        "in_id": "ch4_s1_a2_p1"
+      },
+      {
+        "term_id": "insured",
+        "in_id": "ch4_s1_a2_p1"
+      },
+      {
+        "term_id": "insured",
+        "in_id": "ch4_s2_a1_p1"
+      },
+      {
+        "term_id": "insured",
+        "in_id": "ch4_s2_a1_p2"
+      },
+      {
+        "term_id": "policyholder",
+        "in_id": "tbl_exclusions__r0c1"
+      },
+      {
+        "term_id": "insured",
+        "in_id": "tbl_exclusions__r0c1"
+      },
+      {
+        "term_id": "insured_car",
+        "in_id": "tbl_notify_facts__r0c1"
+      },
+      {
+        "term_id": "insured_car",
+        "in_id": "tbl_notify_facts__r1c1"
+      }
+    ],
+    "footnote_index": [
+      {
+        "article_id": "ch1_a2",
+        "n": 1,
+        "marker": "（*１）",
+        "text": "事変には、暴動その他の著しい秩序の混乱であって、当会社が別に定めるものを含みます。"
+      },
+      {
+        "article_id": "ch4_s1_a2",
+        "n": 1,
+        "marker": "（*１）",
+        "text": "運転操作の全部または一部を自動的に行う装置で、当会社所定の基準に該当するものをいいます。"
+      }
+    ],
+    "plain_text": {
+      "ch1": {
+        "with_label": "第１章　賠償責任条項",
+        "without_label": "賠償責任条項"
+      },
+      "ch1_a1": {
+        "with_label": "第１条（この条項の補償内容）",
+        "without_label": "この条項の補償内容"
+      },
+      "ch1_a1_p1": {
+        "with_label": "（１）当会社は、被保険者がご契約のお車の所有、使用または管理に起因して他人を死傷させた場合に、この条項に従い、対人賠償保険金を支払います。",
+        "without_label": "当会社は、被保険者がご契約のお車の所有、使用または管理に起因して他人を死傷させた場合に、この条項に従い、対人賠償保険金を支払います。"
+      },
+      "ch1_a1_p2": {
+        "with_label": "（２）当会社が（１）により支払う保険金の額は、無制限とします。",
+        "without_label": "当会社が（１）により支払う保険金の額は、無制限とします。"
+      },
+      "ch1_a2": {
+        "with_label": "第２条（保険金を支払わない場合）",
+        "without_label": "保険金を支払わない場合"
+      },
+      "ch1_a2_p1": {
+        "with_label": "当会社は、次に掲げる事由のいずれかにより生じた損害については、保険金を支払いません。",
+        "without_label": "当会社は、次に掲げる事由のいずれかにより生じた損害については、保険金を支払いません。"
+      },
+      "ch4": {
+        "with_label": "第２章　基本条項",
+        "without_label": "基本条項"
+      },
+      "ch4_s1": {
+        "with_label": "第１節　契約手続と義務",
+        "without_label": "契約手続と義務"
+      },
+      "ch4_s1_a1": {
+        "with_label": "第１条（告知義務）",
+        "without_label": "告知義務"
+      },
+      "ch4_s1_a1_p1": {
+        "with_label": "（１）保険契約者または被保険者は、保険契約の締結に際し、当会社が書面等で告知を求めた事項について、事実を正確に告げなければなりません。",
+        "without_label": "保険契約者または被保険者は、保険契約の締結に際し、当会社が書面等で告知を求めた事項について、事実を正確に告げなければなりません。"
+      },
+      "ch4_s1_a1_p2": {
+        "with_label": "（２）当会社は、（１）に違反した事実があった場合には、保険契約を解除することができます。ただし、その事実が保険金を支払うべき事由の発生に影響を及ぼさなかったときは、この限りではありません。",
+        "without_label": "当会社は、（１）に違反した事実があった場合には、保険契約を解除することができます。ただし、その事実が保険金を支払うべき事由の発生に影響を及ぼさなかったときは、この限りではありません。"
+      },
+      "ch4_s1_a2": {
+        "with_label": "第２条（通知義務）",
+        "without_label": "通知義務"
+      },
+      "ch4_s1_a2_p1": {
+        "with_label": "（１）保険契約を締結した後に、下表に掲げる事実のいずれかが生じたときは、保険契約者または被保険者は、遅滞なく、書面等により当会社にその旨を知らせなければなりません。ただし、当会社が知らせを受ける前にその事実が消滅したときを除きます。",
+        "without_label": "保険契約を締結した後に、下表に掲げる事実のいずれかが生じたときは、保険契約者または被保険者は、遅滞なく、書面等により当会社にその旨を知らせなければなりません。ただし、当会社が知らせを受ける前にその事実が消滅したときを除きます。"
+      },
+      "ch4_s1_a2_p2": {
+        "with_label": "（２）当会社は、（１）の知らせを受けたときは、その内容を記載した書類の提出を求めることがあります。",
+        "without_label": "当会社は、（１）の知らせを受けたときは、その内容を記載した書類の提出を求めることがあります。"
+      },
+      "ch4_s1_a2_p3": {
+        "with_label": "（３）第１条（告知義務）に定める告知の内容に変更が生じた場合の取扱いは、第１条（告知義務）（２）の例によります。",
+        "without_label": "第１条（告知義務）に定める告知の内容に変更が生じた場合の取扱いは、第１条（告知義務）（２）の例によります。"
+      },
+      "ch4_s2": {
+        "with_label": "第２節　事故発生時の義務",
+        "without_label": "事故発生時の義務"
+      },
+      "ch4_s2_a1": {
+        "with_label": "第１条（事故が発生した場合の義務）",
+        "without_label": "事故が発生した場合の義務"
+      },
+      "ch4_s2_a1_p1": {
+        "with_label": "（１）被保険者は、事故が発生したことを知った場合は、下表に掲げる義務を履行しなければなりません。",
+        "without_label": "被保険者は、事故が発生したことを知った場合は、下表に掲げる義務を履行しなければなりません。"
+      },
+      "ch4_s2_a1_p2": {
+        "with_label": "（２）被保険者が正当な理由がなく（１）の義務を怠った場合は、当会社は、それによって当会社が被った損害の額を差し引いて保険金を支払います。",
+        "without_label": "被保険者が正当な理由がなく（１）の義務を怠った場合は、当会社は、それによって当会社が被った損害の額を差し引いて保険金を支払います。"
+      },
+      "app1": {
+        "with_label": "別表１　後遺障害等級表（抜粋）",
+        "without_label": "後遺障害等級表（抜粋）"
+      },
+      "app1_s1": {
+        "with_label": "第１　等級と保険金支払割合",
+        "without_label": "等級と保険金支払割合"
+      },
+      "app1_s1_p1": {
+        "with_label": "１．後遺障害の等級は、身体に残った障害の程度に応じて次表のとおり区分します。",
+        "without_label": "後遺障害の等級は、身体に残った障害の程度に応じて次表のとおり区分します。"
+      },
+      "app1_s1_p2": {
+        "with_label": "２．同一の事故により二以上の後遺障害が生じた場合の取扱いは、当会社が別に定める基準によります。",
+        "without_label": "同一の事故により二以上の後遺障害が生じた場合の取扱いは、当会社が別に定める基準によります。"
+      },
+      "fn_ch1_a2__n1": {
+        "with_label": "（*１）　事変には、暴動その他の著しい秩序の混乱であって、当会社が別に定めるものを含みます。",
+        "without_label": "事変には、暴動その他の著しい秩序の混乱であって、当会社が別に定めるものを含みます。"
+      },
+      "tbl_exclusions__r0c0": {
+        "with_label": "①",
+        "without_label": "①"
+      },
+      "tbl_exclusions__r0c1": {
+        "with_label": "保険契約者または被保険者の故意によって生じた損害",
+        "without_label": "保険契約者または被保険者の故意によって生じた損害"
+      },
+      "tbl_exclusions__r1c0": {
+        "with_label": "②",
+        "without_label": "②"
+      },
+      "tbl_exclusions__r1c1": {
+        "with_label": "戦争、内乱その他これらに類似の事変（*１）によって生じた損害",
+        "without_label": "戦争、内乱その他これらに類似の事変（*１）によって生じた損害"
+      },
+      "fn_ch4_s1_a2__n1": {
+        "with_label": "（*１）　運転操作の全部または一部を自動的に行う装置で、当会社所定の基準に該当するものをいいます。",
+        "without_label": "運転操作の全部または一部を自動的に行う装置で、当会社所定の基準に該当するものをいいます。"
+      },
+      "box_notify_hint__title": {
+        "with_label": "お知らせが必要な場合",
+        "without_label": "お知らせが必要な場合"
+      },
+      "par_notify_hint": {
+        "with_label": "住所や連絡先が変わったときも、お早めにご連絡ください。ご連絡がないと、大切なお知らせが届かないことがあります。",
+        "without_label": "住所や連絡先が変わったときも、お早めにご連絡ください。ご連絡がないと、大切なお知らせが届かないことがあります。"
+      },
+      "tbl_notify_facts__r0c0": {
+        "with_label": "①",
+        "without_label": "①"
+      },
+      "tbl_notify_facts__r0c1": {
+        "with_label": "ご契約のお車の主な使用地域が、保険証券に記載された都道府県以外に移ったこと。",
+        "without_label": "ご契約のお車の主な使用地域が、保険証券に記載された都道府県以外に移ったこと。"
+      },
+      "tbl_notify_facts__r1c0": {
+        "with_label": "②",
+        "without_label": "②"
+      },
+      "tbl_notify_facts__r1c1": {
+        "with_label": "ご契約のお車に自動運行装置（*１）を後から取り付けたこと、または取り外したこと。",
+        "without_label": "ご契約のお車に自動運行装置（*１）を後から取り付けたこと、または取り外したこと。"
+      },
+      "fig_accident_flow__caption": {
+        "with_label": "図１　事故発生から保険金のお支払いまで",
+        "without_label": "事故発生から保険金のお支払いまで"
+      },
+      "tbl_duties__caption": {
+        "with_label": "表３　事故が発生した場合の義務",
+        "without_label": "事故が発生した場合の義務"
+      },
+      "tbl_duties__r0c0": {
+        "with_label": "義務の名称",
+        "without_label": "義務の名称"
+      },
+      "tbl_duties__r0c1": {
+        "with_label": "内容",
+        "without_label": "内容"
+      },
+      "tbl_duties__r1c0": {
+        "with_label": "損害防止義務",
+        "without_label": "損害防止義務"
+      },
+      "tbl_duties__r1c1": {
+        "with_label": "損害の発生および拡大の防止に努めること。",
+        "without_label": "損害の発生および拡大の防止に努めること。"
+      },
+      "tbl_duties__r2c0": {
+        "with_label": "通知義務",
+        "without_label": "通知義務"
+      },
+      "tbl_duties__r2c1": {
+        "with_label": "事故の発生の日からその日を含めて30日以内に、事故の状況を当会社に通知すること。",
+        "without_label": "事故の発生の日からその日を含めて30日以内に、事故の状況を当会社に通知すること。"
+      },
+      "tbl_duties__r3c0": {
+        "with_label": "協力義務",
+        "without_label": "協力義務"
+      },
+      "tbl_duties__r3c1": {
+        "with_label": "当会社が行う損害の調査に協力すること。",
+        "without_label": "当会社が行う損害の調査に協力すること。"
+      },
+      "tbl_duties__note0": {
+        "with_label": "やむを得ない事由があるときは、その事由が解消した後、遅滞なく履行してください。",
+        "without_label": "やむを得ない事由があるときは、その事由が解消した後、遅滞なく履行してください。"
+      },
+      "tbl_grade__caption": {
+        "with_label": "表４　後遺障害等級と支払割合",
+        "without_label": "後遺障害等級と支払割合"
+      },
+      "tbl_grade__r0c0": {
+        "with_label": "等級",
+        "without_label": "等級"
+      },
+      "tbl_grade__r0c1": {
+        "with_label": "障害の程度",
+        "without_label": "障害の程度"
+      },
+      "tbl_grade__r0c2": {
+        "with_label": "支払割合",
+        "without_label": "支払割合"
+      },
+      "tbl_grade__r1c0": {
+        "with_label": "第一級",
+        "without_label": "第一級"
+      },
+      "tbl_grade__r1c1": {
+        "with_label": "常に介護を要する状態が残ったもの",
+        "without_label": "常に介護を要する状態が残ったもの"
+      },
+      "tbl_grade__r1c2": {
+        "with_label": "100％",
+        "without_label": "100％"
+      },
+      "tbl_grade__r2c0": {
+        "with_label": "第二級",
+        "without_label": "第二級"
+      },
+      "tbl_grade__r2c1": {
+        "with_label": "随時介護を要する状態が残ったもの",
+        "without_label": "随時介護を要する状態が残ったもの"
+      },
+      "tbl_grade__r2c2": {
+        "with_label": "89％",
+        "without_label": "89％"
+      },
+      "tbl_grade__r3c0": {
+        "with_label": "第三級",
+        "without_label": "第三級"
+      },
+      "tbl_grade__r3c1": {
+        "with_label": "終身にわたり労務に服することができない状態が残ったもの",
+        "without_label": "終身にわたり労務に服することができない状態が残ったもの"
+      },
+      "tbl_grade__r3c2": {
+        "with_label": "78％",
+        "without_label": "78％"
+      },
+      "tbl_grade__note0": {
+        "with_label": "支払割合は、保険証券に記載された保険金額に対する割合です。",
+        "without_label": "支払割合は、保険証券に記載された保険金額に対する割合です。"
+      },
+      "par_colophon_1": {
+        "with_label": "青葉みなと総合自動車保険　普通保険約款　2026年10月1日改定",
+        "without_label": "青葉みなと総合自動車保険　普通保険約款　2026年10月1日改定"
+      },
+      "par_colophon_2": {
+        "with_label": "青葉みなと損害保険株式会社　お問い合わせ窓口　0120-000-000（受付時間　午前９時から午後５時まで）　example.jp",
+        "without_label": "青葉みなと損害保険株式会社　お問い合わせ窓口　0120-000-000（受付時間　午前９時から午後５時まで）　example.jp"
+      },
+      "par_colophon_3": {
+        "with_label": "本冊子は、文書読取技術の検証を目的として作成された架空の約款です。記載の会社・商品・連絡先は実在しません。",
+        "without_label": "本冊子は、文書読取技術の検証を目的として作成された架空の約款です。記載の会社・商品・連絡先は実在しません。"
+      }
+    },
+    "tables": {
+      "tbl_exclusions": {
+        "caption_label": "表１",
+        "header_path": {
+          "tbl_exclusions__r0c1": {
+            "row_headers": [
+              ""
+            ],
+            "col_headers": []
+          },
+          "tbl_exclusions__r1c1": {
+            "row_headers": [
+              ""
+            ],
+            "col_headers": []
+          }
+        },
+        "auto_labels": {
+          "tbl_exclusions__r0c0": "①",
+          "tbl_exclusions__r1c0": "②"
+        }
+      },
+      "tbl_notify_facts": {
+        "caption_label": "表２",
+        "header_path": {
+          "tbl_notify_facts__r0c1": {
+            "row_headers": [
+              ""
+            ],
+            "col_headers": []
+          },
+          "tbl_notify_facts__r1c1": {
+            "row_headers": [
+              ""
+            ],
+            "col_headers": []
+          }
+        },
+        "auto_labels": {
+          "tbl_notify_facts__r0c0": "①",
+          "tbl_notify_facts__r1c0": "②"
+        }
+      },
+      "tbl_duties": {
+        "caption_label": "表３",
+        "header_path": {
+          "tbl_duties__r1c0": {
+            "row_headers": [],
+            "col_headers": [
+              "義務の名称"
+            ]
+          },
+          "tbl_duties__r1c1": {
+            "row_headers": [],
+            "col_headers": [
+              "内容"
+            ]
+          },
+          "tbl_duties__r2c0": {
+            "row_headers": [],
+            "col_headers": [
+              "義務の名称"
+            ]
+          },
+          "tbl_duties__r2c1": {
+            "row_headers": [],
+            "col_headers": [
+              "内容"
+            ]
+          },
+          "tbl_duties__r3c0": {
+            "row_headers": [],
+            "col_headers": [
+              "義務の名称"
+            ]
+          },
+          "tbl_duties__r3c1": {
+            "row_headers": [],
+            "col_headers": [
+              "内容"
+            ]
+          }
+        },
+        "auto_labels": {}
+      },
+      "tbl_grade": {
+        "caption_label": "表４",
+        "header_path": {
+          "tbl_grade__r1c1": {
+            "row_headers": [
+              "第一級"
+            ],
+            "col_headers": [
+              "障害の程度"
+            ]
+          },
+          "tbl_grade__r1c2": {
+            "row_headers": [
+              "第一級"
+            ],
+            "col_headers": [
+              "支払割合"
+            ]
+          },
+          "tbl_grade__r2c1": {
+            "row_headers": [
+              "第二級"
+            ],
+            "col_headers": [
+              "障害の程度"
+            ]
+          },
+          "tbl_grade__r2c2": {
+            "row_headers": [
+              "第二級"
+            ],
+            "col_headers": [
+              "支払割合"
+            ]
+          },
+          "tbl_grade__r3c1": {
+            "row_headers": [
+              "第三級"
+            ],
+            "col_headers": [
+              "障害の程度"
+            ]
+          },
+          "tbl_grade__r3c2": {
+            "row_headers": [
+              "第三級"
+            ],
+            "col_headers": [
+              "支払割合"
+            ]
+          }
+        },
+        "auto_labels": {}
+      }
+    },
+    "figures": {
+      "fig_accident_flow": {
+        "caption_label": "図１",
+        "node_order": [
+          "n1",
+          "n2",
+          "n3",
+          "n4",
+          "n5",
+          "n6"
+        ],
+        "paths": [
+          [
+            "事故の発生",
+            "当会社へ連絡",
+            "損害の調査",
+            "お支払いできますか",
+            "保険金のお支払い"
+          ],
+          [
+            "事故の発生",
+            "当会社へ連絡",
+            "損害の調査",
+            "お支払いできますか",
+            "理由のご説明"
+          ]
+        ]
+      }
+    },
+    "toc": [
+      {
+        "id": "ch1",
+        "depth": 0,
+        "label": "第１章",
+        "title": "賠償責任条項",
+        "heading_text": "第１章　賠償責任条項",
+        "summary": "他人を死傷させたり、他人の財物を壊したりした場合の補償を定めます。"
+      },
+      {
+        "id": "ch1_a1",
+        "depth": 1,
+        "label": "第１条",
+        "title": "この条項の補償内容",
+        "heading_text": "第１条（この条項の補償内容）",
+        "summary": null
+      },
+      {
+        "id": "ch1_a2",
+        "depth": 1,
+        "label": "第２条",
+        "title": "保険金を支払わない場合",
+        "heading_text": "第２条（保険金を支払わない場合）",
+        "summary": null
+      },
+      {
+        "id": "ch4",
+        "depth": 0,
+        "label": "第２章",
+        "title": "基本条項",
+        "heading_text": "第２章　基本条項",
+        "summary": "契約の手続き、保険料の払込み、事故が起きたときの義務など、全条項に共通する事柄を定めます。"
+      },
+      {
+        "id": "ch4_s1",
+        "depth": 1,
+        "label": "第１節",
+        "title": "契約手続と義務",
+        "heading_text": "第１節　契約手続と義務",
+        "summary": null
+      },
+      {
+        "id": "ch4_s1_a1",
+        "depth": 2,
+        "label": "第１条",
+        "title": "告知義務",
+        "heading_text": "第１条（告知義務）",
+        "summary": null
+      },
+      {
+        "id": "ch4_s1_a2",
+        "depth": 2,
+        "label": "第２条",
+        "title": "通知義務",
+        "heading_text": "第２条（通知義務）",
+        "summary": null
+      },
+      {
+        "id": "ch4_s2",
+        "depth": 1,
+        "label": "第２節",
+        "title": "事故発生時の義務",
+        "heading_text": "第２節　事故発生時の義務",
+        "summary": null
+      },
+      {
+        "id": "ch4_s2_a1",
+        "depth": 2,
+        "label": "第１条",
+        "title": "事故が発生した場合の義務",
+        "heading_text": "第１条（事故が発生した場合の義務）",
+        "summary": null
+      },
+      {
+        "id": "app1",
+        "depth": 0,
+        "label": "別表１",
+        "title": "後遺障害等級表（抜粋）",
+        "heading_text": "別表１　後遺障害等級表（抜粋）",
+        "summary": null
+      },
+      {
+        "id": "app1_s1",
+        "depth": 1,
+        "label": "第１",
+        "title": "等級と保険金支払割合",
+        "heading_text": "第１　等級と保険金支払割合",
+        "summary": null
+      }
+    ]
+  }
+}

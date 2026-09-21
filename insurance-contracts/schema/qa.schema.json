@@ -1,0 +1,113 @@
+{
+  "$defs": {
+    "QA": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "type": {
+          "enum": [
+            "locate",
+            "extract",
+            "definition",
+            "table_lookup",
+            "table_reason",
+            "figure_path",
+            "figure_fact",
+            "crossref",
+            "count",
+            "negative"
+          ],
+          "title": "Type",
+          "type": "string"
+        },
+        "question": {
+          "title": "Question",
+          "type": "string"
+        },
+        "answer": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            }
+          ],
+          "title": "Answer"
+        },
+        "answer_type": {
+          "enum": [
+            "string",
+            "number",
+            "list",
+            "boolean"
+          ],
+          "title": "Answer Type",
+          "type": "string"
+        },
+        "evidence": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Evidence",
+          "type": "array"
+        },
+        "page_hint": {
+          "items": {
+            "type": "integer"
+          },
+          "title": "Page Hint",
+          "type": "array"
+        },
+        "source": {
+          "enum": [
+            "auto",
+            "authored"
+          ],
+          "title": "Source",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "type",
+        "question",
+        "answer",
+        "answer_type",
+        "evidence",
+        "source"
+      ],
+      "title": "QA",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "doc_id": {
+      "title": "Doc Id",
+      "type": "string"
+    },
+    "items": {
+      "items": {
+        "$ref": "#/$defs/QA"
+      },
+      "title": "Items",
+      "type": "array"
+    }
+  },
+  "required": [
+    "doc_id"
+  ],
+  "title": "QASet",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

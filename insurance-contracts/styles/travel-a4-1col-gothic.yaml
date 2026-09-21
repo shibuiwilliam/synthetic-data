@@ -1,0 +1,12 @@
+style_id: travel-a4-1col-gothic
+description: A4・1段組・ゴシック9.5pt。帯付き見出し・章番号を色付きに。travel 向け（付録A）
+page: { size: A4, width_mm: 210, height_mm: 297, margin_mm: { top: 17, right: 16, bottom: 19, left: 16 } }
+columns: { count: 1, gap_mm: 0 }
+fonts: { body: "Noto Sans JP", heading: "Noto Sans JP", symbol_fallback: ["Noto Sans Symbols", "Noto Sans Symbols 2"] }
+sizes: { body_pt: 9.5, line_height: 1.68, h1_pt: 13.5, h2_pt: 11, h3_pt: 10, h4_pt: 9.5,
+         table_pt: 8.5, note_pt: 8, toc_pt: 9, cover_pt: 20 }
+palette: { text: "#111111", rule: "#3a3a3a", accent: "#0f6b52", band: "#e9f4ef", note_bg: "#f5faf8" }
+headings: { band: true }
+table: { border: grid }
+margin_note: article_end
+chars_per_page_estimate: 1453

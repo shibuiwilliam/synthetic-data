@@ -1,0 +1,11 @@
+{
+  "clause_id": "lapse_revival", "scheme": "life", "title_options": ["失効および復活"],
+  "constants": { "revival_years": "3年" },
+  "terms_used": ["policyholder"],
+  "variants": [{ "id": "v1", "tone": "standard", "paragraphs": [
+    { "text": "保険料の払込みがないまま猶予期間が満了したときは、保険契約は効力を失います。" },
+    { "text": "{term:policyholder}は、保険契約が効力を失った日から{const:revival_years}以内に限り、会社の承諾を得て保険契約を復活させることができます。" },
+    { "text": "復活の申込みにあたっては、あらためて告知が必要となります。会社が復活を承諾した場合には、{term:policyholder}は、失効期間中の保険料を払い込まなければなりません。" },
+    { "text": "復活した保険契約の責任は、会社が復活を承諾し、かつ{ref:$p3}の保険料を受け取った時から開始します。" }
+  ]}]
+}

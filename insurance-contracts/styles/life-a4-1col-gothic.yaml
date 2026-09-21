@@ -1,0 +1,14 @@
+style_id: life-a4-1col-gothic
+description: A4・1段組・ゴシック10.5pt。帯付き見出し・格子罫。life の変種（付録A）
+# 付録A は BIZ UDPゴシックを指定しているが未取得のため Noto Sans JP で代替する
+# （assets/fonts/SOURCES.md の「未取得のフォント」）
+page: { size: A4, width_mm: 210, height_mm: 297, margin_mm: { top: 18, right: 17, bottom: 20, left: 17 } }
+columns: { count: 1, gap_mm: 0 }
+fonts: { body: "Noto Sans JP", heading: "Noto Sans JP", symbol_fallback: ["Noto Sans Symbols", "Noto Sans Symbols 2"] }
+sizes: { body_pt: 10.5, line_height: 1.78, h1_pt: 14.5, h2_pt: 12, h3_pt: 11, h4_pt: 10.5,
+         table_pt: 9.5, note_pt: 9, toc_pt: 10, cover_pt: 22 }
+palette: { text: "#111111", rule: "#444444", accent: "#12507a", band: "#12507a", note_bg: "#f2f6f9" }
+headings: { band: true }
+table: { border: grid }
+margin_note: article_end
+chars_per_page_estimate: 950

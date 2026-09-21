@@ -1,0 +1,7 @@
+{
+  "clause_id": "prescription", "scheme": "life", "title_options": ["時効"],
+  "constants": { "prescription_years": "3年" },
+  "variants": [{ "id": "v1", "tone": "standard", "paragraphs": [
+    { "text": "保険金、給付金および解約返戻金を請求する権利は、これらを行使することができる時から{const:prescription_years}を経過したときは、時効によって消滅します。" }
+  ]}]
+}

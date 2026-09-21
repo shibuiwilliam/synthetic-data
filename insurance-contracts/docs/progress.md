@@ -1,0 +1,262 @@
+# progress.md — 進捗と次の一手
+
+CLAUDE.md §0.2-1 でセッション開始時に読み、§0.2-4 で終了時に更新するファイル。
+各フェーズに「完了／未完／次にやる3タスク／落とし穴」を書く。フェーズの DoD は CLAUDE.md §12。
+
+**現在地：P4 完了（7ジャンル各1文書・8データセットが ready）。次は P5（QA・バッチ）。直近セッション：2026-09-22。**
+
+---
+
+## P0 環境 — **完了**（DoD 達成）
+
+DoD：`make check` が通る／日本語 A4 2 段組の smoke PDF が出る／WeasyPrint・Pango・フォントの版が
+`docs/gotchas.md` にある。**3 つとも満たした。**
+
+**完了したもの**
+- リポジトリ運用：親 `synthetic-data` リポジトリを使用、`.gitignore`（親の `parts/` 打ち消し）、`docs/` 雛形、
+  `.claude/rules/` 4 本、CLAUDE.md の分割（739 → 291 行）。
+- uv プロジェクト：`yakkan-synth` / Python 3.12.9 / 依存 11 本 + dev 2 本を `pyproject.toml` に固定、`uv.lock`。
+  WeasyPrint は **`==70.0`** で固定（最新安定版）。
+- OS 依存：Pango 1.56.4 / HarfBuzz 11.3.3（Homebrew 導入済みを確認）。cffi 2.1.1 で libffi 動作。
+- フォント同梱（36MB・全て OFL / IPA）：Noto Serif JP・Noto Sans JP（各 Regular/Bold）、IPAex明朝・ゴシック、
+  Noto Sans Symbols・Symbols 2。出典 URL・版・SHA256 を `assets/fonts/SOURCES.md` に記録。BIZ UD 系は未取得（代替あり）。
+- §10 のディレクトリ骨格、`README.md`、`Makefile`（setup / check / fmt / lint / test / doctor / smoke / doc / batch / clean）。
+- `yakkan doctor`：Python・WeasyPrint・Pango・HarfBuzz・cffi・各パッケージ・pypdfium2 のラスタライズ・
+  フォントの存在と代表文字 20 字の cmap 被覆を表で出す。NG があれば exit 1。
+- `scripts/smoke_render.py`：A4・2 段組・@page ヘッダ/フッタ・結合セル表・インライン SVG・丸数字/黒丸数字の
+  1 ページ PDF → 150dpi PNG。PNG を目視確認済み（崩れなし）。
+- `yakkan/layout/extract.py`（box ツリー → element bbox）と `yakkan/verify/normalize.py`（読み順と正規化）の最小版。
+- `tests/`：15 件（フォント被覆・正規化・読み順・往復一致・ヘッダ/フッタ分離・SVG テキスト・
+  フォント混入なし・決定論・PNG 解像度）。`make check` で全通過。
+- `.claude/settings.json`：許可リスト（uv / make / pytest / ruff / git 読み取り系）、
+  `env` で `DYLD_FALLBACK_LIBRARY_PATH`、`dataset/` 手編集の拒否（`Edit(/dataset/**)` + PreToolUse フック）。
+
+**前倒しで済んだもの（本来 P2）**
+- **`scripts/probe_weasy.py` 相当の probe は完了**。box ツリーから element id → bbox が取れることを実証し、
+  renderer を WeasyPrint で確定（`docs/decisions.md`）。`column-span: all` も動作確認済み。
+
+**未完（P2 に送る）**
+- `target-counter`（目次ページ番号）・`leader()`・`float: footnote`・`<ruby>` の probe。
+- 複数ページでの表頭繰り返し（`thead`）の実挙動確認。
+- PDF のメタデータ日時の固定（現状テキスト層の一致までは確認、バイナリ一致は未確認）。
+- `yakkan doctor` に poppler 相当の確認は入れていない（pypdfium2 で足りるため不要と判断）。
+
+---
+
+## P1 モデル — **完了**（DoD 達成）
+
+DoD：pydantic モデルと JSON Schema、numbering、richtext、lint L01–L03 / L07 / L08 / L13 が実装され、
+単体テストと golden テストが通る／docs/schema.md のサンプル（旧 §5.10）が lint を通る。**すべて満たした。**
+
+**完了したもの**
+- `yakkan/models.py`：Source / Node / Block（9 種）/ Table / Cell / Figure / Diagram（6 種）/ Formula /
+  TermDef / Layout / QA を pydantic v2 で定義。列挙は `Literal`、判別共用体は discriminator 付き。
+  **執筆物 `SourceDraft`（derived なし）と build 後の `Source`（derived あり）を型で分離**し、
+  執筆物に `derived` を書くと `extra="forbid"` で落ちる → lint L00。
+- `schema/{source_draft,source,layout,qa}.schema.json`（JSON Schema 2020-12）を `yakkan schema export` で生成。
+- `yakkan/ids.py`：ノード id（親を接頭辞に持つ）・ブロック id 接頭辞・セル/図ノード id の組み立てと検査。
+- `yakkan/numbering.py`：nonlife / life / teikan の 3 方式、全角半角、丸数字の上限（⑳超は括弧数字＋警告）、
+  単項無番号、teikan の第 1 項無番号、別紙の独立体系、`{ref:}` の解決（relative / short / full）。
+- `yakkan/richtext.py`：9 種のトークンの再帰下降パーサと AST、平文化（参照解決・ラベル付き/なし）、
+  エスケープ、未知トークンのエラー（位置つき）。
+- `yakkan/compose.py`：`content/<cid>/doc.json` ＋ `parts/*.json` の読み込み（docs/schema.md §5.11 で新規に定義）。
+- `yakkan/lint/`：ルール登録基盤（code・severity・element_id・path、`--quick`、`--only`）と
+  **L00 / L01 / L02 / L03 / L07 / L08 / L12（部分）/ L13**。`denylist.txt` は損保・生保・共済 約90 語。
+- `tests/golden/sample_min/`：オリジナル文の最小 content（2 章・別表・表 4 点・図 1 点・脚注・欄外注）。
+  lint が error 0 / warn 0。ラベルと参照解決を golden JSON で固定（`--update-golden` で更新）。
+- docs/schema.md を実装に合わせて更新（§5.2 Cover・constants・number_override_reason、§5.3 const/auto_label、
+  §5.4 blocks_side_by_side・MergedInto、§5.11 parts 形式を新設）。乖離の判断は decisions.md に 13 行。
+
+**未完（後続フェーズ）**
+- lint L04（blueprint 必須要素）・L05（表）・L06（図）・L09（ページ数）・L10（文体）・L11（数値整合）・
+  L14（QA）・L15（類似度）。L05/L06 は P2/P3、L04/L09 は blueprint と描画が要る。
+- L12 の後半（定義されたが使われない語）は P4。
+- `{ref:}` の表・図への参照は P2（キャプション採番と同時）。現状は L01 でエラーにして明示している。
+- `yakkan/build.py`（derived の付与）は P2 の入口で作る。`scaffold.py` は P4。
+
+## P2 レンダラ — **完了**（DoD 達成）
+
+DoD：3 ページ相当のサンプルで PDF 生成・目次ページ番号の一致・テキスト往復一致・決定論を確認し、
+renderer の確定を decisions.md に記録する。**すべて満たした**（`tests/golden/test_render.py`、`yakkan verify` が error 0 / warn 0）。
+
+**完了したもの**
+- `scripts/probe_weasy.py`（`make probe`）：22 項目を実測。結果表は decisions.md の付録。
+  **renderer を WeasyPrint 70.0 で確定**（判断基準にあった pdfplumber 主経路化・ReportLab 切替は不要）。
+- `yakkan/build.py`：parts 結合 → 番号・参照の解決 → 平文（ラベル有無）→ 目次 → 表の header_path・
+  列挙表の自動ラベル → 図の経路 → `derived` 付与 → `source.json`。
+- `styles/nl-a4-2col-mincho.yaml` ＋ `styles/css/*.css.j2`（Jinja テンプレート）、`yakkan/styles.py`。
+- `yakkan/render/`：`html.py`（Source → HTML。全要素に id と data-kind、見出しはラベル span と文言 span を分離、
+  項・号は CSS grid のぶら下げ）、`inline.py`（RichText → HTML。平文と同じ解決を使う）、
+  `weasy.py`（HTML → render → layout 抽出 → PDF（メタデータ固定）→ PNG 150dpi）、`templates/document.html.j2`。
+- `yakkan/layout/extract.py`：`layout.json` 全体（fragments・repeated 表頭・header/footer 分離・
+  text_lines（LineBox 単位・region 付き）・reading_order（本文 → 欄外注））。
+- `yakkan/layout/fallback_align.py`：pdfplumber の文字列を期待テキストに difflib で整列して bbox を復元。
+- `yakkan/verify/checks.py`：V01 ページ数 / V02 フォント / V03 テキスト往復（JSON→PDF と box→pdfplumber の 2 方向）/
+  V04 目次ページ一致 / V05 fragment 存在 / V06 はみ出し / V07 重なり / V08 bbox 突合 / V09 決定論。
+- CLI：`yakkan build` / `render`（`--style` `--report` `--png/--no-png`）/ `verify`。
+- `tests/golden/test_render.py`：layout.json（bbox 許容 0.5pt）と PDF テキスト層（完全一致）を golden 固定。
+  サンプルは `sample_min`（3 ページ・表 4 点・脚注・欄外注・目次・別表）を流用し、内容を二重に持たない。
+
+**probe で分かった非対応と代替（decisions.md に詳細）**
+- `column-span: all` は `<table>` 直接では効かない → `<figure>` でくるむ。
+- `float: footnote` 非対応 → 欄外注は条末に囲みで置く。
+- `<ruby>` 非対応 → inline-block 積みで代替（実測で読みが上に出ることを確認）。
+- box ツリーの y は pdfplumber の文字上端と 4〜5pt ずれる → IoU ではなく内包判定にした。
+
+**未完（P3 以降）**
+- **図の SVG 描画は P3**。いまは枠だけの placeholder を出し、render が note で知らせる。
+  `layout.figures` も空のまま。
+- lint L04 / L05 / L06 / L09〜L11（blueprint・表・図・ページ数見積り・文体・数値整合）。
+- 2 段組でぶら下げ段落が段の境界で割れるとラベルだけ残る（gotchas に記録。見た目の調整は P6）。
+- style は 1 種類のみ。付録A の残り 6 種は P6。
+
+---
+
+## P3 図 — **完了**（DoD 達成）
+
+DoD：6 種の Diagram と Formula を JSON → SVG に変換でき、`figure_layout`（ノード id → bbox）が返り、
+`layout.json` の `figures` にページ座標で統合される。各種 1 点のサンプルが PNG で崩れなく描ける。**すべて満たした。**
+
+**完了したもの**
+- `yakkan/render/diagrams/base.py`：文字幅見積り（全角 1.0em / ASCII 0.55em / 半角カナ 0.5em、
+  `unicodedata.east_asian_width` で判定）、折返し、SVG 組立て（rect / polygon / line / polyline /
+  text / text_block）、矢頭マーカー（id は図ごと）、`DiagramStyle.from_style`。
+- 6 種：`flowchart`（格子・直交エッジ・菱形分岐・エッジラベル・書類形）／`tree`（lines / bracket / nested）／
+  `steps`（LR は矢羽根、TB は枠＋下向き矢印、detail / asks / docs の小枠）／
+  `timeline`（レーン・区間バー・イベント旗・目盛）／`annotated_mock`（証券の模式図＋バッジ＋凡例）／
+  `matrix`（格子＋記号＋凡例）。
+- `yakkan/render/formula.py`：`inline_boxes` と `fraction`（HTML/CSS で組む）。
+- lint **L06**：エッジ端点の存在・格子座標の重複・最小複雑度（flowchart 5 ノード＋分岐 1／tree 3 階層／
+  steps 4／timeline 4 要素／matrix 4×3）・`alt` と `facts` の非空・バッジと凡例の対応・
+  matrix の行列数一致・timeline の目盛整合（warn）。
+- `layout.figures`：`<svg>` の実寸と viewBox から倍率を求め、ノード bbox をページ座標（pt）へ変換。
+  実測で倍率はちょうど 0.75（px→pt）。計算は `tests/unit/test_figure_layout.py` で数値検証。
+- verify **V10**：図のノード座標が空でないこと、ラベルが PDF のテキスト層から読めること。
+- `tests/fixtures/diagrams/`：6 種のサンプル（架空商品の手続き・補償構成・契約期間）。
+  `scripts/preview_diagrams.py` で 1 枚にまとめて PNG 目視確認した。
+- テスト 53 件追加（文字幅・折返し・6 種の描画・font-family 必須・bbox が viewBox 内・決定論・
+  装飾なし・算式・L06 の 10 ケース・ページ座標の数値）。合計 178 件。
+
+**目視で見つけて直した 3 件**
+- flowchart：分岐エッジが本線と重なり、ラベルも衝突していた → 横の辺から出す経路に変更。
+- steps：小枠の高さが 1 行ぶん足りず最終行が枠外にはみ出していた。
+- timeline：右端のイベント旗が viewBox から切れていた → 内側に寄せる。
+
+**未完（P4 以降）**
+- `tree` の `bracket` / `nested` と `steps` の TB、`annotated_mock` の `claim_form` / `app_screen` は
+  実装済みだが **fixture が無く目視未確認**。使う文書が出た時点で確認する。
+- lint L04（blueprint 必須要素）・L05（表）・L09〜L11・L14・L15。
+- style は 1 種類のみ。図の配色は palette に追従するので style 追加時は再確認する。
+
+---
+
+## P4 コンテンツ — a/b 完了、c（執筆）が残り
+
+### P4-a 構造分析 — 完了
+参考URL 8 件すべてを取得して構造分析し、`docs/reference_structures.md` を完成させた。
+#5 は「リスク細分型海外旅行保険」と判明。blueprint 提案 B-1〜B-9 を提出。
+
+### P4-b 骨組み — **完了**
+
+- **blueprints 7 種**（`blueprints/*.yaml`）：必須要素と最小件数、章の入替許容範囲、特約プール、
+  数値表記の variants、字数 budget。`yakkan/blueprints.py` が型として検査する。
+- **styles 8 種**（付録A の 7 種 ＋ 素組みの `nl-a4-1col-plain`）。CSS は
+  `styles/css/_base.css.j2` ＋ スタイル差分。`chars_per_page_estimate` は
+  `scripts/calibrate_styles.py` で**実測較正**（当初の見積りは最大 1.6 倍ずれていた）。
+- **条文ライブラリ 41 条・本文 8,765 字**（`library/clauses/{nonlife,life,teikan}/`）。
+  すべてオリジナル。params（`constants`）と言い換え（`variants`）を持つ。
+- **`yakkan/scaffold.py`**：blueprint ＋ seed → `doc.json` ＋ `parts/*.json`。
+  見出し候補・TODO・必須要素・推定字数・安定 id を埋め、定型条は本文まで展開する。
+- **`yakkan/compose.py`**：`_todo` を落として `SourceDraft` にする／残 TODO を数える。
+- **lint L04 L05 L09 L10 L11 L12 L15 を追加**（L12 は完全版に差し替え）。`--skip` で断片を検査できる。
+- **`.claude/agents/`**（author / reviewer / render-debugger）と
+  **`.claude/commands/`**（/author /review /batch）。
+- テスト 113 件追加（合計 291 件）。`tests/golden/test_pipeline.py` が 5 段の疎通を固定。
+
+**疎通確認**：`auto` の空スケルトンで scaffold → lint → build → render(7 ページ) → verify が
+端から端まで走る。全 7 ジャンルで scaffold → build を確認。
+空スケルトンでは lint が「未執筆」を、verify が「描画漏れ」を指摘するのが正しい挙動で、
+**空の項に 40 字入れると描画漏れが消えることをテストで固定**してある。
+
+**この作業で見つけた不具合（すべて記録済み）**
+- **段組の中に 1 ページを超える段またぎ要素があると、以降の内容が黙って消える**（WeasyPrint 70.0）。
+  目次で踏んだ。テンプレートで目次を段組の外に出して解消。verify V05 だけが気づけた。
+- **ページ分割の内部アサーションで落ちることがある**（内容の高さ次第。単調でない）。
+  `RenderLayoutError` として明示的に失敗させる。自動回避はしない。
+- `{auto_label}` が `exclusions` 表で採番されず stub が空になっていた（build と lint の両方を修正）。
+- `sample_min` が `digit_style: fullwidth` なのに半角数字を使っていた（L10 が検出）。
+
+### P4-c 執筆 — **完了**（7文書 8データセットが ready）
+
+| content_id | style | ページ | 表 | 図 | 脚注 | 欄外注 | 参照 | reviewer 採点（修正前） |
+|---|---|---|---|---|---|---|---|---|
+| auto-0001 | nl-a4-2col-mincho | 16 | 16 | 5 | 20 | 4 | 78 | 3/5 |
+| oneday-0001 | nl-a4-1col-plain | 13 | 15 | 3 | 21 | 3 | 38 | 3/5 |
+| quake-0001 | nl-b5-2col-dense | 11 | 11 | 4 | 24 | 5 | 49 | 3/5 |
+| quake-0001 | nl-a4-1col-gothic | 14 | 〃 | 〃 | 〃 | 〃 | 〃 | （2スタイル目） |
+| health-0001 | nl-a4-2col-mincho | 14 | 12 | 4 | 25 | 6 | 69 | 2/5 |
+| life-0001 | life-b5-1col-mincho | 18 | 12 | 3 | 20 | 2 | 28 | 2/5 |
+| teikan-0001 | teikan-a4-1col-mincho | 12 | 5 | 1 | 0 | 0 | 21 | 3/5 |
+| travel-0001 | travel-a4-1col-gothic | 14 | 11 | 4 | 27 | 5 | 58 | 3/5 |
+
+全 8 データセットが **lint error 0 / verify error 0 / warn 0**、`manifest` は ready 8/8。`make check` 通過（291 テスト）。
+
+**所要**：1文書あたり author サブエージェント1体で 20〜50 分（ツール呼び出し 48〜166 回）。
+part 単位の並列委譲より、1文書を1体に任せるほうが整合性が取れた（part 間の数値・定義語の食い違いを本人が直せる）。
+reviewer → 修正 の 2 周目で品質が大きく上がった。**reviewer を通さない初稿は公開できる状態ではなかった。**
+
+**失敗**：quake の修正エージェントが 600 秒無反応で停止（stalled）。指摘12件は反映済みだったので親側で描画だけ仕上げた。
+長時間タスクは途中成果がファイルに残る形で進めさせるのが安全。
+
+### P4-c で見つかった、lint では検出できない問題の分類
+
+1. **§0.4-1（転載禁止）の違反が5文書で同じ形をとって再発した。**
+   auto の後遺障害等級表（支払割合 100/89/78…％と法令別表の逐語文言）、quake の支払割合・家財の損害割合・流失70％、
+   health の等級表12個すべて一致＋むち打ち症条項、life の高度障害状態表6項目と入院の定義、travel の72時間と食中毒 carve-out。
+   → **模倣は文章より「数値の列」と「列挙の順序」と「別表特有の語形」に出る。**
+   golden fixture 自身も同じ違反をしていた。執筆時のチェックリストに「別表の数値列は必ず実物からずらす」を入れること。
+2. **正解データ（gold）自体の誤り**：図の `facts` が本文と食い違う（auto「基本条項は四つの節」→実際は6節、travel「四つの部分」→実際は5章）。
+   facts は QA の正解そのものなので、間違っていると評価が壊れる。
+3. **章順の逆転**：`doc.json` の `parts` がファイル名順でそのまま章順になり、車両補償が賠償責任より前に来ていた。
+   根本原因は `blueprints/auto.yaml` の `variants.order_shuffle`。ジャンルによっては章順に制約が要る。
+4. **表・図が導入文より前に描画される**：表を「条直下の blocks」に置くか「項の blocks」に置くかで読み順が変わる。
+5. **`meta.constants` の値の衝突**：auto は 30日が4概念、60日が3概念。数値 QA の弁別力が無い。
+6. **一覧表が掲げる保険金に条文が無い**（oneday で2件）。表と条文の対応が空振りする。
+7. **業法・実務との不整合**：teikan の剰余金処分を取締役会決議にしていた（相互会社では総代会決議）。
+
+### P4-c で直した基盤側の欠陥
+
+- **verify V05 が表・図の丸ごと欠落を検出できていなかった**（ノードしか照合していなかった）。quake で表2つが verify 通過のまま消えていた。
+- **段またぎ要素がページ境界で以降の内容を全部捨てる**（最重要）。章見出しを段内に戻し、`render` が欠落を検出したら停止するようにした。
+- **L09 の計量が二重に間違っていた**：生の RichText を数えていた（`{term:...}` を丁寧に使う文書ほど不利）＋係数が未較正（最大 +28%／−11%）。
+  平文で数え、7文書の実測で較正し直した（最大相対誤差 5.6%）。恒常的に出て無視される warn を解消。
+- **`records` が全文書の表で null**（§2-4 の二重表現違反）。`scripts/fill_records.py` で35表を機械導出し、lint L05 に検査を追加。
+- **fragment が自分の text_lines を覆っていないことがあった**（段またぎの脚注）。抽出側で包含関係を保つようにした。
+- ヘッダの章名が1ページ先行／別表見出しの孤立／表紙のペットネーム未描画／古い PNG の残留／
+  L05 の records 突合が `{ref:}` を空文字に解決するバグ。
+
+### 次にやる3タスク
+1. `docs/shared_fixes.md` の残り（特約の独立番号体系が最大。4文書が独立に同じ指摘を出した）。P6 送りも含めて判断する。
+2. P5：自動 QA・執筆 QA・`specs/batch_v1.yaml`（7 genre × 3 content ≈ 30 文書）。
+   **content は 7 ジャンル × 1 本しか無い**ので、各ジャンルあと2本ずつ執筆する必要がある。
+3. 同一ジャンル 3 文書になると L15（類似度）が実際に効く。定型条ライブラリ由来の文の扱いを確認する。
+
+**落とし穴（P5 で効くもの）**
+- 「レンダリングが成功した」は「内容が全部載った」を意味しない。`render` の欠落検査と verify V05 を必ず見る。
+- `RenderLayoutError` は字数の増減では通らない形がある（構造を変えると通る）。quake は A4 2段では通らず、2スタイル目を A4 1段に変えた。
+- **サブエージェント作業中に共有コードを触ると彼らが幻の失敗を追う。** 今回2回やってしまった。
+  verify の強化だけは描画結果を変えないので例外的に安全。
+
+---
+
+## セッション記録
+
+| 日付 | やったこと | 次の一手 |
+|---|---|---|
+| 2026-09-21 | §15 確定、docs/ 雛形、CLAUDE.md 分割（739→291行）、.gitignore、.claude/rules | P0：Python 3.12 化 → uv sync → doctor → probe_weasy |
+| 2026-09-21 | P0 完了（uv・フォント同梱・doctor・smoke PDF・往復検証・settings/hook）。box ツリー probe 成功で renderer 確定 | P1：models / numbering / richtext / lint L01–L03 |
+| 2026-09-21 | P1 完了（models・schema export・ids・numbering・richtext・compose・lint 8 規則・golden sample）。仕様の欠落 5 件を docs/schema.md に追記 | P2：build.py → テンプレート/CSS → 目次まわりの probe |
+| 2026-09-21 | P2 完了（probe 22 項目 → renderer 確定、build・style・テンプレート・layout 抽出・verify 9 種・golden）。3 ページのサンプルで verify が error 0 / warn 0 | P3：図の SVG 6 種と lint L06 |
+| 2026-09-21 | P3 完了（図 6 種＋算式、lint L06、layout.figures のページ座標、verify V10、fixture 6 点を目視確認）。テスト 178 件 | P4：reference_structures → blueprints・scaffold → auto を 1 文書 |
+| 2026-09-21 | P4-a 完了（参考URL 8 件の構造分析、travel の商品種別を特定、blueprint 提案 B-1〜B-9） | 回答待ち 3 件を確認 → blueprints 7 種と scaffold |
+| 2026-09-21 | P4-b 完了（blueprint 7・style 8・条文ライブラリ 41 条・scaffold/compose・lint 7 規則追加・agents/commands）。5 段の疎通確認。WeasyPrint の内容欠落バグを発見し修正 | P4-c：auto を 1 文書執筆 → review → 残り 6 ジャンル |

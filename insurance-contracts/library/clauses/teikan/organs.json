@@ -1,0 +1,69 @@
+{
+  "clause_id": "organs",
+  "scheme": "teikan",
+  "title_options": [
+    "機関"
+  ],
+  "variants": [
+    {
+      "id": "v1",
+      "tone": "standard",
+      "paragraphs": [
+        {
+          "text": "当会社は、株主総会および取締役のほか、次の機関を置く。",
+          "blocks": [
+            {
+              "type": "table",
+              "id": "tbl_organs",
+              "semantic_type": "enumeration",
+              "layout": {
+                "header_rows": 0,
+                "header_cols": 1,
+                "repeat_header": false,
+                "style": "minimal"
+              },
+              "grid": [
+                [
+                  {
+                    "id": "tbl_organs__r0c0",
+                    "text": "{auto_label}",
+                    "role": "stub"
+                  },
+                  {
+                    "id": "tbl_organs__r0c1",
+                    "text": "取締役会",
+                    "role": "body"
+                  }
+                ],
+                [
+                  {
+                    "id": "tbl_organs__r1c0",
+                    "text": "{auto_label}",
+                    "role": "stub"
+                  },
+                  {
+                    "id": "tbl_organs__r1c1",
+                    "text": "監査役および監査役会",
+                    "role": "body"
+                  }
+                ],
+                [
+                  {
+                    "id": "tbl_organs__r2c0",
+                    "text": "{auto_label}",
+                    "role": "stub"
+                  },
+                  {
+                    "id": "tbl_organs__r2c1",
+                    "text": "会計監査人",
+                    "role": "body"
+                  }
+                ]
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

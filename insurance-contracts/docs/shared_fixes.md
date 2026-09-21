@@ -1,0 +1,59 @@
+# shared_fixes.md — 共有コード側で直すべきものの積み残し
+
+サブエージェントの報告と自分の目視から集約。いずれも全文書に影響するため
+`docs/decisions.md` に記録してから実施し、最後に全7文書を再レンダリング＋verify する。
+
+1. **条末ブロックの並び順**：`yakkan/render/html.py` の `_is_trailing` が
+   欄外注（`box style=margin_note`）を条末脚注（`footnotes`）より先に出している。
+   実物は脚注 →（ページ下部または条末の）欄外注の順。travel p8・life で確認。
+2. **表紙のヘッダ／フッタを消す**：`@page :first` で `@top-left` / `@bottom-center` / `@bottom-right` を空にする。
+   実物の約款冊子の表紙にページ番号は入らない。life p1 で確認。
+   → `layout.json` の `pages[0].header/footer` が null になる（正解としてはより正確）。
+3. **timeline の軸目盛ラベルが5文字以上で viewBox から切れる**：両端にパディングを入れる。
+   life・travel の両担当が独立に「4文字までしか入らない」と報告。
+4. **`page_break` ブロックが未実装**：`html.py` が空文字を返している。スキーマは宣言しているので実装する。
+   travel の別表が12〜13ページにまたがり1行だけ残る問題の制御手段になる。
+5. **teikan の号の記号**：現在 ①②③（損保約款流）。定款の慣行は `(1)(2)(3)` または漢数字。
+   `yakkan/numbering.py` の teikan scheme を変更する。
+6. **teikan の `{ref:}` から章の冠を外す**：条が全編通し番号（`CONTINUOUS_ARTICLE_SCHEMES`）なので
+   「第３章第１２条」の章プレフィックスは不要。同一章内参照と挙動も不統一。
+7. **matrix 図の列幅が固定 62px**：health 担当が列見出しを「けが／病気／特約」まで短縮せざるを得なかった。
+   ラベル長に応じて列幅を広げる。
+8. **特約を独立番号体系にする**（auto A12・oneday ⑩）：現在は普通保険約款の章として通し番号化され、
+   「普通保険約款を準用する」と書くと自己言及になる。`scaffold`/`numbering` に rider 体系を足す。
+   ※ 影響が大きいので P6 送りも検討。暫定対応は各文書側で実施済み。
+9. **表題（figcaption）と表本体の分離**：`break-after: avoid` は本文欠落を誘発するため採用できない（実測済み）。
+   別手段を探すか、既知の制約として残す。
+
+## 追加（P4-c のレビューと修正で集まったもの）
+
+10. **キャプションのない列挙表が「表N」の番号を消費する**：oneday で `表13` の次が `表15` に飛んだ。
+    `assign_caption_labels` が caption 無しの表まで数えているため。teikan では附則の履歴表に「表４」が付き、
+    実物の定款は附則の表に表番号を振らない。読者に見える番号が飛ぶのは正解データとしても不自然。
+    → caption を持つ表だけを数える／`semantic_type` が列挙系の表は番号を振らない、のどちらかに寄せる。
+11. **`{ref:}` が表・図・別表を参照できない**：`{ref:tbl_coverage_overview}` は L01 で落ちる。
+    `build` は `labels` に「表N」を持っているのに ref 解決側が見ていない。
+    「表２に掲げる額の２分の１」と書けないため、oneday は `{ref:ch1_a4|short}` で代替した。
+    crossref QA の材料としても表・図への参照は欲しい。
+12. **`RenderLayoutError` が「字数の増減では通らない」形がある**：oneday 担当が
+    「`ch3_a4` の(2)(3)を1項に統合する」形だけは前後の字数をいくら振っても落ちたと報告。
+    `docs/gotchas.md` の「数十字増減すれば通る」が常に成り立つわけではない。
+    → 最小再現が取れたら `scripts/probe_weasy.py` に追加し、WeasyPrint 側に報告できる形にする。
+13. **特約を独立番号体系にする**（auto A12・oneday ⑩・quake・travel T-8 で4文書が同じ指摘）：
+    `Node.kind` に特約用の区分が無く、特約を `chapter` として body に置くため
+    「第５章 携行品損害補償特約」と普通約款の続き番号になる。そのうえで「普通保険約款を準用します」と書くと自己言及になる。
+    → `kind: "rider"` を models に追加し、numbering で「特約第○条」の独立体系にして、目次でも本文と別建てにする。
+    **4文書で暫定対応（準用文の書き換え）を入れたが、本筋はこれ。P6 送りも検討。**
+14. **teikan の号の記号**：`yakkan/build.py` の `enumeration_labels()` が `circled()` を無条件に呼ぶため、
+    scheme に関係なく ①②③ になる。`_label_teikan` の item は既に `（１）` を返すので、
+    `enumeration_labels` を `label_for(ctx, "item", n, in_appendix=...)` 経由にすれば scheme と揃う。
+15. **teikan の `{ref:}` から章の冠を外す**：条が全編通し番号なので「第３章第１４条」の章プレフィックスは不要。
+    同一章内参照（「第１４条（決議）」）と挙動も不統一。
+16. **teikan の附則の見出し**：`_label_appendix_inner` が `appendix_section` に「第１」、paragraph に「１．」を振る。
+    定款の附則は項番号「１」「２」で起こすのが通例。
+17. **`blueprints/travel.yaml` は appendices に `kind_label: "付表"` を指定しているが描画は「別表１」**。
+    blueprint か numbering のどちらかに寄せる。
+18. **rowspan がページ境界をまたぐと継続ページのセルが空欄になる**（life `tbl_benefit` の受取人列）。
+    読み取り課題としては妥当だが、正解側が `repeated` 扱いを区別できているか verify で確認したい。
+19. **フッタのページ番号が半角**（`counter(page)`）で `digit_style: fullwidth` の文書と不整合。
+    実物の日本語冊子もページ番号は半角が多いので、意図的に半角と決めるなら decisions に記録する。

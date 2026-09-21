@@ -1,0 +1,37 @@
+{
+  "clause_id": "notification_duty",
+  "scheme": "nonlife",
+  "title_options": ["通知義務", "契約締結後の通知義務"],
+  "terms_used": ["policyholder", "insured"],
+  "variants": [
+    {
+      "id": "v1",
+      "tone": "standard",
+      "paragraphs": [
+        { "text": "保険契約を締結した後に、下表に掲げる事実のいずれかが生じたときは、{term:policyholder}または{term:insured}は、遅滞なく、書面等により当会社にその旨を知らせなければなりません。ただし、当会社が知らせを受ける前にその事実が消滅したときを除きます。",
+          "blocks": [
+            { "type": "table", "id": "tbl_notify_facts", "semantic_type": "enumeration",
+              "layout": { "header_rows": 0, "header_cols": 1, "repeat_header": false, "style": "grid" },
+              "grid": [
+                [ { "id": "tbl_notify_facts__r0c0", "text": "{auto_label}", "role": "stub" },
+                  { "id": "tbl_notify_facts__r0c1", "text": "申込書に記載された保険の対象の用途または使用の状況が変わったこと。", "role": "body" } ],
+                [ { "id": "tbl_notify_facts__r1c0", "text": "{auto_label}", "role": "stub" },
+                  { "id": "tbl_notify_facts__r1c1", "text": "保険の対象を他人に譲り渡したこと、またはその管理を他人に委ねたこと。", "role": "body" } ],
+                [ { "id": "tbl_notify_facts__r2c0", "text": "{auto_label}", "role": "stub" },
+                  { "id": "tbl_notify_facts__r2c1", "text": "当会社が申込書において通知を求めた事項に変更が生じたこと。", "role": "body" } ]
+              ] } ] },
+        { "text": "当会社は、{ref:$p1}の知らせを受けたときは、その内容を記載した書類の提出を求めることがあります。" },
+        { "text": "{term:policyholder}または{term:insured}が故意または重大な過失によって{ref:$p1}の知らせを怠ったときは、当会社は、その事実が生じた時から知らせを受けた時までに生じた損害に対しては、保険金を支払いません。" }
+      ]
+    },
+    {
+      "id": "v2",
+      "tone": "concise",
+      "paragraphs": [
+        { "text": "{term:policyholder}または{term:insured}は、保険契約を締結した後に危険の程度が増加する事実が生じたことを知ったときは、遅滞なく、その事実を当会社に知らせなければなりません。" },
+        { "text": "当会社は、{ref:$p1}の知らせを受けた場合において、引き続き保険契約を継続することができるときは、危険の程度の増加に応じて保険料を変更することがあります。" },
+        { "text": "{ref:$p1}に違反した場合の取扱いは、当会社が別に定めるところによります。" }
+      ]
+    }
+  ]
+}

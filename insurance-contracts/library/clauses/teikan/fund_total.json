@@ -1,0 +1,21 @@
+{
+  "clause_id": "fund_total",
+  "scheme": "teikan",
+  "title_options": [
+    "基金の総額"
+  ],
+  "constants": {
+    "fund_amount": "１００億円"
+  },
+  "variants": [
+    {
+      "id": "v1",
+      "tone": "standard",
+      "paragraphs": [
+        {
+          "text": "当会社の基金の総額は、{const:fund_amount}とする。"
+        }
+      ]
+    }
+  ]
+}

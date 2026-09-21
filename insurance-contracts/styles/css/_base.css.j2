@@ -1,0 +1,184 @@
+/* _base.css.j2 — 全スタイル共通の土台
+   各スタイルの css.j2 がこれを include し、差分だけを後から上書きする。
+   生成元は styles/<style_id>.yaml。直接編集せずテンプレートを直す（CLAUDE.md §0.4-3）。 */
+{{ font_faces }}
+
+/* body の既定マージン 8px を必ず消す（docs/gotchas.md：本文幅が左右 6pt ずつ削られる） */
+body { margin: 0; }
+
+@page {
+  /* CSS の B5 は ISO B5（176×250mm）で JIS B5（182×257mm）と違うため、寸法を mm で明示する */
+  size: {{ style.page.width_mm }}mm {{ style.page.height_mm }}mm;
+  margin: {{ m.top }}mm {{ m.right }}mm {{ m.bottom }}mm {{ m.left }}mm;
+  @top-left {
+    /* first: ページ先頭時点の値。既定（last）だとページ末に始まる章名が
+       そのページのヘッダに出て、1ページ先行して見える。 */
+    content: string(part, first) string(chapter, first);
+    font-family: '{{ style.fonts.heading }}'; font-size: 8pt; color: {{ p.rule }};
+  }
+  @bottom-center {
+    content: counter(page);
+    font-family: '{{ style.fonts.heading }}'; font-size: 8pt; color: {{ p.text }};
+  }
+  @bottom-right {
+    content: "{{ form_code }}";
+    font-family: '{{ style.fonts.heading }}'; font-size: 7pt; color: {{ p.rule }};
+  }
+}
+
+html {
+  font-family: '{{ style.fonts.body }}', {{ fallbacks }}, serif;
+  font-size: {{ s.body_pt }}pt;
+  line-height: {{ s.line_height }};
+  color: {{ p.text }};
+  line-break: strict;
+  word-break: normal;
+}
+
+/* --- 段組（本文）。段またぎは column-span: all。<table> には直接効かないので
+       figure でくるむ（docs/decisions.md 2026-09-21） --- */
+.cols { column-count: {{ style.columns.count }}; column-gap: {{ style.columns.gap_mm }}mm; column-fill: auto; }
+.span-all { column-span: all; }
+
+/* --- 見出し：ラベル span と文言 span を分離する（docs/rendering.md §6.3） --- */
+h1, h2, h3, h4 { font-family: '{{ style.fonts.heading }}', {{ fallbacks }}, sans-serif; font-weight: 700; }
+h1 { font-size: {{ s.h1_pt }}pt; margin: 0 0 4mm; padding-bottom: 1.5mm;
+     border-bottom: 1.2pt solid {{ p.text }}; column-span: all; }
+h2 { font-size: {{ s.h2_pt }}pt; margin: 0 0 2.6mm;
+     column-span: none; break-after: avoid;
+{%- if style.headings.band %}
+     padding: 1.1mm 2mm; background: {{ p.band }}; border-left: 2.4pt solid {{ p.accent }};
+{%- else %}
+     padding-bottom: 0.8mm; border-bottom: 1pt solid {{ p.text }};
+{%- endif %} }
+/* 別表の見出しは改ページで始める。段組の残り高さに span-all の表が収まらないと
+   h3 以降がまとめて次ページへ送られ、見出しだけがページ末に孤立するため。 */
+/* @page ヘッダ用の string。編（part）と章（chapter）を別々に立てることで、
+   同じ「第３章」が編をまたいで衝突しても header_path が一意に決まる。
+   区切りの U+3000 を part 側の string に含めるので、編を持たない文書では余分な空白が出ない。 */
+h2[data-kind="part"] { string-set: part content() '\3000'; }
+h2:not([data-kind="part"]) { string-set: chapter content(); }
+/* 別表は編の外にあるので、編の string を空に戻す（「第３編　特約条項　別表２」と出ないように）。 */
+h2[data-kind="appendix"] { string-set: part '', chapter content(); }
+h2[data-kind="appendix"] { column-span: none; }
+h3 { font-size: {{ s.h3_pt }}pt; margin: 2.6mm 0 1.6mm; break-after: avoid;
+{%- if style.headings.band %}
+     color: {{ p.accent }}; border-bottom: 0.5pt solid {{ p.accent }};
+{%- endif %} }
+h4 { font-size: {{ s.h4_pt }}pt; margin: 2.4mm 0 1.2mm; break-after: avoid; }
+/* ラベルと文言の間隔は U+3000 の文字で空ける（テキスト層を heading_text と一致させるため） */
+
+/* --- 項・号：CSS grid のぶら下げインデント。float は使わない ---
+   `break-inside: avoid` は必須。無いと段またぎで grid が壊れ、
+   **本文がヘッダ帯に食い込む**（docs/gotchas.md）。
+   ラベルだけが前の段に取り残される問題も同時に解消する。
+   項が段の高さを超えると配置できなくなるので、1 項は長くても段の半分までに収める。 */
+.para { display: grid; grid-template-columns: var(--label-w) 1fr; margin: 0 0 1.8mm;
+        break-inside: avoid; }
+.para > .label { grid-column: 1; }
+.para > .text  { grid-column: 2; text-align: justify; }
+.para.no-label { display: block; text-align: justify; }
+/* ラベル欄は実際に入るラベルの幅で決める。狭いと本文に食い込む（verify V08 が検出） */
+.para[data-kind="paragraph"] { --label-w: 3.6em; }
+.para[data-kind="item"]      { --label-w: 1.6em; margin-left: 3.6em; }
+.para[data-kind="subitem"]   { --label-w: 1.8em; margin-left: 5.2em; }
+.para[data-kind="subsubitem"]{ --label-w: 2.2em; margin-left: 7.0em; }
+
+/* --- 表 --- */
+figure.table-wrap { margin: 1.6mm 0 2.4mm; break-inside: auto; }
+figure.table-wrap.span-all { column-span: all; }
+figcaption { font-family: '{{ style.fonts.heading }}', sans-serif; font-size: {{ s.note_pt }}pt;
+             font-weight: 700; margin-bottom: 1mm; }
+table { border-collapse: collapse; width: 100%; font-size: {{ s.table_pt }}pt; }
+{%- if style.table.border == 'grid' %}
+th, td { border: 0.5pt solid {{ p.rule }}; padding: 0.9mm 1.4mm; vertical-align: top; text-align: left; }
+{%- elif style.table.border == 'horizontal' %}
+th, td { border: none; border-bottom: 0.4pt solid {{ p.rule }}; padding: 0.9mm 1.4mm;
+         vertical-align: top; text-align: left; }
+thead th { border-top: 0.8pt solid {{ p.rule }}; border-bottom: 0.8pt solid {{ p.rule }}; }
+{%- else %}
+th, td { border: none; padding: 0.7mm 1.2mm; vertical-align: top; text-align: left; }
+thead th { border-bottom: 0.5pt solid {{ p.rule }}; }
+{%- endif %}
+thead { display: table-header-group; }
+thead th { {% if style.table.border != 'minimal' %}background: {{ p.band }};{% endif %}
+           font-family: '{{ style.fonts.heading }}', sans-serif; text-align: center; }
+tr { break-inside: avoid; }
+td.stub, th.stub { text-align: center; }
+td.align-center { text-align: center; }
+td.align-right  { text-align: right; }
+table.enumeration td.stub { width: 2.2em; }
+table.enumeration td { border: none; padding: 0.4mm 0.8mm; }
+.table-note { font-size: {{ s.note_pt }}pt; margin-top: 0.8mm; }
+
+/* --- 図・算式 --- */
+figure.figure-wrap { margin: 1.6mm 0 2.4mm; break-inside: avoid; }
+figure.figure-wrap.span-all { column-span: all; }
+svg { display: block; max-width: 100%; }
+.formula { display: flex; flex-wrap: wrap; align-items: center; gap: 0.4em;
+           margin: 1.4mm 0; break-inside: avoid; }
+.formula .fbox { border: 0.5pt solid {{ p.rule }}; padding: 0.6mm 1.6mm; }
+.formula .fop { font-family: '{{ style.fonts.heading }}', sans-serif; }
+.formula .ffrac { display: inline-flex; flex-direction: column; text-align: center; vertical-align: middle; }
+.formula .ffrac .num { padding: 0 1.2mm 0.3mm; border-bottom: 0.5pt solid {{ p.rule }}; }
+.formula .ffrac .den { padding: 0.3mm 1.2mm 0; }
+
+/* --- 囲み・欄外注・脚注 --- */
+.box { border: 0.5pt solid {{ p.rule }}; background: {{ p.note_bg }};
+       padding: 1.2mm 1.8mm; margin: 1.6mm 0; font-size: {{ s.note_pt }}pt; break-inside: avoid; }
+.box .box-title { font-family: '{{ style.fonts.heading }}', sans-serif; font-weight: 700; display: block;
+                  margin-bottom: 0.6mm; }
+.box[data-style="margin_note"] { border-left: 2pt solid {{ p.accent }}; }
+.footnotes { font-size: {{ s.note_pt }}pt; margin: 1.4mm 0 2mm; padding-top: 0.8mm;
+             border-top: 0.5pt solid {{ p.rule }}; }
+/* 脚注のマーカー欄は内容に合わせる（max-content）。
+   固定幅だと `（*1）` が「（*」「1）」で 2 行に割れたり（狭い）、
+   逆に広げすぎて別の崩れを招いたりする（どちらも実際に起きた） */
+.footnotes .fn-line { display: grid; grid-template-columns: max-content 1fr; column-gap: 0.6em; }
+.footnotes .fn-line > .label { white-space: nowrap; }
+
+/* --- 目次 --- */
+/* 前付けは段組の外に置く（目次と同じ理由） */
+.preface { margin-bottom: 4mm; }
+.preface .para { margin-bottom: 2.4mm; }
+
+/* 目次は段組コンテナの外に置くので column-span は不要（docs/gotchas.md） */
+nav.toc { margin-bottom: 4mm; font-size: {{ s.toc_pt }}pt; }
+nav.toc .toc-line { display: block; margin: 0 0 0.9mm; }
+nav.toc .toc-line a { text-decoration: none; color: inherit; }
+nav.toc .toc-line a::after { content: leader('.') target-counter(attr(href), page); }
+/* 2 パス目：ページ番号を文字として埋めた場合は target-counter を使わない
+   （WeasyPrint の target-counter は長い目次で収束せず、印字と実ページがずれる。
+     docs/gotchas.md「目次のページ番号が収束しない」） */
+nav.toc .toc-line a.fixed::after { content: leader('.'); }
+nav.toc .d0 { font-family: '{{ style.fonts.heading }}', sans-serif; font-weight: 700; margin-top: 1.6mm; }
+nav.toc .d1 { margin-left: 1.6em; }
+nav.toc .d2 { margin-left: 3.2em; }
+nav.toc .toc-summary { display: block; margin-left: 1.6em; font-size: {{ s.note_pt }}pt; color: {{ p.rule }}; }
+
+/* --- 表紙・奥付 --- */
+.cover { break-after: page; text-align: center; padding-top: 42mm; }
+.cover .cover-petname { font-family: '{{ style.fonts.heading }}', sans-serif;
+                        font-size: 13pt; color: {{ p.accent }}; margin-bottom: 3mm; }
+.cover .cover-title { font-family: '{{ style.fonts.heading }}', sans-serif; font-size: {{ s.cover_pt }}pt;
+                      font-weight: 700; margin-bottom: 6mm; }
+.cover .cover-subtitle { font-size: 11pt; margin-bottom: 30mm; }
+.cover .cover-issuer { font-size: 12pt; margin-bottom: 2mm; }
+.cover .cover-form { font-size: 8pt; color: {{ p.rule }}; margin-top: 14mm; }
+.cover .cover-note { font-size: 9pt; margin: 0 18mm; text-align: left; }
+.colophon { column-span: all; margin-top: 6mm; padding-top: 2mm;
+            border-top: 0.5pt solid {{ p.rule }}; font-size: {{ s.note_pt }}pt; }
+
+/* 条項間参照は地の文と同じ見た目にする。実物の約款は参照だけ色や下線を変えない
+   （PDF の内部リンクとしては生きている） */
+a.ref, a { color: inherit; text-decoration: none; }
+
+/* --- 定義語・強調・ルビ（<ruby> は WeasyPrint 70.0 非対応なので inline-block で積む） --- */
+.term { font-weight: 700; }
+.u { text-decoration: underline; }
+.ruby { display: inline-block; text-align: center; line-height: 1; vertical-align: baseline; }
+.ruby .rt { display: block; font-size: 50%; line-height: 1; margin-bottom: -0.1em; }
+.ruby .rb { display: block; line-height: 1; }
+
+/* 長い欧文だけ折り返す（docs/rendering.md §6.3） */
+.latin { overflow-wrap: break-word; }

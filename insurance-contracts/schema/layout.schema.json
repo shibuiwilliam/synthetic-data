@@ -1,0 +1,397 @@
+{
+  "$defs": {
+    "ElementFragment": {
+      "additionalProperties": false,
+      "properties": {
+        "page": {
+          "title": "Page",
+          "type": "integer"
+        },
+        "bbox": {
+          "maxItems": 4,
+          "minItems": 4,
+          "prefixItems": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "title": "Bbox",
+          "type": "array"
+        },
+        "repeated": {
+          "default": false,
+          "title": "Repeated",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "page",
+        "bbox"
+      ],
+      "title": "ElementFragment",
+      "type": "object"
+    },
+    "ElementLayout": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "title": "Kind",
+          "type": "string"
+        },
+        "fragments": {
+          "items": {
+            "$ref": "#/$defs/ElementFragment"
+          },
+          "title": "Fragments",
+          "type": "array"
+        },
+        "label": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Label"
+        },
+        "heading_text": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Heading Text"
+        }
+      },
+      "required": [
+        "kind",
+        "fragments"
+      ],
+      "title": "ElementLayout",
+      "type": "object"
+    },
+    "FigureLayout": {
+      "additionalProperties": false,
+      "properties": {
+        "page": {
+          "title": "Page",
+          "type": "integer"
+        },
+        "bbox": {
+          "maxItems": 4,
+          "minItems": 4,
+          "prefixItems": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "title": "Bbox",
+          "type": "array"
+        },
+        "scale": {
+          "title": "Scale",
+          "type": "number"
+        },
+        "nodes": {
+          "additionalProperties": {
+            "maxItems": 4,
+            "minItems": 4,
+            "prefixItems": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "number"
+              }
+            ],
+            "type": "array"
+          },
+          "title": "Nodes",
+          "type": "object"
+        }
+      },
+      "required": [
+        "page",
+        "bbox",
+        "scale"
+      ],
+      "title": "FigureLayout",
+      "type": "object"
+    },
+    "Furniture": {
+      "additionalProperties": false,
+      "properties": {
+        "text": {
+          "title": "Text",
+          "type": "string"
+        },
+        "bbox": {
+          "maxItems": 4,
+          "minItems": 4,
+          "prefixItems": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "title": "Bbox",
+          "type": "array"
+        }
+      },
+      "required": [
+        "text",
+        "bbox"
+      ],
+      "title": "Furniture",
+      "type": "object"
+    },
+    "PageLayout": {
+      "additionalProperties": false,
+      "properties": {
+        "number": {
+          "title": "Number",
+          "type": "integer"
+        },
+        "columns": {
+          "title": "Columns",
+          "type": "integer"
+        },
+        "header": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Furniture"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "footer": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Furniture"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "reading_order": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Reading Order",
+          "type": "array"
+        },
+        "text_lines": {
+          "items": {
+            "$ref": "#/$defs/TextLine"
+          },
+          "title": "Text Lines",
+          "type": "array"
+        }
+      },
+      "required": [
+        "number",
+        "columns"
+      ],
+      "title": "PageLayout",
+      "type": "object"
+    },
+    "Renderer": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "const": "weasyprint",
+          "default": "weasyprint",
+          "title": "Name",
+          "type": "string"
+        },
+        "version": {
+          "title": "Version",
+          "type": "string"
+        },
+        "fonts": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Fonts",
+          "type": "array"
+        }
+      },
+      "required": [
+        "version"
+      ],
+      "title": "Renderer",
+      "type": "object"
+    },
+    "TextLine": {
+      "additionalProperties": false,
+      "properties": {
+        "bbox": {
+          "maxItems": 4,
+          "minItems": 4,
+          "prefixItems": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "title": "Bbox",
+          "type": "array"
+        },
+        "text": {
+          "title": "Text",
+          "type": "string"
+        },
+        "element_id": {
+          "title": "Element Id",
+          "type": "string"
+        },
+        "region": {
+          "enum": [
+            "body",
+            "margin_note",
+            "header",
+            "footer",
+            "figure",
+            "table"
+          ],
+          "title": "Region",
+          "type": "string"
+        }
+      },
+      "required": [
+        "bbox",
+        "text",
+        "element_id",
+        "region"
+      ],
+      "title": "TextLine",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "doc_id": {
+      "title": "Doc Id",
+      "type": "string"
+    },
+    "content_id": {
+      "title": "Content Id",
+      "type": "string"
+    },
+    "style_id": {
+      "title": "Style Id",
+      "type": "string"
+    },
+    "renderer": {
+      "$ref": "#/$defs/Renderer"
+    },
+    "page_size_pt": {
+      "maxItems": 2,
+      "minItems": 2,
+      "prefixItems": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "number"
+        }
+      ],
+      "title": "Page Size Pt",
+      "type": "array"
+    },
+    "page_count": {
+      "title": "Page Count",
+      "type": "integer"
+    },
+    "dpi_png": {
+      "const": 150,
+      "default": 150,
+      "title": "Dpi Png",
+      "type": "integer"
+    },
+    "pages": {
+      "items": {
+        "$ref": "#/$defs/PageLayout"
+      },
+      "title": "Pages",
+      "type": "array"
+    },
+    "elements": {
+      "additionalProperties": {
+        "$ref": "#/$defs/ElementLayout"
+      },
+      "title": "Elements",
+      "type": "object"
+    },
+    "figures": {
+      "additionalProperties": {
+        "$ref": "#/$defs/FigureLayout"
+      },
+      "title": "Figures",
+      "type": "object"
+    }
+  },
+  "required": [
+    "doc_id",
+    "content_id",
+    "style_id",
+    "renderer",
+    "page_size_pt",
+    "page_count"
+  ],
+  "title": "Layout",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

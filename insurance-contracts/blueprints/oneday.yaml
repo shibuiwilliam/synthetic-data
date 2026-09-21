@@ -1,0 +1,81 @@
+# 1日型自動車保険（docs/blueprints.md §4.1 oneday）
+# 実物（docs/reference_structures.md #2）は装飾のない素組みの Web 配布 PDF
+genre: oneday
+description: 1日単位で加入する自動車保険の約款。小型・プラン表と申込手続きが中心
+target_pages: [8, 14]
+numbering_scheme: nonlife
+default_style: nl-a4-1col-plain
+
+front_matter:
+  cover: true
+  preface: false
+  purpose_index: false
+  toc_with_summaries: false
+  toc_depth: 2
+  rider_index: false
+
+required:
+  - { kind: table, subtype: definitions, min_rows: 8 }
+  - { kind: table, subtype: plan_matrix, min_rows: 4, min_cols: 3, note: "プラン比較マトリクス（C6）" }
+  - { kind: table, subtype: benefit_schedule, min_rows: 3, note: "補償内容一覧表（C2）" }
+  - { kind: figure, subtype: steps, note: "申込手続きの流れ（D7・スマートフォン手続き）" }
+  - { kind: figure, subtype: timeline, note: "保険期間タイムライン（D5）" }
+  - { kind: footnotes, min_count: 6 }
+
+skeleton:
+  - id: terms
+    kind: chapter
+    title_options: ["用語の定義"]
+    todo: "8〜12語。1日型特有の語（利用開始日時・利用日数）を含める"
+    chars: 1400
+    required: [ { kind: table, subtype: definitions, min_rows: 8 } ]
+
+  - id: ch1
+    kind: chapter
+    title_options: ["補償条項"]
+    children:
+      - { id: ch1_a1, kind: article, title_options: ["対人賠償", "対人事故の補償"], chars: 600 }
+      - { id: ch1_a2, kind: article, title_options: ["対物賠償", "対物事故の補償"], chars: 600 }
+      - { id: ch1_a3, kind: article, title_options: ["車両の補償"], chars: 600,
+          todo: "プランにより付帯されない場合がある旨を書く" }
+      - { id: ch1_a4, kind: article, title_options: ["保険金を支払わない場合"], chars: 700,
+          required: [ { kind: table, subtype: exclusions, min_rows: 4 } ] }
+
+  - id: ch2
+    kind: chapter
+    title_options: ["プランと保険料"]
+    children:
+      - { id: ch2_a1, kind: article, title_options: ["プランの種類"], chars: 600,
+          todo: "プラン×補償のマトリクス（○△－の凡例つき）",
+          required: [ { kind: table, subtype: plan_matrix, min_rows: 4, min_cols: 3 } ] }
+      - { id: ch2_a2, kind: article, title_options: ["無事故割引"], chars: 500,
+          todo: "利用回数と割引率の表",
+          required: [ { kind: table, subtype: rate, min_rows: 3 } ] }
+
+  - id: ch3
+    kind: chapter
+    title_options: ["基本条項"]
+    children:
+      - { id: ch3_a1, kind: article, title_options: ["保険期間および責任の始期・終期"], chars: 700,
+          todo: "時刻まで明記する（利用開始日時から24時間単位など）" }
+      - { id: ch3_a2, kind: article, title_options: ["申込みの手続"], chars: 600,
+          todo: "申込から利用開始までの手順" }
+      - { id: ch3_a3, kind: article, title_options: ["告知義務"], chars: 600, clause: disclosure_duty }
+      - { id: ch3_a4, kind: article, title_options: ["事故発生時の義務"], chars: 700, clause: accident_duty }
+      - { id: ch3_a5, kind: article, title_options: ["保険金の請求"], chars: 700, clause: claim_procedure }
+      - { id: ch3_a6, kind: article, title_options: ["時効"], chars: 300, clause: prescription }
+      - { id: ch3_a7, kind: article, title_options: ["準拠法および管轄"], chars: 300, clause: governing_law }
+
+riders: { count: [0, 1], pool: [rider_personal_belongings] }
+appendices: []
+
+variants:
+  digit_style: { fullwidth: 0.4, halfwidth: 0.6 }
+  paren_style: { fullwidth: 0.3, halfwidth: 0.7 }
+  era: { seireki: 1.0 }
+  issuer_kind: { stock: 1.0 }
+  pet_name: { present: 0.7, absent: 0.3 }
+  order_shuffle: []
+  styles: [nl-a4-1col-plain, nl-a4-1col-gothic]
+
+budget: { chars_min: 4400, chars_max: 9600, footnotes_min: 6, margin_notes_min: 0 }

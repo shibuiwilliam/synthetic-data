@@ -1,0 +1,25 @@
+{
+  "clause_id": "invalidity",
+  "scheme": "nonlife",
+  "title_options": ["保険契約の無効および取消し", "無効および取消し"],
+  "terms_used": ["policyholder"],
+  "variants": [
+    {
+      "id": "v1",
+      "tone": "standard",
+      "paragraphs": [
+        { "text": "{term:policyholder}が、保険金を不法に取得する目的または他人に不法に取得させる目的をもって保険契約を締結した場合には、保険契約は無効とします。" },
+        { "text": "{term:policyholder}の詐欺または強迫によって当会社が保険契約を締結した場合には、当会社は、保険契約を取り消すことができます。" },
+        { "text": "{ref:$p1}または{ref:$p2}の場合には、当会社は、既に払い込まれた保険料を返還しません。" }
+      ]
+    },
+    {
+      "id": "v2",
+      "tone": "concise",
+      "paragraphs": [
+        { "text": "保険金を不法に取得する目的で締結された保険契約は、無効とします。この場合、既に払い込まれた保険料は返還しません。" },
+        { "text": "{term:policyholder}の詐欺または強迫によって締結された保険契約について、当会社はこれを取り消すことができます。" }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "clause_id": "public_notice",
+  "scheme": "teikan",
+  "title_options": [
+    "公告方法"
+  ],
+  "constants": {
+    "backup_notice": "日本国内において発行する日刊新聞紙"
+  },
+  "variants": [
+    {
+      "id": "v1",
+      "tone": "standard",
+      "paragraphs": [
+        {
+          "text": "当会社の公告は、電子公告により行う。"
+        },
+        {
+          "text": "事故その他やむを得ない事由によって電子公告による公告をすることができない場合は、{const:backup_notice}に掲載する方法による。"
+        }
+      ]
+    }
+  ]
+}

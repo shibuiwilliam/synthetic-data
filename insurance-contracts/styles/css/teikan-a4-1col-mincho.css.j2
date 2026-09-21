@@ -1,0 +1,8 @@
+{% include "_base.css.j2" %}
+
+/* --- teikan の差分：章題は中央揃え、罫線は最小限（付録A）--- */
+h2 { text-align: center; background: none; border: none; padding: 0; margin: 6mm 0 3mm; }
+h3 { color: inherit; border-bottom: none; }
+/* 定款の項は行頭に全角数字を置く。別表（附則）では「１．」の 2 文字になるので
+   1.4em では足りず本文に食い込む（verify V08 が検出した） */
+.para[data-kind="paragraph"] { --label-w: 2.4em; }

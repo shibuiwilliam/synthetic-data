@@ -1,0 +1,21 @@
+{
+  "clause_id": "representative_director",
+  "scheme": "teikan",
+  "title_options": [
+    "代表取締役"
+  ],
+  "variants": [
+    {
+      "id": "v1",
+      "tone": "standard",
+      "paragraphs": [
+        {
+          "text": "取締役会は、その決議によって代表取締役を選定する。"
+        },
+        {
+          "text": "取締役会は、その決議によって取締役社長１名を選定し、必要に応じて取締役副社長その他の役付取締役を置くことができる。"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "clause_id": "designated_proxy_claim", "scheme": "life", "title_options": ["指定代理請求"],
+  "terms_used": ["policyholder", "insured"],
+  "variants": [{ "id": "v1", "tone": "standard", "paragraphs": [
+    { "text": "{term:insured}が保険金または給付金を請求することができない所定の事情があるときは、{term:policyholder}があらかじめ指定した者が、{term:insured}に代わって請求することができます。" },
+    { "text": "{ref:$p1}の指定を行う場合には、{term:policyholder}は、{term:insured}の同意を得たうえで会社所定の書面により申し出てください。指定の変更についても同様とします。" },
+    { "text": "会社が{ref:$p1}により請求を受けて保険金または給付金を支払った場合には、その後に重複して請求を受けても、会社は支払いません。" }
+  ]}]
+}

@@ -1,0 +1,22 @@
+{
+  "clause_id": "prescription",
+  "scheme": "nonlife",
+  "title_options": ["時効"],
+  "constants": { "prescription_years": "３年" },
+  "variants": [
+    {
+      "id": "v1",
+      "tone": "standard",
+      "paragraphs": [
+        { "text": "保険金の請求権は、これを行使することができる時から{const:prescription_years}を経過した場合は、時効によって消滅します。" }
+      ]
+    },
+    {
+      "id": "v2",
+      "tone": "detailed",
+      "paragraphs": [
+        { "text": "保険金の請求権および保険料の返還を求める権利は、これらを行使することができる時から{const:prescription_years}を経過したときは、時効によって消滅します。" }
+      ]
+    }
+  ]
+}

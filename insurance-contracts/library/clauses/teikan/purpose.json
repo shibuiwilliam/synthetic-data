@@ -1,0 +1,81 @@
+{
+  "clause_id": "purpose",
+  "scheme": "teikan",
+  "title_options": [
+    "目的"
+  ],
+  "variants": [
+    {
+      "id": "v1",
+      "tone": "standard",
+      "paragraphs": [
+        {
+          "text": "当会社は、次に掲げる事業を営むことを目的とする。",
+          "blocks": [
+            {
+              "type": "table",
+              "id": "tbl_purpose",
+              "semantic_type": "enumeration",
+              "layout": {
+                "header_rows": 0,
+                "header_cols": 1,
+                "repeat_header": false,
+                "style": "minimal"
+              },
+              "grid": [
+                [
+                  {
+                    "id": "tbl_purpose__r0c0",
+                    "text": "{auto_label}",
+                    "role": "stub"
+                  },
+                  {
+                    "id": "tbl_purpose__r0c1",
+                    "text": "損害保険業",
+                    "role": "body"
+                  }
+                ],
+                [
+                  {
+                    "id": "tbl_purpose__r1c0",
+                    "text": "{auto_label}",
+                    "role": "stub"
+                  },
+                  {
+                    "id": "tbl_purpose__r1c1",
+                    "text": "他の保険会社その他金融業を行う者の業務の代理または事務の代行",
+                    "role": "body"
+                  }
+                ],
+                [
+                  {
+                    "id": "tbl_purpose__r2c0",
+                    "text": "{auto_label}",
+                    "role": "stub"
+                  },
+                  {
+                    "id": "tbl_purpose__r2c1",
+                    "text": "債務の保証その他法令により営むことができる業務",
+                    "role": "body"
+                  }
+                ],
+                [
+                  {
+                    "id": "tbl_purpose__r3c0",
+                    "text": "{auto_label}",
+                    "role": "stub"
+                  },
+                  {
+                    "id": "tbl_purpose__r3c1",
+                    "text": "前各号に附帯する一切の業務",
+                    "role": "body"
+                  }
+                ]
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

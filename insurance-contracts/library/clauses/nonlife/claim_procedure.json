@@ -1,0 +1,43 @@
+{
+  "clause_id": "claim_procedure",
+  "scheme": "nonlife",
+  "title_options": ["保険金の請求", "保険金の請求手続"],
+  "terms_used": ["insured"],
+  "variants": [
+    {
+      "id": "v1",
+      "tone": "standard",
+      "paragraphs": [
+        { "text": "当会社に対する保険金の請求権は、損害が発生した時から発生し、これを行使することができるものとします。" },
+        { "text": "{term:insured}が保険金の支払を受けようとする場合は、当会社所定の保険金請求書に、下表に掲げる書類のうち当会社が求めるものを添えて、当会社に提出しなければなりません。",
+          "blocks": [
+            { "type": "table", "id": "tbl_claim_docs", "semantic_type": "procedure",
+              "caption": "保険金の請求に必要な書類",
+              "layout": { "header_rows": 1, "header_cols": 0, "repeat_header": true, "style": "grid" },
+              "grid": [
+                [ { "id": "tbl_claim_docs__r0c0", "text": "書類の種類", "role": "header", "align": "center" },
+                  { "id": "tbl_claim_docs__r0c1", "text": "備考", "role": "header", "align": "center" } ],
+                [ { "id": "tbl_claim_docs__r1c0", "text": "保険金請求書", "role": "stub" },
+                  { "id": "tbl_claim_docs__r1c1", "text": "当会社所定の様式によります。", "role": "body" } ],
+                [ { "id": "tbl_claim_docs__r2c0", "text": "事故の状況を示す書類", "role": "stub" },
+                  { "id": "tbl_claim_docs__r2c1", "text": "公の機関が発行するものに限りません。", "role": "body" } ],
+                [ { "id": "tbl_claim_docs__r3c0", "text": "損害の額を示す書類", "role": "stub" },
+                  { "id": "tbl_claim_docs__r3c1", "text": "修理見積書、領収書その他これらに類する書類をいいます。", "role": "body" } ],
+                [ { "id": "tbl_claim_docs__r4c0", "text": "請求者の確認書類", "role": "stub" },
+                  { "id": "tbl_claim_docs__r4c1", "text": "請求の権限を有することを確認できる書類をいいます。", "role": "body" } ]
+              ] } ] },
+        { "text": "当会社は、必要と認めた場合には、{ref:$p2}に掲げるもののほか、当会社が指定する医師または専門家による意見書その他の書類の提出を求めることがあります。この場合の費用は、当会社の負担とします。" },
+        { "text": "{term:insured}が正当な理由がなく{ref:$p2}もしくは{ref:$p3}の書類を提出せず、またはこれらの書類に事実と異なる記載をしたときは、当会社は、それによって当会社が被った損害の額を差し引いて保険金を支払います。" }
+      ]
+    },
+    {
+      "id": "v2",
+      "tone": "concise",
+      "paragraphs": [
+        { "text": "保険金の請求権は、損害が発生した時から行使することができます。" },
+        { "text": "保険金の支払を受けようとするときは、当会社所定の請求書に、事故の状況および損害の額を示す書類を添えて当会社に提出してください。" },
+        { "text": "当会社は、必要と認めたときは、{ref:$p2}のほかに当会社が指定する医師の診断書その他の書類の提出を求めることがあります。この場合の費用は、当会社の負担とします。" }
+      ]
+    }
+  ]
+}

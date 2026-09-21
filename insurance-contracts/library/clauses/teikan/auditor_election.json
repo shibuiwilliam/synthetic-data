@@ -1,0 +1,24 @@
+{
+  "clause_id": "auditor_election",
+  "scheme": "teikan",
+  "title_options": [
+    "員数および選任"
+  ],
+  "constants": {
+    "auditor_max": "５名"
+  },
+  "variants": [
+    {
+      "id": "v1",
+      "tone": "standard",
+      "paragraphs": [
+        {
+          "text": "当会社の監査役は、{const:auditor_max}以内とする。"
+        },
+        {
+          "text": "監査役は、総代会の決議によって選任する。"
+        }
+      ]
+    }
+  ]
+}

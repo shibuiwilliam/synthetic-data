@@ -1,0 +1,21 @@
+{
+  "clause_id": "meeting_chair",
+  "scheme": "teikan",
+  "title_options": [
+    "議長"
+  ],
+  "variants": [
+    {
+      "id": "v1",
+      "tone": "standard",
+      "paragraphs": [
+        {
+          "text": "総代会の議長は、取締役社長がこれに当たる。"
+        },
+        {
+          "text": "取締役社長に事故があるときは、あらかじめ取締役会が定めた順序により、他の取締役が議長となる。"
+        }
+      ]
+    }
+  ]
+}

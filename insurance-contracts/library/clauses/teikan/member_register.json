@@ -1,0 +1,18 @@
+{
+  "clause_id": "member_register",
+  "scheme": "teikan",
+  "title_options": [
+    "社員名簿"
+  ],
+  "variants": [
+    {
+      "id": "v1",
+      "tone": "standard",
+      "paragraphs": [
+        {
+          "text": "当会社は、社員名簿を作成し、これを本店に備え置く。"
+        }
+      ]
+    }
+  ]
+}

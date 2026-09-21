@@ -1,0 +1,22 @@
+{
+  "clause_id": "disclosure_violation", "scheme": "life",
+  "title_options": ["告知義務違反による解除"],
+  "constants": { "disclosure_notice_days": "1か月", "disclosure_limit_years": "2年" },
+  "terms_used": ["policyholder", "insured"],
+  "variants": [{ "id": "v1", "tone": "standard", "paragraphs": [
+    { "text": "告知が求められた事項について、{term:policyholder}または{term:insured}が、故意または重大な過失によって事実を告げず、または事実と異なることを告げた場合には、会社は保険契約を解除することができます。" },
+    { "text": "次のいずれかに該当する場合には、会社は{ref:$p1}の解除を行いません。",
+      "blocks": [
+        { "type": "table", "id": "tbl_life_disclosure_exempt", "semantic_type": "enumeration",
+          "layout": { "header_rows": 0, "header_cols": 1, "repeat_header": false, "style": "grid" },
+          "grid": [
+            [ { "id": "tbl_life_disclosure_exempt__r0c0", "text": "{auto_label}", "role": "stub" },
+              { "id": "tbl_life_disclosure_exempt__r0c1", "text": "会社が保険契約の締結の際に解除の原因となる事実を知っていたとき、または過失によって知らなかったとき。", "role": "body" } ],
+            [ { "id": "tbl_life_disclosure_exempt__r1c0", "text": "{auto_label}", "role": "stub" },
+              { "id": "tbl_life_disclosure_exempt__r1c1", "text": "会社が解除の原因となる事実を知った時から{const:disclosure_notice_days}を経過したとき。", "role": "body" } ],
+            [ { "id": "tbl_life_disclosure_exempt__r2c0", "text": "{auto_label}", "role": "stub" },
+              { "id": "tbl_life_disclosure_exempt__r2c1", "text": "責任開始期の属する日から{const:disclosure_limit_years}を経過したとき。ただし、その期間内に給付事由が生じていた場合を除きます。", "role": "body" } ]
+          ] } ] },
+    { "text": "{ref:$p1}の解除が行われた場合には、会社は、給付事由が生じていたときであっても保険金または給付金を支払いません。ただし、給付事由の発生が、告げられなかった事実または事実と異なる告知がなされた事項によらないことが明らかであるときは、この限りではありません。" }
+  ]}]
+}

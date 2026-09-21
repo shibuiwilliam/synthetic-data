@@ -1,0 +1,105 @@
+# 生命保険 ご契約のしおり＋約款（docs/blueprints.md §4.1 life）
+#
+# docs/reference_structures.md #6/#7 の実測：しおり部に条番号は無く、テーマ見出し＋箇条書き＋
+# 色分け囲みで構成される。Q&A 形式は今回の参考2件には見られなかったため、
+# しおり部は「テーマ見出し」を既定にし、Q&A 見出しは variants 扱いとする（提案 B-6）。
+genre: life
+description: 生命保険のご契約のしおりと約款。Ⅰ部（しおり・条番号なし）とⅡ部（約款・条あり）の2部構成
+target_pages: [16, 20]
+numbering_scheme: life
+default_style: life-b5-1col-mincho
+
+front_matter:
+  cover: true
+  preface: true
+  purpose_index: false
+  toc_with_summaries: true
+  toc_depth: 3
+  rider_index: false
+
+required:
+  - { kind: table, subtype: benefit_schedule, min_rows: 4, min_cols: 4,
+      note: "名称／支払事由／支払額／受取人の表（C2）" }
+  - { kind: table, subtype: procedure, min_rows: 3, min_cols: 2, note: "保険料払込方法と猶予期間の表" }
+  - { kind: table, subtype: generic, min_rows: 3, note: "税制上の取扱い表" }
+  - { kind: table, subtype: surgery_schedule, min_rows: 6, note: "別表：手術の種類表" }
+  - { kind: figure, subtype: steps, note: "手続きの流れ図（D7）" }
+  - { kind: figure, subtype: timeline, note: "失効と復活のタイムライン（D5）" }
+  - { kind: box, subtype: caution, min_count: 2, note: "クーリング・オフの説明枠など" }
+  - { kind: footnotes, min_count: 6 }
+
+skeleton:
+  - id: pt1
+    kind: part
+    title_options: ["ご契約のしおり"]
+    todo: "条番号を使わない解説部。テーマ見出し＋箇条書き＋囲み"
+    children:
+      - { id: pt1_ch1, kind: chapter, title_options: ["このしおりの読み方"], chars: 700,
+          todo: "冊子の構成（Ⅰ部・Ⅱ部の役割）を説明する" }
+      - { id: pt1_ch2, kind: chapter, title_options: ["ご契約の手続き"], chars: 1100,
+          todo: "申込から責任開始までの流れ図を添える",
+          required: [ { kind: figure, subtype: steps } ] }
+      - { id: pt1_ch3, kind: chapter, title_options: ["保険料のお払込み"], chars: 1200,
+          todo: "払込方法と猶予期間の表。クーリング・オフの囲みもここに",
+          required: [ { kind: table, subtype: procedure, min_rows: 3, min_cols: 2 },
+                      { kind: box, subtype: caution } ] }
+      - { id: pt1_ch4, kind: chapter, title_options: ["失効と復活"], chars: 900,
+          todo: "失効から復活までのタイムライン図",
+          required: [ { kind: figure, subtype: timeline } ] }
+      - { id: pt1_ch5, kind: chapter, title_options: ["税制上のお取扱い"], chars: 800,
+          required: [ { kind: table, subtype: generic, min_rows: 3 } ] }
+
+  - id: pt2
+    kind: part
+    title_options: ["普通保険約款"]
+    todo: "条番号を使う約款部。life の番号方式（項「１．」／号「(1)」／細目「①」／注は「（注N）」）"
+    children:
+      - id: pt2_ch1
+        kind: chapter
+        title_options: ["保険金および給付金の支払"]
+        children:
+          - { id: pt2_ch1_a1, kind: article, title_options: ["責任開始期"], chars: 600 }
+          - { id: pt2_ch1_a2, kind: article, title_options: ["保険金および給付金の支払"], chars: 1100,
+              todo: "名称／支払事由／支払額／受取人の4列表",
+              required: [ { kind: table, subtype: benefit_schedule, min_rows: 4, min_cols: 4 } ] }
+          - { id: pt2_ch1_a3, kind: article, title_options: ["保険金を支払わない場合"], chars: 800,
+              required: [ { kind: table, subtype: exclusions, min_rows: 3 } ] }
+      - id: pt2_ch2
+        kind: chapter
+        title_options: ["ご契約の締結と維持"]
+        children:
+          - { id: pt2_ch2_a1, kind: article, title_options: ["告知義務"], chars: 800, clause: disclosure_duty }
+          - { id: pt2_ch2_a2, kind: article, title_options: ["告知義務違反による解除"], chars: 700,
+              clause: disclosure_violation }
+          - { id: pt2_ch2_a3, kind: article, title_options: ["保険料の払込みおよび猶予期間"], chars: 900,
+              clause: premium_payment }
+          - { id: pt2_ch2_a4, kind: article, title_options: ["失効および復活"], chars: 800, clause: lapse_revival }
+      - id: pt2_ch3
+        kind: chapter
+        title_options: ["ご契約後のお取扱い"]
+        children:
+          - { id: pt2_ch3_a1, kind: article, title_options: ["解約および解約返戻金"], chars: 700, clause: surrender }
+          - { id: pt2_ch3_a2, kind: article, title_options: ["契約者貸付"], chars: 600, clause: policy_loan }
+          - { id: pt2_ch3_a3, kind: article, title_options: ["指定代理請求"], chars: 700,
+              clause: designated_proxy_claim }
+          - { id: pt2_ch3_a4, kind: article, title_options: ["重大事由による解除"], chars: 700,
+              clause: serious_cause_termination }
+          - { id: pt2_ch3_a5, kind: article, title_options: ["時効"], chars: 300, clause: prescription }
+
+riders: { count: [1, 2], pool: [rider_medical, rider_living_benefit, rider_waiver_of_premium] }
+
+appendices:
+  - { id: app1, title_options: ["高度障害状態"], table: generic, min_rows: 4 }
+  - { id: app2, title_options: ["手術の種類"], table: surgery_schedule, min_rows: 6 }
+  - { id: app3, title_options: ["対象となる疾病の範囲"], table: generic, min_rows: 4 }
+
+variants:
+  digit_style: { fullwidth: 0.8, halfwidth: 0.2 }
+  paren_style: { fullwidth: 0.5, halfwidth: 0.5 }
+  era: { seireki: 0.7, wareki: 0.3 }
+  issuer_kind: { mutual: 0.6, stock: 0.4 }
+  pet_name: { present: 0.7, absent: 0.3 }
+  order_shuffle: []
+  styles: [life-b5-1col-mincho, life-a4-1col-gothic]
+
+budget: { chars_min: 9000, chars_max: 14000, footnotes_min: 6, margin_notes_min: 2 }

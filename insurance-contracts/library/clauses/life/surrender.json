@@ -1,0 +1,11 @@
+{
+  "clause_id": "surrender", "scheme": "life", "title_options": ["解約および解約返戻金"],
+  "terms_used": ["policyholder"],
+  "variants": [{ "id": "v1", "tone": "standard", "paragraphs": [
+    { "text": "{term:policyholder}は、いつでも将来に向かって保険契約を解約することができます。" },
+    { "text": "{ref:$p1}の解約が行われた場合には、会社は、解約返戻金を{term:policyholder}に支払います。" },
+    { "text": "解約返戻金の額は、保険料の払込みの経過期間および保険種類に応じて会社が計算した額とし、その計算の方法は会社が別に定めるところによります。保険料の払込みの経過期間が短い場合には、解約返戻金がないことがあります{fn:1}。" }
+  ], "footnotes": [
+    { "n": 1, "text": "解約返戻金の有無および金額の目安は、ご契約時にお渡しする書類に記載しています。" }
+  ]}]
+}

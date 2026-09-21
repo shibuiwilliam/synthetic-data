@@ -1,0 +1,98 @@
+# 保険会社 定款（docs/blueprints.md §4.1 teikan）
+#
+# docs/reference_structures.md #8 の実測：表 0 件・図 0 件・脚注 0 件、章と条の 2 階層のみ、常体。
+# CLAUDE.md §4.1 は機関構成図と改正履歴表を必須としているが、実物は持たない（提案 B-7）。
+# 回答があるまでは憲章に従い「図1点・表1点」を必須のまま残す（min_count で緩めに）。
+genre: teikan
+description: 保険会社の定款。常体・章と条の2階層・表と図はごく少ない
+target_pages: [8, 12]
+numbering_scheme: teikan
+default_style: teikan-a4-1col-mincho
+
+front_matter:
+  cover: true
+  preface: false
+  purpose_index: false
+  toc_with_summaries: false
+  toc_depth: 1
+  rider_index: false
+
+required:
+  - { kind: figure, subtype: tree, min_count: 1, note: "機関構成図（D7・組織ツリー）。実物には無い（B-7 で見直し提案中）" }
+  - { kind: table, subtype: history, min_count: 1, min_rows: 3, note: "附則の改正履歴表（C7）。同上" }
+
+skeleton:
+  - id: ch1
+    kind: chapter
+    title_options: ["総則"]
+    children:
+      - { id: ch1_a1, kind: article, title_options: ["商号"], chars: 200, clause: trade_name }
+      - { id: ch1_a2, kind: article, title_options: ["目的"], chars: 400, clause: purpose }
+      - { id: ch1_a3, kind: article, title_options: ["本店の所在地"], chars: 150, clause: head_office }
+      - { id: ch1_a4, kind: article, title_options: ["公告方法"], chars: 200, clause: public_notice }
+      - { id: ch1_a5, kind: article, title_options: ["機関"], chars: 300, clause: organs,
+          todo: "設置する機関を列挙し、機関構成図を添える",
+          required: [ { kind: figure, subtype: tree } ] }
+
+  - id: ch2
+    kind: chapter
+    title_options: ["社員", "株式"]
+    children:
+      - { id: ch2_a1, kind: article, title_options: ["社員の資格", "発行可能株式総数"], chars: 300,
+          clause: member_status }
+      - { id: ch2_a2, kind: article, title_options: ["社員名簿", "株主名簿"], chars: 250, clause: member_register }
+
+  - id: ch3
+    kind: chapter
+    title_options: ["総代会", "株主総会"]
+    children:
+      - { id: ch3_a1, kind: article, title_options: ["招集"], chars: 350, clause: meeting_convocation }
+      - { id: ch3_a2, kind: article, title_options: ["議長"], chars: 200, clause: meeting_chair }
+      - { id: ch3_a3, kind: article, title_options: ["決議"], chars: 350, clause: meeting_resolution }
+
+  - id: ch4
+    kind: chapter
+    title_options: ["取締役および取締役会"]
+    children:
+      - { id: ch4_a1, kind: article, title_options: ["員数および選任"], chars: 350, clause: director_election }
+      - { id: ch4_a2, kind: article, title_options: ["任期"], chars: 250, clause: director_term }
+      - { id: ch4_a3, kind: article, title_options: ["代表取締役"], chars: 250, clause: representative_director }
+
+  - id: ch5
+    kind: chapter
+    title_options: ["監査役および監査役会"]
+    children:
+      - { id: ch5_a1, kind: article, title_options: ["員数および選任"], chars: 300, clause: auditor_election }
+      - { id: ch5_a2, kind: article, title_options: ["任期"], chars: 250, clause: auditor_term }
+
+  - id: ch6
+    kind: chapter
+    title_options: ["計算"]
+    children:
+      - { id: ch6_a1, kind: article, title_options: ["事業年度"], chars: 200, clause: fiscal_year }
+      - { id: ch6_a2, kind: article, title_options: ["剰余金の処分"], chars: 350, clause: surplus_distribution }
+
+  - id: ch7
+    kind: chapter
+    title_options: ["基金"]
+    todo: "相互会社の場合のみ。株式会社なら章ごと落とす（variants の issuer_kind に連動）"
+    children:
+      - { id: ch7_a1, kind: article, title_options: ["基金の総額"], chars: 250, clause: fund_total }
+      - { id: ch7_a2, kind: article, title_options: ["基金の償却"], chars: 300, clause: fund_redemption }
+
+riders: { count: [0, 0], pool: [] }
+
+appendices:
+  - { id: app1, title_options: ["附則"], table: history, min_rows: 3, kind_label: "附則",
+      todo: "施行期日と改正履歴の表" }
+
+variants:
+  digit_style: { fullwidth: 1.0 }
+  paren_style: { fullwidth: 1.0 }
+  era: { seireki: 0.5, wareki: 0.5 }
+  issuer_kind: { mutual: 0.5, stock: 0.5 }
+  pet_name: { absent: 1.0 }
+  order_shuffle: []
+  styles: [teikan-a4-1col-mincho]
+
+budget: { chars_min: 3700, chars_max: 7000, footnotes_min: 0, margin_notes_min: 0 }

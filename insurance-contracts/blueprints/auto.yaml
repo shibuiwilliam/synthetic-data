@@ -1,0 +1,153 @@
+# 総合自動車保険（docs/blueprints.md §4.1 auto）
+genre: auto
+description: 総合自動車保険 普通保険約款（しおり抜粋つき）。A〜E のほぼ全要素を含む代表ジャンル
+target_pages: [14, 20]
+numbering_scheme: nonlife
+default_style: nl-a4-2col-mincho
+
+front_matter:
+  cover: true
+  preface: true
+  purpose_index: true
+  toc_with_summaries: true
+  toc_depth: 3
+  rider_index: true
+  petname_table_p: 0.5
+
+required:
+  - { kind: table, subtype: definitions, min_rows: 15, note: "用語の定義表（五十音索引列つき・15〜25語）" }
+  - { kind: table, subtype: purpose_index, min_rows: 6, note: "目的別もくじ（こんなときは→参照先→ページ）" }
+  - { kind: table, subtype: rider_index, min_rows: 4, min_cols: 6, note: "特約一覧表（6列以上・記号凡例つき）" }
+  - { kind: figure, subtype: tree, note: "約款の構成図（D1）" }
+  - { kind: figure, subtype: steps, note: "事故時の対応ステップ（D2）" }
+  - { kind: figure, subtype: flowchart, note: "受取りまでの流れ（D3）" }
+  - { kind: figure, subtype: timeline, note: "等級推移タイムライン（D5）" }
+  - { kind: box, subtype: margin_note, min_count: 4, note: "欄外解説ボックス（B6）" }
+  - { kind: footnotes, min_count: 10, note: "条末脚注（B5）" }
+
+skeleton:
+  - id: terms
+    kind: chapter
+    title_options: ["用語の定義", "この約款に用いる用語の定義"]
+    todo: "五十音の索引列つき定義表。15〜25語。定義セル内に脚注を1つ以上置く"
+    chars: 2600
+    required:
+      - { kind: table, subtype: definitions, min_rows: 15 }
+
+  - id: ch1
+    kind: chapter
+    title_options: ["賠償責任条項", "賠償に関する補償"]
+    todo: "対人・対物の賠償。章の要約文（もくじ用 summary）も書く"
+    movable: true
+    children:
+      - { id: ch1_a1, kind: article, title_options: ["この条項の補償内容", "保険金を支払う場合"], chars: 700,
+          todo: "補償の対象と範囲。{term:} で定義語を参照する" }
+      - { id: ch1_a2, kind: article, title_options: ["被保険者の範囲"], chars: 600,
+          todo: "被保険者を列挙表（enumeration）で示す",
+          required: [ { kind: table, subtype: enumeration, min_rows: 3 } ] }
+      - { id: ch1_a3, kind: article, title_options: ["保険金を支払わない場合", "免責事由"], chars: 900,
+          todo: "免責事由の列挙表。但し書きを1つ以上入れる",
+          required: [ { kind: table, subtype: exclusions, min_rows: 4 } ] }
+      - { id: ch1_a4, kind: article, title_options: ["お支払いする保険金", "支払保険金"], chars: 900,
+          todo: "保険金の種類と額の表＋算式ボックス",
+          required: [ { kind: table, subtype: benefit_schedule, min_rows: 3 },
+                      { kind: formula, subtype: inline_boxes } ] }
+      - { id: ch1_a5, kind: article, title_options: ["当会社による援助または解決"], chars: 700,
+          clause: assistance_settlement }
+
+  - id: ch2
+    kind: chapter
+    title_options: ["人身傷害条項", "人身傷害に関する補償"]
+    todo: "抜粋で可。損害額の考え方まで"
+    movable: true
+    children:
+      - { id: ch2_a1, kind: article, title_options: ["この条項の補償内容"], chars: 600 }
+      - { id: ch2_a2, kind: article, title_options: ["保険金請求権者"], chars: 500 }
+      - { id: ch2_a3, kind: article, title_options: ["損害額の決定"], chars: 700,
+          todo: "損害額の内訳を列挙表で",
+          required: [ { kind: table, subtype: enumeration, min_rows: 3 } ] }
+
+  - id: ch3
+    kind: chapter
+    title_options: ["車両条項", "お車に関する補償"]
+    movable: true
+    children:
+      - { id: ch3_a1, kind: article, title_options: ["この条項の補償内容"], chars: 600 }
+      - { id: ch3_a2, kind: article, title_options: ["付属品の範囲"], chars: 700,
+          todo: "付属品を列挙表（B3：文＋①②…の表）で示す",
+          required: [ { kind: table, subtype: enumeration, min_rows: 4 } ] }
+
+  - id: ch4
+    kind: chapter
+    title_options: ["基本条項"]
+    todo: "全条項に共通する事柄。節で分ける"
+    children:
+      - id: ch4_s1
+        kind: section
+        title_options: ["契約手続と義務"]
+        children:
+          - { id: ch4_s1_a1, kind: article, title_options: ["告知義務"], chars: 700, clause: disclosure_duty }
+          - { id: ch4_s1_a2, kind: article, title_options: ["通知義務"], chars: 800, clause: notification_duty,
+              required: [ { kind: table, subtype: enumeration, min_rows: 2 } ] }
+          - { id: ch4_s1_a3, kind: article, title_options: ["保険契約者の住所変更"], chars: 400,
+              clause: address_change }
+      - id: ch4_s2
+        kind: section
+        title_options: ["保険料の払込み"]
+        children:
+          - { id: ch4_s2_a1, kind: article, title_options: ["保険料の払込方法"], chars: 700, clause: premium_payment }
+          - { id: ch4_s2_a2, kind: article, title_options: ["保険料の返還または追加請求"], chars: 700,
+              todo: "短期率・月割の付表を参照する" }
+      - id: ch4_s3
+        kind: section
+        title_options: ["事故発生時の義務"]
+        children:
+          - { id: ch4_s3_a1, kind: article, title_options: ["事故発生時の義務"], chars: 900, clause: accident_duty,
+              required: [ { kind: table, subtype: procedure, min_rows: 3, min_cols: 2 } ] }
+      - id: ch4_s4
+        kind: section
+        title_options: ["保険金の請求"]
+        children:
+          - { id: ch4_s4_a1, kind: article, title_options: ["保険金の請求"], chars: 800, clause: claim_procedure }
+          - { id: ch4_s4_a2, kind: article, title_options: ["保険金の支払時期"], chars: 700, clause: payment_period }
+      - id: ch4_s5
+        kind: section
+        title_options: ["解除・無効"]
+        children:
+          - { id: ch4_s5_a1, kind: article, title_options: ["重大事由による解除"], chars: 800,
+              clause: serious_cause_termination }
+          - { id: ch4_s5_a2, kind: article, title_options: ["保険契約の無効および取消し"], chars: 500,
+              clause: invalidity }
+      - id: ch4_s6
+        kind: section
+        title_options: ["その他"]
+        children:
+          - { id: ch4_s6_a1, kind: article, title_options: ["代位"], chars: 500, clause: subrogation }
+          - { id: ch4_s6_a2, kind: article, title_options: ["時効"], chars: 300, clause: prescription }
+          - { id: ch4_s6_a3, kind: article, title_options: ["準拠法および管轄"], chars: 300, clause: governing_law }
+
+riders:
+  count: [2, 3]
+  pool: [rider_other_car, rider_family_bike, rider_lawyer_fee, rider_rentacar, rider_personal_belongings]
+
+appendices:
+  - { id: app1, title_options: ["後遺障害等級表"], table: grade_schedule, min_rows: 10,
+      todo: "等級×障害の程度×支払割合。抜粋10行以上" }
+  - { id: app2, title_options: ["短期率表"], table: rate, min_rows: 8, kind_label: "付表",
+      todo: "既経過期間×短期率の横長表" }
+  - { id: app3, title_options: ["月割表"], table: rate, min_rows: 6, kind_label: "付表" }
+
+variants:
+  digit_style: { fullwidth: 0.7, halfwidth: 0.3 }
+  paren_style: { fullwidth: 0.6, halfwidth: 0.4 }
+  era: { seireki: 0.8, wareki: 0.2 }
+  issuer_kind: { stock: 0.9, mutual: 0.1 }
+  pet_name: { present: 0.5, absent: 0.5 }
+  order_shuffle: [["ch1", "ch2", "ch3"]]
+  styles: [nl-a4-2col-mincho, nl-b5-2col-dense, nl-a4-1col-gothic]
+
+budget:
+  chars_min: 13000
+  chars_max: 24000
+  footnotes_min: 10
+  margin_notes_min: 4

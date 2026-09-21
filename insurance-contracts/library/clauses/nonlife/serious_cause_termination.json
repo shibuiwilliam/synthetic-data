@@ -1,0 +1,38 @@
+{
+  "clause_id": "serious_cause_termination",
+  "scheme": "nonlife",
+  "title_options": ["重大事由による解除", "重大な事由がある場合の解除"],
+  "terms_used": ["policyholder", "insured"],
+  "variants": [
+    {
+      "id": "v1",
+      "tone": "standard",
+      "paragraphs": [
+        { "text": "当会社は、次に掲げる事由のいずれかが生じた場合には、保険契約を解除することができます。",
+          "blocks": [
+            { "type": "table", "id": "tbl_serious_cause", "semantic_type": "exclusions",
+              "layout": { "header_rows": 0, "header_cols": 1, "repeat_header": false, "style": "grid" },
+              "grid": [
+                [ { "id": "tbl_serious_cause__r0c0", "text": "{auto_label}", "role": "stub" },
+                  { "id": "tbl_serious_cause__r0c1", "text": "{term:policyholder}または{term:insured}が、当会社に保険金を支払わせることを目的として損害を生じさせ、または生じさせようとしたこと。", "role": "body" } ],
+                [ { "id": "tbl_serious_cause__r1c0", "text": "{auto_label}", "role": "stub" },
+                  { "id": "tbl_serious_cause__r1c1", "text": "保険金の請求について、{term:insured}に詐欺の行為があったこと、またはその行為があろうとしたこと。", "role": "body" } ],
+                [ { "id": "tbl_serious_cause__r2c0", "text": "{auto_label}", "role": "stub" },
+                  { "id": "tbl_serious_cause__r2c1", "text": "{term:policyholder}または{term:insured}が、暴力団その他の反社会的勢力に該当すると認められること。", "role": "body" } ],
+                [ { "id": "tbl_serious_cause__r3c0", "text": "{auto_label}", "role": "stub" },
+                  { "id": "tbl_serious_cause__r3c1", "text": "前各号に掲げるもののほか、当会社の{term:policyholder}または{term:insured}に対する信頼を損ない、保険契約を存続することを期待しえない重大な事由が生じたこと。", "role": "body" } ]
+              ] } ] },
+        { "text": "{ref:$p1}の解除は、将来に向かってのみその効力を生じます。" },
+        { "text": "当会社は、{ref:$p1}の解除を行った場合には、解除の原因となった事由が生じた時から解除がなされた時までに生じた損害に対しては、保険金を支払いません。この場合において、既に保険金を支払っていたときは、その返還を請求することができます。" }
+      ]
+    },
+    {
+      "id": "v2",
+      "tone": "concise",
+      "paragraphs": [
+        { "text": "当会社は、{term:policyholder}または{term:insured}に、保険金を不正に取得する目的の行為、詐欺の行為、反社会的勢力への該当その他これらに類する重大な事由が生じた場合には、保険契約を解除することができます。" },
+        { "text": "{ref:$p1}の解除は将来に向かってのみ効力を生じますが、解除の原因となった事由が生じた時以後に生じた損害については、当会社は保険金を支払いません。" }
+      ]
+    }
+  ]
+}

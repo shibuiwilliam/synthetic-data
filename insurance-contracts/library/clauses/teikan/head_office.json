@@ -1,0 +1,21 @@
+{
+  "clause_id": "head_office",
+  "scheme": "teikan",
+  "title_options": [
+    "本店の所在地"
+  ],
+  "constants": {
+    "head_office_city": "東京都千代田区"
+  },
+  "variants": [
+    {
+      "id": "v1",
+      "tone": "standard",
+      "paragraphs": [
+        {
+          "text": "当会社は、本店を{const:head_office_city}に置く。"
+        }
+      ]
+    }
+  ]
+}

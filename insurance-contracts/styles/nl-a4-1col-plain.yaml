@@ -1,0 +1,12 @@
+style_id: nl-a4-1col-plain
+description: A4・1段組・明朝10pt。装飾なしの素組み（docs/reference_structures.md #2 の Web 配布 PDF 型）
+page: { size: A4, width_mm: 210, height_mm: 297, margin_mm: { top: 20, right: 20, bottom: 20, left: 20 } }
+columns: { count: 1, gap_mm: 0 }
+fonts: { body: "Noto Serif JP", heading: "Noto Serif JP", symbol_fallback: ["Noto Sans Symbols", "Noto Sans Symbols 2"] }
+sizes: { body_pt: 10, line_height: 1.75, h1_pt: 12, h2_pt: 11, h3_pt: 10.5, h4_pt: 10,
+         table_pt: 9.5, note_pt: 8.5, toc_pt: 10, cover_pt: 16 }
+palette: { text: "#000000", rule: "#000000", accent: "#000000", band: "#ffffff", note_bg: "#ffffff" }
+headings: { band: false }
+table: { border: grid }
+margin_note: article_end
+chars_per_page_estimate: 1023

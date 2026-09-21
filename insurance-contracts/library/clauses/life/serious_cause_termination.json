@@ -1,0 +1,20 @@
+{
+  "clause_id": "serious_cause_termination", "scheme": "life",
+  "title_options": ["重大事由による解除"],
+  "terms_used": ["policyholder", "insured"],
+  "variants": [{ "id": "v1", "tone": "standard", "paragraphs": [
+    { "text": "次のいずれかに該当する事由が生じた場合には、会社は保険契約を解除することができます。",
+      "blocks": [
+        { "type": "table", "id": "tbl_life_serious", "semantic_type": "exclusions",
+          "layout": { "header_rows": 0, "header_cols": 1, "repeat_header": false, "style": "grid" },
+          "grid": [
+            [ { "id": "tbl_life_serious__r0c0", "text": "{auto_label}", "role": "stub" },
+              { "id": "tbl_life_serious__r0c1", "text": "保険金または給付金を取得する目的で給付事由を生じさせ、または生じさせようとしたこと。", "role": "body" } ],
+            [ { "id": "tbl_life_serious__r1c0", "text": "{auto_label}", "role": "stub" },
+              { "id": "tbl_life_serious__r1c1", "text": "保険金または給付金の請求について詐欺の行為があったこと。", "role": "body" } ],
+            [ { "id": "tbl_life_serious__r2c0", "text": "{auto_label}", "role": "stub" },
+              { "id": "tbl_life_serious__r2c1", "text": "{term:policyholder}または{term:insured}が反社会的勢力に該当すると認められること。", "role": "body" } ]
+          ] } ] },
+    { "text": "{ref:$p1}の解除は将来に向かってのみ効力を生じます。ただし、解除の原因となった事由が生じた時以後に生じた給付事由については、会社は保険金または給付金を支払いません。" }
+  ]}]
+}

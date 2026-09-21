@@ -1,0 +1,9 @@
+{
+  "clause_id": "disclosure_duty", "scheme": "life", "title_options": ["告知義務"],
+  "terms_used": ["policyholder", "insured"],
+  "variants": [{ "id": "v1", "tone": "standard", "paragraphs": [
+    { "text": "会社が保険契約の締結に際して告知を求めた事項について、{term:policyholder}および{term:insured}は、事実をありのままに告げてください。" },
+    { "text": "告知は、会社所定の書面によるほか、会社が指定した医師の質問に答える方法によることがあります。" },
+    { "text": "会社の職員のうち告知を受ける権限を有しない者に口頭で述べられた事実は、会社に告げられたものとしては取り扱いません。" }
+  ]}]
+}

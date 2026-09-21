@@ -1,0 +1,12 @@
+{
+  "clause_id": "premium_payment", "scheme": "life",
+  "title_options": ["保険料の払込みおよび猶予期間"],
+  "constants": { "grace_month_end": "翌月末日", "grace_period": "払込期月の翌月初日から末日まで" },
+  "terms_used": ["policyholder"],
+  "variants": [{ "id": "v1", "tone": "standard", "paragraphs": [
+    { "text": "{term:policyholder}は、保険契約の締結の際に定めた払込方法により、払込期月中に保険料を払い込んでください。" },
+    { "text": "払込期月中に保険料の払込みがない場合には、{const:grace_period}を猶予期間とします。" },
+    { "text": "猶予期間中に給付事由が生じたときは、会社は、未払込みの保険料を保険金または給付金から差し引いて支払います。" },
+    { "text": "猶予期間が満了するまでに保険料の払込みがないときは、保険契約は猶予期間の満了の日の翌日から効力を失います。" }
+  ]}]
+}

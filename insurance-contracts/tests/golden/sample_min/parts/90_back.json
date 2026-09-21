@@ -1,0 +1,20 @@
+{
+  "target": "colophon",
+  "items": [
+    {
+      "type": "paragraph",
+      "id": "par_colophon_1",
+      "text": "青葉みなと総合自動車保険　普通保険約款　２０２６年１０月１日改定"
+    },
+    {
+      "type": "paragraph",
+      "id": "par_colophon_2",
+      "text": "青葉みなと損害保険株式会社　お問い合わせ窓口　０１２０-０００-０００（受付時間　午前９時から午後５時まで）　example.jp"
+    },
+    {
+      "type": "paragraph",
+      "id": "par_colophon_3",
+      "text": "本冊子は、文書読取技術の検証を目的として作成された架空の約款です。記載の会社・商品・連絡先は実在しません。"
+    }
+  ]
+}
