@@ -19,38 +19,44 @@ from yakkan.models import Answer, AnswerPage, Layout, OutlineEntry, Source
 BODY_REGIONS = ("body", "table", "margin_note")
 
 
-def _repeated_cell_ids(layout: Layout) -> dict[int, set[str]]:
-    """ページごとの「繰り返し表頭として描かれたセル」の id。
+def _repeated_boxes(layout: Layout) -> dict[int, list[tuple[float, float, float, float]]]:
+    """ページごとの「繰り返し表頭として描かれた領域」。
 
-    同じセルが複数ページに出るとき、最初のページ以外は繰り返し表頭とみなす。
-    `ElementFragment.repeated` が立っているものに加え、同一 id が複数ページに
-    現れる場合の 2 ページ目以降も対象にする。
+    繰り返しは **同じページの中でも起きる**（2 段組で表が段をまたぐと、右段の頭に表頭が再掲される）。
+    ページ単位で id を弾くと段内の再掲を取りこぼすので、**fragment の bbox で判定する**。
+
+    判定に使うのは `repeated` フラグだけ。「同じ id が複数ページに出たら 2 ページ目以降は再掲」
+    という推測を足すと、ページをまたぐ**容れ物**（章・別表のノード）まで対象になり、
+    そのページの中身が丸ごと落ちる（実際に 3 ページ目が空になった）。
     """
-    out: dict[int, set[str]] = {page.number: set() for page in layout.pages}
-    for element_id, element in layout.elements.items():
-        pages = sorted({f.page for f in element.fragments})
-        if len(pages) <= 1:
-            continue
-        first = pages[0]
+    out: dict[int, list[tuple[float, float, float, float]]] = {p.number: [] for p in layout.pages}
+    for element in layout.elements.values():
         for fragment in element.fragments:
-            if fragment.repeated or fragment.page != first:
-                out.setdefault(fragment.page, set()).add(element_id)
+            if fragment.repeated:
+                out.setdefault(fragment.page, []).append(tuple(fragment.bbox))
     return out
 
 
+def _inside(box: tuple[float, float, float, float], bbox: list[float]) -> bool:
+    """行が繰り返し領域の中にあるか（中心点で判定する）。"""
+    cx = (bbox[0] + bbox[2]) / 2
+    cy = (bbox[1] + bbox[3]) / 2
+    return box[0] - 0.5 <= cx <= box[2] + 0.5 and box[1] - 0.5 <= cy <= box[3] + 0.5
+
+
 def _page_texts(layout: Layout) -> list[AnswerPage]:
-    repeated = _repeated_cell_ids(layout)
+    repeated = _repeated_boxes(layout)
     pages: list[AnswerPage] = []
     for page in layout.pages:
-        skip = repeated.get(page.number, set())
+        boxes = repeated.get(page.number, [])
         body_parts: list[str] = []
         all_parts: list[str] = []
         for line in page.text_lines:
             all_parts.append(line.text)
             if line.region not in BODY_REGIONS:
                 continue
-            if line.element_id and line.element_id in skip:
-                continue  # 繰り返し表頭は 1 回だけ数える
+            if any(_inside(box, line.bbox) for box in boxes):
+                continue  # 繰り返し表頭は正解として二重に数えない
             body_parts.append(line.text)
         header = page.header.text if page.header else ""
         footer = page.footer.text if page.footer else ""
