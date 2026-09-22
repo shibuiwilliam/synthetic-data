@@ -105,8 +105,11 @@ h4 { font-size: {{ s.h4_pt }}pt; margin: 2.4mm 0 1.2mm; break-after: avoid; }
 /* --- 表 --- */
 figure.table-wrap { margin: 1.6mm 0 2.4mm; break-inside: auto; }
 figure.table-wrap.span-all { column-span: all; }
-figcaption { font-family: '{{ style.fonts.heading }}', sans-serif; font-size: {{ s.note_pt }}pt;
-             font-weight: 700; margin-bottom: 1mm; }
+figcaption, table > caption {
+             font-family: '{{ style.fonts.heading }}', sans-serif; font-size: {{ s.note_pt }}pt;
+             font-weight: 700; margin-bottom: 1mm; text-align: left; }
+/* 表題は表の中に置く（B1）。caption は表と同じ box なので段・ページで離れない。 */
+table > caption { caption-side: top; padding-bottom: 1mm; }
 table { border-collapse: collapse; width: 100%; font-size: {{ s.table_pt }}pt; }
 {%- if style.table.border == 'grid' %}
 th, td { border: 0.5pt solid {{ p.rule }}; padding: 0.9mm 1.4mm; vertical-align: top; text-align: left; }

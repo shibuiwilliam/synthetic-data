@@ -255,11 +255,14 @@ class HtmlBuilder:
         body = "".join(f"<tr>{html}</tr>" for r, html in rows_html if r >= header_rows)
         thead = f"<thead>{head}</thead>" if head else ""
         caption_label = self.source.derived.tables[table.id].caption_label or ""
+        # 表題は `<caption>` として **表の中に**置く。外に置くと段・ページの境界で
+        # 表題だけが取り残される（docs/shared_fixes.md B1）。`break-after: avoid` は
+        # 本文欠落を招くので使わない。
         caption = ""
         if table.caption:
             caption = (
-                f'<figcaption id="{table.id}__caption" data-kind="caption">'
-                f"{escape(caption_label)}　{escape(table.caption)}</figcaption>"
+                f'<caption id="{table.id}__caption" data-kind="caption">'
+                f"{escape(caption_label)}　{escape(table.caption)}</caption>"
             )
         notes = "".join(
             f'<div class="table-note" id="{table.id}__note{i}" data-kind="table_note">'
@@ -276,9 +279,9 @@ class HtmlBuilder:
             colgroup = f"<colgroup>{cols}</colgroup>"
         return (
             f'<figure class="table-wrap{span}" id="{table.id}__wrap" data-kind="table_wrap">'
-            f"{caption}"
             f'<table id="{table.id}" data-kind="table" data-semantic="{table.semantic_type}"'
-            f' class="{enum_class.strip()}">{colgroup}{thead}<tbody>{body}</tbody></table>{notes}</figure>'
+            f' class="{enum_class.strip()}">{caption}{colgroup}{thead}'
+            f"<tbody>{body}</tbody></table>{notes}</figure>"
         )
 
     def _figure_html(self, figure: Figure) -> str:

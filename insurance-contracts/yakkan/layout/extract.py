@@ -87,6 +87,11 @@ def extract_layout(
     # fragment が自分の text_lines を覆っていないことがある（実例：段またぎの脚注で、
     # id を持つ span の box が右段の 1 行目を含まず、行だけが先に出る）。
     # fragment と text_lines はどちらも正解データなので、食い違ったままにしない。
+    # 表題を持つ表は CSS 上 2 つの box を作る（表題を含む table wrapper box と、
+    # 罫線が引かれる table box）。どちらも同じ id を持つので fragment が二重になる。
+    # 正解としては罫線の内側＝内側の box だけが欲しい（docs/shared_fixes.md B1）。
+    _drop_wrapper_fragments(elements)
+
     _extend_fragments_to_lines(elements, pages)
 
     fonts = sorted({f.family for f in _used_fonts()})
@@ -142,6 +147,29 @@ def _extend_fragments_to_lines(elements: dict[str, ElementLayout], pages: dict[i
                     max(nearest.bbox[2], bbox[2]),
                     max(nearest.bbox[3], bbox[3]),
                 )
+
+
+def _drop_wrapper_fragments(elements: dict[str, ElementLayout]) -> None:
+    """同じ要素・同じページで、別の fragment を丸ごと含む fragment を落とす。
+
+    分割された fragment どうしは重ならないので、包含が起きるのは
+    「同じ要素に外側の box と内側の box がある」ときだけ。
+    """
+    for entry in elements.values():
+        if len(entry.fragments) < 2:
+            continue
+        keep = []
+        for i, fragment in enumerate(entry.fragments):
+            outer = any(
+                j != i
+                and other.page == fragment.page
+                and _contains(fragment.bbox, other.bbox)
+                and other.bbox != fragment.bbox
+                for j, other in enumerate(entry.fragments)
+            )
+            if not outer:
+                keep.append(fragment)
+        entry.fragments[:] = keep
 
 
 def _contains(outer: tuple[float, float, float, float], inner: tuple[float, float, float, float]) -> bool:
