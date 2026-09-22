@@ -37,4 +37,4 @@ table:
 # 欄外注の位置：float: footnote は WeasyPrint 70.0 が未対応なので条末に置く（docs/decisions.md 2026-09-21）
 margin_note: article_end
 # ページ数の見積り（docs/rendering.md §6.10）
-chars_per_page_estimate: 1787
+chars_per_page_estimate: 1779

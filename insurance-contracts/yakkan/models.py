@@ -20,8 +20,28 @@ from pydantic import BaseModel, ConfigDict, Field
 
 SCHEMA_VERSION = "1.0"
 
-Genre = Literal["auto", "oneday", "quake", "health", "life", "teikan", "travel"]
-NumberingScheme = Literal["nonlife", "life", "teikan"]
+Genre = Literal[
+    "auto",
+    "oneday",
+    "quake",
+    "health",
+    "life",
+    "teikan",
+    "travel",
+    # 2026-09-22 追加（docs/reference_structures.md #9〜#14）
+    "golf",  # 賠償責任保険の約款集（ゴルファー保険）
+    "group",  # 団体保険（法人向け）の普通保険約款＋特約条項
+    "jyusetsu",  # 重要事項説明書。条を持たない説明書型の文書
+]
+NumberingScheme = Literal[
+    "nonlife",
+    "life",
+    "teikan",
+    # 団体保険：項＝丸数字（第1項は無番号）、号＝「１．」、細目＝(ｱ)。条見出しは条の上に括弧書き
+    "group",
+    # 重要事項説明書：条を持たない。章＝番号なし、節＝（N）、条の位置に丸数字の小見出し
+    "jyusetsu",
+]
 DigitStyle = Literal["fullwidth", "halfwidth"]
 NodeKind = Literal[
     "part",

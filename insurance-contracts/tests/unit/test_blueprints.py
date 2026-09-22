@@ -10,11 +10,22 @@ from yakkan.styles import available_styles, load_style
 
 GENRES = available_genres()
 STYLES = available_styles()
+#: 条文ライブラリを持つ番号方式。group / jyusetsu は定型条を共有しないので含めない。
 SCHEMES = ("nonlife", "life", "teikan")
 
 
-def test_7ジャンルそろっている() -> None:
-    assert set(GENRES) == {"auto", "oneday", "quake", "health", "life", "teikan", "travel"}
+def test_ジャンルがそろっている() -> None:
+    """2026-09-22 に参考 #11 から golf を追加した。"""
+    assert set(GENRES) == {
+        "auto",
+        "oneday",
+        "quake",
+        "health",
+        "life",
+        "teikan",
+        "travel",
+        "golf",
+    }
 
 
 @pytest.mark.parametrize("genre", GENRES)

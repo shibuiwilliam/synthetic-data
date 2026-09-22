@@ -39,6 +39,7 @@ def build_html(style, paragraphs: list[str]) -> str:
 
     class _Meta:
         form_code = "Ｄ００００００"
+        digit_style = "fullwidth"
         constants: dict[str, str] = {}
 
     class _Source:

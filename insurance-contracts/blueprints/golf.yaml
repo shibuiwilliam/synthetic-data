@@ -1,0 +1,100 @@
+# 賠償責任保険 約款集（ゴルファー保険用）
+# 実物（docs/reference_structures.md #11）は 202×188mm の横長小型判・2 段組・完全な素組み。
+# 1 冊で複数商品の普通保険約款と特約をまとめる「約款集」の体裁。
+# 脚注は (*N) ではなく（注N）で、条末ではなく項の直後にぶら下げる（実物 483 回）。
+genre: golf
+description: ゴルファー保険（賠償責任保険）の約款集。賠償・傷害・用具損害・ホールインワン等費用の4本立て
+target_pages: [12, 18]
+numbering_scheme: nonlife
+default_style: nl-wide-2col-plain
+
+front_matter:
+  cover: true
+  preface: true          # 表紙裏の「ご契約者の皆さまへ」（実物にある角丸枠の箇条書き）
+  purpose_index: false
+  toc_with_summaries: false
+  toc_depth: 3
+  rider_index: true
+
+required:
+  - { kind: table, subtype: definitions, min_rows: 10 }
+  - { kind: table, subtype: benefit_schedule, min_rows: 4, min_cols: 3,
+      note: "保険金の名称／支払う場合／支払う額（C2）" }
+  - { kind: table, subtype: exclusions, min_rows: 4, note: "支払わない場合の列挙表" }
+  - { kind: table, subtype: rider_index, min_rows: 3, min_cols: 4 }
+  - { kind: figure, subtype: flowchart, note: "事故発生から保険金支払までの流れ（D3）" }
+  - { kind: figure, subtype: tree, note: "この約款集の構成（D1）" }
+  - { kind: footnotes, min_count: 10 }
+
+skeleton:
+  - id: terms
+    kind: chapter
+    title_options: ["用語の定義"]
+    chars: 1900
+    todo: "10〜14語。ゴルフの練習・競技・施設・用具・キャディーなどを定義する"
+    required: [ { kind: table, subtype: definitions, min_rows: 10 } ]
+
+  - id: ch1
+    kind: chapter
+    title_options: ["賠償責任条項"]
+    todo: "ゴルフの行為により他人にけがをさせた・物を壊した場合の賠償"
+    children:
+      - { id: ch1_a1, kind: article, title_options: ["当会社が保険金を支払う場合"], chars: 800 }
+      - { id: ch1_a2, kind: article, title_options: ["被保険者の範囲"], chars: 600,
+          required: [ { kind: table, subtype: enumeration, min_rows: 3 } ] }
+      - { id: ch1_a3, kind: article, title_options: ["保険金を支払わない場合"], chars: 900,
+          required: [ { kind: table, subtype: exclusions, min_rows: 4 } ] }
+      - { id: ch1_a4, kind: article, title_options: ["お支払いする保険金の額"], chars: 800,
+          todo: "免責金額の控除を算式で示す",
+          required: [ { kind: formula, subtype: inline_boxes } ] }
+      - { id: ch1_a5, kind: article, title_options: ["当会社による解決の援助"], chars: 700,
+          clause: assistance_settlement }
+
+  - id: ch2
+    kind: chapter
+    title_options: ["傷害および用具の補償条項"]
+    todo: "被保険者自身のけがと、ゴルフ用具の損害。保険金一覧表をここに置く"
+    children:
+      - { id: ch2_a1, kind: article, title_options: ["お支払いする保険金の種類"], chars: 900,
+          required: [ { kind: table, subtype: benefit_schedule, min_rows: 4, min_cols: 3 } ] }
+      - { id: ch2_a2, kind: article, title_options: ["用具に生じた損害の補償"], chars: 800 }
+      - { id: ch2_a3, kind: article, title_options: ["ホールインワンおよびアルバトロスの費用"], chars: 900,
+          todo: "対象となる費用の範囲と、証明書類の要件。限度額は {const:} で持つ" }
+      - { id: ch2_a4, kind: article, title_options: ["保険金を支払わない場合"], chars: 800 }
+
+  - id: ch3
+    kind: chapter
+    title_options: ["基本条項"]
+    children:
+      - { id: ch3_a1, kind: article, title_options: ["保険責任の始期および終期"], chars: 600 }
+      - { id: ch3_a2, kind: article, title_options: ["告知義務"], chars: 700, clause: disclosure_duty }
+      - { id: ch3_a3, kind: article, title_options: ["通知義務"], chars: 700, clause: notification_duty }
+      - { id: ch3_a4, kind: article, title_options: ["保険料の払込み"], chars: 600, clause: premium_payment }
+      - { id: ch3_a5, kind: article, title_options: ["事故発生時の義務"], chars: 800, clause: accident_duty }
+      - { id: ch3_a6, kind: article, title_options: ["保険金の請求"], chars: 800, clause: claim_procedure,
+          required: [ { kind: figure, subtype: flowchart } ] }
+      - { id: ch3_a7, kind: article, title_options: ["保険金の支払時期"], chars: 600, clause: payment_period }
+      - { id: ch3_a8, kind: article, title_options: ["重大事由による解除"], chars: 700,
+          clause: serious_cause_termination }
+      - { id: ch3_a9, kind: article, title_options: ["代位"], chars: 400, clause: subrogation }
+      - { id: ch3_a10, kind: article, title_options: ["時効"], chars: 300, clause: prescription }
+      - { id: ch3_a11, kind: article, title_options: ["準拠法および管轄"], chars: 300, clause: governing_law }
+
+riders: { count: [2, 3], pool: [rider_caddie, rider_equipment_new, rider_competition] }
+
+appendices:
+  - { id: app1, title_options: ["後遺障害の区分と支払割合"], table: grade_schedule, min_rows: 6,
+      todo: "区分は実物と段数も基準も変える。等差・等比にしない" }
+  - { id: app2, title_options: ["用具の種類別の限度額"], table: rate, min_rows: 5, kind_label: "付表",
+      optional: true }
+
+variants:
+  digit_style: { fullwidth: 0.6, halfwidth: 0.4 }
+  paren_style: { fullwidth: 0.5, halfwidth: 0.5 }
+  era: { seireki: 1.0 }
+  issuer_kind: { stock: 1.0 }
+  pet_name: { absent: 0.8, present: 0.2 }
+  order_shuffle: [[ch1, ch2]]
+  styles: [nl-wide-2col-plain, nl-a4-2col-mincho]
+
+budget: { chars_min: 9000, chars_max: 15000, footnotes_min: 10, margin_notes_min: 0 }

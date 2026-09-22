@@ -81,6 +81,9 @@ class Style(Model):
     headings: HeadingSpec = Field(default_factory=HeadingSpec)
     table: TableSpec = Field(default_factory=TableSpec)
     margin_note: Literal["article_end", "page_bottom"] = "article_end"
+    #: フッタのページ番号の書式（§3.1 E7）。`dashed` は「− 3 −」のようにダッシュで囲む。
+    #: 参考 #3・#11〜#14 がこの形。`plain` は数字だけ。
+    page_number: Literal["plain", "dashed"] = "plain"
     chars_per_page_estimate: int = 2300
 
     def gutter_pt(self) -> tuple[float, float]:

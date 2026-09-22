@@ -1,0 +1,13 @@
+style_id: nl-wide-2col-plain
+description: 202×188mm の横長小型判・2段組・素組み。賠償責任保険の約款集（参考 #11）の版面
+page: { size: custom, width_mm: 202, height_mm: 188, margin_mm: { top: 13, right: 13, bottom: 14, left: 13 } }
+columns: { count: 2, gap_mm: 7 }
+fonts: { body: "IPAexMincho", heading: "IPAexGothic", symbol_fallback: ["Noto Sans Symbols", "Noto Sans Symbols 2"] }
+sizes: { body_pt: 8, line_height: 1.46, h1_pt: 11, h2_pt: 9, h3_pt: 8.5, h4_pt: 8,
+         table_pt: 7.2, note_pt: 6.8, toc_pt: 7.6, cover_pt: 16 }
+palette: { text: "#000000", rule: "#000000", accent: "#000000", band: "#ffffff", note_bg: "#ffffff" }
+headings: { band: false }
+table: { border: grid }
+margin_note: article_end
+page_number: dashed
+chars_per_page_estimate: 1573

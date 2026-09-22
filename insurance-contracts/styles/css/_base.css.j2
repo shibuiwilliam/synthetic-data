@@ -28,7 +28,12 @@ body { margin: 0; }
     /* ページ番号は文書の `digit_style` に合わせる。全角の文書で `counter(page)` を
        そのまま使うと、本文が全角なのにページ番号だけ半角になって表記が割れる。
        （様式番号は執筆物の文字列なので、そちらの表記は content の判断に従う。） */
+{%- if style.page_number == 'dashed' %}
+    /* ダッシュ囲み（§3.1 E7）。参考 #3・#11〜#14 の体裁。 */
+    content: "\2212\2005" counter(page{% if digit_style == 'fullwidth' %}, zenkaku{% endif %}) "\2005\2212";
+{%- else %}
     content: counter(page{% if digit_style == 'fullwidth' %}, zenkaku{% endif %});
+{%- endif %}
     font-family: '{{ style.fonts.heading }}'; font-size: 8pt; color: {{ p.text }};
   }
   @bottom-right {
