@@ -88,10 +88,7 @@ def l04_required_elements(ctx: LintContext) -> Iterator[Finding]:
     for req in blueprint.all_requirements():
         if req.kind == "badge":
             hits = [
-                b
-                for _node, badges in badge_nodes
-                for b in badges
-                if req.subtype is None or b == req.subtype
+                b for _node, badges in badge_nodes for b in badges if req.subtype is None or b == req.subtype
             ]
             if len(hits) < req.min_count:
                 label = "badge" + (f"/{req.subtype}" if req.subtype else "")
