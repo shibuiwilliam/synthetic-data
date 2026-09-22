@@ -451,3 +451,42 @@ def test_L01_キャプションの無い表は参照できない(content: Path) 
         lambda d: first_paragraph(d).__setitem__("text", "{ref:tbl_exclusions}のとおりとします。"),
     )
     assert "L01" in codes(lint_content(content, quick=True, exclude=DOCUMENT_RULES))
+
+
+def test_L06_図の中の値トークンは使える(content: Path) -> None:
+    """docs/shared_fixes.md A2。{ref:} {term:} {const:} は build が解決する。"""
+
+    def put(data: dict) -> None:
+        _find_figure(data)["diagram"]["nodes"][0]["label"] = "事故の発生（{const:notify_days}日以内）"
+
+    edit(content / "parts" / "30_ch4.json", put)
+    assert "L06" not in codes(lint_content(content, quick=True, exclude=DOCUMENT_RULES))
+
+
+def test_L06_図の中のマークアップはエラー(content: Path) -> None:
+    """SVG は行内マークアップを持てない。"""
+
+    def put(data: dict) -> None:
+        _find_figure(data)["diagram"]["nodes"][0]["label"] = "事故の{b:発生}{br}のとき"
+
+    edit(content / "parts" / "30_ch4.json", put)
+    assert "L06" in codes(lint_content(content, quick=True, exclude=DOCUMENT_RULES))
+
+
+def _find_figure(data: dict) -> dict:
+    """part の中の最初の flowchart 図を探す。"""
+    found: list[dict] = []
+
+    def walk(obj: object) -> None:
+        if isinstance(obj, dict):
+            if obj.get("type") == "figure" and obj.get("diagram", {}).get("kind") == "flowchart":
+                found.append(obj)
+            for value in obj.values():
+                walk(value)
+        elif isinstance(obj, list):
+            for value in obj:
+                walk(value)
+
+    walk(data)
+    assert found, "part に flowchart の図が無い"
+    return found[0]

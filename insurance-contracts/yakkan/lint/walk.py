@@ -33,6 +33,14 @@ class OwnedText:
     text: str
     rich: bool  # RichText としてパースすべきか
     article_id: str | None = None  # 直近の条（脚注の対応検査に使う）
+    #: 図・算式の文字列。値を差し込むトークン（{ref:} {term:} {const:}）だけ書ける
+    #: （docs/shared_fixes.md A2）。行内マークアップは L06 が弾く。
+    flat: bool = False
+
+    @property
+    def parseable(self) -> bool:
+        """RichText としてパースしてよいか（rich か flat）。"""
+        return self.rich or self.flat
 
 
 @dataclass(frozen=True)
@@ -81,21 +89,33 @@ def iter_block_texts(block, owner_id: str, article_id: str | None) -> Iterator[O
         case Figure():
             if block.caption:
                 yield OwnedText(block.id, f"{block.id}.caption", block.caption, False, article_id)
-            yield OwnedText(block.id, f"{block.id}.alt", block.alt, False, article_id)
+            yield OwnedText(block.id, f"{block.id}.alt", block.alt, False, article_id, flat=True)
             for i, fact in enumerate(block.facts):
-                yield OwnedText(block.id, f"{block.id}.facts[{i}]", fact, False, article_id)
+                yield OwnedText(block.id, f"{block.id}.facts[{i}]", fact, False, article_id, flat=True)
             yield from _iter_diagram_texts(block, article_id)
         case Formula():
-            yield OwnedText(block.id, f"{block.id}.alt", block.alt, False, article_id)
+            yield OwnedText(block.id, f"{block.id}.alt", block.alt, False, article_id, flat=True)
             for i, term in enumerate(block.terms):
                 if isinstance(term, FormulaBox):
-                    yield OwnedText(block.id, f"{block.id}.terms[{i}]", term.box, False, article_id)
+                    yield OwnedText(
+                        block.id, f"{block.id}.terms[{i}]", term.box, False, article_id, flat=True
+                    )
                 elif isinstance(term, FormulaFraction):
                     yield OwnedText(
-                        block.id, f"{block.id}.terms[{i}].num", term.fraction.num, False, article_id
+                        block.id,
+                        f"{block.id}.terms[{i}].num",
+                        term.fraction.num,
+                        False,
+                        article_id,
+                        flat=True,
                     )
                     yield OwnedText(
-                        block.id, f"{block.id}.terms[{i}].den", term.fraction.den, False, article_id
+                        block.id,
+                        f"{block.id}.terms[{i}].den",
+                        term.fraction.den,
+                        False,
+                        article_id,
+                        flat=True,
                     )
         case BoxBlock():
             if block.title:
@@ -115,44 +135,58 @@ def _iter_diagram_texts(figure: Figure, article_id: str | None) -> Iterator[Owne
     match diagram.kind:
         case "flowchart":
             for node in diagram.nodes:
-                yield OwnedText(figure.id, f"{base}.{node.id}", node.label, False, article_id)
+                yield OwnedText(figure.id, f"{base}.{node.id}", node.label, False, article_id, flat=True)
             for i, edge in enumerate(diagram.edges):
                 if edge.label:
-                    yield OwnedText(figure.id, f"{base}.edges[{i}]", edge.label, False, article_id)
+                    yield OwnedText(figure.id, f"{base}.edges[{i}]", edge.label, False, article_id, flat=True)
         case "tree":
             stack = [diagram.root]
             while stack:
                 current = stack.pop()
-                yield OwnedText(figure.id, f"{base}.{current.id}", current.label, False, article_id)
+                yield OwnedText(
+                    figure.id, f"{base}.{current.id}", current.label, False, article_id, flat=True
+                )
                 if current.note:
-                    yield OwnedText(figure.id, f"{base}.{current.id}.note", current.note, False, article_id)
+                    yield OwnedText(
+                        figure.id, f"{base}.{current.id}.note", current.note, False, article_id, flat=True
+                    )
                 stack.extend(current.children)
         case "steps":
             for step in diagram.steps:
-                yield OwnedText(figure.id, f"{base}.{step.id}", step.title, False, article_id)
+                yield OwnedText(figure.id, f"{base}.{step.id}", step.title, False, article_id, flat=True)
                 for group in (step.detail, step.asks, step.docs):
                     for i, line in enumerate(group):
-                        yield OwnedText(figure.id, f"{base}.{step.id}[{i}]", line, False, article_id)
+                        yield OwnedText(
+                            figure.id, f"{base}.{step.id}[{i}]", line, False, article_id, flat=True
+                        )
         case "timeline":
             for span in diagram.spans:
-                yield OwnedText(figure.id, f"{base}.{span.id}", span.label, False, article_id)
+                yield OwnedText(figure.id, f"{base}.{span.id}", span.label, False, article_id, flat=True)
             for event in diagram.events:
-                yield OwnedText(figure.id, f"{base}.{event.id}", event.label, False, article_id)
+                yield OwnedText(figure.id, f"{base}.{event.id}", event.label, False, article_id, flat=True)
         case "annotated_mock":
             for field_ in diagram.fields:
-                yield OwnedText(figure.id, f"{base}.{field_.id}", field_.label, False, article_id)
+                yield OwnedText(figure.id, f"{base}.{field_.id}", field_.label, False, article_id, flat=True)
                 if field_.value:
-                    yield OwnedText(figure.id, f"{base}.{field_.id}.value", field_.value, False, article_id)
+                    yield OwnedText(
+                        figure.id, f"{base}.{field_.id}.value", field_.value, False, article_id, flat=True
+                    )
             for legend in diagram.legend:
-                yield OwnedText(figure.id, f"{base}.legend{legend.badge}", legend.title, False, article_id)
-                yield OwnedText(figure.id, f"{base}.legend{legend.badge}.text", legend.text, True, article_id)
+                yield OwnedText(
+                    figure.id, f"{base}.legend{legend.badge}", legend.title, False, article_id, flat=True
+                )
+                yield OwnedText(
+                    figure.id, f"{base}.legend{legend.badge}.text", legend.text, False, article_id, flat=True
+                )
         case "matrix":
             for i, row in enumerate(diagram.rows):
-                yield OwnedText(figure.id, f"{base}.rows[{i}]", row, False, article_id)
+                yield OwnedText(figure.id, f"{base}.rows[{i}]", row, False, article_id, flat=True)
             for i, col in enumerate(diagram.cols):
-                yield OwnedText(figure.id, f"{base}.cols[{i}]", col, False, article_id)
+                yield OwnedText(figure.id, f"{base}.cols[{i}]", col, False, article_id, flat=True)
             for legend in diagram.legend:
-                yield OwnedText(figure.id, f"{base}.legend.{legend.mark}", legend.meaning, False, article_id)
+                yield OwnedText(
+                    figure.id, f"{base}.legend.{legend.mark}", legend.meaning, False, article_id, flat=True
+                )
 
 
 def iter_blocks(draft: SourceDraft) -> Iterator[tuple[object, str, str | None]]:

@@ -497,6 +497,16 @@ class FigureDerived(Model):
     caption_label: str | None = None
     node_order: list[str] = Field(default_factory=list)
     paths: list[list[str]] = Field(default_factory=list)
+    #: 図の中に書かれたトークンを含む文字列の解決結果（生文字列 → 解決後）。
+    #: SVG は行内マークアップを持てないので、値を差し込む `{ref:}` `{term:}` `{const:}` だけを許す。
+    #: 描画側は `resolve_strings()` でこの対応表を当ててから SVG を組む（docs/shared_fixes.md A2）。
+    resolved_labels: dict[str, str] = Field(default_factory=dict)
+
+
+class FormulaDerived(Model):
+    """算式の箱に書かれたトークンの解決結果（`FigureDerived.resolved_labels` と同じ扱い）。"""
+
+    resolved_labels: dict[str, str] = Field(default_factory=dict)
 
 
 class TocEntry(Model):
@@ -518,6 +528,7 @@ class Derived(Model):
     plain_text: dict[str, PlainText] = Field(default_factory=dict)
     tables: dict[str, TableDerived] = Field(default_factory=dict)
     figures: dict[str, FigureDerived] = Field(default_factory=dict)
+    formulas: dict[str, FormulaDerived] = Field(default_factory=dict)
     toc: list[TocEntry] = Field(default_factory=list)
 
 

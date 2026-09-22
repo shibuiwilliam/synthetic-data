@@ -327,7 +327,18 @@ def _table_reason(answer: Answer) -> list[QA]:
 
 
 def _figures(answer: Answer) -> list[tuple[Figure, str]]:
-    return [(b, o) for b, o in _iter_blocks(answer) if isinstance(b, Figure)]
+    """図はトークンを解決してから使う。`facts` もラベルも QA の答えそのものなので、
+    生の `{const:...}` を残すと問いと答えが壊れる（docs/shared_fixes.md A2）。"""
+    from yakkan.build import resolve_strings
+
+    figures = answer.source.derived.figures
+    out: list[tuple[Figure, str]] = []
+    for block, owner in _iter_blocks(answer):
+        if not isinstance(block, Figure):
+            continue
+        derived = figures.get(block.id)
+        out.append((resolve_strings(block, derived.resolved_labels if derived else {}), owner))
+    return out
 
 
 def _node_labels(figure: Figure) -> dict[str, str]:

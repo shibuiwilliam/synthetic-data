@@ -405,6 +405,7 @@ def check_figures(source: Source, layout: Layout, pdf_path: Path) -> list[CheckR
     `alt` / `facts` が担うので、ここでは「座標が取れていること」と
     「ラベルが PDF から読めること」の 2 点を確かめる。
     """
+    from yakkan.build import resolve_strings
     from yakkan.lint.walk import iter_blocks
     from yakkan.models import Figure
 
@@ -413,6 +414,9 @@ def check_figures(source: Source, layout: Layout, pdf_path: Path) -> list[CheckR
     for block, _owner, _article in iter_blocks(source):
         if not isinstance(block, Figure):
             continue
+        # 紙面に出るのはトークンを解決した文字列（docs/shared_fixes.md A2）
+        derived = source.derived.figures.get(block.id)
+        block = resolve_strings(block, derived.resolved_labels if derived else {})
         figure_layout = layout.figures.get(block.id)
         if figure_layout is None:
             out.append(CheckResult("V10", "error", f"図の座標が layout に無い: {block.id}"))

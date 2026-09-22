@@ -61,3 +61,24 @@ def test_全項にidが付く() -> None:
     html = formula_html(FRACTION)
     for i in range(len(FRACTION.terms)):
         assert f'id="fml_rate__t{i}"' in html
+
+
+def test_算式の箱のトークンも解決される() -> None:
+    """docs/shared_fixes.md A2。`derived.formulas[].resolved_labels` に入る。"""
+    from yakkan.build import resolve_strings
+    from yakkan.models import Formula, FormulaBox, FormulaOp
+
+    formula = Formula(
+        id="fml_x",
+        alt="保険金は支払限度額に{const:rate}を乗じた額",
+        terms=[FormulaBox(box="支払限度額"), FormulaOp(op="×"), FormulaBox(box="{const:rate}")],
+    )
+    labels = {
+        "{const:rate}": "７０％",
+        "保険金は支払限度額に{const:rate}を乗じた額": "保険金は支払限度額に７０％を乗じた額",
+    }
+    resolved = resolve_strings(formula, labels)
+    assert resolved.terms[2].box == "７０％"
+    assert resolved.alt == "保険金は支払限度額に７０％を乗じた額"
+    # 元のモデルは変わらない（source.json は執筆物のまま）
+    assert formula.terms[2].box == "{const:rate}"

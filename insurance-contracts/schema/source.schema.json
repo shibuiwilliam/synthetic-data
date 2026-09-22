@@ -433,6 +433,13 @@
           "title": "Figures",
           "type": "object"
         },
+        "formulas": {
+          "additionalProperties": {
+            "$ref": "#/$defs/FormulaDerived"
+          },
+          "title": "Formulas",
+          "type": "object"
+        },
         "toc": {
           "items": {
             "$ref": "#/$defs/TocEntry"
@@ -564,6 +571,13 @@
           },
           "title": "Paths",
           "type": "array"
+        },
+        "resolved_labels": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Resolved Labels",
+          "type": "object"
         }
       },
       "title": "FigureDerived",
@@ -831,6 +845,21 @@
         "box"
       ],
       "title": "FormulaBox",
+      "type": "object"
+    },
+    "FormulaDerived": {
+      "additionalProperties": false,
+      "description": "算式の箱に書かれたトークンの解決結果（`FigureDerived.resolved_labels` と同じ扱い）。",
+      "properties": {
+        "resolved_labels": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Resolved Labels",
+          "type": "object"
+        }
+      },
+      "title": "FormulaDerived",
       "type": "object"
     },
     "FormulaFraction": {

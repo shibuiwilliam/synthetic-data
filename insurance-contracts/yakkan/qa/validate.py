@@ -201,25 +201,36 @@ def _figure_labels(answer: Answer, evidence: list[str]) -> set[str]:
     #: ノードのラベルだけを集めると取りこぼす。
     text_keys = ("label", "title", "text", "name", "from", "from_", "to", "start", "end", "note")
 
-    def collect(obj: object) -> None:
+    def add(value: str, mapping: dict[str, str]) -> None:
+        if not value.strip():
+            return
+        # 図の中のトークンは build が解決して描くので、紙面に出るのは解決後の文字列。
+        # 執筆時の生文字列も許しておく（どちらで書いても同じ図を指す）。
+        labels.add(normalize(value))
+        labels.add(normalize(mapping.get(value, value)))
+
+    def collect(obj: object, mapping: dict[str, str]) -> None:
         if isinstance(obj, dict):
             for key in text_keys:
                 value = obj.get(key)
-                if isinstance(value, str) and value.strip():
-                    labels.add(normalize(value))
+                if isinstance(value, str):
+                    add(value, mapping)
             ticks = obj.get("ticks")
             if isinstance(ticks, list):
-                labels.update(normalize(x) for x in ticks if isinstance(x, str))
+                for tick in ticks:
+                    if isinstance(tick, str):
+                        add(tick, mapping)
             for value in obj.values():
-                collect(value)
+                collect(value, mapping)
         elif isinstance(obj, list):
             for value in obj:
-                collect(value)
+                collect(value, mapping)
 
     def walk(obj: object) -> None:
         if isinstance(obj, dict):
             if obj.get("type") == "figure" and obj.get("id") in wanted:
-                collect(obj.get("diagram"))
+                derived = answer.source.derived.figures.get(str(obj["id"]))
+                collect(obj.get("diagram"), derived.resolved_labels if derived else {})
             for value in obj.values():
                 walk(value)
         elif isinstance(obj, list):

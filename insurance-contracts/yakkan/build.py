@@ -11,6 +11,8 @@ from collections.abc import Iterator
 from dataclasses import dataclass, field
 from pathlib import Path
 
+from pydantic import BaseModel
+
 from yakkan.compose import load_draft
 from yakkan.lint.walk import iter_blocks, iter_nodes
 from yakkan.models import (
@@ -21,6 +23,8 @@ from yakkan.models import (
     FigureDerived,
     FootnoteIndex,
     FootnotesBlock,
+    Formula,
+    FormulaDerived,
     HeaderPath,
     ListBlock,
     ListItem,
@@ -41,7 +45,7 @@ from yakkan.numbering import (
     footnote_marker,
     resolve_ref,
 )
-from yakkan.richtext import PlainContext, parse, to_plain, with_label
+from yakkan.richtext import Const, PlainContext, Ref, Term, iter_tokens, parse, to_plain, with_label
 
 
 class BuildError(ValueError):
@@ -101,6 +105,63 @@ def assign_caption_labels(draft: SourceDraft, ctx: NumberingContext) -> dict[str
             figure_n += 1
             labels[block.id] = f"図{to_digits(figure_n, ctx.digit_style)}"
     return labels
+
+
+# --- 図・算式のトークン解決 ----------------------------------------------------
+
+#: 図と算式で使ってよいトークン。SVG も算式の箱も行内マークアップを持てないので、
+#: 値を差し込むものだけを許す（太字・ルビ・改行・脚注は L06 が弾く）。
+FLAT_TOKENS = (Ref, Term, Const)
+
+
+def iter_model_strings(value: object) -> Iterator[str]:
+    """pydantic モデル・リスト・辞書を歩いて、すべての文字列を出す。"""
+    if isinstance(value, str):
+        yield value
+    elif isinstance(value, BaseModel):
+        for name in type(value).model_fields:
+            yield from iter_model_strings(getattr(value, name))
+    elif isinstance(value, list | tuple):
+        for item in value:
+            yield from iter_model_strings(item)
+    elif isinstance(value, dict):
+        for item in value.values():
+            yield from iter_model_strings(item)
+
+
+def resolved_labels(value: object, ctx: BuildContext, owner_id: str) -> dict[str, str]:
+    """図・算式の中のトークンを含む文字列を「生文字列 → 解決後」の対応表にする。
+
+    描画側はこの対応表を当ててから SVG・算式を組む（docs/shared_fixes.md A2）。
+    トークンを含まない文字列は入れない（対応表を小さく保ち、差分を読みやすくする）。
+    解決は文字列単位で、同じ生文字列は同じ結果になる（`{ref:}` の起点は図・算式そのもの）。
+    """
+    out: dict[str, str] = {}
+    for raw in iter_model_strings(value):
+        if raw in out or "{" not in raw:
+            continue
+        nodes = parse(raw)
+        if not any(isinstance(t, FLAT_TOKENS) for t in iter_tokens(nodes)):
+            continue
+        out[raw] = to_plain(nodes, ctx.plain_context(owner_id))
+    return out
+
+
+def resolve_strings[M: BaseModel](value: M, labels: dict[str, str]) -> M:
+    """`resolved_labels` の対応表を当てたモデルの複製を返す。元のモデルは変えない。"""
+    if not labels:
+        return value
+    return type(value).model_validate(_substitute(value.model_dump(mode="python", by_alias=True), labels))
+
+
+def _substitute(value: object, labels: dict[str, str]) -> object:
+    if isinstance(value, str):
+        return labels.get(value, value)
+    if isinstance(value, list):
+        return [_substitute(v, labels) for v in value]
+    if isinstance(value, dict):
+        return {k: _substitute(v, labels) for k, v in value.items()}
+    return value
 
 
 # --- 表のヘッダ経路 -----------------------------------------------------------
@@ -389,6 +450,7 @@ def build(draft: SourceDraft) -> Source:
 
     tables: dict[str, TableDerived] = {}
     figures: dict[str, FigureDerived] = {}
+    formulas: dict[str, FormulaDerived] = {}
     for block, _owner, _article in iter_blocks(draft):
         if isinstance(block, Table):
             tables[block.id] = TableDerived(
@@ -397,12 +459,17 @@ def build(draft: SourceDraft) -> Source:
                 auto_labels=enumeration_labels(block, ctx),
             )
         elif isinstance(block, Figure):
-            order, paths = figure_paths(block)
+            labels = resolved_labels(block, ctx, block.id)
+            # 経路はラベルの列なので、トークンを解決してから取る（正解に生トークンを残さない）
+            order, paths = figure_paths(resolve_strings(block, labels))
             figures[block.id] = FigureDerived(
                 caption_label=ctx.caption_labels.get(block.id),
                 node_order=order,
                 paths=paths,
+                resolved_labels=labels,
             )
+        elif isinstance(block, Formula):
+            formulas[block.id] = FormulaDerived(resolved_labels=resolved_labels(block, ctx, block.id))
 
     derived = Derived(
         labels=index.labels(),
@@ -412,6 +479,7 @@ def build(draft: SourceDraft) -> Source:
         plain_text=plain,
         tables=tables,
         figures=figures,
+        formulas=formulas,
         toc=build_toc(ctx),
     )
     return Source(**draft.model_dump(), derived=derived)

@@ -282,9 +282,13 @@ class HtmlBuilder:
         )
 
     def _figure_html(self, figure: Figure) -> str:
+        from yakkan.build import resolve_strings
         from yakkan.render.diagrams import DiagramStyle, render_diagram
 
-        caption_label = self.source.derived.figures[figure.id].caption_label or ""
+        derived = self.source.derived.figures[figure.id]
+        # 図の中の {const:} {term:} {ref:} は build が解決済み。SVG を組む前に当てる（A2）
+        figure = resolve_strings(figure, derived.resolved_labels)
+        caption_label = derived.caption_label or ""
         caption = ""
         if figure.caption:
             caption = (
@@ -302,9 +306,12 @@ class HtmlBuilder:
         )
 
     def _formula_html(self, formula: Formula) -> str:
+        from yakkan.build import resolve_strings
         from yakkan.render.formula import formula_html
 
-        return formula_html(formula)
+        derived = self.source.derived.formulas.get(formula.id)
+        labels = derived.resolved_labels if derived else {}
+        return formula_html(resolve_strings(formula, labels))
 
 
 def build_css(style: Style, source: Source) -> str:

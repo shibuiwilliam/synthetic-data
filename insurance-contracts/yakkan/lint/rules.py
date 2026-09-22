@@ -16,11 +16,15 @@ from yakkan.lint.walk import iter_ids, iter_texts
 from yakkan.models import BoxBlock, Cell, Figure, FootnotesBlock, Table
 from yakkan.richtext import (
     AutoLabel,
+    Bold,
+    Br,
     Const,
     Fn,
     Inline,
     Ref,
     RichTextError,
+    Ruby,
+    Underline,
     iter_tokens,
     parse,
     raw_text,
@@ -98,7 +102,7 @@ def l01_ids_and_refs(ctx: LintContext) -> Iterator[Finding]:
     ref_targets = node_ids | caption_ids
 
     for owned in iter_texts(ctx.draft):
-        if not owned.rich:
+        if not owned.parseable:
             continue
         try:
             tokens = _parsed(owned.text)
@@ -212,7 +216,7 @@ def l02_footnotes(ctx: LintContext) -> Iterator[Finding]:
 @rule("L03", "番号ラベルの直書きが無い／記法が正しい")
 def l03_no_literal_labels(ctx: LintContext) -> Iterator[Finding]:
     for owned in iter_texts(ctx.draft):
-        if owned.rich:
+        if owned.parseable:
             try:
                 tokens = _parsed(owned.text)
             except RichTextError as exc:
@@ -262,7 +266,7 @@ def l03_no_literal_labels(ctx: LintContext) -> Iterator[Finding]:
                     )
 
     for owned in iter_texts(ctx.draft):
-        if not owned.rich:
+        if not owned.parseable:
             continue
         try:
             tokens = _parsed(owned.text)
@@ -425,7 +429,7 @@ def l13_meta(ctx: LintContext) -> Iterator[Finding]:
 
     used_consts: set[str] = set()
     for owned in iter_texts(ctx.draft):
-        if not owned.rich:
+        if not owned.parseable:
             continue
         try:
             tokens = _parsed(owned.text)
@@ -483,30 +487,42 @@ def l06_figures(ctx: LintContext) -> Iterator[Finding]:
         yield from _check_diagram_tokens(block)
 
 
-#: 図の中では解決されないトークン（SVG は build の RichText 解決を通らない）
-_DIAGRAM_TOKEN = __import__("re").compile(r"\{(?:ref|term|const|fn|b|u|ruby|br|auto_label)[:}]")
+#: 図・算式で使ってよいトークン。値を差し込むものだけ（docs/shared_fixes.md A2）。
+_FLAT_TOKEN_NAMES = {"ref", "term", "const"}
+#: SVG・算式の箱は行内マークアップを持てないので、これらは解決しても形にならない
+_MARKUP_TOKENS = (Fn, Bold, Underline, Ruby, Br, AutoLabel)
 
 
 def _check_diagram_tokens(figure) -> Iterator[Finding]:
-    """`diagram` の中に RichText トークンを書いていないか。
+    """`diagram` の中のトークンを検査する。
 
-    図は自前で SVG を組み立てるので、build の RichText 解決を通らない。
-    `{term:...}` や `{const:...}` を書くと、**PDF にトークンがそのまま描かれる**
-    （auto-0002 の annotated_mock の凡例で実際に起きた）。
-    図の文字は平文で書き、数値を本文と揃えたいときは手で追従する。
+    `{const:}` `{term:}` `{ref:}` は build が `derived.figures[].resolved_labels` に
+    解決して、描画側が SVG を組む前に当てる。だから図の中で使ってよい。
+    太字・ルビ・改行・脚注は SVG に形が無いので弾く。
     """
-    import json as _json
+    for raw in _figure_strings(figure):
+        if "{" not in raw:
+            continue
+        try:
+            nodes = parse(raw)
+        except RichTextError as exc:
+            yield Finding("L06", "error", f"図の中の RichText が壊れている: {exc}", element_id=figure.id)
+            continue
+        bad = sorted({type(t).__name__ for t in iter_tokens(nodes) if isinstance(t, _MARKUP_TOKENS)})
+        if bad:
+            yield Finding(
+                "L06",
+                "error",
+                f"図の中では使えないトークンがある: {' '.join(bad)}"
+                "（SVG は行内マークアップを持てない。使えるのは {ref:} {term:} {const:} だけ）",
+                element_id=figure.id,
+            )
 
-    dumped = _json.dumps(figure.diagram.model_dump(mode="json"), ensure_ascii=False)
-    found = sorted(set(_DIAGRAM_TOKEN.findall(dumped)))
-    if found:
-        yield Finding(
-            "L06",
-            "error",
-            f"図の中に解決されないトークンがある: {' '.join(found)}"
-            "（図の文字は平文で書く。SVG は RichText 解決を通らないので、そのまま描かれる）",
-            element_id=figure.id,
-        )
+
+def _figure_strings(figure) -> Iterator[str]:
+    from yakkan.build import iter_model_strings
+
+    return iter_model_strings(figure)
 
 
 def _check_figure_meta(figure) -> Iterator[Finding]:

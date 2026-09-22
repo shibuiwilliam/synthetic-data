@@ -5,7 +5,7 @@
   "seed": 1,
   "meta": {
     "title": "青葉みなと総合自動車保険　普通保険約款（検証用最小サンプル）",
-    "subtitle": "2026年10月1日以降始期契約用",
+    "subtitle": "２０２６年１０月１日以降始期契約用",
     "issuer": {
       "name": "青葉みなと損害保険株式会社",
       "kind": "stock",
@@ -19,14 +19,14 @@
     "digit_style": "fullwidth",
     "disclaimer": "本冊子は、文書読取技術の検証を目的として作成された架空の約款です。記載の会社・商品・連絡先は実在しません。",
     "constants": {
-      "notice_days": "30日",
+      "notice_days": "３０日",
       "bodily_limit": "無制限"
     }
   },
   "front_matter": {
     "cover": {
       "title": "青葉みなと総合自動車保険　普通保険約款",
-      "subtitle": "2026年10月1日以降始期契約用",
+      "subtitle": "２０２６年１０月１日以降始期契約用",
       "product_name": "青葉みなと総合自動車保険",
       "pet_name": "みなとドライブ",
       "issuer_name": "青葉みなと損害保険株式会社",
@@ -95,6 +95,7 @@
               "summary": null,
               "blocks": [],
               "children": [],
+              "kind_label": null,
               "number_override": null,
               "number_override_reason": null
             },
@@ -106,10 +107,12 @@
               "summary": null,
               "blocks": [],
               "children": [],
+              "kind_label": null,
               "number_override": null,
               "number_override_reason": null
             }
           ],
+          "kind_label": null,
           "number_override": null,
           "number_override_reason": null
         },
@@ -200,14 +203,17 @@
                 }
               ],
               "children": [],
+              "kind_label": null,
               "number_override": null,
               "number_override_reason": null
             }
           ],
+          "kind_label": null,
           "number_override": null,
           "number_override_reason": null
         }
       ],
+      "kind_label": null,
       "number_override": null,
       "number_override_reason": null
     },
@@ -243,6 +249,7 @@
                   "summary": null,
                   "blocks": [],
                   "children": [],
+                  "kind_label": null,
                   "number_override": null,
                   "number_override_reason": null
                 },
@@ -254,10 +261,12 @@
                   "summary": null,
                   "blocks": [],
                   "children": [],
+                  "kind_label": null,
                   "number_override": null,
                   "number_override_reason": null
                 }
               ],
+              "kind_label": null,
               "number_override": null,
               "number_override_reason": null
             },
@@ -362,6 +371,7 @@
                     }
                   ],
                   "children": [],
+                  "kind_label": null,
                   "number_override": null,
                   "number_override_reason": null
                 },
@@ -373,6 +383,7 @@
                   "summary": null,
                   "blocks": [],
                   "children": [],
+                  "kind_label": null,
                   "number_override": null,
                   "number_override_reason": null
                 },
@@ -384,14 +395,17 @@
                   "summary": null,
                   "blocks": [],
                   "children": [],
+                  "kind_label": null,
                   "number_override": null,
                   "number_override_reason": null
                 }
               ],
+              "kind_label": null,
               "number_override": null,
               "number_override_reason": null
             }
           ],
+          "kind_label": null,
           "number_override": null,
           "number_override_reason": null
         },
@@ -623,6 +637,7 @@
                     }
                   ],
                   "children": [],
+                  "kind_label": null,
                   "number_override": null,
                   "number_override_reason": null
                 },
@@ -634,18 +649,22 @@
                   "summary": null,
                   "blocks": [],
                   "children": [],
+                  "kind_label": null,
                   "number_override": null,
                   "number_override_reason": null
                 }
               ],
+              "kind_label": null,
               "number_override": null,
               "number_override_reason": null
             }
           ],
+          "kind_label": null,
           "number_override": null,
           "number_override_reason": null
         }
       ],
+      "kind_label": null,
       "number_override": null,
       "number_override_reason": null
     }
@@ -730,7 +749,7 @@
                       },
                       {
                         "id": "tbl_grade__r1c1",
-                        "text": "常に介護を要する状態が残ったもの",
+                        "text": "日常生活のすべての場面で他人の介助が欠かせない状態が続くもの",
                         "rowspan": 1,
                         "colspan": 1,
                         "role": "body",
@@ -739,7 +758,7 @@
                       },
                       {
                         "id": "tbl_grade__r1c2",
-                        "text": "100％",
+                        "text": "１００％",
                         "rowspan": 1,
                         "colspan": 1,
                         "role": "body",
@@ -759,7 +778,7 @@
                       },
                       {
                         "id": "tbl_grade__r2c1",
-                        "text": "随時介護を要する状態が残ったもの",
+                        "text": "日常生活の多くの場面で他人の介助が欠かせない状態が続くもの",
                         "rowspan": 1,
                         "colspan": 1,
                         "role": "body",
@@ -768,7 +787,7 @@
                       },
                       {
                         "id": "tbl_grade__r2c2",
-                        "text": "89％",
+                        "text": "９０％",
                         "rowspan": 1,
                         "colspan": 1,
                         "role": "body",
@@ -788,7 +807,7 @@
                       },
                       {
                         "id": "tbl_grade__r3c1",
-                        "text": "終身にわたり労務に服することができない状態が残ったもの",
+                        "text": "生涯にわたり就労することができない状態が続くもの",
                         "rowspan": 1,
                         "colspan": 1,
                         "role": "body",
@@ -797,7 +816,94 @@
                       },
                       {
                         "id": "tbl_grade__r3c2",
-                        "text": "78％",
+                        "text": "８０％",
+                        "rowspan": 1,
+                        "colspan": 1,
+                        "role": "body",
+                        "align": "right",
+                        "vertical_text": false
+                      }
+                    ],
+                    [
+                      {
+                        "id": "tbl_grade__r4c0",
+                        "text": "第四級",
+                        "rowspan": 1,
+                        "colspan": 1,
+                        "role": "stub",
+                        "align": "center",
+                        "vertical_text": false
+                      },
+                      {
+                        "id": "tbl_grade__r4c1",
+                        "text": "就労できる業務の範囲が著しく狭くなったもの",
+                        "rowspan": 1,
+                        "colspan": 1,
+                        "role": "body",
+                        "align": null,
+                        "vertical_text": false
+                      },
+                      {
+                        "id": "tbl_grade__r4c2",
+                        "text": "７０％",
+                        "rowspan": 1,
+                        "colspan": 1,
+                        "role": "body",
+                        "align": "right",
+                        "vertical_text": false
+                      }
+                    ],
+                    [
+                      {
+                        "id": "tbl_grade__r5c0",
+                        "text": "第五級",
+                        "rowspan": 1,
+                        "colspan": 1,
+                        "role": "stub",
+                        "align": "center",
+                        "vertical_text": false
+                      },
+                      {
+                        "id": "tbl_grade__r5c1",
+                        "text": "従前の業務に復することができず、軽易な業務に限られるもの",
+                        "rowspan": 1,
+                        "colspan": 1,
+                        "role": "body",
+                        "align": null,
+                        "vertical_text": false
+                      },
+                      {
+                        "id": "tbl_grade__r5c2",
+                        "text": "６０％",
+                        "rowspan": 1,
+                        "colspan": 1,
+                        "role": "body",
+                        "align": "right",
+                        "vertical_text": false
+                      }
+                    ],
+                    [
+                      {
+                        "id": "tbl_grade__r6c0",
+                        "text": "第六級",
+                        "rowspan": 1,
+                        "colspan": 1,
+                        "role": "stub",
+                        "align": "center",
+                        "vertical_text": false
+                      },
+                      {
+                        "id": "tbl_grade__r6c1",
+                        "text": "片方の手足の機能に大きな制限が残ったもの",
+                        "rowspan": 1,
+                        "colspan": 1,
+                        "role": "body",
+                        "align": null,
+                        "vertical_text": false
+                      },
+                      {
+                        "id": "tbl_grade__r6c2",
+                        "text": "５２％",
                         "rowspan": 1,
                         "colspan": 1,
                         "role": "body",
@@ -806,13 +912,45 @@
                       }
                     ]
                   ],
-                  "records": null,
+                  "records": [
+                    {
+                      "等級": "第一級",
+                      "障害の程度": "日常生活のすべての場面で他人の介助が欠かせない状態が続くもの",
+                      "支払割合": "１００％"
+                    },
+                    {
+                      "等級": "第二級",
+                      "障害の程度": "日常生活の多くの場面で他人の介助が欠かせない状態が続くもの",
+                      "支払割合": "９０％"
+                    },
+                    {
+                      "等級": "第三級",
+                      "障害の程度": "生涯にわたり就労することができない状態が続くもの",
+                      "支払割合": "８０％"
+                    },
+                    {
+                      "等級": "第四級",
+                      "障害の程度": "就労できる業務の範囲が著しく狭くなったもの",
+                      "支払割合": "７０％"
+                    },
+                    {
+                      "等級": "第五級",
+                      "障害の程度": "従前の業務に復することができず、軽易な業務に限られるもの",
+                      "支払割合": "６０％"
+                    },
+                    {
+                      "等級": "第六級",
+                      "障害の程度": "片方の手足の機能に大きな制限が残ったもの",
+                      "支払割合": "５２％"
+                    }
+                  ],
                   "notes": [
                     "支払割合は、保険証券に記載された保険金額に対する割合です。"
                   ]
                 }
               ],
               "children": [],
+              "kind_label": null,
               "number_override": null,
               "number_override_reason": null
             },
@@ -824,14 +962,17 @@
               "summary": null,
               "blocks": [],
               "children": [],
+              "kind_label": null,
               "number_override": null,
               "number_override_reason": null
             }
           ],
+          "kind_label": null,
           "number_override": null,
           "number_override_reason": null
         }
       ],
+      "kind_label": null,
       "number_override": null,
       "number_override_reason": null
     }
@@ -841,12 +982,12 @@
       {
         "type": "paragraph",
         "id": "par_colophon_1",
-        "text": "青葉みなと総合自動車保険　普通保険約款　2026年10月1日改定"
+        "text": "青葉みなと総合自動車保険　普通保険約款　２０２６年１０月１日改定"
       },
       {
         "type": "paragraph",
         "id": "par_colophon_2",
-        "text": "青葉みなと損害保険株式会社　お問い合わせ窓口　0120-000-000（受付時間　午前９時から午後５時まで）　example.jp"
+        "text": "青葉みなと損害保険株式会社　お問い合わせ窓口　０１２０-０００-０００（受付時間　午前９時から午後５時まで）　example.jp"
       },
       {
         "type": "paragraph",
@@ -1330,7 +1471,7 @@
         "without_label": "事故発生から保険金のお支払いまで"
       },
       "tbl_duties__caption": {
-        "with_label": "表３　事故が発生した場合の義務",
+        "with_label": "表１　事故が発生した場合の義務",
         "without_label": "事故が発生した場合の義務"
       },
       "tbl_duties__r0c0": {
@@ -1354,8 +1495,8 @@
         "without_label": "通知義務"
       },
       "tbl_duties__r2c1": {
-        "with_label": "事故の発生の日からその日を含めて30日以内に、事故の状況を当会社に通知すること。",
-        "without_label": "事故の発生の日からその日を含めて30日以内に、事故の状況を当会社に通知すること。"
+        "with_label": "事故の発生の日からその日を含めて３０日以内に、事故の状況を当会社に通知すること。",
+        "without_label": "事故の発生の日からその日を含めて３０日以内に、事故の状況を当会社に通知すること。"
       },
       "tbl_duties__r3c0": {
         "with_label": "協力義務",
@@ -1370,7 +1511,7 @@
         "without_label": "やむを得ない事由があるときは、その事由が解消した後、遅滞なく履行してください。"
       },
       "tbl_grade__caption": {
-        "with_label": "表４　後遺障害等級と支払割合",
+        "with_label": "表２　後遺障害等級と支払割合",
         "without_label": "後遺障害等級と支払割合"
       },
       "tbl_grade__r0c0": {
@@ -1390,48 +1531,84 @@
         "without_label": "第一級"
       },
       "tbl_grade__r1c1": {
-        "with_label": "常に介護を要する状態が残ったもの",
-        "without_label": "常に介護を要する状態が残ったもの"
+        "with_label": "日常生活のすべての場面で他人の介助が欠かせない状態が続くもの",
+        "without_label": "日常生活のすべての場面で他人の介助が欠かせない状態が続くもの"
       },
       "tbl_grade__r1c2": {
-        "with_label": "100％",
-        "without_label": "100％"
+        "with_label": "１００％",
+        "without_label": "１００％"
       },
       "tbl_grade__r2c0": {
         "with_label": "第二級",
         "without_label": "第二級"
       },
       "tbl_grade__r2c1": {
-        "with_label": "随時介護を要する状態が残ったもの",
-        "without_label": "随時介護を要する状態が残ったもの"
+        "with_label": "日常生活の多くの場面で他人の介助が欠かせない状態が続くもの",
+        "without_label": "日常生活の多くの場面で他人の介助が欠かせない状態が続くもの"
       },
       "tbl_grade__r2c2": {
-        "with_label": "89％",
-        "without_label": "89％"
+        "with_label": "９０％",
+        "without_label": "９０％"
       },
       "tbl_grade__r3c0": {
         "with_label": "第三級",
         "without_label": "第三級"
       },
       "tbl_grade__r3c1": {
-        "with_label": "終身にわたり労務に服することができない状態が残ったもの",
-        "without_label": "終身にわたり労務に服することができない状態が残ったもの"
+        "with_label": "生涯にわたり就労することができない状態が続くもの",
+        "without_label": "生涯にわたり就労することができない状態が続くもの"
       },
       "tbl_grade__r3c2": {
-        "with_label": "78％",
-        "without_label": "78％"
+        "with_label": "８０％",
+        "without_label": "８０％"
+      },
+      "tbl_grade__r4c0": {
+        "with_label": "第四級",
+        "without_label": "第四級"
+      },
+      "tbl_grade__r4c1": {
+        "with_label": "就労できる業務の範囲が著しく狭くなったもの",
+        "without_label": "就労できる業務の範囲が著しく狭くなったもの"
+      },
+      "tbl_grade__r4c2": {
+        "with_label": "７０％",
+        "without_label": "７０％"
+      },
+      "tbl_grade__r5c0": {
+        "with_label": "第五級",
+        "without_label": "第五級"
+      },
+      "tbl_grade__r5c1": {
+        "with_label": "従前の業務に復することができず、軽易な業務に限られるもの",
+        "without_label": "従前の業務に復することができず、軽易な業務に限られるもの"
+      },
+      "tbl_grade__r5c2": {
+        "with_label": "６０％",
+        "without_label": "６０％"
+      },
+      "tbl_grade__r6c0": {
+        "with_label": "第六級",
+        "without_label": "第六級"
+      },
+      "tbl_grade__r6c1": {
+        "with_label": "片方の手足の機能に大きな制限が残ったもの",
+        "without_label": "片方の手足の機能に大きな制限が残ったもの"
+      },
+      "tbl_grade__r6c2": {
+        "with_label": "５２％",
+        "without_label": "５２％"
       },
       "tbl_grade__note0": {
         "with_label": "支払割合は、保険証券に記載された保険金額に対する割合です。",
         "without_label": "支払割合は、保険証券に記載された保険金額に対する割合です。"
       },
       "par_colophon_1": {
-        "with_label": "青葉みなと総合自動車保険　普通保険約款　2026年10月1日改定",
-        "without_label": "青葉みなと総合自動車保険　普通保険約款　2026年10月1日改定"
+        "with_label": "青葉みなと総合自動車保険　普通保険約款　２０２６年１０月１日改定",
+        "without_label": "青葉みなと総合自動車保険　普通保険約款　２０２６年１０月１日改定"
       },
       "par_colophon_2": {
-        "with_label": "青葉みなと損害保険株式会社　お問い合わせ窓口　0120-000-000（受付時間　午前９時から午後５時まで）　example.jp",
-        "without_label": "青葉みなと損害保険株式会社　お問い合わせ窓口　0120-000-000（受付時間　午前９時から午後５時まで）　example.jp"
+        "with_label": "青葉みなと損害保険株式会社　お問い合わせ窓口　０１２０-０００-０００（受付時間　午前９時から午後５時まで）　example.jp",
+        "without_label": "青葉みなと損害保険株式会社　お問い合わせ窓口　０１２０-０００-０００（受付時間　午前９時から午後５時まで）　example.jp"
       },
       "par_colophon_3": {
         "with_label": "本冊子は、文書読取技術の検証を目的として作成された架空の約款です。記載の会社・商品・連絡先は実在しません。",
@@ -1440,7 +1617,7 @@
     },
     "tables": {
       "tbl_exclusions": {
-        "caption_label": "表１",
+        "caption_label": null,
         "header_path": {
           "tbl_exclusions__r0c1": {
             "row_headers": [
@@ -1461,7 +1638,7 @@
         }
       },
       "tbl_notify_facts": {
-        "caption_label": "表２",
+        "caption_label": null,
         "header_path": {
           "tbl_notify_facts__r0c1": {
             "row_headers": [
@@ -1482,7 +1659,7 @@
         }
       },
       "tbl_duties": {
-        "caption_label": "表３",
+        "caption_label": "表１",
         "header_path": {
           "tbl_duties__r1c0": {
             "row_headers": [],
@@ -1524,7 +1701,7 @@
         "auto_labels": {}
       },
       "tbl_grade": {
-        "caption_label": "表４",
+        "caption_label": "表２",
         "header_path": {
           "tbl_grade__r1c1": {
             "row_headers": [
@@ -1573,6 +1750,54 @@
             "col_headers": [
               "支払割合"
             ]
+          },
+          "tbl_grade__r4c1": {
+            "row_headers": [
+              "第四級"
+            ],
+            "col_headers": [
+              "障害の程度"
+            ]
+          },
+          "tbl_grade__r4c2": {
+            "row_headers": [
+              "第四級"
+            ],
+            "col_headers": [
+              "支払割合"
+            ]
+          },
+          "tbl_grade__r5c1": {
+            "row_headers": [
+              "第五級"
+            ],
+            "col_headers": [
+              "障害の程度"
+            ]
+          },
+          "tbl_grade__r5c2": {
+            "row_headers": [
+              "第五級"
+            ],
+            "col_headers": [
+              "支払割合"
+            ]
+          },
+          "tbl_grade__r6c1": {
+            "row_headers": [
+              "第六級"
+            ],
+            "col_headers": [
+              "障害の程度"
+            ]
+          },
+          "tbl_grade__r6c2": {
+            "row_headers": [
+              "第六級"
+            ],
+            "col_headers": [
+              "支払割合"
+            ]
           }
         },
         "auto_labels": {}
@@ -1604,9 +1829,11 @@
             "お支払いできますか",
             "理由のご説明"
           ]
-        ]
+        ],
+        "resolved_labels": {}
       }
     },
+    "formulas": {},
     "toc": [
       {
         "id": "ch1",
