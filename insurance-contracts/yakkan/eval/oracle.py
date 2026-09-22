@@ -43,12 +43,18 @@ def build_prediction(answer: Answer, qa_items: list[dict[str, Any]] | None = Non
             info = derived.labels.get(element_id)
             if plain is None or not plain.without_label.strip():
                 continue
+            element = answer.layout.elements.get(element_id)
+            bbox = next(
+                (list(f.bbox) for f in (element.fragments if element else []) if f.page == page.number),
+                None,
+            )
             elements.append(
                 {
                     "text": plain.without_label,
                     "page": page.number,
                     "kind": info.kind if info else None,
                     "citation": info.citation if info else "",
+                    **({"bbox": bbox} if bbox else {}),
                 }
             )
 

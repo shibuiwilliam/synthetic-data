@@ -20,7 +20,7 @@ import json
 from pathlib import Path
 from typing import Any
 
-from yakkan.eval.metrics import cer, kendall_tau, normalize, set_f1, teds
+from yakkan.eval.metrics import cer, iou, kendall_tau, normalize, set_f1, teds
 from yakkan.models import Answer
 
 
@@ -299,6 +299,47 @@ def score_enumerations(answer: Answer, pred: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+# --- bbox（画像からの読み取りの位置あわせ） -----------------------------------
+
+#: 「当たり」とみなす IoU の下限
+IOU_HIT = 0.5
+
+
+def score_layout(answer: Answer, pred: dict[str, Any]) -> dict[str, Any]:
+    """予測が `bbox` を出しているとき、gold の fragment と重なっているかを測る。
+
+    突合は本文テキスト（出現回数つき）。`bbox` を出さない予測では `predicted` が 0 になる。
+    """
+    # bbox は**同じ本文がどこに出ていても当たりでよい**ので、テキストだけを鍵にして
+    # すべての fragment を候補にする（citation とは違い、何回目かを問う必要がない）。
+    gold: dict[str, list[tuple[int, list[float]]]] = {}
+    for element_id, plain in answer.source.derived.plain_text.items():
+        element = answer.layout.elements.get(element_id)
+        key = normalize(plain.without_label)
+        if not key or element is None or not element.fragments:
+            continue
+        gold.setdefault(key, []).extend((f.page, list(f.bbox)) for f in element.fragments)
+
+    pred_items = [i for i in _pred_list(pred, "elements") if i.get("bbox")]
+    scores: list[float] = []
+    for item in pred_items:
+        boxes = gold.get(normalize(item.get("text", "")))
+        if not boxes:
+            continue
+        page = item.get("page")
+        candidates = [b for p, b in boxes if page is None or p == page] or [b for _p, b in boxes]
+        scores.append(max(iou(b, item["bbox"]) for b in candidates))
+    return {
+        "gold_elements": len(gold),
+        "predicted": len(pred_items),
+        "matched": len(scores),
+        "iou_mean": round(sum(scores) / len(scores), 4) if scores else 0.0,
+        f"hit@iou{IOU_HIT}": round(sum(1 for s in scores if s >= IOU_HIT) / len(scores), 4)
+        if scores
+        else 0.0,
+    }
+
+
 # --- 読み順 -------------------------------------------------------------------
 
 
@@ -380,6 +421,7 @@ def evaluate(dataset_dir: Path, prediction: dict[str, Any]) -> dict[str, Any]:
         "tables": score_tables(answer, prediction),
         "figures": score_figures(answer, prediction),
         "enumerations": score_enumerations(answer, prediction),
+        "layout": score_layout(answer, prediction),
         "reading_order": score_reading_order(answer, prediction),
         "qa": score_qa(qa_items, prediction),
     }

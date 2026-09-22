@@ -695,6 +695,8 @@ def eval_command(
             ("図エッジ F1", result["figures"]["edge_f1"]["f1"]),
             ("図経路 F1", result["figures"]["path_f1"]["f1"]),
             ("列挙の順番一致", result["enumerations"]["order_exact"]),
+            ("bbox の IoU 平均", result["layout"]["iou_mean"]),
+            ("bbox 当たり率（IoU≥0.5）", result["layout"]["hit@iou0.5"]),
             ("読み順 Kendall τ", result["reading_order"]["tau_macro"]),
             ("QA 完全一致", result["qa"]["exact_match"]),
         ]

@@ -13,6 +13,7 @@
 | 表の構造 | `grid`（結合展開後）＋ `header_path` | TEDS ／ セル値 F1（行見出し・列見出し・値の 3 つ組） |
 | 図の構造 | `derived.figures[].graph` ＋ `paths` | ノード F1 ／ エッジ F1 ／ 経路 F1 |
 | 列挙の位置づけ | `derived.enumerations` | 項目の順番つき一致率 |
+| bbox（画像からの位置あわせ） | `layout.elements[].fragments[].bbox` | IoU 平均 ／ IoU≥0.5 の当たり率 |
 | 読み順 | `layout.pages[].reading_order` | Kendall の τ |
 | QA | `qa.json` | 完全一致 ／ 部分一致 |
 | 検索 | `dataset/search/{passages,queries,qrels}.jsonl` | nDCG@k ／ Recall@k ／ MRR |
@@ -41,7 +42,8 @@
   // 本文の要素。**読み順に**並べる（読み順の τ はこの並びで測る）
   "elements": [
     { "text": "当会社は、被保険者が…支払います。", "page": 6,
-      "kind": "paragraph", "citation": "第2章 第1条 (1)" }
+      "kind": "paragraph", "citation": "第2章 第1条 (1)",
+      "bbox": [39.7, 573.6, 286.3, 758.2] }   // 任意。pt・原点左上。出すと IoU が採点される
   ],
 
   // 表。grid は**結合を展開した**矩形。cells は意味座標つきの値

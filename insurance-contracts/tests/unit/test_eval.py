@@ -54,6 +54,14 @@ def test_Kendallのτ() -> None:
     assert kendall_tau(["a"], ["a"]) == 1.0
 
 
+def test_bboxのIoU() -> None:
+    from yakkan.eval.metrics import iou
+
+    assert iou([0, 0, 10, 10], [0, 0, 10, 10]) == 1.0
+    assert iou([0, 0, 10, 10], [20, 20, 30, 30]) == 0.0
+    assert iou([0, 0, 10, 10], [0, 0, 5, 10]) == 0.5
+
+
 def test_検索の指標() -> None:
     assert ndcg_at_k([2, 1], [2, 1], 2) == 1.0
     assert ndcg_at_k([0, 0], [2, 1], 2) == 0.0
@@ -85,6 +93,7 @@ def test_満点の予測は満点になる() -> None:
     assert score["figures"]["edge_f1"]["f1"] == 1.0
     assert score["figures"]["path_f1"]["f1"] == 1.0
     assert score["enumerations"]["order_exact"] == 1.0
+    assert score["layout"]["iou_mean"] == 1.0, "oracle は gold の bbox をそのまま出す"
     assert score["reading_order"]["tau_macro"] == 1.0
     assert score["qa"]["exact_match"] == 1.0
 

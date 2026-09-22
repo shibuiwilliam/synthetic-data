@@ -91,6 +91,24 @@ def teds(gold: list[list[str]], pred: list[list[str]]) -> float:
     return round(1 - distance / denominator, 4) if denominator else 1.0
 
 
+# --- bbox ---------------------------------------------------------------------
+
+
+def iou(a: Sequence[float], b: Sequence[float]) -> float:
+    """2 つの矩形（x0, y0, x1, y1）の IoU。重なりが無ければ 0。"""
+    if len(a) != 4 or len(b) != 4:
+        return 0.0
+    dx = min(a[2], b[2]) - max(a[0], b[0])
+    dy = min(a[3], b[3]) - max(a[1], b[1])
+    if dx <= 0 or dy <= 0:
+        return 0.0
+    intersection = dx * dy
+    area_a = max(a[2] - a[0], 0) * max(a[3] - a[1], 0)
+    area_b = max(b[2] - b[0], 0) * max(b[3] - b[1], 0)
+    union = area_a + area_b - intersection
+    return round(intersection / union, 4) if union > 0 else 0.0
+
+
 # --- 読み順 -------------------------------------------------------------------
 
 
