@@ -50,6 +50,8 @@ class LintContext:
             ctx = NumberingContext(
                 scheme=self.draft.meta.numbering_scheme,
                 digit_style=self.draft.meta.digit_style,
+                article_heading=self.draft.meta.article_heading,
+                footnote_style=self.draft.meta.footnote_style,
             )
             self._index = DocumentIndex(ctx, self.draft.body, self.draft.appendices)
         return self._index

@@ -115,6 +115,10 @@ class Blueprint(Model):
     description: str = ""
     target_pages: tuple[int, int]
     numbering_scheme: NumberingScheme
+    #: 条見出しの体裁（`above` は見出し文言を条の上に置く。docs/reference_structures.md #12）
+    article_heading: Literal["inline", "above"] = "inline"
+    #: 条末脚注の体裁（`remarks_box` は黒丸数字と「第N条　備考」の枠。#13）
+    footnote_style: Literal["inline", "remarks_box"] = "inline"
     default_style: str
     front_matter: FrontMatterSpec = Field(default_factory=FrontMatterSpec)
     skeleton: list[SkeletonNode] = Field(default_factory=list)

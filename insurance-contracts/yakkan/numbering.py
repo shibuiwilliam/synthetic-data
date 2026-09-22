@@ -16,7 +16,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from typing import Literal
 
 from yakkan.models import DigitStyle, LabelInfo, Node, NodeKind, NumberingScheme
@@ -88,6 +88,11 @@ class NumberingContext:
     scheme: NumberingScheme
     digit_style: DigitStyle = "fullwidth"
     warnings: list[NumberWarning] = field(default_factory=list)
+    #: 条見出しの体裁。`above` は見出し文言だけを条の上に置き、条ラベルを第1項に走り込ませる
+    #: （docs/reference_structures.md #12）。
+    article_heading: Literal["inline", "above"] = "inline"
+    #: 条末脚注の体裁。`remarks_box` は黒丸数字のマーカーと「備考」の枠（#13）。
+    footnote_style: Literal["inline", "remarks_box"] = "inline"
 
     @property
     def continuous_articles(self) -> bool:
@@ -141,6 +146,57 @@ def _label_life(ctx: NumberingContext, kind: NodeKind, n: int, node_id: str, sib
     return ""
 
 
+def _label_group(ctx: NumberingContext, kind: NodeKind, n: int, node_id: str, siblings: int) -> str:
+    """団体保険（docs/reference_structures.md #12）。項＝丸数字・号＝「１．」・細目＝(ｱ)。"""
+    d = ctx.digit_style
+    match kind:
+        case "part":
+            return f"第{to_digits(n, d)}編"
+        case "chapter":
+            return f"第{to_digits(n, d)}章"
+        case "section":
+            return f"第{to_digits(n, d)}節"
+        case "article":
+            return f"第{to_digits(n, d)}条"
+        case "paragraph":
+            # 第1項は無番号。第2項以降を丸数字で示す（実物の体裁）。
+            return "" if n <= 1 else circled(n, d, ctx.warnings, node_id)
+        case "item":
+            return f"{to_digits(n, d)}．"
+        case "subitem":
+            return ctx.paren(_katakana(n, d))
+        case "subsubitem":
+            ctx.warnings.append(NumberWarning(node_id, "団体保険に細々目の番号方式は無い"))
+            return ""
+    return ""
+
+
+def _label_jyusetsu(ctx: NumberingContext, kind: NodeKind, n: int, node_id: str, siblings: int) -> str:
+    """重要事項説明書（#9・#10）。**条を持たない。**
+
+    大見出し（章）は番号を持たず、節が `（1）`、条の位置に丸数字の小見出しが来る。
+    """
+    d = ctx.digit_style
+    match kind:
+        case "part":
+            return to_digits(n, d)
+        case "chapter":
+            return to_digits(n, d)
+        case "section":
+            return ctx.paren(to_digits(n, d))
+        case "article":
+            return circled(n, d, ctx.warnings, node_id)
+        case "paragraph":
+            return ""
+        case "item":
+            return circled(n, d, ctx.warnings, node_id)
+        case "subitem":
+            return f"{_katakana(n, d)}."
+        case "subsubitem":
+            return ctx.paren(_katakana(n, d))
+    return ""
+
+
 def _label_teikan(ctx: NumberingContext, kind: NodeKind, n: int, node_id: str, siblings: int) -> str:
     d = ctx.digit_style
     match kind:
@@ -191,6 +247,8 @@ APPENDIX_KIND_LABELS: dict[NumberingScheme, str] = {
     "nonlife": "別表",
     "life": "別表",
     "teikan": "附則",
+    "group": "別表",
+    "jyusetsu": "別表",
 }
 
 
@@ -202,8 +260,17 @@ def appendix_label(ctx: NumberingContext, index: int, kind_label: str | None = N
     return f"{base}{to_digits(index, ctx.digit_style)}"
 
 
+#: 黒丸数字（❶〜❿）。団体保険の「備考」欄のマーカー（docs/reference_structures.md #13）。
+BLACK_CIRCLED = "❶❷❸❹❺❻❼❽❾❿"
+
+
 def footnote_marker(ctx: NumberingContext, n: int) -> str:
-    """条末脚注のマーカー。nonlife/teikan は（*1）、life は（注1）。"""
+    """条末脚注のマーカー。nonlife/teikan は（*1）、life は（注1）、備考欄は❶。"""
+    if ctx.footnote_style == "remarks_box":
+        if 1 <= n <= len(BLACK_CIRCLED):
+            return BLACK_CIRCLED[n - 1]
+        ctx.warnings.append(NumberWarning("", f"備考のマーカーは {len(BLACK_CIRCLED)} 件まで（{n} 件目）"))
+        return f"({n})"
     body = to_digits(n, ctx.digit_style)
     return f"（注{body}）" if ctx.scheme == "life" else f"（*{body}）"
 
@@ -241,11 +308,23 @@ def label_for(
             return _label_life(ctx, kind, index, node_id, siblings)
         case "teikan":
             return _label_teikan(ctx, kind, index, node_id, siblings)
+        case "group":
+            return _label_group(ctx, kind, index, node_id, siblings)
+        case "jyusetsu":
+            return _label_jyusetsu(ctx, kind, index, node_id, siblings)
 
 
-def heading_text(kind: NodeKind, label: str, title: str | None) -> str:
-    """見出し文字列。条は「第１条（告知義務）」、それ以外は「第１章　補償の概要」。"""
+def heading_text(
+    kind: NodeKind, label: str, title: str | None, article_heading: str = "inline"
+) -> str:
+    """見出し文字列。条は「第１条（告知義務）」、それ以外は「第１章　補償の概要」。
+
+    `article_heading == "above"` のとき、条の見出し行には**見出し文言だけ**が出る
+    （「（告知義務）」）。条ラベルは第1項の本文の先頭に走り込む。
+    """
     title = title or ""
+    if kind == "article" and article_heading == "above":
+        return f"（{title}）" if title else label
     if not label:
         return title
     if not title:
@@ -268,6 +347,8 @@ class IndexedNode:
     in_appendix: bool
     label: str
     heading_text: str
+    #: 本文の先頭に走り込みで印字されるラベル（`article_heading == "above"` の第1項）
+    run_in_label: str | None = None
 
 
 class DocumentIndex:
@@ -323,7 +404,7 @@ class DocumentIndex:
                 depth=depth,
                 in_appendix=in_appendix,
                 label=label,
-                heading_text=heading_text(child.kind, label, child.title),
+                heading_text=heading_text(child.kind, label, child.title, self.ctx.article_heading),
             )
             self.order.append(child.id)
             self._index_children(
@@ -333,6 +414,12 @@ class DocumentIndex:
                 depth=depth + 1,
                 in_appendix=in_appendix,
             )
+            # 条見出しを条の上に置く体裁では、条ラベルを第1項の本文の先頭に走り込ませる
+            # （docs/reference_structures.md #12）。条の label は「第23条」のまま残す。
+            if self.ctx.article_heading == "above" and child.kind == "article" and label:
+                first = next((c for c in child.children if c.kind == "paragraph"), None)
+                if first is not None:
+                    self.nodes[first.id] = replace(self.nodes[first.id], run_in_label=label)
 
     def __contains__(self, node_id: object) -> bool:
         return node_id in self.nodes
@@ -350,6 +437,7 @@ class DocumentIndex:
                 heading_text=item.heading_text,
                 path=[self.nodes[a].heading_text for a in item.ancestors],
                 depth=item.depth,
+                run_in_label=item.run_in_label,
             )
         return out
 

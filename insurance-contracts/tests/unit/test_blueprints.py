@@ -15,7 +15,7 @@ SCHEMES = ("nonlife", "life", "teikan")
 
 
 def test_ジャンルがそろっている() -> None:
-    """2026-09-22 に参考 #11 から golf を追加した。"""
+    """2026-09-22 に参考 #11 から golf を、#12〜#14 から group を追加した。"""
     assert set(GENRES) == {
         "auto",
         "oneday",
@@ -25,6 +25,7 @@ def test_ジャンルがそろっている() -> None:
         "teikan",
         "travel",
         "golf",
+        "group",
     }
 
 

@@ -1,0 +1,13 @@
+style_id: grp-a4land-2col-plain
+description: A4 横・2段組・素組み。団体保険の特約条項と加入のしおり（参考 #13・#14）の版面
+page: { size: A4-landscape, width_mm: 297, height_mm: 210, margin_mm: { top: 15, right: 16, bottom: 16, left: 16 } }
+columns: { count: 2, gap_mm: 9 }
+fonts: { body: "IPAexMincho", heading: "IPAexGothic", symbol_fallback: ["Noto Sans Symbols", "Noto Sans Symbols 2"] }
+sizes: { body_pt: 9, line_height: 1.6, h1_pt: 12.5, h2_pt: 10.5, h3_pt: 9.5, h4_pt: 9,
+         table_pt: 8.2, note_pt: 7.8, toc_pt: 8.6, cover_pt: 17 }
+palette: { text: "#000000", rule: "#000000", accent: "#000000", band: "#ffffff", note_bg: "#ffffff" }
+headings: { band: false }
+table: { border: grid }
+margin_note: article_end
+page_number: dashed
+chars_per_page_estimate: 1573

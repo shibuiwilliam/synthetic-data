@@ -1,0 +1,91 @@
+# 団体保険（法人向け）の普通保険約款＋特約条項
+# 実物（docs/reference_structures.md #12・#13）の特徴：
+#  - 条見出しを条の上に括弧書きで置き、条ラベルは第1項の本文に走り込ませる（article_heading: above）
+#  - 項＝丸数字（第1項は無番号）、号＝「１．」、細目＝(ｱ)（numbering_scheme: group）
+#  - 条末の注記は黒丸数字のマーカーと「第N条　備考」の枠（footnote_style: remarks_box）
+#  - ページ番号はダッシュ囲み。表・図は少なく、本文が主体
+genre: group
+description: 団体を保険契約者とする生命保険の普通保険約款と特約条項。条見出しを条の上に置く体裁
+target_pages: [12, 18]
+numbering_scheme: group
+article_heading: above
+footnote_style: remarks_box
+default_style: grp-a4-1col-mincho
+
+front_matter:
+  cover: true
+  preface: false
+  purpose_index: false
+  toc_with_summaries: false
+  toc_depth: 2
+  rider_index: false
+
+required:
+  - { kind: table, subtype: definitions, min_rows: 8 }
+  - { kind: table, subtype: procedure, min_rows: 3, min_cols: 2,
+      note: "請求に必要な書類の表（C7）" }
+  - { kind: footnotes, min_count: 8, note: "「備考」欄。黒丸数字のマーカーで本文と対応させる" }
+  - { kind: figure, subtype: timeline, note: "責任開始から支払までの期間（D5）" }
+
+skeleton:
+  - id: ch1
+    kind: chapter
+    title_options: ["用語の意義および保険金の支払"]
+    children:
+      - { id: ch1_a1, kind: article, title_options: ["用語の意義"], chars: 1500,
+          todo: "8〜12語。団体・加入者・所属員など団体保険に固有の語を入れる",
+          required: [ { kind: table, subtype: definitions, min_rows: 8 } ] }
+      - { id: ch1_a2, kind: article, title_options: ["死亡保険金の支払"], chars: 700 }
+      - { id: ch1_a3, kind: article, title_options: ["高度障害保険金の支払"], chars: 800,
+          todo: "該当する状態は別表で定め、本文からは {ref:app1} で呼ぶ" }
+      - { id: ch1_a4, kind: article, title_options: ["保険金を支払わない場合"], chars: 900 }
+      - { id: ch1_a5, kind: article, title_options: ["保険金の請求手続"], chars: 900,
+          required: [ { kind: table, subtype: procedure, min_rows: 3, min_cols: 2 } ] }
+      - { id: ch1_a6, kind: article, title_options: ["保険金の支払の時期および場所"], chars: 900,
+          required: [ { kind: figure, subtype: timeline } ] }
+
+  - id: ch2
+    kind: chapter
+    title_options: ["保険契約の締結および効力"]
+    children:
+      - { id: ch2_a1, kind: article, title_options: ["保険契約の締結"], chars: 700 }
+      - { id: ch2_a2, kind: article, title_options: ["加入者の範囲"], chars: 700 }
+      - { id: ch2_a3, kind: article, title_options: ["責任開始期"], chars: 600 }
+      - { id: ch2_a4, kind: article, title_options: ["告知義務"], chars: 700 }
+      - { id: ch2_a5, kind: article, title_options: ["告知義務違反による解除"], chars: 900,
+          todo: "因果関係不存在の特則を必ず置く（docs/authoring_checklist.md §10）" }
+
+  - id: ch3
+    kind: chapter
+    title_options: ["保険料の払込み"]
+    children:
+      - { id: ch3_a1, kind: article, title_options: ["保険料の払込方法"], chars: 700 }
+      - { id: ch3_a2, kind: article, title_options: ["猶予期間および保険契約の失効"], chars: 700 }
+      - { id: ch3_a3, kind: article, title_options: ["保険料の払込免除"], chars: 600 }
+
+  - id: ch4
+    kind: chapter
+    title_options: ["保険契約の消滅およびその他の事項"]
+    children:
+      - { id: ch4_a1, kind: article, title_options: ["重大事由による解除"], chars: 800 }
+      - { id: ch4_a2, kind: article, title_options: ["詐欺による取消しおよび不法取得目的による無効"], chars: 600 }
+      - { id: ch4_a3, kind: article, title_options: ["保険契約者の変更"], chars: 500 }
+      - { id: ch4_a4, kind: article, title_options: ["時効"], chars: 300 }
+      - { id: ch4_a5, kind: article, title_options: ["管轄裁判所"], chars: 300 }
+
+riders: { count: [2, 2], pool: [rider_lapse_cancel, rider_premium_waiver] }
+
+appendices:
+  - { id: app1, title_options: ["高度障害状態"], table: grade_schedule, min_rows: 5,
+      todo: "判定軸ごと実物と変える。日常生活動作の介助の要否で組む" }
+
+variants:
+  digit_style: { halfwidth: 0.7, fullwidth: 0.3 }
+  paren_style: { fullwidth: 0.6, halfwidth: 0.4 }
+  era: { seireki: 1.0 }
+  issuer_kind: { mutual: 0.5, stock: 0.5 }
+  pet_name: { absent: 1.0 }
+  order_shuffle: []
+  styles: [grp-a4-1col-mincho, grp-a4land-2col-plain]
+
+budget: { chars_min: 9000, chars_max: 15000, footnotes_min: 8, margin_notes_min: 0 }

@@ -359,3 +359,15 @@ CLAUDE.md §14 の筆頭リスク。`yakkan/layout/extract.py` に実装と所�
 - 教訓：**この renderer に対しては「レンダリングが成功した」は「内容が全部載った」を意味しない。**
   ページ数と lint だけで判断してはいけない。
 - 確認日：2026-09-21。
+
+## `scripts/calibrate_styles.py` の 2 段組の較正値は粗い（2026-09-22）
+
+`measure()` は「1 ページ目に実際に描かれた文字数」を数えるが、2 段組のスタイルで
+**版面が違うのに同じ値が出る**ことがある（`nl-wide-2col-plain` と
+`grp-a4land-2col-plain` がともに 1573、`nl-a4-2col-mincho` と `nl-b5-2col-dense` が
+ともに 1779）。CSS は正しく別物が生成されており（`@page size`・`font-size`・
+`column-gap` はいずれも違う）、原因は未特定。
+
+`chars_per_page_estimate` は lint L09（推定ページ数）にしか使わず、L09 は warn 止まりなので
+データセットの正しさには影響しない。**新しい style を足したら、較正値を信用せず
+実際に 1 本描いてページ数を確かめること。**

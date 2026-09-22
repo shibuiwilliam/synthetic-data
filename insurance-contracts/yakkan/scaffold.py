@@ -296,6 +296,8 @@ class Scaffolder:
                 "edition_date": "2026-10-01",
                 "form_code": "",
                 "numbering_scheme": bp.numbering_scheme,
+                "article_heading": bp.article_heading,
+                "footnote_style": bp.footnote_style,
                 "digit_style": digit_style,
                 "disclaimer": DISCLAIMER,
                 "constants": dict(sorted(self.constants.items())),

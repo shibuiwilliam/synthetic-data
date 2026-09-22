@@ -1,0 +1,13 @@
+style_id: grp-a4-1col-mincho
+description: A4 縦・1段組・明朝。団体保険の普通保険約款（参考 #12）の版面。ページ番号はダッシュ囲み
+page: { size: A4, width_mm: 210, height_mm: 297, margin_mm: { top: 22, right: 24, bottom: 22, left: 24 } }
+columns: { count: 1, gap_mm: 8 }
+fonts: { body: "IPAexMincho", heading: "IPAexMincho", symbol_fallback: ["Noto Sans Symbols", "Noto Sans Symbols 2"] }
+sizes: { body_pt: 10.5, line_height: 1.85, h1_pt: 13.5, h2_pt: 11.5, h3_pt: 11, h4_pt: 10.5,
+         table_pt: 9.5, note_pt: 9, toc_pt: 10, cover_pt: 18 }
+palette: { text: "#000000", rule: "#000000", accent: "#000000", band: "#ffffff", note_bg: "#ffffff" }
+headings: { band: false }
+table: { border: grid }
+margin_note: article_end
+page_number: dashed
+chars_per_page_estimate: 887

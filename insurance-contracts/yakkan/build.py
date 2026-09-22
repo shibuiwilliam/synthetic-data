@@ -336,7 +336,9 @@ def build_plain_text(ctx: BuildContext) -> tuple[dict[str, PlainText], list[RefI
             pc = ctx.plain_context(node.id)
             body = to_plain(parse(node.text), pc)
             _collect(pc, node.id, refs, terms)
-            plain[node.id] = PlainText(with_label=with_label(item.label, body), without_label=body)
+            # `article_heading == "above"` の第1項は、条ラベルが本文の先頭に走り込む
+            prefix = item.run_in_label or item.label
+            plain[node.id] = PlainText(with_label=with_label(prefix, body), without_label=body)
         else:
             plain[node.id] = PlainText(
                 with_label=item.heading_text,
@@ -436,7 +438,12 @@ def build_footnote_index(ctx: BuildContext) -> list[FootnoteIndex]:
 
 def build(draft: SourceDraft) -> Source:
     """執筆物から `derived` 付きの `Source` を作る。"""
-    numbering = NumberingContext(draft.meta.numbering_scheme, draft.meta.digit_style)
+    numbering = NumberingContext(
+        draft.meta.numbering_scheme,
+        draft.meta.digit_style,
+        article_heading=draft.meta.article_heading,
+        footnote_style=draft.meta.footnote_style,
+    )
     index = DocumentIndex(numbering, draft.body, draft.appendices)
     ctx = BuildContext(
         draft=draft,

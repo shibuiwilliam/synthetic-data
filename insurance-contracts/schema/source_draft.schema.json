@@ -1085,7 +1085,9 @@
           "enum": [
             "nonlife",
             "life",
-            "teikan"
+            "teikan",
+            "group",
+            "jyusetsu"
           ],
           "title": "Numbering Scheme",
           "type": "string"
@@ -1096,6 +1098,24 @@
             "halfwidth"
           ],
           "title": "Digit Style",
+          "type": "string"
+        },
+        "article_heading": {
+          "default": "inline",
+          "enum": [
+            "inline",
+            "above"
+          ],
+          "title": "Article Heading",
+          "type": "string"
+        },
+        "footnote_style": {
+          "default": "inline",
+          "enum": [
+            "inline",
+            "remarks_box"
+          ],
+          "title": "Footnote Style",
           "type": "string"
         },
         "disclaimer": {
@@ -1998,7 +2018,10 @@
         "health",
         "life",
         "teikan",
-        "travel"
+        "travel",
+        "golf",
+        "group",
+        "jyusetsu"
       ],
       "title": "Genre",
       "type": "string"

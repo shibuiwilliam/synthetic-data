@@ -107,11 +107,16 @@ class HtmlBuilder:
 
     def node_html(self, node: Node, depth: int = 0) -> str:
         parts: list[str] = []
-        label = self.source.derived.labels[node.id].label
+        info = self.source.derived.labels[node.id]
+        label = info.label
         title = node.title or ""
         if node.kind in PARAGRAPH_KINDS:
-            parts.append(self._paragraph_html(node, label))
+            # `article_heading == "above"` の第1項は、条ラベルを本文の先頭に走り込ませる
+            parts.append(self._paragraph_html(node, info.run_in_label or label))
         else:
+            # 同じ体裁では、条の見出し行に条ラベルを出さない（heading_text も「（見出し）」）
+            if node.kind == "article" and self.source.meta.article_heading == "above":
+                label = ""
             tag = HEADING_TAGS.get(node.kind, "h4")
             label_span = f'<span class="label" id="{node.id}_label">{escape(label)}</span>' if label else ""
             # derived.heading_text と PDF のテキスト層を一字一句そろえる。
@@ -119,6 +124,8 @@ class HtmlBuilder:
             # 間隔を CSS の margin で空けるとテキスト層に文字が入らず heading_text と食い違う。
             if node.kind == "article" and title:
                 title_text, separator = f"（{title}）", ""
+                if self.source.meta.article_heading == "above":
+                    separator = ""
             else:
                 title_text = title
                 separator = HEADING_SPACE if (label and title) else ""
@@ -140,11 +147,11 @@ class HtmlBuilder:
         leading = [b for b in node.blocks if not _is_trailing(b)]
         trailing = [b for b in node.blocks if _is_trailing(b)]
         for block in leading:
-            parts.append(self.block_html(block))
+            parts.append(self.block_html(block, node.id))
         for child in node.children:
             parts.append(self.node_html(child, depth + 1))
         for block in trailing:
-            parts.append(self.block_html(block))
+            parts.append(self.block_html(block, node.id))
         return "\n".join(p for p in parts if p)
 
     def _paragraph_html(self, node: Node, label: str) -> str:
@@ -159,7 +166,8 @@ class HtmlBuilder:
 
     # --- ブロック -----------------------------------------------------------
 
-    def block_html(self, block) -> str:
+    def block_html(self, block, owner_id: str | None = None) -> str:
+        """`owner_id` は、このブロックがぶら下がるノード（備考の見出しに条ラベルを出すのに使う）。"""
         match block:
             case ParagraphBlock():
                 return (
@@ -196,8 +204,20 @@ class HtmlBuilder:
                         f'<span class="label">{marker}</span>'
                         f'<span class="text">{self.inline(note.text, note_id)}</span></div>'
                     )
+                # 団体保険は「第N条　備考」の枠で示す（docs/reference_structures.md #13）。
+                head = ""
+                cls = "footnotes"
+                if self.source.meta.footnote_style == "remarks_box":
+                    cls = "footnotes remarks"
+                    owner = self.source.derived.labels.get(owner_id or "")
+                    caption = f"{owner.label}　備考" if owner and owner.label else "備考"
+                    head = (
+                        f'<div class="remarks-head" id="{block.id}__head" '
+                        f'data-kind="remarks_head">{escape(caption)}</div>'
+                    )
                 return (
-                    f'<div class="footnotes" id="{block.id}" data-kind="footnotes">'
+                    f'<div class="{cls}" id="{block.id}" data-kind="footnotes">'
+                    + head
                     + "".join(lines)
                     + "</div>"
                 )
@@ -344,7 +364,12 @@ def build_html(
     `toc_pages` を渡すと、目次のページ番号を `target-counter` ではなく**文字として**埋める
     （2 パス描画。docs/gotchas.md「目次のページ番号が収束しない」）。
     """
-    numbering = NumberingContext(source.meta.numbering_scheme, source.meta.digit_style)
+    numbering = NumberingContext(
+        source.meta.numbering_scheme,
+        source.meta.digit_style,
+        article_heading=source.meta.article_heading,
+        footnote_style=source.meta.footnote_style,
+    )
     from yakkan.build import assign_caption_labels
     from yakkan.numbering import DocumentIndex
 

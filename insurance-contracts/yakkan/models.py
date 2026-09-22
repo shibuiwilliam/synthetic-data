@@ -130,6 +130,13 @@ class Meta(Model):
     form_code: str
     numbering_scheme: NumberingScheme
     digit_style: DigitStyle
+    #: 条見出しの体裁。`inline` は「第１条（告知義務）」を 1 行の見出しに置く（既定）。
+    #: `above` は見出し文言だけを括弧書きで条の上の行に置き、条ラベルを第1項の本文の
+    #: 先頭に走り込ませる（団体保険の体裁。docs/reference_structures.md #12）。
+    article_heading: Literal["inline", "above"] = "inline"
+    #: 条末脚注の体裁。`inline` は「（*1）」を条末に並べる（既定）。
+    #: `remarks_box` は黒丸数字のマーカーと「第N条　備考」の枠で示す（#13）。
+    footnote_style: Literal["inline", "remarks_box"] = "inline"
     disclaimer: str
     #: 文書内で一貫させたい定数（限度額・日数・等級）。本文からは `{const:key}` で参照する（§8 L11）。
     constants: dict[str, str] = Field(default_factory=dict)
@@ -478,6 +485,11 @@ class LabelInfo(Model):
     heading_text: str  # 「第１条（告知義務）」
     path: list[str]  # 祖先の heading_text
     depth: int
+    #: この節点の本文の**先頭に走り込みで印字される**ラベル。
+    #: `meta.article_heading == "above"`（条見出しを条の上に括弧書きで置く体裁。
+    #: docs/reference_structures.md #12）のとき、条の第1項がここに条ラベルを持つ。
+    #: 通常の体裁では None で、ラベルは見出し行に出る。
+    run_in_label: str | None = None
 
 
 class RefInfo(Model):

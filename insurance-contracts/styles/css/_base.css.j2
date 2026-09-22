@@ -162,6 +162,12 @@ svg { display: block; max-width: 100%; }
    逆に広げすぎて別の崩れを招いたりする（どちらも実際に起きた） */
 .footnotes .fn-line { display: grid; grid-template-columns: max-content 1fr; column-gap: 0.6em; }
 .footnotes .fn-line > .label { white-space: nowrap; }
+/* 団体保険の「第N条　備考」欄（docs/reference_structures.md #13）。
+   罫線の上に並べる脚注ではなく、細い枠で囲んだ箱として置く。 */
+.footnotes.remarks { border: 0.5pt solid {{ p.rule }}; border-top-width: 0.5pt;
+                     padding: 1mm 1.6mm; margin: 1.6mm 0 2.2mm; }
+.footnotes.remarks .remarks-head { font-family: '{{ style.fonts.heading }}', sans-serif;
+                                   font-weight: 700; margin-bottom: 0.6mm; }
 
 /* --- 目次 --- */
 /* 前付けは段組の外に置く（目次と同じ理由） */

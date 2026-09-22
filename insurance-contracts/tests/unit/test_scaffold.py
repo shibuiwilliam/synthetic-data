@@ -34,7 +34,7 @@ def test_composeで読み込める(built) -> None:
     _genre, result = built
     draft = load_draft(result.content_dir)
     assert draft.body, "body が空"
-    assert draft.meta.numbering_scheme in ("nonlife", "life", "teikan")
+    assert draft.meta.numbering_scheme in ("nonlife", "life", "teikan", "group", "jyusetsu")
 
 
 def test_TODOが残っていることを数えられる(built) -> None:

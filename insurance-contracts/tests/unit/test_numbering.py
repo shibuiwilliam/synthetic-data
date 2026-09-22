@@ -247,3 +247,48 @@ def test_定款の参照解決(from_id, to_id, expected) -> None:
 def test_損保では章の冠が残る() -> None:
     """C2 は teikan 限定。条が章ごとに振り直される方式は章から書く。"""
     assert resolve_ref(_index(), "ch1_a1_p1", "ch4_s3_a1", "relative") == "第２章第１節第１条"
+
+
+def test_団体保険の番号方式() -> None:
+    """項＝丸数字（第1項は無番号）、号＝「１．」、細目＝(ｱ)（docs/reference_structures.md #12）。"""
+    c = ctx("group", "halfwidth")
+    assert label_for(c, "chapter", 2) == "第2章"
+    assert label_for(c, "article", 23) == "第23条"
+    assert label_for(c, "paragraph", 1, siblings=3) == ""
+    assert label_for(c, "paragraph", 2, siblings=3) == "②"
+    assert label_for(c, "item", 3) == "3．", "号のピリオドは全角（実物の体裁）"
+    assert label_for(c, "subitem", 1) == "(ｱ)"
+
+
+def test_条見出しを条の上に置くと条ラベルは第1項に走り込む() -> None:
+    """docs/reference_structures.md #12 の体裁。`meta.article_heading = "above"`。"""
+    c = NumberingContext(scheme="group", digit_style="halfwidth", article_heading="above")
+    body = [
+        Node(
+            id="ch1",
+            kind="chapter",
+            title="保険金の支払",
+            children=[
+                Node(
+                    id="ch1_a1",
+                    kind="article",
+                    title="死亡保険金の支払",
+                    children=[Node(id="ch1_a1_p1", kind="paragraph"), Node(id="ch1_a1_p2", kind="paragraph")],
+                )
+            ],
+        )
+    ]
+    labels = DocumentIndex(c, body).labels()
+    assert labels["ch1_a1"].label == "第1条", "条のラベルは正解として残す"
+    assert labels["ch1_a1"].heading_text == "（死亡保険金の支払）", "見出し行には見出し文言だけ"
+    assert labels["ch1_a1_p1"].run_in_label == "第1条", "条ラベルは第1項の本文の先頭に走り込む"
+    assert labels["ch1_a1_p1"].label == "", "第1項そのものは無番号"
+    assert labels["ch1_a1_p2"].run_in_label is None
+
+
+def test_備考欄のマーカーは黒丸数字() -> None:
+    c = NumberingContext(scheme="group", footnote_style="remarks_box")
+    assert footnote_marker(c, 1) == "❶"
+    assert footnote_marker(c, 3) == "❸"
+    # 既定の体裁は変わらない
+    assert footnote_marker(NumberingContext(scheme="group"), 1) == "（*１）"
