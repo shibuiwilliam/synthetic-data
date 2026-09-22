@@ -244,6 +244,16 @@ grade 1 は 1 クエリあたり 20 件までに切っているが、**切った
 
 **対処**：`queries.jsonl` に `related_truncated`（真偽）と `n_related_total` を出す。
 
+### 実施（2026-09-22・完了）
+
+- `queries.jsonl` に `n_related_total` と `related_truncated` を出した。
+  実測：1,944 クエリ中 **28 件**が打ち切られ、落ちた grade 1 は **1,109 件**。
+  内訳は term 23・heading 4・qa 1 で、いずれも「事故」のような頻出の定義語。
+- 切るときは `passage_id` 順の先頭 20 件だった。これだと doc_id が辞書順で前の文書に
+  偏り、後ろの文書の関連パッセージが非適合と同じ扱いになる。**文書ごとの列から
+  順に 1 件ずつ拾う**ように変えた（`_spread`）。
+- `docs/evaluation.md` に「この 28 件で Recall@k を解釈しない」と明記した。
+
 ---
 
 ## S6 自己評価が循環している

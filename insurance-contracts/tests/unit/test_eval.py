@@ -196,3 +196,32 @@ def test_部分適合を落とすとnDCGが下がる() -> None:
     worse = evaluate_run(graded, dropped)["overall"]["ndcg@10"]
     assert best == 1.0
     assert worse < best, "grade 1 を落としても点が変わらないなら、部分適合が効いていない"
+
+
+# --- grade 1 の打ち切り（docs/remaining_issues.md S5） ------------------------
+
+
+def test_grade1の間引きは文書をまたいで均等に取る() -> None:
+    from yakkan.search_set import _spread
+
+    related = {f"doc{d}::e{i}": 1 for d in range(4) for i in range(10)}
+    kept = _spread(related, 8)
+    assert len(kept) == 8
+    per_doc = {}
+    for passage_id in kept:
+        per_doc[passage_id.split("::")[0]] = per_doc.get(passage_id.split("::")[0], 0) + 1
+    assert per_doc == {"doc0": 2, "doc1": 2, "doc2": 2, "doc3": 2}, per_doc
+    assert _spread(related, 100) == dict(sorted(related.items())), "上限以下なら素通し"
+
+
+@pytest.mark.skipif(not (DATASET / "search" / "queries.jsonl").exists(), reason="検索評価セットが無い")
+def test_打ち切ったクエリには印がある() -> None:
+    rows = [
+        json.loads(line)
+        for line in (DATASET / "search" / "queries.jsonl").read_text(encoding="utf-8").splitlines()
+        if line.strip()
+    ]
+    for row in rows:
+        assert row["n_related"] <= row["n_related_total"]
+        assert row["related_truncated"] == (row["n_related"] < row["n_related_total"])
+    assert any(row["related_truncated"] for row in rows), "打ち切りが 1 件も無いなら印を検査できていない"

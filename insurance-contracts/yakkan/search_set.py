@@ -283,6 +283,35 @@ def _resolve_evidence(evidence: str, index: dict[str, str]) -> str | None:
 MAX_RELATED = 20
 
 
+def _spread(related: dict[str, int], limit: int) -> dict[str, int]:
+    """grade 1 を上限まで間引く。**文書をまたいで均等に**取る。
+
+    `passage_id` 順に先頭から切ると、doc_id が辞書順で前にある文書の
+    パッセージばかりが残り、後ろの文書の関連パッセージが「非適合」と同じ
+    扱いになる（docs/remaining_issues.md S5）。文書ごとの列を作って
+    順番に 1 件ずつ拾えば、どの文書からも同じだけ残る。
+    """
+    if len(related) <= limit:
+        return dict(sorted(related.items()))
+    columns: dict[str, list[str]] = {}
+    for passage_id in sorted(related):
+        columns.setdefault(passage_id.split("::", 1)[0], []).append(passage_id)
+    kept: list[str] = []
+    while len(kept) < limit:
+        added = False
+        for doc_id in sorted(columns):
+            queue = columns[doc_id]
+            if not queue:
+                continue
+            kept.append(queue.pop(0))
+            added = True
+            if len(kept) >= limit:
+                break
+        if not added:
+            break
+    return {passage_id: related[passage_id] for passage_id in sorted(kept)}
+
+
 def _under(citation: str, prefix: str) -> bool:
     """`citation` が `prefix` の配下か（「第2章 第1条 (1)」は「第2章 第1条」の配下）。"""
     if not prefix or not citation:
@@ -320,7 +349,7 @@ def build_search_set(  # noqa: C901 - クエリ種別ごとの分岐が本質
         related = {p: g for p, g in hits.items() if p in by_id and g == GRADE_RELATED and p not in exact}
         if not exact:
             return
-        trimmed = dict(sorted(related.items())[:MAX_RELATED])
+        trimmed = _spread(related, MAX_RELATED)
         merged = exact | trimmed
         queries.append(
             {
@@ -331,6 +360,10 @@ def build_search_set(  # noqa: C901 - クエリ種別ごとの分岐が本質
                 "n_relevant": len(merged),
                 "n_exact": len(exact),
                 "n_related": len(trimmed),
+                # 上限で切った分は qrels に出ないので、**Recall を誤解しないための印**を残す。
+                # 切られたパッセージは実際には関連するが、評価上は非適合として扱われる。
+                "n_related_total": len(related),
+                "related_truncated": len(related) > len(trimmed),
             }
         )
         for passage_id, grade in sorted(merged.items()):

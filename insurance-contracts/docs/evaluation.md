@@ -105,9 +105,16 @@ uv run yakkan eval dataset/auto-0001--nl-a4-2col-mincho --pred pred.json --out s
 
 ### クエリと qrels
 
-`queries.jsonl`（`query_id` / `kind` / `query` / `note` / `n_relevant`）と
+`queries.jsonl`（`query_id` / `kind` / `query` / `note` / `n_relevant` / `n_exact` /
+`n_related` / `n_related_total` / `related_truncated`）と
 `qrels.jsonl`（`query_id` / `passage_id` / `grade`）。**grade は 2＝答えがそこにある、1＝関連する。**
 qrels に無い組み合わせは 0（非適合）。
+
+**grade 1 は 1 クエリ 20 件で打ち切る**（`MAX_RELATED`）。打ち切ると qrels に出ないので、
+評価上は非適合と同じ扱いになる。どのクエリで何件落としたかは
+`related_truncated` / `n_related_total` でわかる（現状 1,944 クエリ中 28 件、
+おもに「事故」のような頻出の定義語）。**Recall@k をこの 28 件で解釈しない。**
+打ち切るときは文書をまたいで均等に拾うので、特定の文書だけが残ることはない。
 
 | kind | 作り方 | 何を測るか |
 |---|---|---|
