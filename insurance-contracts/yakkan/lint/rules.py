@@ -92,9 +92,11 @@ def l01_ids_and_refs(ctx: LintContext) -> Iterator[Finding]:
 
     node_ids = {n for n in ctx.index.nodes}
     all_ids = set(seen) | node_ids
-    # キャプションのある表・図は build が「表１」「図２」を振るので、{ref:} の参照先にできる
-    # （docs/shared_fixes.md A3）。キャプションの無い列挙表には番号が無いので参照先にできない。
-    caption_ids = {
+    # 番号の付く表・図だけが {ref:} の参照先になれる（docs/shared_fixes.md A3）。
+    # キャプションの無い列挙表には番号が無く、`caption_numbering: chapter` では
+    # 章に属さない表・図にも番号を振らない（docs/remaining_issues.md S2）。
+    caption_ids = set(ctx.caption_labels)
+    captioned_ids = {
         block.id
         for block, _owner, _article in _iter_blocks(ctx)
         if isinstance(block, Table | Figure) and (block.caption or "").strip()
@@ -127,12 +129,18 @@ def l01_ids_and_refs(ctx: LintContext) -> Iterator[Finding]:
                         path=owned.path,
                     )
             if isinstance(token, Ref) and token.target not in ref_targets:
-                detail = (
-                    "（キャプションの無い表・図には番号が無いので参照できない。caption を付けるか、"
-                    "その表を持つ条を参照する）"
-                    if token.target in all_ids
-                    else ""
-                )
+                if token.target in captioned_ids:
+                    detail = (
+                        "（caption_numbering: chapter では章に属さない表・図に番号を振らないので"
+                        "参照できない。章の中に移すか、その表を持つ別表の条を参照する）"
+                    )
+                elif token.target in all_ids:
+                    detail = (
+                        "（キャプションの無い表・図には番号が無いので参照できない。caption を付けるか、"
+                        "その表を持つ条を参照する）"
+                    )
+                else:
+                    detail = ""
                 yield Finding(
                     "L01",
                     "error",

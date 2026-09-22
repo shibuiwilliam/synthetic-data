@@ -48,8 +48,8 @@ def _compare(actual: dict, golden_path: Path, update: bool) -> None:
 
 
 def test_lintが通る() -> None:
-    """sample_min は描画検証用の 3 ページ抜粋なので、文書全体の規則（L04/L09/L15）は外す。"""
-    findings = lint_content(SAMPLE, exclude=["L04", "L09", "L15"])
+    """sample_min は描画検証用の 3 ページ抜粋なので、文書全体の規則（L04/L09/L15/L16）は外す。"""
+    findings = lint_content(SAMPLE, exclude=["L04", "L09", "L15", "L16"])
     assert findings == [], "\n".join(f.format() for f in findings)
 
 

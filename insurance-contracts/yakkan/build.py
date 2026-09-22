@@ -115,6 +115,9 @@ def assign_caption_labels(draft: SourceDraft, ctx: NumberingContext) -> dict[str
 
     `meta.caption_numbering == "chapter"` のときは章番号を含める（「表1-1」「表3-2」）。
     実物の団体保険の加入のしおり（docs/reference_structures.md #14）がこの形。
+    この方式では**章に属さない表・図（前付け・別表の中）には番号を振らない**。
+    実物がそうであるうえ、「表1-1」と「表1」が同居すると読み取りの正解として
+    紛らわしいためである（docs/remaining_issues.md S2）。
     """
     from yakkan.numbering import to_digits
 
@@ -128,8 +131,10 @@ def assign_caption_labels(draft: SourceDraft, ctx: NumberingContext) -> dict[str
     counters: dict[tuple[str, int], int] = {}
     digits = ctx.digit_style
 
-    def number(kind: str, owner_id: str) -> str:
+    def number(kind: str, owner_id: str) -> str | None:
         chapter = chapters.get(owner_id, 0) if by_chapter else 0
+        if by_chapter and not chapter:
+            return None
         key = (kind, chapter)
         counters[key] = counters.get(key, 0) + 1
         n = to_digits(counters[key], digits)
@@ -141,7 +146,9 @@ def assign_caption_labels(draft: SourceDraft, ctx: NumberingContext) -> dict[str
         if isinstance(block, Table | Figure):
             if not (block.caption or "").strip():
                 continue
-            labels[block.id] = number("表" if isinstance(block, Table) else "図", owner)
+            label = number("表" if isinstance(block, Table) else "図", owner)
+            if label is not None:
+                labels[block.id] = label
     return labels
 
 

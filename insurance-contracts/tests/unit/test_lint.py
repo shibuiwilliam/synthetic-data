@@ -14,7 +14,8 @@ SAMPLE = Path(__file__).resolve().parents[1] / "golden" / "sample_min"
 
 
 #: 文書全体を対象にする規則。sample_min は 3 ページの抜粋なので、これらは対象外にする
-DOCUMENT_RULES = ["L04", "L09", "L15"]
+#: （L16 は 15 問の執筆 QA を求めるので、抜粋には課さない）
+DOCUMENT_RULES = ["L04", "L09", "L15", "L16"]
 
 
 def codes(findings, severity="error") -> set[str]:

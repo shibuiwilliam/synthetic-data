@@ -61,6 +61,16 @@ def _is_trailing(block) -> bool:
     return isinstance(block, BoxBlock) and block.style == "margin_note"
 
 
+def _captioned(label: str, caption: str) -> str:
+    """「表1-1　用語の意味」。番号が無い表・図は表題だけを出す。
+
+    `caption_numbering: chapter` では章に属さない表・図に番号を振らない
+    （docs/remaining_issues.md S2）。build の `plain_text` も同じ形にしているので、
+    ここで区切りの全角空白を落とさないと往復比較（V03）が落ちる。
+    """
+    return f"{label}\u3000{caption}" if label else caption
+
+
 @dataclass
 class HtmlBuilder:
     """1 文書ぶんの HTML を組み立てる。"""
@@ -297,7 +307,7 @@ class HtmlBuilder:
         if table.caption:
             caption = (
                 f'<caption id="{table.id}__caption" data-kind="caption">'
-                f"{escape(caption_label)}　{escape(table.caption)}</caption>"
+                f"{escape(_captioned(caption_label, table.caption))}</caption>"
             )
         notes = "".join(
             f'<div class="table-note" id="{table.id}__note{i}" data-kind="table_note">'
@@ -331,7 +341,7 @@ class HtmlBuilder:
         if figure.caption:
             caption = (
                 f'<figcaption id="{figure.id}__caption" data-kind="caption">'
-                f"{escape(caption_label)}　{escape(figure.caption)}</figcaption>"
+                f"{escape(_captioned(caption_label, figure.caption))}</figcaption>"
             )
         span = " span-all" if figure.size == "full" else ""
         result = render_diagram(figure.diagram, DiagramStyle.from_style(self.style), figure.id)

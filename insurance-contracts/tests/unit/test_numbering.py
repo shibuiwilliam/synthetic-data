@@ -421,3 +421,74 @@ def test_章番号を含む表番号() -> None:
         "t3": "表2-1",
         "f1": "図2-1",
     }, "章ごとに振り直す"
+
+    # 章に属さない表（別表の中）には番号を振らない（docs/remaining_issues.md S2）。
+    # 通し採番のままだと「表1-1」と「表1」が同居し、読み取りの正解として紛らわしい。
+    outside = {
+        **base,
+        "meta": {**base["meta"], "caption_numbering": "chapter"},
+        "appendices": [
+            Node(id="app1", kind="appendix", title="別表", blocks=[table("t9", "え")]).model_dump(mode="json")
+        ],
+    }
+    labels = assign_caption_labels(SourceDraft.model_validate(outside), ctx("group", "halfwidth"))
+    assert "t9" not in labels, "章の外の表には番号を振らない"
+    assert labels["t3"] == "表2-1", "章の中の採番は変わらない"
+
+    flat_outside = SourceDraft.model_validate({**outside, "meta": base["meta"]})
+    assert assign_caption_labels(flat_outside, ctx("group", "halfwidth"))["t9"] == "表4", (
+        "通し採番のときは章の外も番号を振る"
+    )
+
+
+def test_章の外の表を参照するとL01が落ちる() -> None:
+    """番号の無い表は `{ref:}` の参照先にできない（docs/remaining_issues.md S2）。
+
+    以前はキャプションの有無だけで判定していたので、`caption_numbering: chapter` で
+    章の外の表を参照すると lint を素通りし、build が `BuildError` で落ちていた。
+    """
+    from yakkan.lint.runner import lint_draft
+    from yakkan.models import SourceDraft, Table
+
+    def table(tid: str) -> Table:
+        return Table.model_validate(
+            {
+                "id": tid,
+                "caption": "高度障害状態",
+                "semantic_type": "generic",
+                "layout": {"header_rows": 0, "col_widths": [50, 50]},
+                "grid": [[{"id": f"{tid}__r0c0", "text": "あ"}, {"id": f"{tid}__r0c1", "text": "い"}]],
+            }
+        )
+
+    base = {
+        "content_id": "x",
+        "genre": "group",
+        "seed": 1,
+        "meta": {
+            "title": "t",
+            "issuer": {"name": "n", "kind": "stock", "short_name": "n"},
+            "product_name": "p",
+            "edition_date": "2026-10-01",
+            "form_code": "F1",
+            "numbering_scheme": "group",
+            "digit_style": "halfwidth",
+            "disclaimer": "d",
+            "caption_numbering": "chapter",
+        },
+        "front_matter": {"cover": {"title": "t", "issuer_name": "n", "form_code": "F1"}},
+        "body": [
+            Node(
+                id="ch1",
+                kind="chapter",
+                title="第一",
+                children=[Node(id="ch1_a1", kind="article", title="第一条", text="{ref:t9}によります。")],
+            ).model_dump(mode="json")
+        ],
+        "appendices": [
+            Node(id="app1", kind="appendix", title="別表", blocks=[table("t9")]).model_dump(mode="json")
+        ],
+    }
+    findings = lint_draft(SourceDraft.model_validate(base), only=["L01"])
+    messages = [f.message for f in findings if f.severity == "error"]
+    assert any("t9" in m and "章に属さない" in m for m in messages), messages

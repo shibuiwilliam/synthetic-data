@@ -73,7 +73,7 @@ def test_サンプルがlintを通る(tmp_path: Path) -> None:
 
     # サンプルは 1 条だけの断片なので、文書全体を見る規則は外す。
     # L12 も外す：用語の枠は残したまま本文だけ差し替えるので「使われていない語」が必ず出る。
-    findings = lint_content(content, exclude=["L04", "L09", "L12", "L15"])
+    findings = lint_content(content, exclude=["L04", "L09", "L12", "L15", "L16"])
     assert findings == [], "\n".join(f.format() for f in findings)
 
 
