@@ -71,6 +71,16 @@ def jaccard(a: set[str], b: set[str]) -> float:
     return len(a & b) / len(a | b)
 
 
+def _unfinished(content_dir: Path) -> bool:
+    """まだ TODO が残っている（＝執筆途中の）content か。"""
+    from yakkan.compose import count_todos, raw_document
+
+    try:
+        return count_todos(raw_document(content_dir)) > 0
+    except Exception:  # noqa: BLE001 — 読めない content は比較対象から外すだけ
+        return True
+
+
 def compare_with_existing(
     draft: SourceDraft, content_dir: Path | None = None
 ) -> Iterator[tuple[str, float, list[str]]]:
@@ -89,6 +99,12 @@ def compare_with_existing(
             continue
         other, errors = load_draft_or_errors(other_dir)
         if other is None or errors or other.genre != draft.genre:
+            continue
+        if _unfinished(other_dir):
+            # 未執筆の content（scaffold のまま）は比較対象にしない。
+            # 骨組みの文言が同じなので必ず高い重複率が出て、執筆者が幻の重複を追うことになる
+            # （実測：未執筆どうしは 100%、執筆済み × 未執筆で 79〜86%。
+            #  執筆済みどうしは 8.8〜26.3% だった）。
             continue
         other_sentences = sentences(other)
         theirs = ngrams(other_sentences) - library_ngrams()
