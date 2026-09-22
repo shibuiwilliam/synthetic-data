@@ -242,3 +242,39 @@ def test_包含検査の対象種別(answer):
 
 def test_normalizeは全角半角と空白を吸収():
     assert normalize("１００％ 以上") == normalize("100% 以上") == "100%以上"
+
+
+def test_figure_pathに存在しないラベルを書くとerror(answer):
+    """図の答えは包含検査の対象外なので、間違った答えが素通りしていた。
+
+    実際に「最初の手順は何か」に存在しないノード名を書いた執筆 QA が L14 を通ってしまった。
+    """
+    from yakkan.qa.auto import _figures
+
+    figures = _figures(answer)
+    if not figures:
+        pytest.skip("この fixture に図が無い")
+    figure_id = figures[0][0].id
+    item = _qa(
+        type="figure_path",
+        answer="この図に存在しないノード名",
+        answer_type="string",
+        evidence=[figure_id],
+    )
+    findings = validate(QASet(doc_id="x", items=[item]), answer)
+    assert any("図に存在しないラベル" in f.message for f in findings)
+
+
+def test_figure_pathの正しいラベルは通る(answer):
+    from yakkan.qa.auto import _figures, _node_labels
+
+    figures = _figures(answer)
+    if not figures:
+        pytest.skip("この fixture に図が無い")
+    figure, _owner = figures[0]
+    labels = list(_node_labels(figure).values())
+    if not labels:
+        pytest.skip("ラベルを持つノードが無い")
+    item = _qa(type="figure_path", answer=labels[0], answer_type="string", evidence=[figure.id])
+    findings = [f for f in validate(QASet(doc_id="x", items=[item]), answer) if f.severity == "error"]
+    assert findings == []

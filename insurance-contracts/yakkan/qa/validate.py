@@ -37,6 +37,9 @@ CONTAINMENT_TYPES = frozenset({"extract", "table_lookup", "definition"})
 #: 数値で答える種別
 NUMBER_TYPES = frozenset({"count"})
 
+#: 図の中の要素を答えにする種別。答えが図のノードのラベルに実在するかを検査する。
+FIGURE_LABEL_TYPES = frozenset({"figure_path"})
+
 
 @dataclass(frozen=True)
 class Finding:
@@ -125,6 +128,26 @@ def validate(qa_set: QASet, answer: Answer) -> list[Finding]:
                     )
                 )
 
+        # --- 3b. 図の答えが実在するラベルか ---
+        # `figure_path` は包含検査の対象外なので、**間違った答えが素通りする**。
+        # 実際に「最初の手順は何か」に存在しないノード名を書いた執筆 QA が通ってしまった。
+        if item.type in FIGURE_LABEL_TYPES:
+            labels = _figure_labels(answer, item.evidence)
+            if labels:
+                wanted = item.answer if isinstance(item.answer, list) else [item.answer]
+                for value in wanted:
+                    if not isinstance(value, str):
+                        continue
+                    if normalize(value) not in labels:
+                        out.append(
+                            Finding(
+                                "L14",
+                                "error",
+                                f"図に存在しないラベルを答えにしている: {value[:30]!r}",
+                                item.id,
+                            )
+                        )
+
         # --- 4. page_hint の整合 ---
         if item.page_hint:
             real: set[int] = set()
@@ -159,6 +182,50 @@ def validate(qa_set: QASet, answer: Answer) -> list[Finding]:
             seen_questions[item.question] = item.id
 
     return out
+
+
+def _figure_labels(answer: Answer, evidence: list[str]) -> set[str]:
+    """evidence に含まれる図の、ノード・手順・区間のラベルを正規化して集める。
+
+    図の中身は `source` の diagram にしかない（`plain_text` には出ない）ので、
+    ここだけは diagram を直接歩く。
+    """
+    wanted = set(evidence)
+    labels: set[str] = set()
+
+    #: 図の「読み取れる文字」が入るキー。timeline の区間は軸の目盛（from/to）で答えるので、
+    #: ノードのラベルだけを集めると取りこぼす。
+    text_keys = ("label", "title", "text", "name", "from", "from_", "to", "start", "end", "note")
+
+    def collect(obj: object) -> None:
+        if isinstance(obj, dict):
+            for key in text_keys:
+                value = obj.get(key)
+                if isinstance(value, str) and value.strip():
+                    labels.add(normalize(value))
+            ticks = obj.get("ticks")
+            if isinstance(ticks, list):
+                labels.update(normalize(x) for x in ticks if isinstance(x, str))
+            for value in obj.values():
+                collect(value)
+        elif isinstance(obj, list):
+            for value in obj:
+                collect(value)
+
+    def walk(obj: object) -> None:
+        if isinstance(obj, dict):
+            if obj.get("type") == "figure" and obj.get("id") in wanted:
+                collect(obj.get("diagram"))
+            for value in obj.values():
+                walk(value)
+        elif isinstance(obj, list):
+            for value in obj:
+                walk(value)
+
+    dumped = answer.source.model_dump(mode="json")
+    for key in ("front_matter", "body", "appendices"):
+        walk(dumped.get(key))
+    return labels
 
 
 def _descendant_text(answer: Answer, element_id: str) -> str:
