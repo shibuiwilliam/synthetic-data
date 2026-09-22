@@ -74,6 +74,11 @@ def _passage(
         "text": text,
         "element_ids": element_ids,
         "pages": _pages_of(answer, element_ids),
+        # qrels の部分適合（grade 1）を機械的に導くための関係。**derived に実在するものだけ**。
+        "terms_used": sorted(
+            {u.term_id for u in answer.source.derived.term_uses if u.in_id in set(element_ids)}
+        ),
+        "refs_to": sorted({r.to_id for r in answer.source.derived.refs if r.from_id in set(element_ids)}),
     }
 
 
@@ -274,50 +279,100 @@ def _resolve_evidence(evidence: str, index: dict[str, str]) -> str | None:
     return None
 
 
-def build_search_set(
+#: 1 クエリあたりの grade 1 の上限。増えすぎると評価が緩くなる
+MAX_RELATED = 20
+
+
+def _under(citation: str, prefix: str) -> bool:
+    """`citation` が `prefix` の配下か（「第2章 第1条 (1)」は「第2章 第1条」の配下）。"""
+    if not prefix or not citation:
+        return False
+    return citation == prefix or citation.startswith(prefix + " ")
+
+
+def build_search_set(  # noqa: C901 - クエリ種別ごとの分岐が本質
     passages: list[dict[str, Any]], qa_by_doc: dict[str, list[dict[str, Any]]]
 ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
     """コーパス全体のクエリと qrels を作る。
 
-    3 系統：
-    - `term`：定義語そのもの。正解はその語の定義パッセージ（**全文書ぶん**）。
-    - `heading`：条の見出し文言。**同じ見出しは複数の文書にあるので、弁別力の検査になる**。
-    - `qa`：既存 QA の問い。正解は evidence を含むパッセージ。
-    - `scoped`：「商品名＋見出し」。正解はその文書のパッセージだけ（絞り込みの検査）。
+    4 系統：
+    - `term`：定義語そのもの。grade 2 はその語の定義パッセージ（**全文書ぶん**）、
+      grade 1 は**その語を実際に使っている**条（`derived.term_uses`）。
+    - `heading`：条の見出し文言。同じ見出しは複数の文書にあるので弁別力の検査になる。
+      grade 1 はその条に属する表・図と、**その条を参照している条**（`derived.refs`）。
+    - `scoped`：「商品名＋見出し」。grade 2 はその文書の条だけ。
+    - `qa`：既存 QA の問い。grade 2 は evidence を含むパッセージ、
+      grade 1 は同じ条の別のパッセージと、その条を参照している条。
+
+    **適合度は捏造しない。** grade 1 は `derived` に実在する関係（用語の使用・条項間参照・
+    同じ条に属すること）からだけ導く。
     """
     by_id = {p["passage_id"]: p for p in passages}
     element_index = _passage_of_element(passages)
+    by_doc: dict[str, list[dict[str, Any]]] = {}
+    for passage in passages:
+        by_doc.setdefault(passage["doc_id"], []).append(passage)
     queries: list[dict[str, Any]] = []
     qrels: list[dict[str, Any]] = []
 
     def add(query_id: str, kind: str, text: str, hits: dict[str, int], note: str = "") -> None:
-        hits = {pid: g for pid, g in hits.items() if pid in by_id and g > 0}
-        if not hits:
+        exact = {p: g for p, g in hits.items() if p in by_id and g == GRADE_EXACT}
+        related = {p: g for p, g in hits.items() if p in by_id and g == GRADE_RELATED and p not in exact}
+        if not exact:
             return
+        trimmed = dict(sorted(related.items())[:MAX_RELATED])
+        merged = exact | trimmed
         queries.append(
             {
                 "query_id": query_id,
                 "kind": kind,
                 "query": text,
                 "note": note,
-                "n_relevant": len(hits),
+                "n_relevant": len(merged),
+                "n_exact": len(exact),
+                "n_related": len(trimmed),
             }
         )
-        for passage_id, grade in sorted(hits.items()):
+        for passage_id, grade in sorted(merged.items()):
             qrels.append({"query_id": query_id, "passage_id": passage_id, "grade": grade})
+
+    def related_of_article(article: dict[str, Any]) -> dict[str, int]:
+        """条に対する「関連する」パッセージ：その条に属する表・図と、その条を参照する条。"""
+        out: dict[str, int] = {}
+        citation = article["citation"]
+        element_ids = set(article["element_ids"])
+        for passage in by_doc.get(article["doc_id"], []):
+            if passage["passage_id"] == article["passage_id"]:
+                continue
+            owns_block = passage["kind"] in ("table", "figure") and _under(passage["citation"], citation)
+            cites_it = bool(element_ids & set(passage.get("refs_to") or []))
+            if owns_block or cites_it:
+                out[passage["passage_id"]] = GRADE_RELATED
+        return out
 
     # --- term ---------------------------------------------------------------
     definitions: dict[str, list[dict[str, Any]]] = {}
+    term_ids: dict[str, set[str]] = {}
     for passage in passages:
         if passage["kind"] == "definition" and passage["title"]:
             definitions.setdefault(passage["title"], []).append(passage)
+            term_id = passage["passage_id"].split("::term::")[-1]
+            term_ids.setdefault(passage["title"], set()).add(term_id)
     for i, (term, hits) in enumerate(sorted(definitions.items()), start=1):
+        grades = {p["passage_id"]: GRADE_EXACT for p in hits}
+        wanted = term_ids.get(term, set())
+        docs = {p["doc_id"] for p in hits}
+        for passage in passages:
+            if passage["doc_id"] not in docs or passage["passage_id"] in grades:
+                continue
+            if wanted & set(passage.get("terms_used") or []):
+                grades[passage["passage_id"]] = GRADE_RELATED
         add(
             f"q_term_{i:04d}",
             "term",
             term,
-            {p["passage_id"]: GRADE_EXACT for p in hits},
-            note="用語の定義を引く項目検索",
+            grades,
+            note="用語の定義を引く項目検索（grade 1 はその語を使っている条）",
         )
 
     # --- heading -------------------------------------------------------------
@@ -332,19 +387,15 @@ def build_search_set(
             headings.setdefault(name, []).append(passage)
     for i, (name, hits) in enumerate(sorted(headings.items()), start=1):
         grades = {p["passage_id"]: GRADE_EXACT for p in hits}
-        # その条に属する表・図は「関連する」
-        owners = {p["passage_id"] for p in hits}
-        for passage in passages:
-            if passage["kind"] in ("table", "figure") and passage["citation"]:
-                for hit in hits:
-                    if passage["doc_id"] == hit["doc_id"] and passage["citation"] == hit["citation"]:
-                        grades.setdefault(passage["passage_id"], GRADE_RELATED)
+        for hit in hits:
+            for passage_id, grade in related_of_article(hit).items():
+                grades.setdefault(passage_id, grade)
         add(
             f"q_head_{i:04d}",
             "heading",
             name,
             grades,
-            note=f"見出しの項目検索（{len(owners)} 文書に同名の条がある）",
+            note=f"見出しの項目検索（{len(hits)} 文書に同名の条がある）",
         )
 
     # --- scoped（商品名で絞り込む） --------------------------------------------
@@ -354,11 +405,12 @@ def build_search_set(
             continue  # 複数文書にある見出しだけが絞り込みの検査になる
         for hit in sorted(hits, key=lambda p: p["passage_id"])[:1]:
             scoped += 1
+            grades = {hit["passage_id"]: GRADE_EXACT} | related_of_article(hit)
             add(
                 f"q_scope_{scoped:04d}",
                 "scoped",
                 f"{hit['product_name']}の{name}",
-                {hit["passage_id"]: GRADE_EXACT},
+                grades,
                 note="商品名で絞り込む項目検索（同名の条が他文書にもある）",
             )
 
@@ -376,13 +428,17 @@ def build_search_set(
                     grades[passage_id] = GRADE_EXACT
             if not grades:
                 continue
-            # 同じ条の別のパッセージは「関連する」
-            citations = {by_id[p]["citation"] for p in grades if by_id[p]["citation"]}
-            for passage in passages:
-                if passage["doc_id"] != doc_id or passage["passage_id"] in grades:
+            citations = {by_id[p]["citation"] for p in list(grades) if by_id[p]["citation"]}
+            for passage in by_doc.get(doc_id, []):
+                if passage["passage_id"] in grades:
                     continue
-                if passage["citation"] and passage["citation"] in citations:
+                if any(_under(passage["citation"], c) or _under(c, passage["citation"]) for c in citations):
                     grades[passage["passage_id"]] = GRADE_RELATED
+            for passage_id in [p for p, g in grades.items() if g == GRADE_EXACT]:
+                article = by_id.get(passage_id)
+                if article and article["kind"] == "article":
+                    for related_id, grade in related_of_article(article).items():
+                        grades.setdefault(related_id, grade)
             n += 1
             add(
                 f"q_qa_{n:04d}",

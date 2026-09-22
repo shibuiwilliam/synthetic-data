@@ -135,3 +135,64 @@ def test_順序を崩すと検索の点が下がる() -> None:
     result = evaluate_run(qrels, broken)
     assert result["overall"]["ndcg@1"] == 0.0
     assert result["overall"]["mrr"] < 1.0
+
+
+# --- 検索評価セットの性質（docs/remaining_issues.md R1） ----------------------
+
+
+def test_citationの前方一致() -> None:
+    from yakkan.search_set import _under
+
+    assert _under("第2章 第1条 (1)", "第2章 第1条")
+    assert _under("第2章 第1条", "第2章 第1条")
+    assert not _under("第2章 第10条", "第2章 第1条"), "前方一致は語の境界で切る"
+    assert not _under("第2章 第1条", "第2章 第1条 (1)")
+    assert not _under("", "第2章")
+
+
+@pytest.mark.skipif(not (DATASET / "search" / "queries.jsonl").exists(), reason="検索評価セットが無い")
+def test_どのクエリ種別にも部分適合がある() -> None:
+    """grade 2 しか無いと nDCG が二値になり、順位の良し悪しを測れない（R1）。"""
+    import json as _json
+    from collections import Counter, defaultdict
+
+    kinds = {
+        _json.loads(line)["query_id"]: _json.loads(line)["kind"]
+        for line in (DATASET / "search" / "queries.jsonl").read_text(encoding="utf-8").splitlines()
+        if line.strip()
+    }
+    grades: defaultdict[str, Counter[int]] = defaultdict(Counter)
+    per_query: Counter[str] = Counter()
+    for line in (DATASET / "search" / "qrels.jsonl").read_text(encoding="utf-8").splitlines():
+        if not line.strip():
+            continue
+        row = _json.loads(line)
+        grades[kinds[row["query_id"]]][int(row["grade"])] += 1
+        per_query[row["query_id"]] += 1
+
+    for kind in ("term", "heading", "scoped", "qa"):
+        assert grades[kind][2] > 0, f"{kind} に grade 2 が無い"
+        assert grades[kind][1] > 0, f"{kind} に grade 1 が無い（部分適合が作れていない）"
+    single = sum(1 for v in per_query.values() if v == 1)
+    assert single / len(per_query) < 0.5, "適合が 1 件だけのクエリが半数を超えている"
+
+
+@pytest.mark.skipif(not (DATASET / "search" / "qrels.jsonl").exists(), reason="検索評価セットが無い")
+def test_部分適合を落とすとnDCGが下がる() -> None:
+    """grade 1 が効いていること（二値ではないこと）を確かめる。"""
+    qrels = load_qrels(DATASET / "search" / "qrels.jsonl")
+    graded = {q: rel for q, rel in qrels.items() if any(g == 1 for g in rel.values())}
+    assert graded, "部分適合を持つクエリが無い"
+    runs = [
+        {"query_id": q, "passages": [p for p, g in sorted(rel.items(), key=lambda kv: (-kv[1], kv[0]))]}
+        for q, rel in graded.items()
+    ]
+    # grade 1 を末尾から落とした結果は、満点より nDCG@10 が下がる
+    dropped = [
+        {"query_id": r["query_id"], "passages": [p for p in r["passages"] if graded[r["query_id"]][p] == 2]}
+        for r in runs
+    ]
+    best = evaluate_run(graded, runs)["overall"]["ndcg@10"]
+    worse = evaluate_run(graded, dropped)["overall"]["ndcg@10"]
+    assert best == 1.0
+    assert worse < best, "grade 1 を落としても点が変わらないなら、部分適合が効いていない"
