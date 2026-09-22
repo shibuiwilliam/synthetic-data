@@ -116,15 +116,25 @@ def lint(
     skip: Annotated[
         list[str] | None, typer.Option("--skip", help="外すルール番号（抜粋の検査では --skip L04 など）")
     ] = None,
+    similarity: Annotated[
+        bool,
+        typer.Option(
+            "--similarity/--no-similarity",
+            help="L15（既存 content との文単位の重複率）を実行する。既定は実行する",
+        ),
+    ] = True,
 ) -> None:
     """執筆物を検査する（CLAUDE.md §8）。error が 1 件でもあれば非ゼロ終了。"""
     from yakkan.lint.runner import lint_content, summarize
 
+    exclude = list(skip) if skip else []
+    if not similarity:
+        exclude.append("L15")
     findings = lint_content(
         content_dir,
         quick=quick,
         only=list(only) if only else None,
-        exclude=list(skip) if skip else None,
+        exclude=exclude or None,
     )
     for finding in findings:
         color = "red" if finding.severity == "error" else "yellow"
