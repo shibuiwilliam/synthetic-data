@@ -121,13 +121,25 @@ def analyze(path: Path, sample: int = 0) -> None:
             )
             # ヘッダ／フッタは「同じ位置に繰り返し出る短い行」の有無だけを見る（内容は記録しない）
             if lines:
-                stat.has_header = bool(page.crop((0, 0, page.width, page.height * 0.07)).chars)
-                stat.has_footer = bool(page.crop((0, page.height * 0.93, page.width, page.height)).chars)
+                stat.has_header = bool(_band(page, 0.0, 0.07).chars)
+                stat.has_footer = bool(_band(page, 0.93, 1.0).chars)
                 top_lines[_shape(lines[0])] += 1
                 bottom_lines[_shape(lines[-1])] += 1
             pages.append(stat)
 
     _report(path, total, pages, counts, style, top_lines, bottom_lines)
+
+
+def _band(page, top_ratio: float, bottom_ratio: float):
+    """ページ上端／下端の帯を切り出す。
+
+    MediaBox の原点が (0, 0) でない PDF（CropBox をずらしてあるもの）があり、
+    0 始まりの bbox を渡すと pdfplumber が「親の外」として弾く（#11 で実際に落ちた）。
+    親の bbox に収まるように clamp する。
+    """
+    x0, top, x1, bottom = page.bbox
+    height = bottom - top
+    return page.crop((x0, top + height * top_ratio, x1, top + height * bottom_ratio))
 
 
 def _shape(line: str) -> str:
