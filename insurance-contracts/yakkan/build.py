@@ -38,7 +38,6 @@ from yakkan.models import (
 from yakkan.numbering import (
     DocumentIndex,
     NumberingContext,
-    circled,
     footnote_marker,
     resolve_ref,
 )
@@ -156,7 +155,14 @@ AUTO_LABEL_TYPES = frozenset({"enumeration", "exclusions"})
 
 
 def enumeration_labels(table: Table, ctx: BuildContext) -> dict[str, str]:
-    """列挙表（`{auto_label}`）の自動採番。第 1 列の stub に ①②… を振る。"""
+    """列挙表（`{auto_label}`）の自動採番。
+
+    **記号は番号方式に従う。** 以前は `circled()` を無条件に呼んでいたため、
+    定款でも ①②③ になっていた（定款の慣行は `（１）（２）`）。
+    ノードの号（`item`）と同じ記号を使うのが筋なので `label_for` 経由にする。
+    """
+    from yakkan.numbering import label_for
+
     labels: dict[str, str] = {}
     if table.semantic_type not in AUTO_LABEL_TYPES:
         return labels
@@ -165,7 +171,7 @@ def enumeration_labels(table: Table, ctx: BuildContext) -> dict[str, str]:
         for cell in row:
             if isinstance(cell, Cell) and "{auto_label}" in cell.text:
                 n += 1
-                labels[cell.id] = circled(n, ctx.numbering.digit_style, ctx.numbering.warnings, cell.id)
+                labels[cell.id] = label_for(ctx.numbering, "item", n, node_id=cell.id, siblings=99)
     return labels
 
 

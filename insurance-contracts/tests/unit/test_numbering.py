@@ -187,3 +187,63 @@ def test_ラベルは位置で決まりidの数字とは独立() -> None:
     assert labels["ch4"].heading_text == "第２章　基本条項"
     assert labels["ch4_s3_a1"].path == ["第２章　基本条項", "第１節　事故発生時の義務"]
     assert labels["ch4_s3_a1"].depth == 2
+
+
+def test_定款の附則は項番号で起こす() -> None:
+    """定款の附則は「１」「２」、号は「（１）」（docs/shared_fixes.md C3）。"""
+    c = ctx("teikan")
+    assert label_for(c, "appendix_section", 1, in_appendix=True) == "第１"
+    assert label_for(c, "paragraph", 1, in_appendix=True, siblings=3) == "１"
+    assert label_for(c, "paragraph", 2, in_appendix=True, siblings=3) == "２"
+    assert label_for(c, "item", 1, in_appendix=True) == "（１）"
+    # 損保・生保の別表は従来どおり
+    assert label_for(ctx(), "paragraph", 2, in_appendix=True, siblings=3) == "２．"
+    assert label_for(ctx(), "item", 1, in_appendix=True) == "①"
+
+
+def _teikan_index() -> DocumentIndex:
+    body = [
+        Node(
+            id="ch3",
+            kind="chapter",
+            title="総代会",
+            children=[Node(id="ch3_a1", kind="article", title="決議")],
+        ),
+        Node(
+            id="ch4",
+            kind="chapter",
+            title="取締役",
+            children=[Node(id="ch4_a1", kind="article", title="報酬等")],
+        ),
+    ]
+    appendices = [
+        Node(
+            id="app1",
+            kind="appendix",
+            children=[
+                Node(id="app1_s1", kind="appendix_section", title="施行期日"),
+                Node(id="app1_s2", kind="appendix_section", title="経過措置"),
+                Node(id="app1_s3", kind="appendix_section", title="定款の変更の経過"),
+            ],
+        )
+    ]
+    return DocumentIndex(ctx("teikan"), body, appendices)
+
+
+@pytest.mark.parametrize(
+    ("from_id", "to_id", "expected"),
+    [
+        # 条が全編通し番号なので章の冠を付けない（C2）
+        ("ch3_a1", "ch4_a1", "第２条（報酬等）"),
+        ("ch4_a1", "ch3_a1", "第１条（決議）"),
+        # 附則の中の項目は「附則」を冠して参照する（C4）
+        ("ch3_a1", "app1_s3", "附則第３"),
+    ],
+)
+def test_定款の参照解決(from_id, to_id, expected) -> None:
+    assert resolve_ref(_teikan_index(), from_id, to_id, "relative") == expected
+
+
+def test_損保では章の冠が残る() -> None:
+    """C2 は teikan 限定。条が章ごとに振り直される方式は章から書く。"""
+    assert resolve_ref(_index(), "ch1_a1_p1", "ch4_s3_a1", "relative") == "第２章第１節第１条"

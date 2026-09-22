@@ -170,13 +170,16 @@ def _label_teikan(ctx: NumberingContext, kind: NodeKind, n: int, node_id: str, s
 #: 別紙内の独立体系（docs/rendering.md §6.4 の「第１」「１．」「①」「ｱ.」）
 def _label_appendix_inner(ctx: NumberingContext, kind: NodeKind, n: int, node_id: str, siblings: int) -> str:
     d = ctx.digit_style
+    # 定款の附則は項番号「１」「２」で起こし、号は（１）とするのが慣行。
+    # 損保・生保の別表は「１．」「①」で、本文の号と同じ記号を使う。
+    teikan = ctx.scheme == "teikan"
     match kind:
         case "appendix_section":
             return f"第{to_digits(n, d)}"
         case "paragraph":
-            return f"{to_digits(n, d)}．"
+            return to_digits(n, d) if teikan else f"{to_digits(n, d)}．"
         case "item":
-            return circled(n, d, ctx.warnings, node_id)
+            return ctx.paren(to_digits(n, d)) if teikan else circled(n, d, ctx.warnings, node_id)
         case "subitem":
             return f"{_katakana(n, d)}."
         case "subsubitem":
@@ -387,6 +390,25 @@ def resolve_ref(index: DocumentIndex, from_id: str, to_id: str, mode: RefMode = 
         chain = list(target_chain[common:])
         if not chain:  # 自分自身への参照
             chain = [to_id]
+
+    # 条が文書全体で通し番号のとき（定款）、章の冠は要らない。
+    # 「第３章第１４条」ではなく「第１４条（決議）」と書くのが実物の体裁で、
+    # 同一章内の参照（冠が付かない）との挙動も揃う。
+    if index.ctx.continuous_articles and mode != "full":
+        for i, cid in enumerate(chain):
+            if index[cid].node.kind == "article":
+                chain = chain[i:]
+                break
+
+    # 別表の中を指す参照は、別表の名前から始める（「附則第３」「別表１第１」）。
+    # 番号だけだと本文の条番号と紛らわしい。
+    if mode != "short" and chain and index[chain[0]].node.kind == "appendix_section":
+        appendix_id = next(
+            (a for a in reversed(index[chain[0]].ancestors) if index[a].node.kind == "appendix"),
+            None,
+        )
+        if appendix_id is not None:
+            chain = [appendix_id, *chain]
 
     if mode == "short":
         cut = [

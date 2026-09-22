@@ -431,3 +431,23 @@ def test_header_pathはrowspanの見出しを全行で指す(content: Path) -> N
     paths = source.derived.tables[tid].header_path
     for row in (1, 2, 3):
         assert paths[f"{tid}__r{row}c1"].row_headers == ["第一分類"], f"{row} 行目が見出しを失っている"
+
+
+def test_L01_キャプションのある表と図は参照できる(content: Path) -> None:
+    """docs/shared_fixes.md A3。build が「表N」「図N」を振るので参照先にできる。"""
+    edit(
+        content / "parts" / "20_ch1.json",
+        lambda d: first_paragraph(d).__setitem__(
+            "text", "{ref:tbl_duties}および{ref:fig_accident_flow}のとおりとします。"
+        ),
+    )
+    assert "L01" not in codes(lint_content(content, quick=True, exclude=DOCUMENT_RULES))
+
+
+def test_L01_キャプションの無い表は参照できない(content: Path) -> None:
+    """列挙表には番号が振られないので、参照先にすると解決できない。"""
+    edit(
+        content / "parts" / "20_ch1.json",
+        lambda d: first_paragraph(d).__setitem__("text", "{ref:tbl_exclusions}のとおりとします。"),
+    )
+    assert "L01" in codes(lint_content(content, quick=True, exclude=DOCUMENT_RULES))

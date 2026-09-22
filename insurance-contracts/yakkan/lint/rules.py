@@ -13,7 +13,7 @@ from pathlib import Path
 
 from yakkan.lint.base import Finding, LintContext, rule
 from yakkan.lint.walk import iter_ids, iter_texts
-from yakkan.models import BoxBlock, Cell, FootnotesBlock, Table
+from yakkan.models import BoxBlock, Cell, Figure, FootnotesBlock, Table
 from yakkan.richtext import (
     AutoLabel,
     Const,
@@ -88,6 +88,14 @@ def l01_ids_and_refs(ctx: LintContext) -> Iterator[Finding]:
 
     node_ids = {n for n in ctx.index.nodes}
     all_ids = set(seen) | node_ids
+    # キャプションのある表・図は build が「表１」「図２」を振るので、{ref:} の参照先にできる
+    # （docs/shared_fixes.md A3）。キャプションの無い列挙表には番号が無いので参照先にできない。
+    caption_ids = {
+        block.id
+        for block, _owner, _article in _iter_blocks(ctx)
+        if isinstance(block, Table | Figure) and (block.caption or "").strip()
+    }
+    ref_targets = node_ids | caption_ids
 
     for owned in iter_texts(ctx.draft):
         if not owned.rich:
@@ -97,9 +105,12 @@ def l01_ids_and_refs(ctx: LintContext) -> Iterator[Finding]:
         except RichTextError:
             continue  # L03 が報告する
         for token in iter_tokens(tokens):
-            if isinstance(token, Ref) and token.target not in node_ids:
+            if isinstance(token, Ref) and token.target not in ref_targets:
                 detail = (
-                    "（表・図への参照は P2 のキャプション採番で対応する）" if token.target in all_ids else ""
+                    "（キャプションの無い表・図には番号が無いので参照できない。caption を付けるか、"
+                    "その表を持つ条を参照する）"
+                    if token.target in all_ids
+                    else ""
                 )
                 yield Finding(
                     "L01",
