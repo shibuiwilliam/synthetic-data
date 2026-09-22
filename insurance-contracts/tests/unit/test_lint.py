@@ -301,3 +301,84 @@ def test_L06_matrixの行列数の不一致(content: Path) -> None:
     with_figure(content, "matrix", lambda f: f["diagram"]["marks"].__setitem__(0, ["○", "○"]))
     findings = [f for f in lint_content(content, quick=True, exclude=DOCUMENT_RULES) if f.code == "L06"]
     assert any("列数が cols と合わない" in f.message for f in findings)
+
+
+# --- L05：2 段ヘッダ（colspan）— §3.1 の C10 ---------------------------------
+
+
+def _two_row_header_table() -> dict:
+    """上段が結合セルの大区分、下段がその内訳という 2 行構成の表頭。
+
+    結合された位置には `merged_into` のプレースホルダを置く（rowspan と同じ規約）。
+    """
+    tid = "tbl_two_row_header"
+    return {
+        "type": "table",
+        "id": tid,
+        "semantic_type": "rate",
+        "caption": "保険料の区分",
+        "layout": {"header_rows": 2, "header_cols": 1, "repeat_header": True, "style": "grid"},
+        "grid": [
+            [
+                {"id": f"{tid}__r0c0", "text": "区分", "role": "header", "rowspan": 2},
+                {"id": f"{tid}__r0c1", "text": "年間の保険料", "role": "header", "colspan": 2},
+                {"merged_into": f"{tid}__r0c1"},
+            ],
+            [
+                {"merged_into": f"{tid}__r0c0"},
+                {"id": f"{tid}__r1c1", "text": "本人", "role": "header"},
+                {"id": f"{tid}__r1c2", "text": "家族", "role": "header"},
+            ],
+            [
+                {"id": f"{tid}__r2c0", "text": "区分あ", "role": "stub"},
+                {"id": f"{tid}__r2c1", "text": "１２，０００円"},
+                {"id": f"{tid}__r2c2", "text": "１８，０００円"},
+            ],
+        ],
+        "records": [{"区分": "区分あ", "本人": "１２，０００円", "家族": "１８，０００円"}],
+    }
+
+
+def _put_table(content: Path, table: dict) -> None:
+    def mutate(data):
+        para = first_paragraph(data)
+        para.setdefault("blocks", []).append(table)
+
+    edit(content / "parts" / "20_ch1.json", mutate)
+
+
+def test_L05_2段ヘッダのcolspanを通す(content: Path) -> None:
+    """`colspan` を足して幅を数えていたため、2 段ヘッダが必ず error になっていた。"""
+    _put_table(content, _two_row_header_table())
+    findings = lint_content(content, exclude=DOCUMENT_RULES)
+    assert [f.format() for f in findings if f.severity == "error"] == []
+
+
+def test_L05_colspanのプレースホルダが欠けているとエラー(content: Path) -> None:
+    table = _two_row_header_table()
+    tid = table["id"]
+    table["grid"][0][2] = {"id": f"{tid}__r0c2", "text": "余計", "role": "header"}
+    _put_table(content, table)
+    findings = lint_content(content, exclude=DOCUMENT_RULES)
+    assert "L05" in codes(findings)
+
+
+def test_L05_rowspanのプレースホルダが欠けているとエラー(content: Path) -> None:
+    table = _two_row_header_table()
+    tid = table["id"]
+    table["grid"][1][0] = {"id": f"{tid}__r1c0", "text": "余計", "role": "header"}
+    _put_table(content, table)
+    findings = lint_content(content, exclude=DOCUMENT_RULES)
+    assert "L05" in codes(findings)
+
+
+def test_header_pathが2段ヘッダを両方の見出しで拾う(content: Path) -> None:
+    """上段の大区分と下段の内訳が both col_headers に入る（table_lookup の正解になる）。"""
+    from yakkan.build import build
+    from yakkan.compose import load_draft
+
+    _put_table(content, _two_row_header_table())
+    source = build(load_draft(content))
+    path = source.derived.tables["tbl_two_row_header"].header_path["tbl_two_row_header__r2c1"]
+    assert path.row_headers == ["区分あ"]
+    assert path.col_headers == ["年間の保険料", "本人"]

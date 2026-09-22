@@ -128,14 +128,44 @@ def l05_tables(ctx: LintContext) -> Iterator[Finding]:
             yield Finding("L05", "error", "grid が空", element_id=block.id)
             continue
 
-        widths = {sum(c.colspan if isinstance(c, Cell) else 1 for c in row) for row in block.grid}
+        # 幅は **格子の位置数**で数える。結合されたセルの位置には `MergedCell` を明示的に置く
+        # 規約なので（rowspan も colspan も同じ）、`colspan` を足すと二重に数えてしまい、
+        # 2 段ヘッダ（§3.1 の C10）が必ず error になっていた。
+        widths = {len(row) for row in block.grid}
         if len(widths) > 1:
             yield Finding(
                 "L05",
                 "error",
-                f"行ごとに列数が違う（結合を展開した幅）: {sorted(widths)}",
+                f"行ごとに格子の位置数が違う: {sorted(widths)}"
+                "（結合された位置には merged_into を持つプレースホルダを置く）",
                 element_id=block.id,
             )
+        # colspan / rowspan がプレースホルダの数と合っているか
+        for r, row in enumerate(block.grid):
+            for c, cell in enumerate(row):
+                if not isinstance(cell, Cell):
+                    continue
+                if cell.colspan > 1:
+                    covered = row[c + 1 : c + cell.colspan]
+                    if len(covered) != cell.colspan - 1 or any(
+                        isinstance(x, Cell) or x.merged_into != cell.id for x in covered
+                    ):
+                        yield Finding(
+                            "L05",
+                            "error",
+                            f"colspan={cell.colspan} だが右隣の位置が merged_into={cell.id} になっていない",
+                            element_id=cell.id,
+                        )
+                if cell.rowspan > 1:
+                    for rr in range(r + 1, min(r + cell.rowspan, len(block.grid))):
+                        below = block.grid[rr][c] if c < len(block.grid[rr]) else None
+                        if below is None or isinstance(below, Cell) or below.merged_into != cell.id:
+                            yield Finding(
+                                "L05",
+                                "error",
+                                f"rowspan={cell.rowspan} だが下の位置が merged_into={cell.id} になっていない",
+                                element_id=cell.id,
+                            )
         width = max(widths)
         if block.layout.header_rows > len(block.grid):
             yield Finding(
