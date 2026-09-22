@@ -382,3 +382,52 @@ def test_header_pathが2段ヘッダを両方の見出しで拾う(content: Path
     path = source.derived.tables["tbl_two_row_header"].header_path["tbl_two_row_header__r2c1"]
     assert path.row_headers == ["区分あ"]
     assert path.col_headers == ["年間の保険料", "本人"]
+
+
+def test_header_pathはrowspanの見出しを全行で指す(content: Path) -> None:
+    """rowspan の見出しがページ／段の境界で継続側に描かれなくても、
+    意味の正解（`header_path`）はその見出しを指し続ける。
+
+    実測（28 データセット）：見出しが別ページにある本文セルが 35 件あり、
+    すべて `row_headers` で見出しを指せていた。読み手には空欄に見えるが、
+    正解は失われていない（`docs/shared_fixes.md` A5）。
+    """
+    from yakkan.build import build
+    from yakkan.compose import load_draft
+
+    tid = "tbl_rowspan_stub"
+    table = {
+        "type": "table",
+        "id": tid,
+        "semantic_type": "generic",
+        "caption": "区分ごとの取扱い",
+        "layout": {"header_rows": 1, "header_cols": 1, "repeat_header": True, "style": "grid"},
+        "grid": [
+            [
+                {"id": f"{tid}__r0c0", "text": "区分", "role": "header"},
+                {"id": f"{tid}__r0c1", "text": "取扱い", "role": "header"},
+            ],
+            [
+                {"id": f"{tid}__r1c0", "text": "第一分類", "role": "stub", "rowspan": 3},
+                {"id": f"{tid}__r1c1", "text": "一つ目の取扱いです。"},
+            ],
+            [
+                {"merged_into": f"{tid}__r1c0"},
+                {"id": f"{tid}__r2c1", "text": "二つ目の取扱いです。"},
+            ],
+            [
+                {"merged_into": f"{tid}__r1c0"},
+                {"id": f"{tid}__r3c1", "text": "三つ目の取扱いです。"},
+            ],
+        ],
+    }
+
+    def mutate(data):
+        para = first_paragraph(data)
+        para.setdefault("blocks", []).append(table)
+
+    edit(content / "parts" / "20_ch1.json", mutate)
+    source = build(load_draft(content))
+    paths = source.derived.tables[tid].header_path
+    for row in (1, 2, 3):
+        assert paths[f"{tid}__r{row}c1"].row_headers == ["第一分類"], f"{row} 行目が見出しを失っている"
