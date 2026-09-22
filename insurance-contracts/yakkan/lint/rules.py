@@ -469,6 +469,33 @@ def l06_figures(ctx: LintContext) -> Iterator[Finding]:
             continue
         yield from _check_figure_meta(block)
         yield from _check_diagram(block)
+        yield from _check_diagram_tokens(block)
+
+
+#: 図の中では解決されないトークン（SVG は build の RichText 解決を通らない）
+_DIAGRAM_TOKEN = __import__("re").compile(r"\{(?:ref|term|const|fn|b|u|ruby|br|auto_label)[:}]")
+
+
+def _check_diagram_tokens(figure) -> Iterator[Finding]:
+    """`diagram` の中に RichText トークンを書いていないか。
+
+    図は自前で SVG を組み立てるので、build の RichText 解決を通らない。
+    `{term:...}` や `{const:...}` を書くと、**PDF にトークンがそのまま描かれる**
+    （auto-0002 の annotated_mock の凡例で実際に起きた）。
+    図の文字は平文で書き、数値を本文と揃えたいときは手で追従する。
+    """
+    import json as _json
+
+    dumped = _json.dumps(figure.diagram.model_dump(mode="json"), ensure_ascii=False)
+    found = sorted(set(_DIAGRAM_TOKEN.findall(dumped)))
+    if found:
+        yield Finding(
+            "L06",
+            "error",
+            f"図の中に解決されないトークンがある: {' '.join(found)}"
+            "（図の文字は平文で書く。SVG は RichText 解決を通らないので、そのまま描かれる）",
+            element_id=figure.id,
+        )
 
 
 def _check_figure_meta(figure) -> Iterator[Finding]:
