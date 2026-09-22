@@ -82,3 +82,26 @@ appendices_required: [ {id: app1, title: "後遺障害等級表", table: grade_s
 variants: { digit_style: {fullwidth: 0.7, halfwidth: 0.3}, era: {seireki: 0.8, wareki: 0.2}, issuer_kind: {stock: 0.9, mutual: 0.1} }
 budget: { chars_min: 18000, chars_max: 32000 }
 ```
+
+---
+
+## 2026-09-22 に足したジャンル（参考 #9〜#14）
+
+| genre | 参考 | default_style | 特徴 |
+|---|---|---|---|
+| `golf` | #11 | `nl-wide-2col-plain` | 賠償責任保険の**約款集**。202×188mm の横長小型判・2 段・完全な素組み。番号方式は nonlife のまま |
+| `group` | #12〜#14 | `grp-a4-1col-mincho` | 団体保険。番号方式 `group`（項＝丸数字・号＝「１．」・細目＝(ｱ)）、`article_heading: above`、`footnote_style: remarks_box` |
+| `jyusetsu` | #9・#10 | `jys-a4-1col-gothic` | 重要事項説明書。**条を持たない**（番号方式 `jyusetsu`、`article_heading: plain`）。見出しに `badges` が付く |
+
+### blueprint に足したフィールド
+
+- `article_heading: inline | above | plain`（既定 `inline`）：条見出しの体裁。scaffold が `meta` に写す。
+- `footnote_style: inline | remarks_box`（既定 `inline`）：条末脚注の体裁。同上。
+- 必須要素に `kind: badge` を追加。`subtype` にバッジの文字列、`min_count` に最低件数を書く。
+
+### style に足したフィールド
+
+- `page_number: plain | dashed`（既定 `plain`）：フッタのページ番号の書式。`dashed` は「− 3 −」（§3.1 E7）。
+
+**新しい style を足したら `chars_per_page_estimate` を鵜呑みにしない。**
+2 段組では較正値が同じ数字になることがある（`docs/gotchas.md`）。実際に 1 本描いてページ数を確かめる。

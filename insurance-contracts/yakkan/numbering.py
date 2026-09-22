@@ -80,6 +80,10 @@ def _roman(n: int, style: DigitStyle) -> str:
 #: 損保・生保の約款は章（または条項）ごとに 1 から振り直すのが普通。
 CONTINUOUS_ARTICLE_SCHEMES: frozenset[str] = frozenset({"teikan"})
 
+#: 第1項を無番号で組む方式。これらでは項を指す `{ref:}` が空文字になってしまうので、
+#: 実物の体裁に合わせて「第N項」と書き下す（docs/reference_structures.md #12）。
+PARAGRAPH_REF_SCHEMES: frozenset[str] = frozenset({"teikan", "group"})
+
 
 @dataclass
 class NumberingContext:
@@ -511,7 +515,12 @@ def resolve_ref(index: DocumentIndex, from_id: str, to_id: str, mode: RefMode = 
     parts: list[str] = []
     for cid in chain:
         item = index[cid]
-        if item.node.kind == "rider":
+        if index.ctx.scheme in PARAGRAPH_REF_SCHEMES and item.node.kind in ("paragraph", "item"):
+            # 参照の書き下し方が印字と違う方式。実物は「第1項第4号」と書く。
+            # 無番号の第1項をそのまま連ねると空文字になり、文がつながらない（実際に起きた）。
+            unit = "項" if item.node.kind == "paragraph" else "号"
+            parts.append(f"第{to_digits(item.index, index.ctx.digit_style)}{unit}")
+        elif item.node.kind == "rider":
             # 特約は番号を持たないので、題名そのもので指す（「携行品損害補償特約第１条」）。
             parts.append(item.node.title or "")
         elif with_title and item.node.kind in _TITLED_KINDS and item.node.title:

@@ -120,10 +120,16 @@ dataset/manifest.json      # 全文書の一覧（doc_id, genre, style, pages, s
 | `life` | 生命保険 ご契約のしおり＋約款 | 16–20 | 1段 | life | 敬体 |
 | `teikan` | 保険会社 定款 | 6–10 | 1段 | teikan | 常体 |
 | `travel` | 海外旅行保険 約款 | 10–16 | 1段/2段 | nonlife | 敬体 |
+| `golf` | 賠償責任保険 約款集（ゴルファー保険） | 12–18 | 2段（横長小型判） | nonlife | 敬体 |
+| `group` | 団体保険 普通保険約款＋特約条項 | 12–18 | 1段／横向きA4 2段 | group | 敬体 |
+| `jyusetsu` | 重要事項説明書（**条を持たない**） | 8–12 | 1段 | jyusetsu | 敬体 |
 
 **必須要素・バリエーション軸・style プリセット・blueprint YAML の形は `docs/blueprints.md`**（旧 §4.1／§4.2／付録A／付録B）。blueprint・style・scaffold を触る作業では着手前に必ず読む。要点：
 
-- ジャンルごとに `required_elements`（表・図・脚注・欄外注の種類と最小件数）が定義され、lint L04 がこれを強制する。
+- ジャンルごとに `required_elements`（表・図・脚注・欄外注・バッジの種類と最小件数）が定義され、lint L04 がこれを強制する。
+- 番号方式は 5 種。`group` は項＝丸数字・号＝「１．」・細目＝(ｱ)、`jyusetsu` は条を持たず 大見出し ›（N）› ①。
+- 条見出しの体裁は `meta.article_heading`（`inline` ／ `above`＝条の上に括弧書き ／ `plain`＝括弧なし）、
+  条末脚注の体裁は `meta.footnote_style`（`inline` ／ `remarks_box`＝黒丸数字と「第N条　備考」の枠）。
 - `variants` は seed で選択：章順・特約本数・定義語数・会社形態・全角半角・和暦西暦・前付けの有無・図表の複雑度。
 - style プリセットは7種（判型×段組×フォント×罫線×欄外注位置）。1 content を1〜3 style で描画してレイアウト頑健性のデータを増やす。
 

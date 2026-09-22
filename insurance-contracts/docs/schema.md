@@ -79,6 +79,9 @@ type Node = {
   summary?: string;            // もくじ用の要約（auto の章）
   blocks?: Block[];            // このノードに付随するブロック（表・図・脚注・囲み）
   children?: Node[];
+  badges?: string[];           // 見出しの右に置く分類ラベル（「契約概要」「注意喚起情報」）。
+                               // `<node_id>__badge<i>` の id を持つ独立要素として描かれ、
+                               // derived.plain_text にも入る（重要事項説明書。#9）
   number_override?: string;           // 例外（「第１の２」など）
   number_override_reason?: string;    // その理由。number_override があるとき lint L03 が必須にする
 };

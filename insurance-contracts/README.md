@@ -80,6 +80,11 @@ DYLD_FALLBACK_LIBRARY_PATH=/opt/homebrew/lib uv run yakkan doctor
 
 - `body[]` / `appendices[]`：`Node` の木（part / chapter / rider / section / article / paragraph / item …）。
   `rider`（特約）は**番号を持たない**種別で、中の条は特約ごとに第1条から始まる。
+  `jyusetsu`（重要事項説明書）は**条を 1 つも持たない**文書で、大見出し ›（N）› ① の 3 階層。
+- `derived.labels[node_id].run_in_label`：条見出しを条の上に置く体裁（`group`）で、
+  **条ラベルが本文の先頭に走り込む**ときのラベル。条そのものの `label` は別に残る。
+- `body[].badges`：見出しの右に付く分類ラベル（「契約概要」「注意喚起情報」）。
+  `<node_id>__badge<i>` の id で `derived.plain_text` と `layout.elements` に入る。
   `Node` は **見出しの文言（`title`）しか持たない**。「第1条」のような番号ラベルは持たず、
   木の位置と番号方式から導出して `derived.labels` に入れる。
 - `derived.labels[node_id]`：`{ label, title, heading_text, path, depth }`。

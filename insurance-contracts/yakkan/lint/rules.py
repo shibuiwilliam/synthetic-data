@@ -109,6 +109,23 @@ def l01_ids_and_refs(ctx: LintContext) -> Iterator[Finding]:
         except RichTextError:
             continue  # L03 が報告する
         for token in iter_tokens(tokens):
+            if isinstance(token, Ref) and token.target in ctx.index:
+                # 参照先に番号が無いと解決結果が空文字になり、文がつながらない
+                # （group の無番号の第1項で実際に起きた）。
+                from yakkan.numbering import resolve_ref as _resolve
+
+                try:
+                    rendered = _resolve(ctx.index, owned.owner_id, token.target, token.mode)
+                except KeyError:
+                    rendered = ""
+                if not rendered.strip():
+                    yield Finding(
+                        "L01",
+                        "error",
+                        f"{{ref:{token.target}}} が空文字に解決される（参照先に番号が無い）",
+                        element_id=owned.owner_id,
+                        path=owned.path,
+                    )
             if isinstance(token, Ref) and token.target not in ref_targets:
                 detail = (
                     "（キャプションの無い表・図には番号が無いので参照できない。caption を付けるか、"

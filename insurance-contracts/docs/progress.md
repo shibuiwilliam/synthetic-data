@@ -342,13 +342,45 @@ P5 の終わりに挙げた 6 件は、A1・A5 を含め **すべて決着した
   新しい道具：`scripts/figure_consts.py`（図の数値を `{const:}` に寄せる）、
   `scripts/figure_strings_snapshot.py`（置換が無害かを確かめる）。
 
+## 参考URL #9〜#14 と 3 ジャンルの追加 — **完了**（2026-09-22）
+
+ユーザーが参考URLを 6 件追加し、「追加した文書形式も生成できるように」と指示した。
+6 件を構造分析して `docs/reference_structures.md` §3.2 に追記し、3 ジャンルを足した。
+
+| genre | 参考 | 文書 | ページ | 本文 | QA |
+|---|---|---|---|---|---|
+| `golf` | #11 | 賠償責任保険 約款集（ゴルファー保険） | 12 / 10 | 10,075 字 | 45 |
+| `group` | #12〜#14 | 団体定期保険 普通保険約款＋特約条項 | 16 / 11 | 10,286 字 | 45 |
+| `jyusetsu` | #9・#10 | 重要事項等説明書（**条を持たない**） | 8 / 9 | 7,605 字 | 45 |
+
+仕組みとして足したもの（いずれも既存 7 ジャンルには影響しない）：
+
+- 番号方式 2 種（`group`：項＝丸数字・号＝「１．」・細目＝(ｱ)／`jyusetsu`：条を使わない）
+- `meta.article_heading`（`inline` / `above` / `plain`）と `LabelInfo.run_in_label`
+- `meta.footnote_style`（`inline` / `remarks_box`＝黒丸数字と「第N条　備考」の枠）
+- `Node.badges`（「契約概要」「注意喚起情報」）と blueprint の `kind: badge` 要件
+- `style.page_number`（`plain` / `dashed`）
+- 第1項が無番号の方式での参照の書き下し（「第1項第4号」）。L01 に「空文字に解決される参照」を追加
+- style 4 種（`nl-wide-2col-plain` `grp-a4-1col-mincho` `grp-a4land-2col-plain` `jys-a4-1col-gothic`）
+
+データセットは **28 → 34**（468 ページ・1,532 問）。`yakkan batch` で 34/34 ready。
+
+途中で見つけて直した欠陥：
+- `analyze_reference_pdf.py` が MediaBox の原点が (0,0) でない PDF で落ちる（#11）
+- `calibrate_styles.py` のスタブが古く `digit_style` を持たず落ちる
+- バッジの CSS を `inline-block` にすると box ツリーが同じ文字を 2 回拾う（V03）
+- 枠つきの備考が段またぎで割れると続きが版面の外に出る（V03。`break-inside: avoid` で解消）
+- `group` の無番号の第1項を指す参照が**空文字**に解決されていた（18 件）
+
 ### 次にやる3タスク（P6）
 1. `yakkan eval`（§9）：ページ別 CER・outline F1・表 TEDS・図 F1・QA 一致・読み順 Kendall τ。
    `answer.json` が評価に耐える形かを確かめるのが主目的。
 2. style 追加・ルビ・縦書きセル・スキャン風画像（§12 P6）。
-3. `dataset-v1` の扱いを決める。タグは P5 完了時点を指しており、今の main で作る
-   データセットとは中身が違う（特約の番号・表題の位置・図の数値の出どころ）。
+3. `dataset-v1` の扱いを決める。タグは P5 完了時点（28 データセット）を指しており、
+   今の main は 34 データセットで中身も違う（特約の番号・表題の位置・図の数値の出どころ）。
    打ち直すか `dataset-v1.1` を切るかはユーザー判断。
+4. 新ジャンルの content 2〜3 本目（現在は各 1 本）。`group` の加入のしおり（#14）にある
+   **階層つき表番号（表1-1）** は未対応。
 
 ---
 
@@ -364,3 +396,4 @@ P5 の終わりに挙げた 6 件は、A1・A5 を含め **すべて決着した
 | 2026-09-21 | P4-a 完了（参考URL 8 件の構造分析、travel の商品種別を特定、blueprint 提案 B-1〜B-9） | 回答待ち 3 件を確認 → blueprints 7 種と scaffold |
 | 2026-09-21 | P4-b 完了（blueprint 7・style 8・条文ライブラリ 41 条・scaffold/compose・lint 7 規則追加・agents/commands）。5 段の疎通確認。WeasyPrint の内容欠落バグを発見し修正 | P4-c：auto を 1 文書執筆 → review → 残り 6 ジャンル |
 | 2026-09-22 | `docs/shared_fixes.md` を一掃（C1–C4・D1・A3 → A2 → B1 → A4 の 4 コミット）。28/28 ready・402 ページ・1,262 問を維持 | P6：`yakkan eval` / style 追加 / `dataset-v1` の打ち直しを決める |
+| 2026-09-22 | 参考URL #9〜#14 を追加・分析し、golf / group / jyusetsu の 3 ジャンルを実装。34/34 ready・468 ページ・1,532 問 | 新ジャンルの content 2〜3 本目 / 階層つき表番号 / `yakkan eval` |

@@ -490,3 +490,28 @@ def _find_figure(data: dict) -> dict:
     walk(data)
     assert found, "part に flowchart の図が無い"
     return found[0]
+
+
+def test_L01_番号を持たない参照先を弾く() -> None:
+    """`resolve_ref` が空文字を返す参照を L01 が error にする。"""
+    from yakkan.models import Node
+    from yakkan.numbering import DocumentIndex, NumberingContext, resolve_ref
+
+    ctx = NumberingContext(scheme="group", digit_style="halfwidth")
+    body = [
+        Node(
+            id="ch1",
+            kind="chapter",
+            title="章",
+            children=[
+                Node(
+                    id="ch1_a1",
+                    kind="article",
+                    title="条",
+                    children=[Node(id="ch1_a1_p1", kind="paragraph"), Node(id="ch1_a1_p2", kind="paragraph")],
+                )
+            ],
+        )
+    ]
+    index = DocumentIndex(ctx, body)
+    assert resolve_ref(index, "ch1_a1_p2", "ch1_a1_p1").strip(), "空文字を返してはいけない"

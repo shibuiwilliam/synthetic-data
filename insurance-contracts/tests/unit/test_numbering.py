@@ -307,3 +307,40 @@ def test_plainの条見出しは括弧を使わない() -> None:
     assert heading_text("article", "③", "主な特約の概要", "plain") == "③　主な特約の概要"
     # 既定の体裁は変わらない
     assert heading_text("article", "第１条", "告知義務") == "第１条（告知義務）"
+
+
+def test_無番号の項を指す参照は第N項と書き下す() -> None:
+    """group / teikan は第1項が無番号なので、そのまま連ねると空文字になる（#12 で実際に起きた）。"""
+    c = NumberingContext(scheme="group", digit_style="halfwidth")
+    body = [
+        Node(
+            id="ch1",
+            kind="chapter",
+            title="保険金の支払",
+            children=[
+                Node(
+                    id="ch1_a1",
+                    kind="article",
+                    title="死亡保険金の支払",
+                    children=[
+                        Node(
+                            id="ch1_a1_p1",
+                            kind="paragraph",
+                            children=[
+                                Node(id="ch1_a1_p1_i1", kind="item"),
+                                Node(id="ch1_a1_p1_i2", kind="item"),
+                            ],
+                        ),
+                        Node(id="ch1_a1_p2", kind="paragraph"),
+                    ],
+                )
+            ],
+        )
+    ]
+    index = DocumentIndex(c, body)
+    assert resolve_ref(index, "ch1_a1_p2", "ch1_a1_p1") == "第1項"
+    assert resolve_ref(index, "ch1_a1_p2", "ch1_a1_p1_i2") == "第1項第2号"
+    # 印字は無番号のまま（参照の書き下し方だけが違う）
+    assert index.labels()["ch1_a1_p1"].label == ""
+    # 損保は印字どおり「（２）」を連ねる
+    assert resolve_ref(_index(), "ch4_s3_a1_p1", "ch4_s3_a1_p2") == "（２）"

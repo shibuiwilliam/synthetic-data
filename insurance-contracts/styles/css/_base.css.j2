@@ -173,8 +173,11 @@ svg { display: block; max-width: 100%; }
 .footnotes .fn-line > .label { white-space: nowrap; }
 /* 団体保険の「第N条　備考」欄（docs/reference_structures.md #13）。
    罫線の上に並べる脚注ではなく、細い枠で囲んだ箱として置く。 */
+/* 枠が段またぎで割れると、続きが版面の外（上マージン）に置かれて描かれない
+   （grp-a4land で実測）。備考は数行の短い箱なので、割らずに次の段へ送る。 */
 .footnotes.remarks { border: 0.5pt solid {{ p.rule }}; border-top-width: 0.5pt;
-                     padding: 1mm 1.6mm; margin: 1.6mm 0 2.2mm; }
+                     padding: 1mm 1.6mm; margin: 1.6mm 0 2.2mm;
+                     break-inside: avoid; }
 .footnotes.remarks .remarks-head { font-family: '{{ style.fonts.heading }}', sans-serif;
                                    font-weight: 700; margin-bottom: 0.6mm; }
 
