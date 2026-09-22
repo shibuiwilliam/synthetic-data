@@ -314,9 +314,7 @@ def label_for(
             return _label_jyusetsu(ctx, kind, index, node_id, siblings)
 
 
-def heading_text(
-    kind: NodeKind, label: str, title: str | None, article_heading: str = "inline"
-) -> str:
+def heading_text(kind: NodeKind, label: str, title: str | None, article_heading: str = "inline") -> str:
     """見出し文字列。条は「第１条（告知義務）」、それ以外は「第１章　補償の概要」。
 
     `article_heading == "above"` のとき、条の見出し行には**見出し文言だけ**が出る
