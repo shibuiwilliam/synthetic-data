@@ -9,4 +9,4 @@ palette: { text: "#111111", rule: "#555555", accent: "#0b5c8a", band: "#e8f1f7",
 headings: { band: true }
 table: { border: horizontal }
 margin_note: article_end
-chars_per_page_estimate: 895
+chars_per_page_estimate: 917

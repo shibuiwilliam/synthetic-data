@@ -1,10 +1,20 @@
-"""style の `chars_per_page_estimate` を実測で較正する（docs/rendering.md §6.10）。
+"""style の `chars_per_page_estimate` を較正する（docs/rendering.md §6.10）。
 
-    uv run python scripts/calibrate_styles.py            # 全スタイルを測って表示
-    uv run python scripts/calibrate_styles.py --write    # styles/*.yaml に書き戻す
+    uv run python scripts/calibrate_styles.py                  # 実コーパスから較正して表示
+    uv run python scripts/calibrate_styles.py --write          # styles/*.yaml に書き戻す
+    uv run python scripts/calibrate_styles.py --synthetic      # 地の文を流し込む旧方式
 
-地の文だけを大量に流し込み、**2 ページ目の先頭に何文字目が来たか**から 1 ページあたりの
-字数を求める。表・図が入るとこれより減るので、lint L09 は表を 0.6 倍・図を固定高で見積もる。
+**既定は実コーパスからの較正**（`--from-dataset` 相当）。`dataset/<doc_id>/layout.json` の
+実ページ数に L09 の見積りが合うような値を、style ごとに二分法で解く。
+L09 の他の係数（表 1.25 倍・図 0.24 ページ…）は実文書で当ててあるので、
+**基準となる字数だけを同じ土俵で合わせる**のが筋。
+
+`--synthetic`（旧方式）は地の文を流し込んで 1 ページ目の文字数を数える。
+**この方式は版面が違っても同じ値を返すことがある**（docs/remaining_issues.md R6）。
+原因は `.para { break-inside: avoid }` で段落が分割されないこと。
+1 ページの容量が**段落単位で量子化**されるため、段落 1 つぶん（2 行前後）より細かく測れず、
+別の版面が同じ段落数に着地すると同値になる。新しい style を足した直後など、
+まだ 1 文書も描いていないときだけ使う。
 """
 
 from __future__ import annotations
@@ -78,14 +88,65 @@ def measure(style_id: str) -> int:
     return text_length(document.pages[0]._page_box)
 
 
+def corpus_samples(dataset_dir: Path) -> dict[str, list[tuple[Path, int]]]:
+    """style_id → [(content ディレクトリ, 実ページ数)]。"""
+    import json
+
+    out: dict[str, list[tuple[Path, int]]] = {}
+    for layout_path in sorted(dataset_dir.glob("*/layout.json")):
+        layout = json.loads(layout_path.read_text(encoding="utf-8"))
+        content_dir = Path("content") / layout["content_id"]
+        if content_dir.is_dir():
+            out.setdefault(layout["style_id"], []).append((content_dir, int(layout["page_count"])))
+    return out
+
+
+def fit_from_corpus(samples: list[tuple[Path, int]], *, low: int = 300, high: int = 4000) -> int:
+    """実ページ数に L09 の見積りが合う `chars_per_page` を二分法で解く。
+
+    見積りは `chars_per_page` について単調減少なので、二分法で足りる。
+    """
+    from yakkan.blueprints import load_blueprint
+    from yakkan.compose import load_draft
+    from yakkan.lint.budget import estimate_pages
+
+    drafts = []
+    for content_dir, actual in samples:
+        draft = load_draft(content_dir)
+        drafts.append((draft, load_blueprint(draft.genre), actual))
+
+    def residual(cpp: int) -> float:
+        """予測 − 実測 の合計（正なら予測が大きい＝ cpp を増やすべき）。"""
+        return sum(estimate_pages(d, b, chars_per_page=cpp).pages - a for d, b, a in drafts)
+
+    lo, hi = low, high
+    for _ in range(40):
+        mid = (lo + hi) // 2
+        if residual(mid) > 0:
+            lo = mid + 1
+        else:
+            hi = mid
+        if lo >= hi:
+            break
+    return lo
+
+
 def main(argv: list[str]) -> int:
     write = "--write" in argv
-    print(f"{'style_id':26} {'現在値':>8} {'実測':>8}  差")
+    synthetic = "--synthetic" in argv
+    dataset_dir = Path("dataset")
+    samples = {} if synthetic else corpus_samples(dataset_dir)
+
+    print(f"{'style_id':26} {'現在値':>8} {'較正値':>8} {'文書':>4}  方式")
     for style_id in available_styles():
         current = load_style(style_id).chars_per_page_estimate
-        measured = measure(style_id)
-        mark = "" if abs(measured - current) <= current * 0.05 else "  ← 更新"
-        print(f"{style_id:26} {current:8} {measured:8}{mark}")
+        rows = samples.get(style_id, [])
+        if rows:
+            measured, how, count = fit_from_corpus(rows), "コーパス", len(rows)
+        else:
+            measured, how, count = measure(style_id), "合成（粗い）", 0
+        mark = "" if abs(measured - current) <= current * 0.02 else "  ← 更新"
+        print(f"{style_id:26} {current:8} {measured:8} {count:4}  {how}{mark}")
         if write:
             path = STYLES_DIR / f"{style_id}.yaml"
             text = path.read_text(encoding="utf-8")
