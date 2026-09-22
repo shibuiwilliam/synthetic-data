@@ -31,6 +31,7 @@ from yakkan.models import (
     HeaderPath,
     ListBlock,
     ListItem,
+    Node,
     ParagraphBlock,
     PlainText,
     RefInfo,
@@ -86,27 +87,61 @@ class BuildContext:
 # --- キャプション採番 ---------------------------------------------------------
 
 
+def _chapter_of(draft: SourceDraft) -> dict[str, int]:
+    """ノード id → その要素が属する章の 1 始まり番号（章の外は 0）。
+
+    `meta.caption_numbering == "chapter"` のときに「表1-1」を作るために使う。
+    """
+    out: dict[str, int] = {}
+
+    def walk(nodes: list[Node], chapter: int) -> None:
+        index = 0
+        for node in nodes:
+            here = chapter
+            if node.kind == "chapter":
+                index += 1
+                here = index if chapter == 0 else chapter
+            out[node.id] = here
+            walk(node.children or [], here)
+            for block in node.blocks:
+                out.setdefault(block.id, here)
+
+    walk(draft.body, 0)
+    return out
+
+
 def assign_caption_labels(draft: SourceDraft, ctx: NumberingContext) -> dict[str, str]:
-    """表・図に「表１」「図１」を文書順で振る（docs/schema.md §5.4 の「番号は build が付与」）。"""
+    """表・図に「表１」「図１」を文書順で振る（docs/schema.md §5.4 の「番号は build が付与」）。
+
+    `meta.caption_numbering == "chapter"` のときは章番号を含める（「表1-1」「表3-2」）。
+    実物の団体保険の加入のしおり（docs/reference_structures.md #14）がこの形。
+    """
     from yakkan.numbering import to_digits
 
     # **キャプションのある表・図だけに番号を振る。**
     # 文と一体の列挙表（「次に掲げる事由」の受けなど）はキャプションを持たず、
     # 実物の約款でも「表N」を振らない。これらを数えていたため、読者に見える番号が
     # 「表１→表３」のように飛んでいた（P5 の執筆担当 4 人が独立に報告）。
+    by_chapter = draft.meta.caption_numbering == "chapter"
+    chapters = _chapter_of(draft) if by_chapter else {}
     labels: dict[str, str] = {}
-    table_n = figure_n = 0
-    for block, _owner, _article in iter_blocks(draft):
-        if isinstance(block, Table):
+    counters: dict[tuple[str, int], int] = {}
+    digits = ctx.digit_style
+
+    def number(kind: str, owner_id: str) -> str:
+        chapter = chapters.get(owner_id, 0) if by_chapter else 0
+        key = (kind, chapter)
+        counters[key] = counters.get(key, 0) + 1
+        n = to_digits(counters[key], digits)
+        if by_chapter and chapter:
+            return f"{kind}{to_digits(chapter, digits)}-{n}"
+        return f"{kind}{n}"
+
+    for block, owner, _article in iter_blocks(draft):
+        if isinstance(block, Table | Figure):
             if not (block.caption or "").strip():
                 continue
-            table_n += 1
-            labels[block.id] = f"表{to_digits(table_n, ctx.digit_style)}"
-        elif isinstance(block, Figure):
-            if not (block.caption or "").strip():
-                continue
-            figure_n += 1
-            labels[block.id] = f"図{to_digits(figure_n, ctx.digit_style)}"
+            labels[block.id] = number("表" if isinstance(block, Table) else "図", owner)
     return labels
 
 

@@ -440,6 +440,13 @@
           "title": "Formulas",
           "type": "object"
         },
+        "enumerations": {
+          "items": {
+            "$ref": "#/$defs/Enumeration"
+          },
+          "title": "Enumerations",
+          "type": "array"
+        },
         "toc": {
           "items": {
             "$ref": "#/$defs/TocEntry"
@@ -449,6 +456,78 @@
         }
       },
       "title": "Derived",
+      "type": "object"
+    },
+    "Enumeration": {
+      "additionalProperties": false,
+      "description": "「列挙された項目の一つ」を機械可読にするための、列挙のまとまり。\n\n表の列挙（`{auto_label}` を持つ表）・号のノード・箇条書きの 3 系統をまとめて扱う。",
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "source": {
+          "enum": [
+            "table",
+            "nodes",
+            "list"
+          ],
+          "title": "Source",
+          "type": "string"
+        },
+        "owner_id": {
+          "title": "Owner Id",
+          "type": "string"
+        },
+        "citation": {
+          "title": "Citation",
+          "type": "string"
+        },
+        "items": {
+          "items": {
+            "$ref": "#/$defs/EnumerationItem"
+          },
+          "title": "Items",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "source",
+        "owner_id",
+        "citation"
+      ],
+      "title": "Enumeration",
+      "type": "object"
+    },
+    "EnumerationItem": {
+      "additionalProperties": false,
+      "description": "列挙の 1 項目（docs/eval_dataset_plan.md P4）。",
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "index": {
+          "title": "Index",
+          "type": "integer"
+        },
+        "label": {
+          "title": "Label",
+          "type": "string"
+        },
+        "text": {
+          "title": "Text",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "index",
+        "label",
+        "text"
+      ],
+      "title": "EnumerationItem",
       "type": "object"
     },
     "Figure": {
@@ -1471,6 +1550,15 @@
             "plain"
           ],
           "title": "Article Heading",
+          "type": "string"
+        },
+        "caption_numbering": {
+          "default": "flat",
+          "enum": [
+            "flat",
+            "chapter"
+          ],
+          "title": "Caption Numbering",
           "type": "string"
         },
         "footnote_style": {

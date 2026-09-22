@@ -344,3 +344,80 @@ def test_無番号の項を指す参照は第N項と書き下す() -> None:
     assert index.labels()["ch1_a1_p1"].label == ""
     # 損保は印字どおり「（２）」を連ねる
     assert resolve_ref(_index(), "ch4_s3_a1_p1", "ch4_s3_a1_p2") == "（２）"
+
+
+def test_章番号を含む表番号() -> None:
+    """docs/reference_structures.md #14 の「表1-1」「表3-2」（`meta.caption_numbering: chapter`）。"""
+    from yakkan.build import assign_caption_labels
+    from yakkan.models import Figure, Flowchart, SourceDraft, Table
+
+    def table(tid: str, caption: str) -> Table:
+        return Table.model_validate(
+            {
+                "id": tid,
+                "caption": caption,
+                "semantic_type": "generic",
+                "layout": {"header_rows": 0, "col_widths": [50, 50]},
+                "grid": [
+                    [
+                        {"id": f"{tid}__r0c0", "text": "あ"},
+                        {"id": f"{tid}__r0c1", "text": "い"},
+                    ]
+                ],
+            }
+        )
+
+    def figure(fid: str) -> Figure:
+        return Figure(
+            id=fid,
+            caption="流れ",
+            alt="説明",
+            facts=["事実"],
+            diagram=Flowchart.model_validate(
+                {
+                    "kind": "flowchart",
+                    "nodes": [
+                        {"id": "a", "label": "甲", "shape": "start", "col": 0, "row": 0},
+                        {"id": "b", "label": "乙", "shape": "end", "col": 0, "row": 1},
+                    ],
+                    "edges": [{"from": "a", "to": "b"}],
+                }
+            ),
+        )
+
+    body = [
+        Node(id="ch1", kind="chapter", title="第一", blocks=[table("t1", "あ"), table("t2", "い")]),
+        Node(id="ch2", kind="chapter", title="第二", blocks=[table("t3", "う"), figure("f1")]),
+    ]
+    base = {
+        "content_id": "x",
+        "genre": "group",
+        "seed": 1,
+        "meta": {
+            "title": "t",
+            "issuer": {"name": "n", "kind": "stock", "short_name": "n"},
+            "product_name": "p",
+            "edition_date": "2026-10-01",
+            "form_code": "F1",
+            "numbering_scheme": "group",
+            "digit_style": "halfwidth",
+            "disclaimer": "d",
+        },
+        "front_matter": {"cover": {"title": "t", "issuer_name": "n", "form_code": "F1"}},
+        "body": [n.model_dump(mode="json") for n in body],
+    }
+    flat = SourceDraft.model_validate(base)
+    assert assign_caption_labels(flat, ctx("group", "halfwidth")) == {
+        "t1": "表1",
+        "t2": "表2",
+        "t3": "表3",
+        "f1": "図1",
+    }
+
+    scoped = SourceDraft.model_validate({**base, "meta": {**base["meta"], "caption_numbering": "chapter"}})
+    assert assign_caption_labels(scoped, ctx("group", "halfwidth")) == {
+        "t1": "表1-1",
+        "t2": "表1-2",
+        "t3": "表2-1",
+        "f1": "図2-1",
+    }, "章ごとに振り直す"

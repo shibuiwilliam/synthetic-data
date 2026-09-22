@@ -298,6 +298,7 @@ class Scaffolder:
                 "numbering_scheme": bp.numbering_scheme,
                 "article_heading": bp.article_heading,
                 "footnote_style": bp.footnote_style,
+                "caption_numbering": bp.caption_numbering,
                 "digit_style": digit_style,
                 "disclaimer": DISCLAIMER,
                 "constants": dict(sorted(self.constants.items())),

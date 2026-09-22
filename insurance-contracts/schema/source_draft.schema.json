@@ -1110,6 +1110,15 @@
           "title": "Article Heading",
           "type": "string"
         },
+        "caption_numbering": {
+          "default": "flat",
+          "enum": [
+            "flat",
+            "chapter"
+          ],
+          "title": "Caption Numbering",
+          "type": "string"
+        },
         "footnote_style": {
           "default": "inline",
           "enum": [

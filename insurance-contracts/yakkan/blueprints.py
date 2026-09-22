@@ -119,6 +119,8 @@ class Blueprint(Model):
     article_heading: Literal["inline", "above", "plain"] = "inline"
     #: 条末脚注の体裁（`remarks_box` は黒丸数字と「第N条　備考」の枠。#13）
     footnote_style: Literal["inline", "remarks_box"] = "inline"
+    #: 表・図の番号の振り方（`chapter` は「表1-1」。#14）
+    caption_numbering: Literal["flat", "chapter"] = "flat"
     default_style: str
     front_matter: FrontMatterSpec = Field(default_factory=FrontMatterSpec)
     skeleton: list[SkeletonNode] = Field(default_factory=list)

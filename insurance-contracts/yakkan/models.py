@@ -135,6 +135,9 @@ class Meta(Model):
     #: 先頭に走り込ませる（団体保険の体裁。docs/reference_structures.md #12）。
     #: `plain` は「①　主な特約の概要」のように括弧を使わない（条を持たない説明書。#9）。
     article_heading: Literal["inline", "above", "plain"] = "inline"
+    #: 表・図の番号の振り方。`flat` は文書内通し（「表1」）、
+    #: `chapter` は章番号を含む（「表1-1」「表3-2」。docs/reference_structures.md #14）。
+    caption_numbering: Literal["flat", "chapter"] = "flat"
     #: 条末脚注の体裁。`inline` は「（*1）」を条末に並べる（既定）。
     #: `remarks_box` は黒丸数字のマーカーと「第N条　備考」の枠で示す（#13）。
     footnote_style: Literal["inline", "remarks_box"] = "inline"
