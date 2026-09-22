@@ -84,13 +84,21 @@ def assign_caption_labels(draft: SourceDraft, ctx: NumberingContext) -> dict[str
     """表・図に「表１」「図１」を文書順で振る（docs/schema.md §5.4 の「番号は build が付与」）。"""
     from yakkan.numbering import to_digits
 
+    # **キャプションのある表・図だけに番号を振る。**
+    # 文と一体の列挙表（「次に掲げる事由」の受けなど）はキャプションを持たず、
+    # 実物の約款でも「表N」を振らない。これらを数えていたため、読者に見える番号が
+    # 「表１→表３」のように飛んでいた（P5 の執筆担当 4 人が独立に報告）。
     labels: dict[str, str] = {}
     table_n = figure_n = 0
     for block, _owner, _article in iter_blocks(draft):
         if isinstance(block, Table):
+            if not (block.caption or "").strip():
+                continue
             table_n += 1
             labels[block.id] = f"表{to_digits(table_n, ctx.digit_style)}"
         elif isinstance(block, Figure):
+            if not (block.caption or "").strip():
+                continue
             figure_n += 1
             labels[block.id] = f"図{to_digits(figure_n, ctx.digit_style)}"
     return labels
