@@ -17,6 +17,7 @@
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 from typing import Any
 
@@ -130,21 +131,41 @@ def score_citations(answer: Answer, pred: dict[str, Any]) -> dict[str, Any]:
         infos.append(info)
     gold = dict(zip(_occurrence_keys(texts), infos, strict=True))
 
-    pred_texts = [normalize(item.get("text", "")) for item in _pred_list(pred, "elements")]
+    pred_items = _pred_list(pred, "elements")
+    pred_texts = [normalize(item.get("text", "")) for item in pred_items]
     hit = cite_ok = kind_ok = 0
-    for key, item in zip(_occurrence_keys(pred_texts), _pred_list(pred, "elements"), strict=True):
+    for key, item in zip(_occurrence_keys(pred_texts), pred_items, strict=True):
         info = gold.get(key)
         if info is None:
             continue
         hit += 1
         cite_ok += int(normalize(item.get("citation", "")) == normalize(info.citation))
         kind_ok += int(item.get("kind") == info.kind)
+
+    # **段落の切り方は読み取り側でかならずずれる。** 全文一致だけだと、位置づけを
+    # 当てられたかが測れない（素朴な読み取り器で coverage 0.375）。
+    # gold の本文を含む予測要素があれば当たったとみなす指標を併記する
+    # （docs/remaining_issues.md T9）。厳密一致の数値は変えない。
+    contains_hit = contains_cite = 0
+    used: set[int] = set()
+    for (text, _occurrence), info in gold.items():
+        for i, candidate in enumerate(pred_texts):
+            if i in used or not candidate or text not in candidate:
+                continue
+            used.add(i)
+            contains_hit += 1
+            contains_cite += int(normalize(pred_items[i].get("citation", "")) == normalize(info.citation))
+            break
     return {
         "gold_elements": len(gold),
         "matched": hit,
         "coverage": round(hit / len(gold), 4) if gold else 0.0,
         "citation_acc": round(cite_ok / hit, 4) if hit else 0.0,
         "kind_acc": round(kind_ok / hit, 4) if hit else 0.0,
+        #: 包含での対応づけ（段落の切り方のずれを許す）
+        "matched_contains": contains_hit,
+        "coverage_contains": round(contains_hit / len(gold), 4) if gold else 0.0,
+        "citation_acc_contains": round(contains_cite / contains_hit, 4) if contains_hit else 0.0,
     }
 
 
@@ -295,9 +316,24 @@ def _label(derived: Any, node_id: str) -> str:
 # --- 列挙 ---------------------------------------------------------------------
 
 
+#: 行頭の列挙番号。**紙面に出る形（「（１）取締役会」）でも、番号を落とした形でも同じ点にする**
+#: （docs/remaining_issues.md T8）。読み取り側に「番号を落とせ」と求めるのは紙面から離れた要求。
+ENUM_LABEL = re.compile(r"^(?:[（(][0-9０-９a-zA-Zａ-ｚア-ン]{1,3}[）)]|[①-⑳]|[❶-❿]|[0-9０-９]{1,2}[.．、])")
+
+
+def strip_enum_label(text: str) -> str:
+    """行頭の列挙番号を落とす。**正規化の前に呼ぶこと。**
+
+    NFKC は ① を「1」にしてしまうので、正規化のあとでは丸数字と
+    「10日以内に…」の 1 を見分けられない。
+    """
+    return ENUM_LABEL.sub("", text, count=1)
+
+
 def score_enumerations(answer: Answer, pred: dict[str, Any]) -> dict[str, Any]:
     gold = {
-        e.citation or e.id: [normalize(i.text) for i in e.items] for e in answer.source.derived.enumerations
+        e.citation or e.id: [normalize(strip_enum_label(i.text)) for i in e.items]
+        for e in answer.source.derived.enumerations
     }
     pred_items = _pred_list(pred, "enumerations")
     exact = 0
@@ -308,7 +344,7 @@ def score_enumerations(answer: Answer, pred: dict[str, Any]) -> dict[str, Any]:
         if target is None:
             continue
         matched += 1
-        got = [normalize(x) for x in item.get("items") or []]
+        got = [normalize(strip_enum_label(x)) for x in item.get("items") or []]
         exact += int(got == target)
     return {
         "gold_enumerations": len(gold),

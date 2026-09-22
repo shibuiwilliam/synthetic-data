@@ -5,6 +5,7 @@
 - `pages[].text`：**読み順**の本文。欄外注と表を含み、ヘッダ／フッタとページ番号は含まない。
 - `pages[].text_with_furniture`：ヘッダ／フッタも含めた、そのページに実際に出る全文字列。
 - `outline[]`：見出しツリー（id・深さ・ラベル・文言・開始ページ）。
+  **紙面にラベルも文言も出ない節点（条の最初の項など）は入れない**（T7）。
 
 繰り返し表頭（`repeated: true`）は `text` に**1 回だけ**入れる。
 PDF のテキスト層には各ページに出るが、正解として二重に数えると CER が歪むため
@@ -82,7 +83,13 @@ def _outline(source: Source, layout: Layout) -> list[OutlineEntry]:
             info = source.derived.labels.get(node.id)
             element = layout.elements.get(node.id)
             page = min((f.page for f in element.fragments), default=0) if element else 0
-            if info is not None:
+            # **紙面に何も出ない節点は見出しではない。** 条の最初の項はラベルも見出し文言も
+            # 持たず（本文が条見出しに続けて始まる）、読み取り側が出しようがない。
+            # これを outline に混ぜると F1 が「出せないもの」に支配され、
+            # 見出しを拾えたかを測れなくなる（docs/remaining_issues.md T7）。
+            # 節点そのものは `derived.labels` と `elements.jsonl` に残る。
+            visible = info is not None and bool((info.label or "").strip() or (info.title or "").strip())
+            if info is not None and visible:
                 entries.append(
                     OutlineEntry(
                         id=node.id,

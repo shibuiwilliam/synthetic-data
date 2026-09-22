@@ -673,7 +673,7 @@ def eval_command(
         console.print(f"[bold]検索[/bold] 採点したクエリ {result['queries_scored']} 件")
         table = Table(title="検索（クエリ種別ごと）", title_justify="left", header_style="bold")
         table.add_column("kind")
-        columns = ["queries", "ndcg@1", "ndcg@5", "ndcg@10", "recall@10", "mrr"]
+        columns = ["queries", "ndcg@1", "ndcg@5", "ndcg@10", "recall@10", "recall_ceiling@10", "mrr"]
         for column in columns:
             table.add_column(column, justify="right")
         for kind, values in result["by_kind"].items():

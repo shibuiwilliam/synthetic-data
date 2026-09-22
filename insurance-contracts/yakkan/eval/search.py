@@ -51,6 +51,10 @@ def evaluate_run(
         for k in cutoffs:
             row[f"ndcg@{k}"] = ndcg_at_k(ranked, ideal, k)
             row[f"recall@{k}"] = recall_at_k(ranked, len(relevant), k)
+            # 適合が k 件を超えるクエリは、上位 k 件を適合で埋めても 1 にならない。
+            # **満点の並びでも recall@10 が 0.87 になり、欠陥に見える**ので、
+            # 到達できる上限を併記する（docs/remaining_issues.md T2）。
+            row[f"recall_ceiling@{k}"] = round(min(1.0, k / len(relevant)), 4)
         row["mrr"] = mrr(ranked)
         rows.append(row)
         per_kind[row["kind"]].append(row)
@@ -59,7 +63,12 @@ def evaluate_run(
         values = [float(i[key]) for i in items if key in i]
         return round(sum(values) / len(values), 4) if values else 0.0
 
-    metrics = [f"ndcg@{k}" for k in cutoffs] + [f"recall@{k}" for k in cutoffs] + ["mrr"]
+    metrics = (
+        [f"ndcg@{k}" for k in cutoffs]
+        + [f"recall@{k}" for k in cutoffs]
+        + [f"recall_ceiling@{k}" for k in cutoffs]
+        + ["mrr"]
+    )
     return {
         "queries_scored": len(rows),
         "queries_in_qrels": len(qrels),

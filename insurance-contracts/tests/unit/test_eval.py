@@ -288,3 +288,62 @@ def test_崩すほど指標が単調に悪くなる(seed: int) -> None:
         assert values[0] == 1.0, f"{path} は崩さなければ満点"
         assert all(b <= a + 1e-9 for a, b in zip(values, values[1:], strict=False)), (path, values)
         assert values[-1] < values[0], f"{path} が強い崩しに反応していない"
+
+
+# --- 外から使えるか（docs/remaining_issues.md T2・T7〜T9） --------------------
+
+
+def test_列挙は番号を付けても付けなくても同じ点になる() -> None:
+    """紙面どおり「（１）取締役会」と出しても、番号を落として出しても正解（T8）。"""
+    from yakkan.eval.harness import strip_enum_label
+    from yakkan.eval.metrics import normalize
+
+    for raw in ("（１）取締役会", "(1)取締役会", "①取締役会", "❶取締役会", "１．取締役会", "取締役会"):
+        assert normalize(strip_enum_label(raw)) == "取締役会", raw
+    # NFKC は ① を「1」にするので、**正規化の前に**落とさないと
+    # 「10日以内に…」の 1 と見分けがつかなくなる
+    assert normalize(strip_enum_label("10日以内に通知します")) == "10日以内に通知します"
+    assert strip_enum_label("（かっこ書き）を含む本文") == "（かっこ書き）を含む本文"
+
+
+@pytest.mark.skipif(_first_dataset() is None, reason="dataset/ が無い")
+def test_outlineに見えない見出しが混ざらない() -> None:
+    """ラベルも文言も無い節点は紙面に出ないので outline に入れない（T7）。"""
+    from yakkan.answer import load_answer
+
+    directory = _first_dataset()
+    assert directory is not None
+    answer = load_answer(directory)
+    blank = [o for o in answer.outline if not (o.label or "").strip() and not (o.title or "").strip()]
+    assert not blank, f"{len(blank)} 件の見えない見出しが outline にある"
+
+
+@pytest.mark.skipif(_first_dataset() is None, reason="dataset/ が無い")
+def test_包含での対応づけは全文一致以上に当たる() -> None:
+    """段落の切り方がずれても位置づけを測れるようにした指標（T9）。"""
+    from yakkan.answer import load_answer
+    from yakkan.eval import build_prediction, evaluate, misread
+
+    directory = _first_dataset()
+    assert directory is not None
+    answer = load_answer(directory)
+    items = json.loads((directory / "qa.json").read_text(encoding="utf-8"))["items"]
+    perfect = build_prediction(answer, items)
+    score = evaluate(directory, perfect)
+    assert score["citation"]["coverage_contains"] == 1.0
+    assert score["citation"]["citation_acc_contains"] == 1.0
+    # 崩した予測でも、包含のほうが全文一致より甘くなる（下回らない）
+    broken = evaluate(directory, misread(perfect, seed=1, rate=0.4))
+    assert broken["citation"]["coverage_contains"] >= broken["citation"]["coverage"]
+
+
+@pytest.mark.skipif(not (DATASET / "search" / "qrels.jsonl").exists(), reason="検索評価セットが無い")
+def test_Recallの上限を併記する() -> None:
+    """適合が k 件を超えるクエリでは満点でも Recall@k が 1 にならない（T2）。"""
+    qrels = load_qrels(DATASET / "search" / "qrels.jsonl")
+    result = evaluate_run(qrels, oracle_run(qrels))
+    assert result["overall"]["recall@10"] == result["overall"]["recall_ceiling@10"], (
+        "満点の並びなら Recall は到達できる上限と一致するはず"
+    )
+    assert result["overall"]["recall_ceiling@10"] < 1.0, "上限が 1 なら、この指標を出す意味がない"
+    assert result["overall"]["recall_ceiling@1"] < result["overall"]["recall_ceiling@10"]

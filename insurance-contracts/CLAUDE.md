@@ -155,7 +155,7 @@ dataset/manifest.json      # 全文書の一覧（doc_id, genre, style, pages, s
 - Jinja2 → HTML → **WeasyPrint（>=62・版固定）** → PDF。検証は pdfplumber（テキスト・文字bbox）＋ pypdfium2（PNG 150dpi）。PyMuPDF は AGPL のため使わない。図は自前 Python → インライン SVG（外部レイアウトエンジン不使用）。
 - 正解要素にはすべて `id` と `data-kind` を付け、レイアウト後の box ツリー（`_page_box`：**私的API・要probe**）から bbox を取る。単位は CSS px→pt（×0.75）、原点左上。フォールバックは pdfplumber の chars 整列。
 - 番号付けは nonlife／life／teikan の3方式で導出。`{ref:}` は参照元と参照先の最小共通祖先から相対表記を生成する。
-- `target-counter`（目次ページ番号）・`leader()`・`column-span: all`・`float: footnote`・`<ruby>` はいずれも**要probe**。非対応なら代替へ切り替え、`docs/decisions.md` に記録する。
+- `target-counter`（目次ページ番号）・`leader()`・`column-span: all`・`float: footnote` はいずれも**要probe**。非対応なら代替へ切り替え、`docs/decisions.md` に記録する。**`<ruby>` と `transform` 回転は実測済み＝使わない**（2026-09-23）。
 - verify：ページ数≤20／フォント被覆（fontTools cmap）／テキスト往復一致／目次ページ一致／全要素が≥1 fragment／はみ出し・重なり無し／2回描画の一致（決定論）。
 - ページ超過・はみ出しは**失敗として停止**する。フォント縮小や自動省略で押し込まない。
 
@@ -279,8 +279,8 @@ uv run pytest -q ; uv run ruff check . ; make check
 - 単位：WeasyPrint は CSS px、PDF は pt（×0.75）。PNG は dpi/72 倍。原点は左上に統一（pdfplumber の `top` 系を使う）。
 - 表頭繰り返し・ヘッダ/フッタは PDF テキスト層に同じ文字列が複数回出る。正解側で `repeated`／`header/footer` として区別し、往復比較の前に除外する。
 - 2段組では 1 要素が 2 fragments に割れる。段の境界は `layout.pages[].columns` と bbox から判定。
-- `column-span: all`、`leader()`、`float: footnote`、`<ruby>`、`target-counter` はいずれも要probe。非対応なら代替（段組コンテナ分割、点線罫、条末配置、inline-block 積み、二段階レンダリング）に切り替え、`docs/decisions.md` に記録。
-- 縦書き（`writing-mode: vertical-*`）は WeasyPrint 非対応の前提。縦書き表見出しは `transform` で回転（P6）。
+- `column-span: all`、`leader()`、`float: footnote`、`target-counter` はいずれも要probe。非対応なら代替（段組コンテナ分割、点線罫、条末配置、二段階レンダリング）に切り替え、`docs/decisions.md` に記録。`<ruby>` は実測済みで**使わない**（読みがテキスト層に混ざりルビにもならない）。
+- 縦書き（`writing-mode: vertical-*`）は WeasyPrint 非対応。**`transform` での回転も入れない**（2026-09-23 に `scripts/probe_rotate.py` で実測：box が縮まず字がセルの外に出る。`docs/decisions.md`）。
 - 丸数字・黒丸数字・☞ などの記号はフォントによって欠ける。L07 のフォント被覆検査を render 前に必ず実行。
 - 長い欧文（URL、型式番号）だけが段からはみ出す。`overflow-wrap: break-word` をそれらの span に限定適用。
 - SVG 内テキストのフォント指定漏れでフォールバックフォントに変わり、幅見積りと実描画がずれる。SVG `<text>` には常に `font-family`/`font-size` を明示。
@@ -297,7 +297,7 @@ uv run pytest -q ; uv run ruff check . ; make check
 | データセット規模（v1） | 約30文書。7ジャンル × 3 content、うち各ジャンル1 content は2スタイルで描画 | 確定 |
 | `travel` の題材 | **海外旅行保険で確定**（2026-09-22 回答）。参考URL #5 の実物は「リスク細分型海外旅行保険」だと直接確認済み | 確定 |
 | 縦書き | v1 対象外。P6 で表見出しの回転のみ | 確定 |
-| ルビ | **v1 では作らない**（2026-09-22 回答）。P6 送り。§14 の「要probe」も P6 まで保留 | 確定 |
+| ルビ | **作らない**。2026-09-23 に `scripts/probe_ruby.py` で実測し、WeasyPrint ではルビとして組まれず読みがテキスト層に混ざることを確認（`docs/decisions.md`）。§14 の「要probe」は解決済み | 確定 |
 | スキャン風劣化画像 | P6 の任意項目。v1 では作らない | 確定 |
 | PDF のタグ付け（tagged PDF） | 作らない | 確定 |
 | QA の言語・件数 | 日本語、自動生成30問＋執筆15問／文書 | 確定 |

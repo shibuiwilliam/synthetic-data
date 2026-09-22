@@ -1,0 +1,14 @@
+{% include "_base.css.j2" %}
+
+/* --- nl-a4-2col-gothic-plain の差分：色帯を持たない白黒の素組み（CLAUDE.md §3 F1）--- */
+/* 見出しの手がかりを「帯・色」から**字面と罫だけ**に変える。
+   同じ内容を nl-a4-2col-mincho（明朝＋色帯）と描き分けることで、
+   レイアウト頑健性の検査になる（docs/remaining_issues.md T4）。 */
+h1 { border-bottom: 0.8pt solid #000; font-size: 12.5pt; }
+h2 { background: none; border: none; border-left: none; border-bottom: 0.5pt solid #000;
+     padding: 0 0 1mm; margin: 4mm 0 2mm; }
+h3 { color: inherit; border-bottom: none; font-weight: 700; }
+h4 { color: inherit; }
+.box { background: none; border: 0.5pt solid #000; }
+.badge { border: 0.5pt solid #000; background: none; color: inherit; }
+nav.toc .d0 { font-weight: 700; }

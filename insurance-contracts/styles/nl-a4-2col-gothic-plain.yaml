@@ -1,0 +1,17 @@
+# F1「素組み」の 2 段組（CLAUDE.md §3 F1・docs/remaining_issues.md T4）。
+# 既存の 2 段組は明朝＋色帯（nl-a4-2col-mincho）か小型判（nl-b5-2col-dense / nl-wide-2col-plain）で、
+# **A4・2 段組・ゴシック・色なし**の組み合わせが無かった。
+# 同じ content を明朝＋帯と素組みゴシックで描き分けると、見出しの手がかりが
+# 「帯」から「字面だけ」に変わるので、レイアウト頑健性の検査になる。
+style_id: nl-a4-2col-gothic-plain
+description: A4・2段組・ゴシック9.5pt。色帯なしの白黒素組み（F1）
+page: { size: A4, width_mm: 210, height_mm: 297, margin_mm: { top: 18, right: 15, bottom: 18, left: 15 } }
+columns: { count: 2, gap_mm: 7 }
+fonts: { body: "Noto Sans JP", heading: "Noto Sans JP", symbol_fallback: ["Noto Sans Symbols", "Noto Sans Symbols 2"] }
+sizes: { body_pt: 9.5, line_height: 1.66, h1_pt: 12.5, h2_pt: 10.5, h3_pt: 10, h4_pt: 9.5,
+         table_pt: 8.5, note_pt: 8, toc_pt: 9, cover_pt: 18 }
+palette: { text: "#000000", rule: "#000000", accent: "#000000", band: "#ffffff", note_bg: "#ffffff" }
+headings: { band: false }
+table: { border: grid }
+margin_note: article_end
+chars_per_page_estimate: 1751
