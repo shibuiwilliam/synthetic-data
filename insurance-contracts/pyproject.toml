@@ -19,6 +19,7 @@ dependencies = [
     # フォント検査・画像
     "fonttools>=4.54",
     "pillow>=10.4",
+    "apted>=1.0.3",
 ]
 
 [project.scripts]

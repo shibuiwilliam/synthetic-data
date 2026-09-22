@@ -240,6 +240,15 @@ def _figure_labels(answer: Answer, evidence: list[str]) -> set[str]:
     dumped = answer.source.model_dump(mode="json")
     for key in ("front_matter", "body", "appendices"):
         walk(dumped.get(key))
+    # 正規化グラフのノードラベルも正解に含める（docs/eval_dataset_plan.md P1）。
+    # 経路（`paths`）はグラフから作るので、グラフのラベルを認めないと自動 QA が自分で落ちる。
+    for figure_id in wanted:
+        derived = answer.source.derived.figures.get(figure_id)
+        if derived is None:
+            continue
+        for node in derived.graph.nodes:
+            if node.label.strip():
+                labels.add(normalize(node.label))
     return labels
 
 

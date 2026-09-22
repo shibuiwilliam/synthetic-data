@@ -55,3 +55,19 @@ docs/
 
 - ルートは現状 `insurance-contracts/`（親の `synthetic-data` リポジトリのサブディレクトリ）。§10 のツリーが示す `yakkan-synth/` はこのディレクトリに読み替える。
 - `.claude/rules/*.md` は frontmatter の `paths:` で対象ファイルを限定する（§0.3）。
+
+## 2026-09-22 に足したもの（評価データセット）
+
+| パス | 役目 |
+|---|---|
+| `yakkan/figure_graph.py` | 図 6 種を共通の有向グラフに正規化する（`docs/eval_dataset_plan.md` P1） |
+| `yakkan/export.py` | `elements.jsonl` / `passages.jsonl` / `dataset/README.md` を書き出す |
+| `yakkan/search_set.py` | 検索評価のパッセージ・クエリ・qrels を作る |
+| `yakkan/eval/metrics.py` | CER・F1・TEDS・Kendall τ・nDCG などの指標 |
+| `yakkan/eval/harness.py` | 予測 JSON の採点 |
+| `yakkan/eval/oracle.py` | 満点の予測を作る（予測フォーマットの実装例／自己評価） |
+| `yakkan/eval/search.py` | 検索結果の採点 |
+| `schema/prediction.schema.json` | 読み取り予測の形 |
+| `schema/search_run.schema.json` | 検索結果の形 |
+| `docs/evaluation.md` | 予測の形と採点のしかた |
+| `docs/eval_dataset_plan.md` | 充足性レビューと改修計画（P1〜P10） |

@@ -89,6 +89,10 @@ def _outline(source: Source, layout: Layout) -> list[OutlineEntry]:
                         title=info.title or "",
                         heading_text=info.heading_text,
                         page=page,
+                        kind=info.kind,
+                        parent_id=info.parent_id,
+                        path_ids=list(info.path_ids),
+                        citation=info.citation,
                     )
                 )
             walk(node.children or [], depth + 1)

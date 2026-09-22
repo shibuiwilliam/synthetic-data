@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.jp/yakkan/search_run.schema.json",
+  "title": "yakkan 検索結果",
+  "description": "docs/evaluation.md §2。クエリごとの順位つきパッセージ id。",
+  "type": "object",
+  "properties": {
+    "runs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "query_id": { "type": "string" },
+          "passages": {
+            "type": "array",
+            "description": "順位の高い順。passage_id は passages.jsonl のもの。",
+            "items": { "type": "string" }
+          }
+        },
+        "required": ["query_id", "passages"]
+      }
+    }
+  },
+  "required": ["runs"]
+}

@@ -181,6 +181,10 @@ def _contains(outer: tuple[float, float, float, float], inner: tuple[float, floa
     )
 
 
+#: 読み順・行の帰属先にしない、要素の内訳を表す span
+INLINE_PART_KINDS: frozenset[str] = frozenset({"label", "text", "title", "box_title", "toc_link", "toc_page"})
+
+
 def _walk(
     box,
     page_number: int,
@@ -196,7 +200,10 @@ def _walk(
     box_type = type(box).__name__
     element_id = _attr(box, "id")
     data_kind = _attr(box, "data-kind")
-    if element_id:
+    # 行の帰属先（＝読み順の単位）は**内容の単位**にする。ラベルと本文を分けた内部の span は
+    # bbox の正解としては要るが、読み順に出ると「項」が消えて使えなくなる
+    # （docs/eval_dataset_plan.md F11）。
+    if element_id and data_kind not in INLINE_PART_KINDS:
         owner_id, owner_kind = element_id, data_kind or box_type
     if box_type == "MarginBox":
         region = MARGIN_REGION.get(getattr(box, "at_keyword", ""), region)

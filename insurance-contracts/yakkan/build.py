@@ -14,11 +14,14 @@ from pathlib import Path
 from pydantic import BaseModel
 
 from yakkan.compose import load_draft
+from yakkan.figure_graph import build_graph, graph_paths
 from yakkan.lint.walk import iter_blocks, iter_nodes
 from yakkan.models import (
     BoxBlock,
     Cell,
     Derived,
+    Enumeration,
+    EnumerationItem,
     Figure,
     FigureDerived,
     FootnoteIndex,
@@ -287,6 +290,98 @@ def _diagram_node_order(figure: Figure) -> list[str]:
     return []
 
 
+# --- 列挙 ---------------------------------------------------------------------
+
+
+def build_enumerations(ctx: BuildContext, plain: dict[str, PlainText]) -> list[Enumeration]:
+    """「列挙された項目の一つ」を辿れるようにする（docs/eval_dataset_plan.md P4）。
+
+    3 系統をまとめる：
+    - **表の列挙**：`{auto_label}` を持つ表。項目は stub セルの隣の本文セル。
+    - **号のノード**：`item` / `subitem` / `subsubitem`。親の項ごとにまとめる。
+    - **箇条書き**：`ListBlock`。
+    """
+    out: list[Enumeration] = []
+
+    def text_of(element_id: str) -> str:
+        entry = plain.get(element_id)
+        return entry.without_label if entry else ""
+
+    # 表の列挙
+    for block, owner_id, _article in iter_blocks(ctx.draft):
+        if not isinstance(block, Table):
+            continue
+        auto = enumeration_labels(block, ctx)
+        if not auto:
+            continue
+        items: list[EnumerationItem] = []
+        for row in block.grid:
+            cells = [c for c in row if isinstance(c, Cell)]
+            marker = next((c for c in cells if c.id in auto), None)
+            if marker is None:
+                continue
+            body = next((c for c in cells if c.id != marker.id), marker)
+            items.append(
+                EnumerationItem(
+                    id=body.id,
+                    index=len(items) + 1,
+                    label=auto[marker.id],
+                    text=text_of(body.id),
+                )
+            )
+        if items:
+            out.append(
+                Enumeration(
+                    id=block.id,
+                    source="table",
+                    owner_id=owner_id,
+                    citation=ctx.index.citation(owner_id) if owner_id in ctx.index else "",
+                    items=items,
+                )
+            )
+
+    # 号のノード（親の項ごと）
+    for node, _ancestors in iter_nodes(ctx.draft.body + ctx.draft.appendices):
+        children = [c for c in node.children if c.kind in ("item", "subitem", "subsubitem")]
+        if len(children) < 2:
+            continue
+        out.append(
+            Enumeration(
+                id=f"{node.id}__enum",
+                source="nodes",
+                owner_id=node.id,
+                citation=ctx.index.citation(node.id),
+                items=[
+                    EnumerationItem(
+                        id=child.id,
+                        index=i + 1,
+                        label=ctx.index[child.id].label,
+                        text=text_of(child.id),
+                    )
+                    for i, child in enumerate(children)
+                ],
+            )
+        )
+
+    # 箇条書き
+    for block, owner_id, _article in iter_blocks(ctx.draft):
+        if not isinstance(block, ListBlock) or len(block.items) < 2:
+            continue
+        out.append(
+            Enumeration(
+                id=block.id,
+                source="list",
+                owner_id=owner_id,
+                citation=ctx.index.citation(owner_id) if owner_id in ctx.index else "",
+                items=[
+                    EnumerationItem(id=item.id, index=i + 1, label="", text=text_of(item.id))
+                    for i, item in enumerate(block.items)
+                ],
+            )
+        )
+    return out
+
+
 # --- 目次 ---------------------------------------------------------------------
 
 
@@ -309,6 +404,10 @@ def build_toc(ctx: BuildContext) -> list[TocEntry]:
                 title=node.title or "",
                 heading_text=item.heading_text,
                 summary=node.summary,
+                kind=node.kind,
+                parent_id=item.parent_id,
+                path_ids=list(item.ancestors),
+                citation=ctx.index.citation(node.id),
             )
         )
     return entries
@@ -347,6 +446,14 @@ def build_plain_text(ctx: BuildContext) -> tuple[dict[str, PlainText], list[RefI
         # 見出しのバッジ（「契約概要」など）も読み取りの対象にする
         for i, badge in enumerate(node.badges):
             plain[f"{node.id}__badge{i}"] = PlainText(with_label=badge, without_label=badge)
+
+    # 定義語（`defined_terms[].definition` は RichText だが、これまで平文化していなかった。
+    # 用語そのものが検索・抽出の対象になるので正解に含める）
+    for term in ctx.draft.defined_terms:
+        pc = ctx.plain_context(f"term_{term.id}")
+        text = to_plain(parse(term.definition), pc)
+        _collect(pc, f"term_{term.id}", refs, terms)
+        plain[f"term_{term.id}"] = PlainText(with_label=f"{term.term}　{text}", without_label=text)
 
     # ブロック
     enum_labels: dict[str, str] = {}
@@ -471,11 +578,14 @@ def build(draft: SourceDraft) -> Source:
         elif isinstance(block, Figure):
             labels = resolved_labels(block, ctx, block.id)
             # 経路はラベルの列なので、トークンを解決してから取る（正解に生トークンを残さない）
-            order, paths = figure_paths(resolve_strings(block, labels))
+            resolved = resolve_strings(block, labels)
+            order, _ = figure_paths(resolved)
+            graph = build_graph(resolved)
             figures[block.id] = FigureDerived(
                 caption_label=ctx.caption_labels.get(block.id),
                 node_order=order,
-                paths=paths,
+                paths=graph_paths(graph),
+                graph=graph,
                 resolved_labels=labels,
             )
         elif isinstance(block, Formula):
@@ -490,6 +600,7 @@ def build(draft: SourceDraft) -> Source:
         tables=tables,
         figures=figures,
         formulas=formulas,
+        enumerations=build_enumerations(ctx, plain),
         toc=build_toc(ctx),
     )
     return Source(**draft.model_dump(), derived=derived)

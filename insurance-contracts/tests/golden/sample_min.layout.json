@@ -141,10 +141,8 @@
         "toc_app1_s1",
         "ch1",
         "ch1_a1",
-        "ch1_a1_p1_label",
-        "ch1_a1_p1_text",
-        "ch1_a1_p2_label",
-        "ch1_a1_p2_text",
+        "ch1_a1_p1",
+        "ch1_a1_p2",
         "ch1_a2",
         "ch1_a2_p1",
         "tbl_exclusions__r0c0",
@@ -155,24 +153,19 @@
         "ch4",
         "ch4_s1",
         "ch4_s1_a1",
-        "ch4_s1_a1_p1_label",
-        "ch4_s1_a1_p1_text",
-        "ch4_s1_a1_p2_label",
-        "ch4_s1_a1_p2_text",
+        "ch4_s1_a1_p1",
+        "ch4_s1_a1_p2",
         "ch4_s1_a2",
-        "ch4_s1_a2_p1_label",
-        "ch4_s1_a2_p1_text",
+        "ch4_s1_a2_p1",
         "tbl_notify_facts__r0c0",
         "tbl_notify_facts__r0c1",
         "tbl_notify_facts__r1c0",
         "tbl_notify_facts__r1c1",
-        "ch4_s1_a2_p2_label",
-        "ch4_s1_a2_p2_text",
-        "ch4_s1_a2_p3_label",
-        "ch4_s1_a2_p3_text",
+        "ch4_s1_a2_p2",
+        "ch4_s1_a2_p3",
         "fn_ch4_s1_a2__n1",
-        "box_notify_hint_title",
-        "par_notify_hint"
+        "par_notify_hint",
+        "box_notify_hint"
       ],
       "text_lines": [
         {
@@ -359,7 +352,7 @@
             374.2517267854946
           ],
           "text": "（１）",
-          "element_id": "ch1_a1_p1_label",
+          "element_id": "ch1_a1_p1",
           "region": "body"
         },
         {
@@ -370,7 +363,7 @@
             374.2517267854946
           ],
           "text": "当会社は、被保険者がご契約のお車の所有、使用",
-          "element_id": "ch1_a1_p1_text",
+          "element_id": "ch1_a1_p1",
           "region": "body"
         },
         {
@@ -381,7 +374,7 @@
             389.64172678549465
           ],
           "text": "または管理に起因して他人を死傷させた場合に、",
-          "element_id": "ch1_a1_p1_text",
+          "element_id": "ch1_a1_p1",
           "region": "body"
         },
         {
@@ -392,7 +385,7 @@
             405.03172678549464
           ],
           "text": "この条項に従い、対人賠償保険金を支払います。",
-          "element_id": "ch1_a1_p1_text",
+          "element_id": "ch1_a1_p1",
           "region": "body"
         },
         {
@@ -403,7 +396,7 @@
             425.52408899021907
           ],
           "text": "（２）",
-          "element_id": "ch1_a1_p2_label",
+          "element_id": "ch1_a1_p2",
           "region": "body"
         },
         {
@@ -414,7 +407,7 @@
             425.52408899021907
           ],
           "text": "当会社が（１）により支払う保険金の額は、無制",
-          "element_id": "ch1_a1_p2_text",
+          "element_id": "ch1_a1_p2",
           "region": "body"
         },
         {
@@ -425,7 +418,7 @@
             440.91408899021906
           ],
           "text": "限とします。",
-          "element_id": "ch1_a1_p2_text",
+          "element_id": "ch1_a1_p2",
           "region": "body"
         },
         {
@@ -590,7 +583,7 @@
             677.6977897776205
           ],
           "text": "（１）",
-          "element_id": "ch4_s1_a1_p1_label",
+          "element_id": "ch4_s1_a1_p1",
           "region": "body"
         },
         {
@@ -601,7 +594,7 @@
             677.6977897776205
           ],
           "text": "保険契約者または被保険者は、保険契約の締結に",
-          "element_id": "ch4_s1_a1_p1_text",
+          "element_id": "ch4_s1_a1_p1",
           "region": "body"
         },
         {
@@ -612,7 +605,7 @@
             693.0877897776206
           ],
           "text": "際し、当会社が書面等で告知を求めた事項につい",
-          "element_id": "ch4_s1_a1_p1_text",
+          "element_id": "ch4_s1_a1_p1",
           "region": "body"
         },
         {
@@ -623,7 +616,7 @@
             708.4777897776205
           ],
           "text": "て、事実を正確に告げなければなりません。",
-          "element_id": "ch4_s1_a1_p1_text",
+          "element_id": "ch4_s1_a1_p1",
           "region": "body"
         },
         {
@@ -634,7 +627,7 @@
             324.8438527697466
           ],
           "text": "（２）",
-          "element_id": "ch4_s1_a1_p2_label",
+          "element_id": "ch4_s1_a1_p2",
           "region": "body"
         },
         {
@@ -645,7 +638,7 @@
             324.8438527697466
           ],
           "text": "当会社は、（１）に違反した事実があった場合に",
-          "element_id": "ch4_s1_a1_p2_text",
+          "element_id": "ch4_s1_a1_p2",
           "region": "body"
         },
         {
@@ -656,7 +649,7 @@
             340.2338527697466
           ],
           "text": "は、保険契約を解除することができます。ただ",
-          "element_id": "ch4_s1_a1_p2_text",
+          "element_id": "ch4_s1_a1_p2",
           "region": "body"
         },
         {
@@ -667,7 +660,7 @@
             355.6238527697466
           ],
           "text": "し、その事実が保険金を支払うべき事由の発生に",
-          "element_id": "ch4_s1_a1_p2_text",
+          "element_id": "ch4_s1_a1_p2",
           "region": "body"
         },
         {
@@ -678,7 +671,7 @@
             371.01385276974656
           ],
           "text": "影響を及ぼさなかったときは、この限りではあり",
-          "element_id": "ch4_s1_a1_p2_text",
+          "element_id": "ch4_s1_a1_p2",
           "region": "body"
         },
         {
@@ -689,7 +682,7 @@
             386.40385276974655
           ],
           "text": "ません。",
-          "element_id": "ch4_s1_a1_p2_text",
+          "element_id": "ch4_s1_a1_p2",
           "region": "body"
         },
         {
@@ -711,7 +704,7 @@
             427.3885771791954
           ],
           "text": "（１）",
-          "element_id": "ch4_s1_a2_p1_label",
+          "element_id": "ch4_s1_a2_p1",
           "region": "body"
         },
         {
@@ -722,7 +715,7 @@
             427.3885771791954
           ],
           "text": "保険契約を締結した後に、下表に掲げる事実のい",
-          "element_id": "ch4_s1_a2_p1_text",
+          "element_id": "ch4_s1_a2_p1",
           "region": "body"
         },
         {
@@ -733,7 +726,7 @@
             442.7785771791954
           ],
           "text": "ずれかが生じたときは、保険契約者または被保険",
-          "element_id": "ch4_s1_a2_p1_text",
+          "element_id": "ch4_s1_a2_p1",
           "region": "body"
         },
         {
@@ -744,7 +737,7 @@
             458.1685771791954
           ],
           "text": "者は、遅滞なく、書面等により当会社にその旨を",
-          "element_id": "ch4_s1_a2_p1_text",
+          "element_id": "ch4_s1_a2_p1",
           "region": "body"
         },
         {
@@ -755,7 +748,7 @@
             473.55857717919537
           ],
           "text": "知らせなければなりません。ただし、当会社が知",
-          "element_id": "ch4_s1_a2_p1_text",
+          "element_id": "ch4_s1_a2_p1",
           "region": "body"
         },
         {
@@ -766,7 +759,7 @@
             488.94857717919535
           ],
           "text": "らせを受ける前にその事実が消滅したときを除き",
-          "element_id": "ch4_s1_a2_p1_text",
+          "element_id": "ch4_s1_a2_p1",
           "region": "body"
         },
         {
@@ -777,7 +770,7 @@
             504.33857717919534
           ],
           "text": "ます。",
-          "element_id": "ch4_s1_a2_p1_text",
+          "element_id": "ch4_s1_a2_p1",
           "region": "body"
         },
         {
@@ -854,7 +847,7 @@
             591.2495220610853
           ],
           "text": "（２）",
-          "element_id": "ch4_s1_a2_p2_label",
+          "element_id": "ch4_s1_a2_p2",
           "region": "body"
         },
         {
@@ -865,7 +858,7 @@
             591.2495220610853
           ],
           "text": "当会社は、（１）の知らせを受けたときは、その",
-          "element_id": "ch4_s1_a2_p2_text",
+          "element_id": "ch4_s1_a2_p2",
           "region": "body"
         },
         {
@@ -876,7 +869,7 @@
             606.6395220610852
           ],
           "text": "内容を記載した書類の提出を求めることがありま",
-          "element_id": "ch4_s1_a2_p2_text",
+          "element_id": "ch4_s1_a2_p2",
           "region": "body"
         },
         {
@@ -887,7 +880,7 @@
             622.0295220610852
           ],
           "text": "す。",
-          "element_id": "ch4_s1_a2_p2_text",
+          "element_id": "ch4_s1_a2_p2",
           "region": "body"
         },
         {
@@ -898,7 +891,7 @@
             642.5218842658096
           ],
           "text": "（３）",
-          "element_id": "ch4_s1_a2_p3_label",
+          "element_id": "ch4_s1_a2_p3",
           "region": "body"
         },
         {
@@ -909,7 +902,7 @@
             642.5218842658096
           ],
           "text": "第１条（告知義務）に定める告知の内容に変更が",
-          "element_id": "ch4_s1_a2_p3_text",
+          "element_id": "ch4_s1_a2_p3",
           "region": "body"
         },
         {
@@ -920,7 +913,7 @@
             657.9118842658097
           ],
           "text": "生じた場合の取扱いは、第１条（告知義務）",
-          "element_id": "ch4_s1_a2_p3_text",
+          "element_id": "ch4_s1_a2_p3",
           "region": "body"
         },
         {
@@ -931,7 +924,7 @@
             673.3018842658096
           ],
           "text": "（２）の例によります。",
-          "element_id": "ch4_s1_a2_p3_text",
+          "element_id": "ch4_s1_a2_p3",
           "region": "body"
         },
         {
@@ -975,8 +968,8 @@
             729.8047480930119
           ],
           "text": "お知らせが必要な場合",
-          "element_id": "box_notify_hint_title",
-          "region": "body"
+          "element_id": "box_notify_hint",
+          "region": "margin_note"
         },
         {
           "bbox": [
@@ -1060,8 +1053,7 @@
         "ch4_s2",
         "ch4_s2_a1",
         "fig_accident_flow__caption",
-        "ch4_s2_a1_p1_label",
-        "ch4_s2_a1_p1_text",
+        "ch4_s2_a1_p1",
         "tbl_duties__caption",
         "tbl_duties__r0c0",
         "tbl_duties__r0c1",
@@ -1072,12 +1064,10 @@
         "tbl_duties__r3c0",
         "tbl_duties__r3c1",
         "tbl_duties__note0",
-        "ch4_s2_a1_p2_label",
-        "ch4_s2_a1_p2_text",
+        "ch4_s2_a1_p2",
         "app1",
         "app1_s1",
-        "app1_s1_p1_label",
-        "app1_s1_p1_text",
+        "app1_s1_p1",
         "tbl_grade__caption",
         "tbl_grade__r0c0",
         "tbl_grade__r0c1",
@@ -1101,8 +1091,7 @@
         "tbl_grade__r6c1",
         "tbl_grade__r6c2",
         "tbl_grade__note0",
-        "app1_s1_p2_label",
-        "app1_s1_p2_text",
+        "app1_s1_p2",
         "par_colophon_1",
         "par_colophon_2",
         "par_colophon_3"
@@ -1149,7 +1138,7 @@
             379.4362149744709
           ],
           "text": "（１）",
-          "element_id": "ch4_s2_a1_p1_label",
+          "element_id": "ch4_s2_a1_p1",
           "region": "body"
         },
         {
@@ -1160,7 +1149,7 @@
             379.4362149744709
           ],
           "text": "被保険者は、事故が発生したことを知った場合",
-          "element_id": "ch4_s2_a1_p1_text",
+          "element_id": "ch4_s2_a1_p1",
           "region": "body"
         },
         {
@@ -1171,7 +1160,7 @@
             394.8262149744709
           ],
           "text": "は、下表に掲げる義務を履行しなければなりませ",
-          "element_id": "ch4_s2_a1_p1_text",
+          "element_id": "ch4_s2_a1_p1",
           "region": "body"
         },
         {
@@ -1182,7 +1171,7 @@
             410.21621497447086
           ],
           "text": "ん。",
-          "element_id": "ch4_s2_a1_p1_text",
+          "element_id": "ch4_s2_a1_p1",
           "region": "body"
         },
         {
@@ -1369,7 +1358,7 @@
             92.59755355714813
           ],
           "text": "（２）",
-          "element_id": "ch4_s2_a1_p2_label",
+          "element_id": "ch4_s2_a1_p2",
           "region": "body"
         },
         {
@@ -1380,7 +1369,7 @@
             92.59755355714813
           ],
           "text": "被保険者が正当な理由がなく（１）の義務を怠っ",
-          "element_id": "ch4_s2_a1_p2_text",
+          "element_id": "ch4_s2_a1_p2",
           "region": "body"
         },
         {
@@ -1391,7 +1380,7 @@
             107.98755355714812
           ],
           "text": "た場合は、当会社は、それによって当会社が被っ",
-          "element_id": "ch4_s2_a1_p2_text",
+          "element_id": "ch4_s2_a1_p2",
           "region": "body"
         },
         {
@@ -1402,7 +1391,7 @@
             123.37755355714813
           ],
           "text": "た損害の額を差し引いて保険金を支払います。",
-          "element_id": "ch4_s2_a1_p2_text",
+          "element_id": "ch4_s2_a1_p2",
           "region": "body"
         },
         {
@@ -1435,7 +1424,7 @@
             195.72164804533708
           ],
           "text": "１．",
-          "element_id": "app1_s1_p1_label",
+          "element_id": "app1_s1_p1",
           "region": "body"
         },
         {
@@ -1446,7 +1435,7 @@
             195.72164804533708
           ],
           "text": "後遺障害の等級は、身体に残った障害の程度に応",
-          "element_id": "app1_s1_p1_text",
+          "element_id": "app1_s1_p1",
           "region": "body"
         },
         {
@@ -1457,7 +1446,7 @@
             211.11164804533706
           ],
           "text": "じて次表のとおり区分します。",
-          "element_id": "app1_s1_p1_text",
+          "element_id": "app1_s1_p1",
           "region": "body"
         },
         {
@@ -1864,7 +1853,7 @@
             504.7607031634474
           ],
           "text": "２．",
-          "element_id": "app1_s1_p2_label",
+          "element_id": "app1_s1_p2",
           "region": "body"
         },
         {
@@ -1875,7 +1864,7 @@
             504.7607031634474
           ],
           "text": "同一の事故により二以上の後遺障害が生じた場合",
-          "element_id": "app1_s1_p2_text",
+          "element_id": "app1_s1_p2",
           "region": "body"
         },
         {
@@ -1886,7 +1875,7 @@
             520.1507031634474
           ],
           "text": "の取扱いは、当会社が別に定める基準によりま",
-          "element_id": "app1_s1_p2_text",
+          "element_id": "app1_s1_p2",
           "region": "body"
         },
         {
@@ -1897,7 +1886,7 @@
             535.5407031634473
           ],
           "text": "す。",
-          "element_id": "app1_s1_p2_text",
+          "element_id": "app1_s1_p2",
           "region": "body"
         },
         {
@@ -2141,7 +2130,7 @@
       "heading_text": null
     },
     "toc_link_ch1": {
-      "kind": "InlineBox",
+      "kind": "toc_link",
       "fragments": [
         {
           "page": 2,
@@ -2158,7 +2147,7 @@
       "heading_text": null
     },
     "toc_page_ch1": {
-      "kind": "InlineBox",
+      "kind": "toc_page",
       "fragments": [
         {
           "page": 2,
@@ -2209,7 +2198,7 @@
       "heading_text": null
     },
     "toc_link_ch1_a1": {
-      "kind": "InlineBox",
+      "kind": "toc_link",
       "fragments": [
         {
           "page": 2,
@@ -2226,7 +2215,7 @@
       "heading_text": null
     },
     "toc_page_ch1_a1": {
-      "kind": "InlineBox",
+      "kind": "toc_page",
       "fragments": [
         {
           "page": 2,
@@ -2260,7 +2249,7 @@
       "heading_text": null
     },
     "toc_link_ch1_a2": {
-      "kind": "InlineBox",
+      "kind": "toc_link",
       "fragments": [
         {
           "page": 2,
@@ -2277,7 +2266,7 @@
       "heading_text": null
     },
     "toc_page_ch1_a2": {
-      "kind": "InlineBox",
+      "kind": "toc_page",
       "fragments": [
         {
           "page": 2,
@@ -2311,7 +2300,7 @@
       "heading_text": null
     },
     "toc_link_ch4": {
-      "kind": "InlineBox",
+      "kind": "toc_link",
       "fragments": [
         {
           "page": 2,
@@ -2328,7 +2317,7 @@
       "heading_text": null
     },
     "toc_page_ch4": {
-      "kind": "InlineBox",
+      "kind": "toc_page",
       "fragments": [
         {
           "page": 2,
@@ -2379,7 +2368,7 @@
       "heading_text": null
     },
     "toc_link_ch4_s1": {
-      "kind": "InlineBox",
+      "kind": "toc_link",
       "fragments": [
         {
           "page": 2,
@@ -2396,7 +2385,7 @@
       "heading_text": null
     },
     "toc_page_ch4_s1": {
-      "kind": "InlineBox",
+      "kind": "toc_page",
       "fragments": [
         {
           "page": 2,
@@ -2430,7 +2419,7 @@
       "heading_text": null
     },
     "toc_link_ch4_s1_a1": {
-      "kind": "InlineBox",
+      "kind": "toc_link",
       "fragments": [
         {
           "page": 2,
@@ -2447,7 +2436,7 @@
       "heading_text": null
     },
     "toc_page_ch4_s1_a1": {
-      "kind": "InlineBox",
+      "kind": "toc_page",
       "fragments": [
         {
           "page": 2,
@@ -2481,7 +2470,7 @@
       "heading_text": null
     },
     "toc_link_ch4_s1_a2": {
-      "kind": "InlineBox",
+      "kind": "toc_link",
       "fragments": [
         {
           "page": 2,
@@ -2498,7 +2487,7 @@
       "heading_text": null
     },
     "toc_page_ch4_s1_a2": {
-      "kind": "InlineBox",
+      "kind": "toc_page",
       "fragments": [
         {
           "page": 2,
@@ -2532,7 +2521,7 @@
       "heading_text": null
     },
     "toc_link_ch4_s2": {
-      "kind": "InlineBox",
+      "kind": "toc_link",
       "fragments": [
         {
           "page": 2,
@@ -2549,7 +2538,7 @@
       "heading_text": null
     },
     "toc_page_ch4_s2": {
-      "kind": "InlineBox",
+      "kind": "toc_page",
       "fragments": [
         {
           "page": 2,
@@ -2583,7 +2572,7 @@
       "heading_text": null
     },
     "toc_link_ch4_s2_a1": {
-      "kind": "InlineBox",
+      "kind": "toc_link",
       "fragments": [
         {
           "page": 2,
@@ -2600,7 +2589,7 @@
       "heading_text": null
     },
     "toc_page_ch4_s2_a1": {
-      "kind": "InlineBox",
+      "kind": "toc_page",
       "fragments": [
         {
           "page": 2,
@@ -2634,7 +2623,7 @@
       "heading_text": null
     },
     "toc_link_app1": {
-      "kind": "InlineBox",
+      "kind": "toc_link",
       "fragments": [
         {
           "page": 2,
@@ -2651,7 +2640,7 @@
       "heading_text": null
     },
     "toc_page_app1": {
-      "kind": "InlineBox",
+      "kind": "toc_page",
       "fragments": [
         {
           "page": 2,
@@ -2685,7 +2674,7 @@
       "heading_text": null
     },
     "toc_link_app1_s1": {
-      "kind": "InlineBox",
+      "kind": "toc_link",
       "fragments": [
         {
           "page": 2,
@@ -2702,7 +2691,7 @@
       "heading_text": null
     },
     "toc_page_app1_s1": {
-      "kind": "InlineBox",
+      "kind": "toc_page",
       "fragments": [
         {
           "page": 2,
@@ -2719,7 +2708,7 @@
       "heading_text": null
     },
     "doc_body": {
-      "kind": "BlockBox",
+      "kind": "body",
       "fragments": [
         {
           "page": 2,
@@ -2763,7 +2752,7 @@
       "heading_text": "第１章　賠償責任条項"
     },
     "ch1_label": {
-      "kind": "InlineBox",
+      "kind": "label",
       "fragments": [
         {
           "page": 2,
@@ -2780,7 +2769,7 @@
       "heading_text": null
     },
     "ch1_title": {
-      "kind": "InlineBox",
+      "kind": "title",
       "fragments": [
         {
           "page": 2,
@@ -2814,7 +2803,7 @@
       "heading_text": "第１条（この条項の補償内容）"
     },
     "ch1_a1_label": {
-      "kind": "InlineBox",
+      "kind": "label",
       "fragments": [
         {
           "page": 2,
@@ -2831,7 +2820,7 @@
       "heading_text": null
     },
     "ch1_a1_title": {
-      "kind": "InlineBox",
+      "kind": "title",
       "fragments": [
         {
           "page": 2,
@@ -2865,7 +2854,7 @@
       "heading_text": "（１）"
     },
     "ch1_a1_p1_label": {
-      "kind": "BlockBox",
+      "kind": "label",
       "fragments": [
         {
           "page": 2,
@@ -2882,7 +2871,7 @@
       "heading_text": null
     },
     "ch1_a1_p1_text": {
-      "kind": "BlockBox",
+      "kind": "text",
       "fragments": [
         {
           "page": 2,
@@ -2916,7 +2905,7 @@
       "heading_text": "（２）"
     },
     "ch1_a1_p2_label": {
-      "kind": "BlockBox",
+      "kind": "label",
       "fragments": [
         {
           "page": 2,
@@ -2933,7 +2922,7 @@
       "heading_text": null
     },
     "ch1_a1_p2_text": {
-      "kind": "BlockBox",
+      "kind": "text",
       "fragments": [
         {
           "page": 2,
@@ -2967,7 +2956,7 @@
       "heading_text": "第２条（保険金を支払わない場合）"
     },
     "ch1_a2_label": {
-      "kind": "InlineBox",
+      "kind": "label",
       "fragments": [
         {
           "page": 2,
@@ -2984,7 +2973,7 @@
       "heading_text": null
     },
     "ch1_a2_title": {
-      "kind": "InlineBox",
+      "kind": "title",
       "fragments": [
         {
           "page": 2,
@@ -3171,7 +3160,7 @@
       "heading_text": "第２章　基本条項"
     },
     "ch4_label": {
-      "kind": "InlineBox",
+      "kind": "label",
       "fragments": [
         {
           "page": 2,
@@ -3188,7 +3177,7 @@
       "heading_text": null
     },
     "ch4_title": {
-      "kind": "InlineBox",
+      "kind": "title",
       "fragments": [
         {
           "page": 2,
@@ -3222,7 +3211,7 @@
       "heading_text": "第１節　契約手続と義務"
     },
     "ch4_s1_label": {
-      "kind": "InlineBox",
+      "kind": "label",
       "fragments": [
         {
           "page": 2,
@@ -3239,7 +3228,7 @@
       "heading_text": null
     },
     "ch4_s1_title": {
-      "kind": "InlineBox",
+      "kind": "title",
       "fragments": [
         {
           "page": 2,
@@ -3273,7 +3262,7 @@
       "heading_text": "第１条（告知義務）"
     },
     "ch4_s1_a1_label": {
-      "kind": "InlineBox",
+      "kind": "label",
       "fragments": [
         {
           "page": 2,
@@ -3290,7 +3279,7 @@
       "heading_text": null
     },
     "ch4_s1_a1_title": {
-      "kind": "InlineBox",
+      "kind": "title",
       "fragments": [
         {
           "page": 2,
@@ -3324,7 +3313,7 @@
       "heading_text": "（１）"
     },
     "ch4_s1_a1_p1_label": {
-      "kind": "BlockBox",
+      "kind": "label",
       "fragments": [
         {
           "page": 2,
@@ -3341,7 +3330,7 @@
       "heading_text": null
     },
     "ch4_s1_a1_p1_text": {
-      "kind": "BlockBox",
+      "kind": "text",
       "fragments": [
         {
           "page": 2,
@@ -3375,7 +3364,7 @@
       "heading_text": "（２）"
     },
     "ch4_s1_a1_p2_label": {
-      "kind": "BlockBox",
+      "kind": "label",
       "fragments": [
         {
           "page": 2,
@@ -3392,7 +3381,7 @@
       "heading_text": null
     },
     "ch4_s1_a1_p2_text": {
-      "kind": "BlockBox",
+      "kind": "text",
       "fragments": [
         {
           "page": 2,
@@ -3426,7 +3415,7 @@
       "heading_text": "第２条（通知義務）"
     },
     "ch4_s1_a2_label": {
-      "kind": "InlineBox",
+      "kind": "label",
       "fragments": [
         {
           "page": 2,
@@ -3443,7 +3432,7 @@
       "heading_text": null
     },
     "ch4_s1_a2_title": {
-      "kind": "InlineBox",
+      "kind": "title",
       "fragments": [
         {
           "page": 2,
@@ -3477,7 +3466,7 @@
       "heading_text": "（１）"
     },
     "ch4_s1_a2_p1_label": {
-      "kind": "BlockBox",
+      "kind": "label",
       "fragments": [
         {
           "page": 2,
@@ -3494,7 +3483,7 @@
       "heading_text": null
     },
     "ch4_s1_a2_p1_text": {
-      "kind": "BlockBox",
+      "kind": "text",
       "fragments": [
         {
           "page": 2,
@@ -3630,7 +3619,7 @@
       "heading_text": "（２）"
     },
     "ch4_s1_a2_p2_label": {
-      "kind": "BlockBox",
+      "kind": "label",
       "fragments": [
         {
           "page": 2,
@@ -3647,7 +3636,7 @@
       "heading_text": null
     },
     "ch4_s1_a2_p2_text": {
-      "kind": "BlockBox",
+      "kind": "text",
       "fragments": [
         {
           "page": 2,
@@ -3681,7 +3670,7 @@
       "heading_text": "（３）"
     },
     "ch4_s1_a2_p3_label": {
-      "kind": "BlockBox",
+      "kind": "label",
       "fragments": [
         {
           "page": 2,
@@ -3698,7 +3687,7 @@
       "heading_text": null
     },
     "ch4_s1_a2_p3_text": {
-      "kind": "BlockBox",
+      "kind": "text",
       "fragments": [
         {
           "page": 2,
@@ -3766,7 +3755,7 @@
       "heading_text": null
     },
     "box_notify_hint_title": {
-      "kind": "BlockBox",
+      "kind": "box_title",
       "fragments": [
         {
           "page": 2,
@@ -3817,7 +3806,7 @@
       "heading_text": "第２節　事故発生時の義務"
     },
     "ch4_s2_label": {
-      "kind": "InlineBox",
+      "kind": "label",
       "fragments": [
         {
           "page": 3,
@@ -3834,7 +3823,7 @@
       "heading_text": null
     },
     "ch4_s2_title": {
-      "kind": "InlineBox",
+      "kind": "title",
       "fragments": [
         {
           "page": 3,
@@ -3868,7 +3857,7 @@
       "heading_text": "第１条（事故が発生した場合の義務）"
     },
     "ch4_s2_a1_label": {
-      "kind": "InlineBox",
+      "kind": "label",
       "fragments": [
         {
           "page": 3,
@@ -3885,7 +3874,7 @@
       "heading_text": null
     },
     "ch4_s2_a1_title": {
-      "kind": "InlineBox",
+      "kind": "title",
       "fragments": [
         {
           "page": 3,
@@ -3987,7 +3976,7 @@
       "heading_text": "（１）"
     },
     "ch4_s2_a1_p1_label": {
-      "kind": "BlockBox",
+      "kind": "label",
       "fragments": [
         {
           "page": 3,
@@ -4004,7 +3993,7 @@
       "heading_text": null
     },
     "ch4_s2_a1_p1_text": {
-      "kind": "BlockBox",
+      "kind": "text",
       "fragments": [
         {
           "page": 3,
@@ -4252,7 +4241,7 @@
       "heading_text": "（２）"
     },
     "ch4_s2_a1_p2_label": {
-      "kind": "BlockBox",
+      "kind": "label",
       "fragments": [
         {
           "page": 3,
@@ -4269,7 +4258,7 @@
       "heading_text": null
     },
     "ch4_s2_a1_p2_text": {
-      "kind": "BlockBox",
+      "kind": "text",
       "fragments": [
         {
           "page": 3,
@@ -4303,7 +4292,7 @@
       "heading_text": "別表１　後遺障害等級表（抜粋）"
     },
     "app1_label": {
-      "kind": "InlineBox",
+      "kind": "label",
       "fragments": [
         {
           "page": 3,
@@ -4320,7 +4309,7 @@
       "heading_text": null
     },
     "app1_title": {
-      "kind": "InlineBox",
+      "kind": "title",
       "fragments": [
         {
           "page": 3,
@@ -4354,7 +4343,7 @@
       "heading_text": "第１　等級と保険金支払割合"
     },
     "app1_s1_label": {
-      "kind": "InlineBox",
+      "kind": "label",
       "fragments": [
         {
           "page": 3,
@@ -4371,7 +4360,7 @@
       "heading_text": null
     },
     "app1_s1_title": {
-      "kind": "InlineBox",
+      "kind": "title",
       "fragments": [
         {
           "page": 3,
@@ -4405,7 +4394,7 @@
       "heading_text": "１．"
     },
     "app1_s1_p1_label": {
-      "kind": "BlockBox",
+      "kind": "label",
       "fragments": [
         {
           "page": 3,
@@ -4422,7 +4411,7 @@
       "heading_text": null
     },
     "app1_s1_p1_text": {
-      "kind": "BlockBox",
+      "kind": "text",
       "fragments": [
         {
           "page": 3,
@@ -4881,7 +4870,7 @@
       "heading_text": "２．"
     },
     "app1_s1_p2_label": {
-      "kind": "BlockBox",
+      "kind": "label",
       "fragments": [
         {
           "page": 3,
@@ -4898,7 +4887,7 @@
       "heading_text": null
     },
     "app1_s1_p2_text": {
-      "kind": "BlockBox",
+      "kind": "text",
       "fragments": [
         {
           "page": 3,

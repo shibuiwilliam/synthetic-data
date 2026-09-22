@@ -490,6 +490,15 @@ class LabelInfo(Model):
     title: str  # 「告知義務」
     heading_text: str  # 「第１条（告知義務）」
     path: list[str]  # 祖先の heading_text
+    #: 祖先の id（`path` と同じ並び）。木として復元するのに使う
+    path_ids: list[str] = Field(default_factory=list)
+    #: 親ノードの id（ルート直下は None）
+    parent_id: str | None = None
+    #: ノード種別（part/chapter/rider/section/article/paragraph/item/…）
+    kind: NodeKind | None = None
+    #: **構造内の位置づけ**を番号だけで連ねた文字列（「第2章 第1条 (1)」）。
+    #: 読み取り側が出す位置づけと直接比較するための正規形（docs/eval_dataset_plan.md P2）。
+    citation: str = ""
     depth: int
     #: この節点の本文の**先頭に走り込みで印字される**ラベル。
     #: `meta.article_heading == "above"`（条見出しを条の上に括弧書きで置く体裁。
@@ -534,10 +543,38 @@ class TableDerived(Model):
     auto_labels: dict[str, str] = Field(default_factory=dict)
 
 
+class FigureNode(Model):
+    """正規化した図のノード（docs/eval_dataset_plan.md P1）。"""
+
+    id: str
+    label: str
+    #: 種別ごとの意味（start/process/decision/tree/step/tick/span/event/field/legend/row/col/cell ほか）
+    role: str
+
+
+class FigureEdge(Model):
+    """正規化した図の辺。`relation` が `flow`/`child`/`next`/`cell` のものだけが経路に数えられる。"""
+
+    from_: str = Field(alias="from")
+    to: str
+    relation: str
+    label: str | None = None
+
+
+class FigureGraph(Model):
+    """6 種の図を 1 つの形に正規化したもの。読み取り側の予測と直接突き合わせる。"""
+
+    nodes: list[FigureNode] = Field(default_factory=list)
+    edges: list[FigureEdge] = Field(default_factory=list)
+
+
 class FigureDerived(Model):
     caption_label: str | None = None
     node_order: list[str] = Field(default_factory=list)
+    #: 入次数 0 → 出次数 0 の全経路（ラベルの列）。**6 種すべてで作る**
     paths: list[list[str]] = Field(default_factory=list)
+    #: 6 種を共通化した有向グラフ（docs/eval_dataset_plan.md P1）
+    graph: FigureGraph = Field(default_factory=FigureGraph)
     #: 図の中に書かれたトークンを含む文字列の解決結果（生文字列 → 解決後）。
     #: SVG は行内マークアップを持てないので、値を差し込む `{ref:}` `{term:}` `{const:}` だけを許す。
     #: 描画側は `resolve_strings()` でこの対応表を当ててから SVG を組む（docs/shared_fixes.md A2）。
@@ -550,6 +587,28 @@ class FormulaDerived(Model):
     resolved_labels: dict[str, str] = Field(default_factory=dict)
 
 
+class EnumerationItem(Model):
+    """列挙の 1 項目（docs/eval_dataset_plan.md P4）。"""
+
+    id: str  # 要素 id（表のセル id / ノード id / リスト項目 id）
+    index: int  # 1 始まりの順番
+    label: str  # 「①」「(1)」など、紙面に出る記号
+    text: str  # 解決後の平文
+
+
+class Enumeration(Model):
+    """「列挙された項目の一つ」を機械可読にするための、列挙のまとまり。
+
+    表の列挙（`{auto_label}` を持つ表）・号のノード・箇条書きの 3 系統をまとめて扱う。
+    """
+
+    id: str  # 列挙そのものの id（表 id / 親ノード id / リスト id）
+    source: Literal["table", "nodes", "list"]
+    owner_id: str  # 導入文の要素 id（「下表のとおり」の項）
+    citation: str  # 親の構造位置（「第2章 第3条 (1)」）
+    items: list[EnumerationItem] = Field(default_factory=list)
+
+
 class TocEntry(Model):
     """目次の 1 行。ページ番号は描画時に `target-counter` が入れる（docs/rendering.md §6.5）。"""
 
@@ -559,6 +618,14 @@ class TocEntry(Model):
     title: str
     heading_text: str
     summary: str | None = None
+    #: ノード種別。目次を木として復元し、見出しの粒度を評価するのに使う
+    kind: NodeKind | None = None
+    #: 親の見出しの id（目次に出ない親は飛ばさず、直近の祖先ノードの id を入れる）
+    parent_id: str | None = None
+    #: 祖先の id
+    path_ids: list[str] = Field(default_factory=list)
+    #: 「第2章 第1条」のような位置づけの正規形
+    citation: str = ""
 
 
 class Derived(Model):
@@ -570,6 +637,8 @@ class Derived(Model):
     tables: dict[str, TableDerived] = Field(default_factory=dict)
     figures: dict[str, FigureDerived] = Field(default_factory=dict)
     formulas: dict[str, FormulaDerived] = Field(default_factory=dict)
+    #: 列挙のまとまり（docs/eval_dataset_plan.md P4）
+    enumerations: list[Enumeration] = Field(default_factory=list)
     toc: list[TocEntry] = Field(default_factory=list)
 
 
@@ -681,6 +750,14 @@ class OutlineEntry(Model):
     title: str
     heading_text: str
     page: int
+    #: ノード種別（章か条か項か）。読み取りの粒度を評価するのに要る
+    kind: NodeKind | None = None
+    #: 親の id。木として復元できるようにする（id の命名規則に頼らない）
+    parent_id: str | None = None
+    #: 祖先の id
+    path_ids: list[str] = Field(default_factory=list)
+    #: 「第2章 第1条」のような位置づけの正規形
+    citation: str = ""
 
 
 class Answer(Model):

@@ -199,12 +199,20 @@ dataset/manifest.json      # 全文書の一覧（doc_id, genre, style, pages, s
 
 ---
 
-## 9. 評価用QAと評価ハーネス（P6・最小）
-- `yakkan eval --pred pred.json --gold answer.json` を用意する。`pred.json` は answer.json の部分集合形式（pages[].text、outline、tables（grid）、figures（nodes/edges））。
-- 指標：ページ別 CER、outline の見出しツリー F1（label+title 一致・深さ一致）、表 TEDS（`apted` で実装、PubTabNet の定義に準拠）、表セル値 F1（header_path 経由）、図ノード/エッジ F1、QA 完全一致／部分一致、読み順の Kendall τ（要素 bbox の中心を用いて予測順を定義）。
-- ハーネスは「正解JSONが評価に耐える形か」を確かめる目的で最小実装し、読み取り側チームの要件が来たら拡張する。
+## 9. 評価用QAと評価ハーネス → 詳細は `docs/evaluation.md`
 
----
+**評価データとしての充足性のレビューと改修の経緯は `docs/eval_dataset_plan.md`。**
+
+- `yakkan eval dataset/<doc_id> --pred pred.json`：読み取りの採点。予測 JSON の形は
+  `schema/prediction.schema.json`。突合は**中身で行う**（予測に内部 id は無い前提）。
+- 指標：ページ別 CER、outline の F1（＋見出しの種別・ページ・位置づけの正解率）、
+  **構造位置 citation の正解率**、表 TEDS（`apted`）、表セル F1（header_path の 3 つ組）、
+  図のノード/エッジ/経路 F1、列挙の順番一致、読み順の Kendall τ、QA の完全/部分一致。
+- `yakkan eval --search-run run.json`：検索の採点（nDCG@k・Recall@k・MRR、クエリ種別ごと）。
+- `yakkan eval … --oracle`：**満点の予測を自分で作って採点する自己評価**。
+  ハーネスが壊れていないことを `tests/unit/test_eval.py` で固定している。
+- `yakkan export`：評価向けの派生成果物を書き出す（`elements.jsonl`・`passages.jsonl`・
+  `dataset/search/*`・`dataset/README.md`）。`yakkan batch` の中でも走る。
 
 ## 10. リポジトリ構成 → 詳細は `docs/repo_layout.md`
 
@@ -229,6 +237,9 @@ uv run yakkan verify dataset/<doc_id>
 uv run yakkan review dataset/<doc_id>     # pages/*.png 出力（Claude が画像を開いて確認）
 uv run yakkan qa dataset/<doc_id> [--validate]
 uv run yakkan batch specs/batch_v1.yaml   # 上記を一括（失敗文書は manifest に failed として記録）
+uv run yakkan export                      # elements.jsonl / passages.jsonl / dataset/search/*
+uv run yakkan eval dataset/<doc_id> --pred pred.json   # 読み取りの採点（--oracle で自己評価）
+uv run yakkan eval --search-run run.json  # 検索の採点
 uv run yakkan manifest update
 uv run pytest -q ; uv run ruff check . ; make check
 ```

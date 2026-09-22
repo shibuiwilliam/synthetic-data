@@ -432,6 +432,25 @@ class DocumentIndex:
     def __getitem__(self, node_id: str) -> IndexedNode:
         return self.nodes[node_id]
 
+    def citation(self, node_id: str) -> str:
+        """**構造内の位置づけ**を番号だけで連ねた文字列（「第2章 第1条 (1)」）。
+
+        読み取り側が出す位置づけと素直に比較できるよう、見出し文言は入れない。
+        番号を持たない特約は題名で示す（「携行品損害補償特約 第1条」）。
+        番号も題名も無いノードは飛ばす。
+        """
+        item = self.nodes[node_id]
+        parts: list[str] = []
+        for nid in (*item.ancestors, node_id):
+            entry = self.nodes[nid]
+            if entry.node.kind == "rider":
+                token = entry.node.title or ""
+            else:
+                token = entry.run_in_label or entry.label
+            if token:
+                parts.append(token)
+        return " ".join(parts)
+
     def labels(self) -> dict[str, LabelInfo]:
         """`derived.labels` を組み立てる。"""
         out: dict[str, LabelInfo] = {}
@@ -441,6 +460,10 @@ class DocumentIndex:
                 title=item.node.title or "",
                 heading_text=item.heading_text,
                 path=[self.nodes[a].heading_text for a in item.ancestors],
+                path_ids=list(item.ancestors),
+                parent_id=item.parent_id,
+                kind=item.node.kind,
+                citation=self.citation(node_id),
                 depth=item.depth,
                 run_in_label=item.run_in_label,
             )

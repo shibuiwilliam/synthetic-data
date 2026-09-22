@@ -84,6 +84,11 @@
 - **F10. `layout.elements[].kind` に WeasyPrint の内部クラス名が混ざる。**
   auto-0001 で 1,059 要素中 **396 件が `InlineBox` / `BlockBox`**（目次のリンクとページ番号の span）。
   `data-kind` を付け忘れている箇所で、正解データとしては誤り。
+- **F11. 読み順が「項」の粒度になっていない**（P5 の実装中に判明）。
+  `layout.pages[].reading_order` と `text_lines[].element_id` が、ラベルと本文を分けた
+  内部の span（`ch1_a3_p1_label` / `ch1_a3_p1_text`）を指しており、
+  **本文ノードそのもの（`ch1_a3_p1`）が読み順に 1 つも出ていなかった**（auto-0001 で 11/90）。
+  読み順の評価にも、要素インデックスにも使えない状態だった。
 
 ---
 
@@ -94,16 +99,16 @@
 
 | # | 施策 | 埋める欠落 | 依存 | 状態 |
 |---|---|---|---|---|
-| P1 | 図の正規化グラフ `derived.figures[].graph`（`nodes[] {id,label,role}` / `edges[] {from,to,label}`）と、全 6 種の `paths` | F1 | — | 未着手 |
-| P2 | `LabelInfo` に `kind` / `path_ids` / `citation`（「第2章 第1条 (1)」）を追加 | F2 | — | 未着手 |
-| P3 | `outline` に `kind` / `parent_id` / `path_ids` / `citation` を追加 | F4 | P2 | 未着手 |
-| P4 | 列挙の親子を `derived.enumerations[]` に出す（親要素 id・順番・ラベル・セル id） | F5 | — | 未着手 |
-| P5 | `elements.jsonl` を出力（1 行 1 要素：id・kind・citation・parent_id・page・bbox・text・table/figure 所属） | F3 | P2 P4 | 未着手 |
-| P6 | 予測 JSON スキーマ `schema/prediction.schema.json` を定義し、`docs/evaluation.md` に書く | F6 | P1–P5 | 未着手 |
-| P7 | `yakkan eval` を実装（CER・outline F1・表 TEDS・表セル F1・図 F1・QA・読み順 τ） | F6 | P6 | 未着手 |
-| P8 | 検索評価セット `passages.jsonl` / `queries.jsonl` / `qrels.jsonl` と `yakkan search-set` | F8 F9 | P5 | 未着手 |
-| P9 | `manifest.json` に成果物一覧とスキーマ版、`dataset/README.md` を追加 | F7 | P1–P8 | 未着手 |
-| P10 | 目次の span に `data-kind` を付ける（`toc_link` / `toc_page`） | F10 | — | 未着手 |
+| P1 | 図の正規化グラフ `derived.figures[].graph` と、全 6 種の `paths` | F1 | — | **完了** |
+| P2 | `LabelInfo` に `kind` / `parent_id` / `path_ids` / `citation` を追加 | F2 | — | **完了** |
+| P3 | `outline` と `derived.toc` に `kind` / `parent_id` / `path_ids` / `citation` を追加 | F4 | P2 | **完了** |
+| P4 | 列挙の親子を `derived.enumerations[]` に出す（表・号のノード・箇条書きの 3 系統） | F5 | — | **完了** |
+| P5 | `elements.jsonl` を出力（1 行 1 要素） | F3 F11 | P2 P4 | **完了** |
+| P6 | 予測 JSON スキーマと `docs/evaluation.md` | F6 | P1–P5 | **完了** |
+| P7 | `yakkan eval` を実装（CER・outline F1・citation 正解率・TEDS・表セル F1・図 F1・列挙・読み順 τ・QA・検索 nDCG） | F6 | P6 | **完了** |
+| P8 | 検索評価セット `passages.jsonl` / `queries.jsonl` / `qrels.jsonl`（`yakkan export`） | F8 F9 | P5 | **完了** |
+| P9 | `manifest.json` に成果物一覧、`dataset/README.md` を生成 | F7 | P1–P8 | **完了** |
+| P10 | すべての span に `data-kind` を付ける（内部クラス名を消す） | F10 | — | **完了** |
 
 ### 各施策の設計メモ
 
@@ -144,3 +149,23 @@ matrix は行→セル→列、annotated_mock はバッジ→凡例。
    「わざと崩した予測」を通して、指標が期待どおり動くことを確かめる
 4. P9（並びと README）
 5. 各段で `make check` と `yakkan batch` を通し、機能単位でコミットする
+
+---
+
+## 4. 実施の記録（2026-09-22）
+
+すべての施策を実施した。実測値：
+
+| 指標 | 値 |
+|---|---|
+| 図の `paths` を持つ図 | 21/111 → **111/111**（6 種すべて） |
+| `layout.elements[].kind` の内部クラス名 | 396/1059 → **0** |
+| 読み順に出る本文ノード | 11/90 → **90/90**（auto-0001） |
+| `elements.jsonl` | 34 文書ぶん |
+| 検索評価セット | パッセージ 2,391／クエリ 1,549／qrels 2,654（24 文書のコーパス） |
+
+**自己評価**（`yakkan eval --oracle`）：満点の予測で全指標が満点、
+崩した予測で CER 0.063・outline F1 0.816・citation 0.0・TEDS 0.616・図エッジ F1 0.0 と下がることを確認。
+検索も満点の並びで nDCG@1/5/10 = 1.0、先頭に非適合を 1 件挟むと nDCG@1 = 0.0 になる。
+
+`tests/unit/test_eval.py` と `tests/unit/test_figure_graph.py` で固定した。

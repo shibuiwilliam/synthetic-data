@@ -1,0 +1,125 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.jp/yakkan/prediction.schema.json",
+  "title": "yakkan 読み取り予測",
+  "description": "docs/evaluation.md §1。すべてのキーは任意で、無い観点は指標が 0 になるだけ。",
+  "type": "object",
+  "properties": {
+    "doc_id": { "type": "string" },
+    "pages": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": { "number": { "type": "integer" }, "text": { "type": "string" } },
+        "required": ["number", "text"]
+      }
+    },
+    "outline": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "label": { "type": "string" },
+          "title": { "type": "string" },
+          "heading_text": { "type": "string" },
+          "kind": { "type": ["string", "null"] },
+          "page": { "type": "integer" },
+          "citation": { "type": "string" }
+        }
+      }
+    },
+    "elements": {
+      "type": "array",
+      "description": "読み順に並べる。読み順の Kendall τ はこの並びで測る。",
+      "items": {
+        "type": "object",
+        "properties": {
+          "text": { "type": "string" },
+          "page": { "type": "integer" },
+          "kind": { "type": ["string", "null"] },
+          "citation": { "type": "string" },
+          "bbox": { "type": "array", "items": { "type": "number" }, "minItems": 4, "maxItems": 4 }
+        },
+        "required": ["text"]
+      }
+    },
+    "tables": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "caption_label": { "type": ["string", "null"] },
+          "grid": {
+            "type": "array",
+            "description": "結合を展開した矩形。被結合位置には結合元の値を入れる。",
+            "items": { "type": "array", "items": { "type": "string" } }
+          },
+          "cells": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "row_headers": { "type": "array", "items": { "type": "string" } },
+                "col_headers": { "type": "array", "items": { "type": "string" } },
+                "value": { "type": "string" }
+              },
+              "required": ["value"]
+            }
+          }
+        }
+      }
+    },
+    "figures": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "caption_label": { "type": ["string", "null"] },
+          "nodes": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": { "type": "string" },
+                "label": { "type": "string" },
+                "role": { "type": "string" }
+              },
+              "required": ["label"]
+            }
+          },
+          "edges": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "from": { "type": "string" },
+                "to": { "type": "string" },
+                "relation": { "type": "string" }
+              },
+              "required": ["from", "to"]
+            }
+          },
+          "paths": { "type": "array", "items": { "type": "array", "items": { "type": "string" } } }
+        }
+      }
+    },
+    "enumerations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "citation": { "type": "string" },
+          "items": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+    "qa": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": { "id": { "type": "string" }, "answer": {} },
+        "required": ["id"]
+      }
+    }
+  }
+}

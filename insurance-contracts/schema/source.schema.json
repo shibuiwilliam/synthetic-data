@@ -572,6 +572,9 @@
           "title": "Paths",
           "type": "array"
         },
+        "graph": {
+          "$ref": "#/$defs/FigureGraph"
+        },
         "resolved_labels": {
           "additionalProperties": {
             "type": "string"
@@ -581,6 +584,90 @@
         }
       },
       "title": "FigureDerived",
+      "type": "object"
+    },
+    "FigureEdge": {
+      "additionalProperties": false,
+      "description": "正規化した図の辺。`relation` が `flow`/`child`/`next`/`cell` のものだけが経路に数えられる。",
+      "properties": {
+        "from": {
+          "title": "From",
+          "type": "string"
+        },
+        "to": {
+          "title": "To",
+          "type": "string"
+        },
+        "relation": {
+          "title": "Relation",
+          "type": "string"
+        },
+        "label": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Label"
+        }
+      },
+      "required": [
+        "from",
+        "to",
+        "relation"
+      ],
+      "title": "FigureEdge",
+      "type": "object"
+    },
+    "FigureGraph": {
+      "additionalProperties": false,
+      "description": "6 種の図を 1 つの形に正規化したもの。読み取り側の予測と直接突き合わせる。",
+      "properties": {
+        "nodes": {
+          "items": {
+            "$ref": "#/$defs/FigureNode"
+          },
+          "title": "Nodes",
+          "type": "array"
+        },
+        "edges": {
+          "items": {
+            "$ref": "#/$defs/FigureEdge"
+          },
+          "title": "Edges",
+          "type": "array"
+        }
+      },
+      "title": "FigureGraph",
+      "type": "object"
+    },
+    "FigureNode": {
+      "additionalProperties": false,
+      "description": "正規化した図のノード（docs/eval_dataset_plan.md P1）。",
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "label": {
+          "title": "Label",
+          "type": "string"
+        },
+        "role": {
+          "title": "Role",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "label",
+        "role"
+      ],
+      "title": "FigureNode",
       "type": "object"
     },
     "FlowEdge": {
@@ -1083,6 +1170,55 @@
           },
           "title": "Path",
           "type": "array"
+        },
+        "path_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Path Ids",
+          "type": "array"
+        },
+        "parent_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Parent Id"
+        },
+        "kind": {
+          "anyOf": [
+            {
+              "enum": [
+                "part",
+                "chapter",
+                "rider",
+                "section",
+                "article",
+                "paragraph",
+                "item",
+                "subitem",
+                "subsubitem",
+                "appendix",
+                "appendix_section"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Kind"
+        },
+        "citation": {
+          "default": "",
+          "title": "Citation",
+          "type": "string"
         },
         "depth": {
           "title": "Depth",
@@ -2304,6 +2440,55 @@
           ],
           "default": null,
           "title": "Summary"
+        },
+        "kind": {
+          "anyOf": [
+            {
+              "enum": [
+                "part",
+                "chapter",
+                "rider",
+                "section",
+                "article",
+                "paragraph",
+                "item",
+                "subitem",
+                "subsubitem",
+                "appendix",
+                "appendix_section"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Kind"
+        },
+        "parent_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Parent Id"
+        },
+        "path_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Path Ids",
+          "type": "array"
+        },
+        "citation": {
+          "default": "",
+          "title": "Citation",
+          "type": "string"
         }
       },
       "required": [

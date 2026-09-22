@@ -549,3 +549,160 @@ def manifest(
         )
     console.print(table)
     console.print(f"{result.path} / ready {result.manifest.ready}/{len(result.manifest.documents)} 件")
+
+
+@app.command()
+def export(
+    dataset_dir: Annotated[Path, typer.Option("--dataset", help="dataset/ のパス")] = Path("dataset"),
+    only: Annotated[str | None, typer.Option("--only", help="doc_id を 1 つだけ処理する")] = None,
+) -> None:
+    """評価向けの派生成果物を書き出す（docs/eval_dataset_plan.md P5・P8）。
+
+    各文書に `elements.jsonl` と `passages.jsonl`、コーパス全体に
+    `dataset/search/{passages,queries,qrels}.jsonl` を作る。
+    """
+    import json as _json
+
+    from yakkan.export import export_dataset, write_jsonl, write_readme
+    from yakkan.models import Answer
+    from yakkan.search_set import build_passages, build_search_set
+
+    dirs = sorted(d for d in dataset_dir.iterdir() if d.is_dir() and (d / "answer.json").exists())
+    if only:
+        dirs = [d for d in dirs if d.name == only]
+        if not dirs:
+            console.print(f"[red]見つからない: {only}[/red]")
+            raise typer.Exit(code=2)
+
+    table = Table(title="export", title_justify="left", header_style="bold")
+    for column in ("doc_id", "elements", "passages"):
+        table.add_column(column, justify="right" if column != "doc_id" else "left")
+    per_content: dict[str, Path] = {}
+    for directory in dirs:
+        counts = export_dataset(directory)
+        table.add_row(directory.name, str(counts["elements"]), str(counts["passages"]))
+        # 検索コーパスは content ごとに 1 スタイルだけ使う（別スタイルは本文が同一で重複になる）
+        content_id = directory.name.split("--")[0]
+        per_content.setdefault(content_id, directory)
+    console.print(table)
+
+    if only:
+        return
+
+    corpus: list[dict] = []
+    qa_by_doc: dict[str, list[dict]] = {}
+    for directory in per_content.values():
+        answer = Answer.model_validate_json((directory / "answer.json").read_text(encoding="utf-8"))
+        corpus.extend(build_passages(answer))
+        qa_path = directory / "qa.json"
+        if qa_path.exists():
+            qa_by_doc[answer.doc_id] = _json.loads(qa_path.read_text(encoding="utf-8"))["items"]
+    queries, qrels = build_search_set(corpus, qa_by_doc)
+    search_dir = dataset_dir / "search"
+    write_jsonl(corpus, search_dir / "passages.jsonl")
+    write_jsonl(queries, search_dir / "queries.jsonl")
+    write_jsonl(qrels, search_dir / "qrels.jsonl")
+    write_readme(dataset_dir)
+    console.print(
+        f"[green]検索評価セット[/green] {search_dir} / "
+        f"パッセージ {len(corpus)} 件・クエリ {len(queries)} 件・qrels {len(qrels)} 件"
+        f"（コーパスは content ごとに 1 スタイル＝{len(per_content)} 文書）"
+    )
+
+
+@app.command("eval")
+def eval_command(
+    dataset_doc: Annotated[
+        Path | None, typer.Argument(help="dataset/<doc_id> のパス（読み取りの採点）")
+    ] = None,
+    pred: Annotated[Path | None, typer.Option("--pred", help="予測 JSON")] = None,
+    search_run: Annotated[
+        Path | None, typer.Option("--search-run", help="検索結果 JSON（--qrels と併用）")
+    ] = None,
+    qrels_path: Annotated[Path, typer.Option("--qrels", help="qrels.jsonl")] = Path(
+        "dataset/search/qrels.jsonl"
+    ),
+    queries_path: Annotated[Path, typer.Option("--queries", help="queries.jsonl")] = Path(
+        "dataset/search/queries.jsonl"
+    ),
+    out: Annotated[Path | None, typer.Option("--out", help="採点結果の書き出し先 JSON")] = None,
+    oracle: Annotated[
+        bool, typer.Option("--oracle", help="満点の予測を自分で作って採点する（自己評価）")
+    ] = False,
+) -> None:
+    """予測 JSON または検索結果を採点する（CLAUDE.md §9・docs/evaluation.md）。"""
+    import json as _json
+
+    from yakkan.eval import build_prediction, evaluate, evaluate_run, load_qrels, oracle_run
+    from yakkan.models import Answer
+
+    result: dict
+    if search_run is not None or (oracle and dataset_doc is None):
+        qrels = load_qrels(qrels_path)
+        queries = [
+            _json.loads(line)
+            for line in queries_path.read_text(encoding="utf-8").splitlines()
+            if line.strip()
+        ]
+        runs = (
+            oracle_run(qrels)
+            if search_run is None
+            else _json.loads(search_run.read_text(encoding="utf-8"))["runs"]
+        )
+        result = evaluate_run(qrels, runs, queries=queries)
+        console.print(f"[bold]検索[/bold] 採点したクエリ {result['queries_scored']} 件")
+        table = Table(title="検索（クエリ種別ごと）", title_justify="left", header_style="bold")
+        table.add_column("kind")
+        columns = ["queries", "ndcg@1", "ndcg@5", "ndcg@10", "recall@10", "mrr"]
+        for column in columns:
+            table.add_column(column, justify="right")
+        for kind, values in result["by_kind"].items():
+            table.add_row(kind, *[str(values.get(c, "")) for c in columns])
+        table.add_row(
+            "**全体**",
+            str(result["queries_scored"]),
+            *[str(result["overall"].get(c, "")) for c in columns[1:]],
+        )
+        console.print(table)
+        result.pop("per_query", None)
+    else:
+        if dataset_doc is None:
+            console.print("[red]dataset/<doc_id> を指定するか --search-run を使う[/red]")
+            raise typer.Exit(code=2)
+        if oracle:
+            answer = Answer.model_validate_json((dataset_doc / "answer.json").read_text(encoding="utf-8"))
+            qa_file = dataset_doc / "qa.json"
+            items = _json.loads(qa_file.read_text(encoding="utf-8"))["items"] if qa_file.exists() else []
+            prediction = build_prediction(answer, items)
+        else:
+            if pred is None:
+                console.print("[red]--pred か --oracle が要る[/red]")
+                raise typer.Exit(code=2)
+            prediction = _json.loads(pred.read_text(encoding="utf-8"))
+        result = evaluate(dataset_doc, prediction)
+        table = Table(title=f"読み取り評価 {result['doc_id']}", title_justify="left", header_style="bold")
+        table.add_column("観点")
+        table.add_column("指標", justify="right")
+        rows = [
+            ("本文 CER（低いほど良い）", result["text"]["cer_macro"]),
+            ("見出し F1", result["outline"]["f1"]),
+            ("見出しの種別 正解率", result["outline"]["kind_acc"]),
+            ("構造位置 citation 正解率", result["citation"]["citation_acc"]),
+            ("構造位置 カバー率", result["citation"]["coverage"]),
+            ("表 TEDS", result["tables"]["teds_macro"]),
+            ("表セル F1", result["tables"]["cell_f1"]["f1"]),
+            ("図ノード F1", result["figures"]["node_f1"]["f1"]),
+            ("図エッジ F1", result["figures"]["edge_f1"]["f1"]),
+            ("図経路 F1", result["figures"]["path_f1"]["f1"]),
+            ("列挙の順番一致", result["enumerations"]["order_exact"]),
+            ("読み順 Kendall τ", result["reading_order"]["tau_macro"]),
+            ("QA 完全一致", result["qa"]["exact_match"]),
+        ]
+        for name, value in rows:
+            table.add_row(name, str(value))
+        console.print(table)
+
+    if out is not None:
+        out.parent.mkdir(parents=True, exist_ok=True)
+        out.write_text(_json.dumps(result, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        console.print(f"[green]書き出した[/green] {out}")

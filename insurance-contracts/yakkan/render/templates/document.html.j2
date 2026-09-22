@@ -44,9 +44,9 @@
     <h1 id="toc_heading" data-kind="toc_heading">もくじ</h1>
     {%- for entry in toc %}
     <span class="toc-line d{{ entry.depth }}" id="toc_{{ entry.id }}" data-kind="toc_line">
-      <a href="#{{ entry.id }}" id="toc_link_{{ entry.id }}"
+      <a href="#{{ entry.id }}" id="toc_link_{{ entry.id }}" data-kind="toc_link"
          {%- if toc_pages %} class="fixed"{% endif %}>{{ entry.heading_text }}</a>
-      {%- if toc_pages %}<span class="toc-page" id="toc_page_{{ entry.id }}">{{ toc_pages.get(entry.id, "") }}</span>{% endif %}
+      {%- if toc_pages %}<span class="toc-page" id="toc_page_{{ entry.id }}" data-kind="toc_page">{{ toc_pages.get(entry.id, "") }}</span>{% endif %}
     </span>
     {%- if entry.summary %}
     <span class="toc-summary" id="toc_sum_{{ entry.id }}" data-kind="toc_summary">{{ entry.summary }}</span>
@@ -55,7 +55,7 @@
   </nav>
 {%- endif %}
 
-<div class="cols" id="doc_body">
+<div class="cols" id="doc_body" data-kind="body">
 {{ body_html }}
 {{ appendices_html }}
 

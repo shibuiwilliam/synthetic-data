@@ -118,7 +118,11 @@ class HtmlBuilder:
             if node.kind == "article" and self.source.meta.article_heading == "above":
                 label = ""
             tag = HEADING_TAGS.get(node.kind, "h4")
-            label_span = f'<span class="label" id="{node.id}_label">{escape(label)}</span>' if label else ""
+            label_span = (
+                f'<span class="label" id="{node.id}_label" data-kind="label">{escape(label)}</span>'
+                if label
+                else ""
+            )
             # derived.heading_text と PDF のテキスト層を一字一句そろえる。
             # 条は「第１条（告知義務）」、それ以外は「第１章␣賠償責任条項」（␣ は U+3000）。
             # 間隔を CSS の margin で空けるとテキスト層に文字が入らず heading_text と食い違う。
@@ -132,7 +136,9 @@ class HtmlBuilder:
                 separator = HEADING_SPACE if (label and title) else ""
             sep_span = f'<span class="sep">{separator}</span>' if separator else ""
             title_span = (
-                f'<span class="title" id="{node.id}_title">{escape(title_text)}</span>' if title_text else ""
+                f'<span class="title" id="{node.id}_title" data-kind="title">{escape(title_text)}</span>'
+                if title_text
+                else ""
             )
             # ヘッダに出す経路を **1 本の文字列**として渡す。
             # 編と章を別々の CSS string にすると、編の境界がページ途中に来たとき
@@ -167,8 +173,8 @@ class HtmlBuilder:
             return f'<div class="para no-label" id="{node.id}" data-kind="{node.kind}">{text}</div>'
         return (
             f'<div class="para" id="{node.id}" data-kind="{node.kind}">'
-            f'<span class="label" id="{node.id}_label">{escape(label)}</span>'
-            f'<span class="text" id="{node.id}_text">{text}</span></div>'
+            f'<span class="label" id="{node.id}_label" data-kind="label">{escape(label)}</span>'
+            f'<span class="text" id="{node.id}_text" data-kind="text">{text}</span></div>'
         )
 
     # --- ブロック -----------------------------------------------------------
@@ -192,7 +198,8 @@ class HtmlBuilder:
             case BoxBlock():
                 inner = "\n".join(self.block_html(b) for b in block.blocks)
                 title = (
-                    f'<span class="box-title" id="{block.id}_title">{escape(block.title)}</span>'
+                    f'<span class="box-title" id="{block.id}_title" data-kind="box_title">'
+                    f"{escape(block.title)}</span>"
                     if block.title
                     else ""
                 )

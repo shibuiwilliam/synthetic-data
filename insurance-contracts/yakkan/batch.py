@@ -204,6 +204,11 @@ def run(
                 qa_errors = [f for f in validate_qa(qa_set, answer) if f.severity == "error"]
                 if qa_errors:
                     raise RuntimeError("QA error: " + "; ".join(str(f) for f in qa_errors[:3]))
+                # 評価向けの派生成果物（docs/eval_dataset_plan.md P5）。
+                # 検索評価セットはコーパス全体で作るので `yakkan export` 側で組む。
+                from yakkan.export import export_dataset
+
+                export_dataset(out_dir)
             except Exception as error:  # noqa: BLE001
                 result.results.append(
                     DocResult(
