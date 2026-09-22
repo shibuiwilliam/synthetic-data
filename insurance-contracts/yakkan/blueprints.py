@@ -17,7 +17,7 @@ from yakkan.models import DigitStyle, Genre, Model, NodeKind, NumberingScheme, S
 BLUEPRINTS_DIR = Path(__file__).resolve().parent.parent / "blueprints"
 
 #: 必須要素の種類
-RequirementKind = Literal["table", "figure", "formula", "box", "footnotes", "list", "term"]
+RequirementKind = Literal["table", "figure", "formula", "box", "footnotes", "list", "term", "badge"]
 
 
 class Requirement(Model):
@@ -116,7 +116,7 @@ class Blueprint(Model):
     target_pages: tuple[int, int]
     numbering_scheme: NumberingScheme
     #: 条見出しの体裁（`above` は見出し文言を条の上に置く。docs/reference_structures.md #12）
-    article_heading: Literal["inline", "above"] = "inline"
+    article_heading: Literal["inline", "above", "plain"] = "inline"
     #: 条末脚注の体裁（`remarks_box` は黒丸数字と「第N条　備考」の枠。#13）
     footnote_style: Literal["inline", "remarks_box"] = "inline"
     default_style: str

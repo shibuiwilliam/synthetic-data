@@ -90,7 +90,7 @@ class NumberingContext:
     warnings: list[NumberWarning] = field(default_factory=list)
     #: 条見出しの体裁。`above` は見出し文言だけを条の上に置き、条ラベルを第1項に走り込ませる
     #: （docs/reference_structures.md #12）。
-    article_heading: Literal["inline", "above"] = "inline"
+    article_heading: Literal["inline", "above", "plain"] = "inline"
     #: 条末脚注の体裁。`remarks_box` は黒丸数字のマーカーと「備考」の枠（#13）。
     footnote_style: Literal["inline", "remarks_box"] = "inline"
 
@@ -323,6 +323,9 @@ def heading_text(kind: NodeKind, label: str, title: str | None, article_heading:
     title = title or ""
     if kind == "article" and article_heading == "above":
         return f"（{title}）" if title else label
+    if kind == "article" and article_heading == "plain":
+        # 条を持たない説明書では、丸数字の小見出しに括弧を使わない（#9）
+        return f"{label}{HEADING_SPACE}{title}" if label and title else (label or title)
     if not label:
         return title
     if not title:

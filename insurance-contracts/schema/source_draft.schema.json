@@ -1104,7 +1104,8 @@
           "default": "inline",
           "enum": [
             "inline",
-            "above"
+            "above",
+            "plain"
           ],
           "title": "Article Heading",
           "type": "string"
@@ -1337,6 +1338,13 @@
             "$ref": "#/$defs/Node"
           },
           "title": "Children",
+          "type": "array"
+        },
+        "badges": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Badges",
           "type": "array"
         },
         "kind_label": {

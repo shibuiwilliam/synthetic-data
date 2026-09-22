@@ -133,7 +133,8 @@ class Meta(Model):
     #: 条見出しの体裁。`inline` は「第１条（告知義務）」を 1 行の見出しに置く（既定）。
     #: `above` は見出し文言だけを括弧書きで条の上の行に置き、条ラベルを第1項の本文の
     #: 先頭に走り込ませる（団体保険の体裁。docs/reference_structures.md #12）。
-    article_heading: Literal["inline", "above"] = "inline"
+    #: `plain` は「①　主な特約の概要」のように括弧を使わない（条を持たない説明書。#9）。
+    article_heading: Literal["inline", "above", "plain"] = "inline"
     #: 条末脚注の体裁。`inline` は「（*1）」を条末に並べる（既定）。
     #: `remarks_box` は黒丸数字のマーカーと「第N条　備考」の枠で示す（#13）。
     footnote_style: Literal["inline", "remarks_box"] = "inline"
@@ -444,6 +445,11 @@ class Node(Model):
     summary: str | None = None
     blocks: list[Block] = Field(default_factory=list)
     children: list[Node] = Field(default_factory=list)
+    #: 見出しの右に置く分類ラベル（「契約概要」「注意喚起情報」）。
+    #: 重要事項説明書が見出しごとに持つ（docs/reference_structures.md #9・§3.1 E6）。
+    #: 各バッジは `<node_id>__badge<i>` の id を持つ独立した要素として描かれ、
+    #: `derived.plain_text` にも入る（読み取りの対象にするため）。
+    badges: list[str] = Field(default_factory=list)
     #: 別表の呼び名（「別表」「付表」「別紙」）。`kind: "appendix"` のときだけ意味を持つ。
     #: blueprint の `kind_label` を scaffold が写す。**build は blueprint を見ない**ので、
     #: content 側に持たせないと「付表」と宣言しても「別表」と描かれる。

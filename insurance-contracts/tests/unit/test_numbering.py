@@ -292,3 +292,18 @@ def test_備考欄のマーカーは黒丸数字() -> None:
     assert footnote_marker(c, 3) == "❸"
     # 既定の体裁は変わらない
     assert footnote_marker(NumberingContext(scheme="group"), 1) == "（*１）"
+
+
+def test_重要事項説明書は条を持たない番号方式() -> None:
+    """大見出しは番号のみ、節は（N）、条の位置に丸数字（docs/reference_structures.md #9）。"""
+    c = ctx("jyusetsu", "halfwidth")
+    assert label_for(c, "chapter", 2) == "2"
+    assert label_for(c, "section", 1) == "(1)"
+    assert label_for(c, "article", 3) == "③"
+    assert label_for(c, "paragraph", 2, siblings=3) == "", "項に番号は振らない"
+
+
+def test_plainの条見出しは括弧を使わない() -> None:
+    assert heading_text("article", "③", "主な特約の概要", "plain") == "③　主な特約の概要"
+    # 既定の体裁は変わらない
+    assert heading_text("article", "第１条", "告知義務") == "第１条（告知義務）"

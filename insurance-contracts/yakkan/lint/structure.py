@@ -6,7 +6,7 @@ from collections.abc import Iterator
 
 from yakkan.blueprints import Blueprint, Requirement, load_blueprint
 from yakkan.lint.base import Finding, LintContext, rule
-from yakkan.lint.walk import iter_blocks
+from yakkan.lint.walk import iter_blocks, iter_nodes
 from yakkan.models import BoxBlock, Cell, Figure, FootnotesBlock, Formula, ListBlock, MergedCell, Table
 
 
@@ -83,7 +83,25 @@ def l04_required_elements(ctx: LintContext) -> Iterator[Finding]:
     owned = [(b, owner) for b, owner, _article in iter_blocks(ctx.draft)]
     blocks = [b for b, _owner in owned]
     descendants = _descendants_of(ctx.draft)
+    # 見出しのバッジはブロックではなくノードが持つので、別に数える
+    badge_nodes = [(node, node.badges) for node, _a in iter_nodes(ctx.draft.body) if node.badges]
     for req in blueprint.all_requirements():
+        if req.kind == "badge":
+            hits = [
+                b
+                for _node, badges in badge_nodes
+                for b in badges
+                if req.subtype is None or b == req.subtype
+            ]
+            if len(hits) < req.min_count:
+                label = "badge" + (f"/{req.subtype}" if req.subtype else "")
+                detail = f"（{req.note}）" if req.note else ""
+                yield Finding(
+                    "L04",
+                    "error",
+                    f"必須要素が足りない: {label} が {len(hits)}/{req.min_count} 件{detail}",
+                )
+            continue
         # `under` は「そのノードの配下に要る」という指定。
         # 実装が無く、文書のどこかに 1 つあれば通ってしまっていた。
         scope = blocks

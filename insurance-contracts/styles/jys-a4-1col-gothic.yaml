@@ -1,0 +1,13 @@
+style_id: jys-a4-1col-gothic
+description: A4 縦・1段組・ゴシック・色帯見出し。重要事項説明書（参考 #9・#10）の版面
+page: { size: A4, width_mm: 210, height_mm: 297, margin_mm: { top: 16, right: 15, bottom: 16, left: 15 } }
+columns: { count: 1, gap_mm: 8 }
+fonts: { body: "IPAexGothic", heading: "IPAexGothic", symbol_fallback: ["Noto Sans Symbols", "Noto Sans Symbols 2"] }
+sizes: { body_pt: 9, line_height: 1.62, h1_pt: 14, h2_pt: 11.5, h3_pt: 10, h4_pt: 9.5,
+         table_pt: 8.2, note_pt: 7.4, toc_pt: 9, cover_pt: 22 }
+palette: { text: "#1a1a1a", rule: "#5a6b86", accent: "#1f3f6e", band: "#ffffff", note_bg: "#eef2f8" }
+headings: { band: true }
+table: { border: grid }
+margin_note: article_end
+page_number: plain
+chars_per_page_estimate: 1779

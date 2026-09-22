@@ -122,11 +122,12 @@ class HtmlBuilder:
             # derived.heading_text と PDF のテキスト層を一字一句そろえる。
             # 条は「第１条（告知義務）」、それ以外は「第１章␣賠償責任条項」（␣ は U+3000）。
             # 間隔を CSS の margin で空けるとテキスト層に文字が入らず heading_text と食い違う。
-            if node.kind == "article" and title:
+            heading_mode = self.source.meta.article_heading
+            if node.kind == "article" and title and heading_mode != "plain":
+                # 「第１条（告知義務）」。`above` では label_span を出さないので「（告知義務）」になる。
                 title_text, separator = f"（{title}）", ""
-                if self.source.meta.article_heading == "above":
-                    separator = ""
             else:
+                # `plain`（条を持たない説明書）は「①　主な特約の概要」（括弧なし・全角空白）
                 title_text = title
                 separator = HEADING_SPACE if (label and title) else ""
             sep_span = f'<span class="sep">{separator}</span>' if separator else ""
@@ -138,9 +139,15 @@ class HtmlBuilder:
             # 別々の編の値を拾って噛み合わなくなる（life-0002 で「第2編…第6章（実は第1編）」が出た）。
             header_path = self._header_path(node)
             path_attr = f' data-headerpath="{escape(header_path)}"' if header_path else ""
+            # 見出しの分類ラベル（「契約概要」「注意喚起情報」）。
+            # 独立した id を持たせて bbox を取れるようにする（docs/reference_structures.md #9）。
+            badges = "".join(
+                f'<span class="badge" id="{node.id}__badge{i}" data-kind="badge">{escape(b)}</span>'
+                for i, b in enumerate(node.badges)
+            )
             parts.append(
                 f'<{tag} id="{node.id}" data-kind="{node.kind}"{path_attr}>'
-                f"{label_span}{sep_span}{title_span}</{tag}>"
+                f"{label_span}{sep_span}{title_span}{badges}</{tag}>"
             )
         # 条末に置くブロック（脚注・欄外注）は子（項）をすべて出してから最後に置く。
         # それ以外のブロック（項に付く列挙表など）は、その場に置く。

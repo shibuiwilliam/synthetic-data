@@ -344,6 +344,9 @@ def build_plain_text(ctx: BuildContext) -> tuple[dict[str, PlainText], list[RefI
                 with_label=item.heading_text,
                 without_label=node.title or "",
             )
+        # 見出しのバッジ（「契約概要」など）も読み取りの対象にする
+        for i, badge in enumerate(node.badges):
+            plain[f"{node.id}__badge{i}"] = PlainText(with_label=badge, without_label=badge)
 
     # ブロック
     enum_labels: dict[str, str] = {}

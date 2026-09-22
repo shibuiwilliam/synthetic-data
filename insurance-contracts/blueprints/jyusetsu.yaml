@@ -1,0 +1,96 @@
+# 重要事項説明書（docs/reference_structures.md #9・#10）
+# 実物の特徴：
+#  - **条を 1 つも持たない。** 大見出し ›（N）› ① の 3 階層で、条・節・項を使わない
+#  - 見出しごとに「契約概要」「注意喚起情報」のバッジが付く（1 文書で 30 回前後）
+#  - 用語の定義表（五十音インデックス列つき）と、○×のプラン比較マトリクス
+#  - ※ の注記が極端に多い（#9 で 125 回）
+genre: jyusetsu
+description: 自動車保険の重要事項等説明書。条を持たず、見出しごとに契約概要／注意喚起情報のバッジが付く
+target_pages: [8, 12]
+numbering_scheme: jyusetsu
+article_heading: plain
+default_style: jys-a4-1col-gothic
+
+front_matter:
+  cover: true
+  preface: true
+  purpose_index: false
+  toc_with_summaries: false
+  toc_depth: 2
+  rider_index: false
+
+required:
+  - { kind: badge, subtype: 契約概要, min_count: 8 }
+  - { kind: badge, subtype: 注意喚起情報, min_count: 6 }
+  - { kind: table, subtype: definitions, min_rows: 10 }
+  - { kind: table, subtype: plan_matrix, min_rows: 4, min_cols: 4,
+      note: "○×の補償範囲マトリクス（C6）。2段ヘッダにする" }
+  - { kind: table, subtype: rider_index, min_rows: 3, min_cols: 3 }
+  - { kind: box, subtype: caution, min_count: 3, note: "クーリングオフ・告知の囲み" }
+  - { kind: figure, subtype: steps, note: "お申込みから補償の開始までの手順（D2）" }
+  - { kind: footnotes, min_count: 8 }
+
+skeleton:
+  - id: ch0
+    kind: chapter
+    title_options: ["用語のご説明"]
+    children:
+      - { id: ch0_a1, kind: article, title_options: ["主な用語と略称"], chars: 1800,
+          todo: "10〜14語。五十音インデックス列つきの定義表",
+          required: [ { kind: table, subtype: definitions, min_rows: 10 } ] }
+
+  - id: ch1
+    kind: chapter
+    title_options: ["契約締結前におけるご確認事項"]
+    children:
+      - { id: ch1_s1, kind: section, title_options: ["商品の仕組み"], children: [
+            { id: ch1_s1_a1, kind: article, title_options: ["この保険の型と補償の組み合わせ"], chars: 700,
+              todo: "見出しに 契約概要 のバッジを付ける" },
+            { id: ch1_s1_a2, kind: article, title_options: ["主な補償の概要"], chars: 900,
+              required: [ { kind: table, subtype: plan_matrix, min_rows: 4, min_cols: 4 } ] },
+            { id: ch1_s1_a3, kind: article, title_options: ["主な特約の概要"], chars: 800,
+              required: [ { kind: table, subtype: rider_index, min_rows: 3, min_cols: 3 } ] } ] }
+      - { id: ch1_s2, kind: section, title_options: ["保険期間と保険料"], children: [
+            { id: ch1_s2_a1, kind: article, title_options: ["保険期間および補償の開始・終了時期"], chars: 600 },
+            { id: ch1_s2_a2, kind: article, title_options: ["保険料の決定の仕組みと払込方法"], chars: 800 },
+            { id: ch1_s2_a3, kind: article, title_options: ["お申込みから補償の開始までの流れ"], chars: 600,
+              required: [ { kind: figure, subtype: steps } ] } ] }
+      - { id: ch1_s3, kind: section, title_options: ["ご注意いただきたいこと"], children: [
+            { id: ch1_s3_a1, kind: article, title_options: ["告知いただく事項"], chars: 800,
+              todo: "注意喚起情報 のバッジ。囲みで「告知が事実と異なる場合」を示す",
+              required: [ { kind: box, subtype: caution } ] },
+            { id: ch1_s3_a2, kind: article, title_options: ["クーリングオフ"], chars: 700,
+              required: [ { kind: box, subtype: caution } ] },
+            { id: ch1_s3_a3, kind: article, title_options: ["補償が重複する可能性"], chars: 600 } ] }
+
+  - id: ch2
+    kind: chapter
+    title_options: ["契約締結後におけるご注意事項"]
+    children:
+      - { id: ch2_a1, kind: article, title_options: ["ご契約内容に変更が生じたとき"], chars: 800,
+          required: [ { kind: box, subtype: caution } ] }
+      - { id: ch2_a2, kind: article, title_options: ["保険料の払込みを怠ったとき"], chars: 600 }
+      - { id: ch2_a3, kind: article, title_options: ["解約されるとき"], chars: 600 }
+      - { id: ch2_a4, kind: article, title_options: ["事故が起きたとき"], chars: 800 }
+
+  - id: ch3
+    kind: chapter
+    title_options: ["その他ご確認いただきたいこと"]
+    children:
+      - { id: ch3_a1, kind: article, title_options: ["保険会社が経営破綻した場合の取扱い"], chars: 600 }
+      - { id: ch3_a2, kind: article, title_options: ["個人情報の取扱い"], chars: 600 }
+      - { id: ch3_a3, kind: article, title_options: ["ご相談・苦情・お問い合わせ窓口"], chars: 500 }
+
+riders: { count: [0, 0], pool: [] }
+appendices: []
+
+variants:
+  digit_style: { halfwidth: 0.8, fullwidth: 0.2 }
+  paren_style: { fullwidth: 0.7, halfwidth: 0.3 }
+  era: { seireki: 1.0 }
+  issuer_kind: { stock: 1.0 }
+  pet_name: { present: 0.6, absent: 0.4 }
+  order_shuffle: []
+  styles: [jys-a4-1col-gothic, nl-a4-1col-gothic]
+
+budget: { chars_min: 7000, chars_max: 12000, footnotes_min: 8, margin_notes_min: 0 }

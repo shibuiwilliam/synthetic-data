@@ -107,6 +107,15 @@ h4 { font-size: {{ s.h4_pt }}pt; margin: 2.4mm 0 1.2mm; break-after: avoid; }
 .para[data-kind="subitem"]   { --label-w: 1.8em; margin-left: 5.2em; }
 .para[data-kind="subsubitem"]{ --label-w: 2.2em; margin-left: 7.0em; }
 
+/* 見出しの分類ラベル（重要事項説明書の「契約概要」「注意喚起情報」）。
+   docs/reference_structures.md #9。見出しの右に小さな角丸の札として置く。 */
+/* `display: inline-block` にすると中に独立した LineBox ができ、box ツリーの行抽出で
+   同じ文字を 2 回拾う（V03 で「契約概要契約概要」になった）。inline のまま組む。 */
+.badge { display: inline; margin-left: 1.6mm; padding: 0.2mm 1.2mm;
+         font-family: '{{ style.fonts.heading }}', sans-serif; font-size: {{ s.note_pt }}pt;
+         font-weight: 400; color: {{ p.band }}; background: {{ p.accent }};
+         border-radius: 0.6mm; }
+
 /* --- 表 --- */
 figure.table-wrap { margin: 1.6mm 0 2.4mm; break-inside: auto; }
 figure.table-wrap.span-all { column-span: all; }
