@@ -13,7 +13,7 @@ body { margin: 0; }
   @top-left {
     /* first: ページ先頭時点の値。既定（last）だとページ末に始まる章名が
        そのページのヘッダに出て、1ページ先行して見える。 */
-    content: string(part, first) string(chapter, first);
+    content: string(chapter, first);
     font-family: '{{ style.fonts.heading }}'; font-size: 8pt; color: {{ p.rule }};
   }
   @bottom-center {
@@ -53,13 +53,11 @@ h2 { font-size: {{ s.h2_pt }}pt; margin: 0 0 2.6mm;
 {%- endif %} }
 /* 別表の見出しは改ページで始める。段組の残り高さに span-all の表が収まらないと
    h3 以降がまとめて次ページへ送られ、見出しだけがページ末に孤立するため。 */
-/* @page ヘッダ用の string。編（part）と章（chapter）を別々に立てることで、
-   同じ「第３章」が編をまたいで衝突しても header_path が一意に決まる。
-   区切りの U+3000 を part 側の string に含めるので、編を持たない文書では余分な空白が出ない。 */
-h2[data-kind="part"] { string-set: part content() '\3000'; }
-h2:not([data-kind="part"]) { string-set: chapter content(); }
-/* 別表は編の外にあるので、編の string を空に戻す（「第３編　特約条項　別表２」と出ないように）。 */
-h2[data-kind="appendix"] { string-set: part '', chapter content(); }
+/* @page ヘッダ用の string。**経路を 1 本の文字列として** テンプレートから受け取る
+   （`data-headerpath`）。編と章を別々の string に立てると、編の境界がページ途中に来たとき
+   別々の編の値を拾って噛み合わなくなる（「第２編…第６章（実は第１編）」が出た）。
+   `derived.labels[].path` から組むので、ヘッダの文字列と header_path の正解が必ず一致する。 */
+h2[data-headerpath] { string-set: chapter attr(data-headerpath); }
 h2[data-kind="appendix"] { column-span: none; }
 h3 { font-size: {{ s.h3_pt }}pt; margin: 2.6mm 0 1.6mm; break-after: avoid;
 {%- if style.headings.band %}

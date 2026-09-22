@@ -85,6 +85,24 @@ class HtmlBuilder:
 
     # --- ノード -------------------------------------------------------------
 
+    #: ヘッダに経路を出すノード（部・章・別表）。節や条までは出さない。
+    HEADER_PATH_KINDS = frozenset({"part", "chapter", "appendix"})
+
+    def _header_path(self, node: Node) -> str:
+        """`@page` のヘッダに出す文字列（「第１編␣ご契約のしおり␣第３章␣…」）。
+
+        `derived.labels[].path`（祖先の heading_text）に自分の heading_text を足す。
+        **別表は編の外**にあるので祖先を付けない。
+        """
+        if node.kind not in self.HEADER_PATH_KINDS:
+            return ""
+        info = self.source.derived.labels.get(node.id)
+        if info is None:
+            return ""
+        if node.kind == "appendix":
+            return info.heading_text
+        return HEADING_SPACE.join([*info.path, info.heading_text])
+
     def node_html(self, node: Node, depth: int = 0) -> str:
         parts: list[str] = []
         label = self.source.derived.labels[node.id].label
@@ -106,8 +124,14 @@ class HtmlBuilder:
             title_span = (
                 f'<span class="title" id="{node.id}_title">{escape(title_text)}</span>' if title_text else ""
             )
+            # ヘッダに出す経路を **1 本の文字列**として渡す。
+            # 編と章を別々の CSS string にすると、編の境界がページ途中に来たとき
+            # 別々の編の値を拾って噛み合わなくなる（life-0002 で「第2編…第6章（実は第1編）」が出た）。
+            header_path = self._header_path(node)
+            path_attr = f' data-headerpath="{escape(header_path)}"' if header_path else ""
             parts.append(
-                f'<{tag} id="{node.id}" data-kind="{node.kind}">{label_span}{sep_span}{title_span}</{tag}>'
+                f'<{tag} id="{node.id}" data-kind="{node.kind}"{path_attr}>'
+                f"{label_span}{sep_span}{title_span}</{tag}>"
             )
         # 条末に置くブロック（脚注・欄外注）は子（項）をすべて出してから最後に置く。
         # それ以外のブロック（項に付く列挙表など）は、その場に置く。
