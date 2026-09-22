@@ -302,3 +302,33 @@ def test_自動生成はapplyを作らない(answer):
     """場面の妥当性を機械で保証できないので、`apply` は執筆 QA 専用。"""
     qa_set = generate(answer, count=30, seed=0)
     assert all(item.type != "apply" for item in qa_set.items)
+
+
+def test_page_breakは実際に改ページする(tmp_path_factory):
+    """`break-before: page` は multicol の中では効かない（書き方を 5 通り試して全滅）。
+
+    `html.py` が `.cols` を閉じて開き直すことで改ページする。
+    """
+    import json
+    import shutil
+
+    from yakkan.build import build
+    from yakkan.compose import load_draft
+    from yakkan.render.weasy import render_source
+
+    work = tmp_path_factory.mktemp("pb") / "sample"
+    shutil.copytree(SAMPLE, work)
+    target = work / "parts" / "20_ch1.json"
+    data = json.loads(target.read_text(encoding="utf-8"))
+    para = data["items"][0]["children"][0]["children"][0]
+    para.setdefault("blocks", []).append({"type": "page_break", "id": "pb_test"})
+    target.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
+
+    source = build(load_draft(work))
+    out = tmp_path_factory.mktemp("pb_out")
+    result = render_source(source, load_style(STYLE_ID), out, render_png=False)
+    layout = result.layout
+    assert "pb_test" in layout.elements, "page_break が描画されていない"
+    before = min(f.page for f in layout.elements["ch1_a1"].fragments)
+    after = min(f.page for f in layout.elements["ch1_a2"].fragments)
+    assert after > before, "page_break の後ろが次ページに送られていない"

@@ -26,6 +26,7 @@ from yakkan.models import (
     ListBlock,
     ListItem,
     Node,
+    PageBreakBlock,
     ParagraphBlock,
     QaHeadingBlock,
     Source,
@@ -201,7 +202,14 @@ class HtmlBuilder:
                 )
             case QaHeadingBlock():
                 return f'<h4 id="{block.id}" data-kind="qa_heading">{escape(block.question)}</h4>'
-        return ""  # page_break は改ページ指示なので後段で扱う
+            case PageBreakBlock():
+                # **段組コンテナを閉じて開き直す**ことで改ページする。
+                # `break-before: page` は multicol の中では効かない（書き方を 5 通り試して全滅）。
+                return (
+                    f'</div><div class="page-break" id="{block.id}" data-kind="page_break"></div>'
+                    f'<div class="cols">'
+                )
+        return ""
 
     def _list_html(self, block: ListBlock) -> str:
         def items(items_: list[ListItem], depth: int) -> str:

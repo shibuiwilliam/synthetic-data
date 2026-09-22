@@ -374,6 +374,9 @@ class Scaffolder:
         out = {
             "id": spec.id,
             "kind": "appendix",
+            # blueprint の呼び名（「付表」など）を content に写す。build は blueprint を見ないので、
+            # ここで持たせないと「付表」と宣言しても「別表」と描かれる。
+            **({"kind_label": spec.kind_label} if spec.kind_label != "別表" else {}),
             "title": _title(self.rng, spec.title_options, ""),
             "children": [
                 {

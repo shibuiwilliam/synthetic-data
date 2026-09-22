@@ -205,6 +205,13 @@ def footnote_marker(ctx: NumberingContext, n: int) -> str:
     return f"（注{body}）" if ctx.scheme == "life" else f"（*{body}）"
 
 
+def _counter_key(ctx: NumberingContext, node: Node) -> str:
+    """番号を数える単位。別表だけは呼び名（別表／付表／別紙）で分ける。"""
+    if node.kind == "appendix":
+        return f"appendix:{node.kind_label or APPENDIX_KIND_LABELS[ctx.scheme]}"
+    return node.kind
+
+
 def label_for(
     ctx: NumberingContext,
     kind: NodeKind,
@@ -212,14 +219,18 @@ def label_for(
     node_id: str = "",
     siblings: int = 2,
     in_appendix: bool = False,
+    kind_label: str | None = None,
 ) -> str:
-    """1 ノードぶんのラベル。`siblings` は同じ親を持つ同種ノードの数（単項無番号の判定に使う）。"""
+    """1 ノードぶんのラベル。`siblings` は同じ親を持つ同種ノードの数（単項無番号の判定に使う）。
+
+    `kind_label` は別表の呼び名（「付表」など）。ノードが持っていればそれを使う。
+    """
     if in_appendix:
         label = _label_appendix_inner(ctx, kind, index, node_id, siblings)
         if label:
             return label
     if kind == "appendix":
-        return appendix_label(ctx, index)
+        return appendix_label(ctx, index, kind_label)
     match ctx.scheme:
         case "nonlife":
             return _label_nonlife(ctx, kind, index, node_id, siblings)
@@ -279,10 +290,13 @@ class DocumentIndex:
         counters: dict[str, int] = {}
         totals: dict[str, int] = {}
         for child in children:
-            totals[child.kind] = totals.get(child.kind, 0) + 1
+            totals[_counter_key(self.ctx, child)] = totals.get(_counter_key(self.ctx, child), 0) + 1
         for child in children:
-            counters[child.kind] = counters.get(child.kind, 0) + 1
-            index = counters[child.kind]
+            # 別表は**呼び名ごとに**番号を振る（別表１／付表１・付表２）。
+            # ひとまとめに数えると「別表１ の次が 付表２」になって実物と違う。
+            key = _counter_key(self.ctx, child)
+            counters[key] = counters.get(key, 0) + 1
+            index = counters[key]
             if child.kind == "article" and self.ctx.continuous_articles and not in_appendix:
                 # 章をまたいで通しで振る（実物の定款の体裁）
                 self._continuous["article"] = self._continuous.get("article", 0) + 1
@@ -293,15 +307,16 @@ class DocumentIndex:
                 child.kind,
                 index,
                 node_id=child.id,
-                siblings=totals[child.kind],
+                siblings=totals[key],
                 in_appendix=inner,
+                kind_label=child.kind_label,
             )
             self.nodes[child.id] = IndexedNode(
                 node=child,
                 parent_id=parent_id,
                 ancestors=ancestors,
                 index=index,
-                siblings=totals[child.kind],
+                siblings=totals[key],
                 depth=depth,
                 in_appendix=in_appendix,
                 label=label,

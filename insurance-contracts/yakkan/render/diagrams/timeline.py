@@ -38,10 +38,37 @@ def render(diagram: Timeline, style: DiagramStyle, figure_id: str) -> SvgResult:
 
     # 軸と目盛
     svg.line(PADDING, axis_y, WIDTH - PADDING, axis_y)
+    tick_size = style.small_font_size - 2
     for tick in ticks:
         x = positions(tick)
         svg.line(x, axis_y - 3, x, axis_y + 3)
-        svg.text(x, axis_y + AXIS_H * 0.75, str(tick), size=style.small_font_size - 2, color=style.muted)
+        # 目盛のラベルは既定では中央揃え。両端の目盛は軸の端にあるので、
+        # そのままだと**ラベルの半分が viewBox の外に出て切れる**（5 文字を超えると顕著）。
+        # 端では内側に寄せ、中間でも枠から出そうなら寄せる。
+        label = str(tick)
+        half = text_width(label, tick_size) / 2
+        if x - half < 1.0:
+            # anchor="start" は **左端**の座標を指定する
+            svg.text(
+                1.0,
+                axis_y + AXIS_H * 0.75,
+                label,
+                size=tick_size,
+                color=style.muted,
+                anchor="start",
+            )
+        elif x + half > WIDTH - 1.0:
+            # anchor="end" は **右端**の座標を指定する
+            svg.text(
+                WIDTH - 1.0,
+                axis_y + AXIS_H * 0.75,
+                label,
+                size=tick_size,
+                color=style.muted,
+                anchor="end",
+            )
+        else:
+            svg.text(x, axis_y + AXIS_H * 0.75, label, size=tick_size, color=style.muted)
 
     # イベント旗
     for event in diagram.events:

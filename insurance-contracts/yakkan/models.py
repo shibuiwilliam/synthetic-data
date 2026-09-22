@@ -379,7 +379,14 @@ class QaHeadingBlock(Model):
 
 
 class PageBreakBlock(Model):
+    """ここで改ページする。別表がページ境界で 1〜2 行だけ残るのを避けるために使う。
+
+    描画結果に文字を持たないが、他のブロックと同じく `id` を持たせて
+    `layout.elements` で位置を追えるようにする。
+    """
+
     type: Literal["page_break"] = "page_break"
+    id: str
 
 
 Block = Annotated[
@@ -407,6 +414,10 @@ class Node(Model):
     summary: str | None = None
     blocks: list[Block] = Field(default_factory=list)
     children: list[Node] = Field(default_factory=list)
+    #: 別表の呼び名（「別表」「付表」「別紙」）。`kind: "appendix"` のときだけ意味を持つ。
+    #: blueprint の `kind_label` を scaffold が写す。**build は blueprint を見ない**ので、
+    #: content 側に持たせないと「付表」と宣言しても「別表」と描かれる。
+    kind_label: str | None = None
     #: 例外的な番号（「第１の２」など）。lint が理由コメントを要求する。
     number_override: str | None = None
     #: number_override を使う理由。lint L03 が必須にする。

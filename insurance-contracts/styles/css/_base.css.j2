@@ -26,6 +26,15 @@ body { margin: 0; }
   }
 }
 
+/* 表紙にはヘッダ・ページ番号・様式番号を出さない。実物の約款冊子の表紙には入らない。
+   `layout.json` の `pages[0].header/footer` も null になるので、正解としても正確になる。
+   （様式番号は表紙本体に `cover_form` として別に描いている。） */
+@page :first {
+  @top-left { content: none; }
+  @bottom-center { content: none; }
+  @bottom-right { content: none; }
+}
+
 html {
   font-family: '{{ style.fonts.body }}', {{ fallbacks }}, serif;
   font-size: {{ s.body_pt }}pt;
@@ -155,6 +164,10 @@ nav.toc .d2 { margin-left: 3.2em; }
 nav.toc .toc-summary { display: block; margin-left: 1.6em; font-size: {{ s.note_pt }}pt; color: {{ p.rule }}; }
 
 /* --- 表紙・奥付 --- */
+/* 明示の改ページ。**段組コンテナの外**に置かれる（`html.py` が `.cols` を閉じて開き直す）。
+   `break-before: page` は multicol の中では効かないので、この形でしか実現できない。 */
+.page-break { break-after: page; height: 0; margin: 0; }
+
 .cover { break-after: page; text-align: center; padding-top: 42mm; }
 .cover .cover-petname { font-family: '{{ style.fonts.heading }}', sans-serif;
                         font-size: 13pt; color: {{ p.accent }}; margin-bottom: 3mm; }

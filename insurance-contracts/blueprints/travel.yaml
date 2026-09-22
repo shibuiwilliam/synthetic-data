@@ -66,7 +66,7 @@ skeleton:
 riders: { count: [1, 2], pool: [rider_cancellation, rider_device_damage, rider_pet_care] }
 
 appendices:
-  - { id: app1, title_options: ["携行品の品目区分"], table: rate, min_rows: 5, kind_label: "付表" }
+  - { id: app1, title_options: ["携行品の品目区分"], table: rate, min_rows: 5 }
 
 variants:
   digit_style: { fullwidth: 0.7, halfwidth: 0.3 }

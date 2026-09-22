@@ -111,3 +111,40 @@ def test_装飾を入れない() -> None:
         svg = render_diagram(figure.diagram, style(), figure.id).svg
         for banned in ("filter=", "linearGradient", "radialGradient", "drop-shadow", "opacity="):
             assert banned not in svg, f"{kind}: {banned} を使っている"
+
+
+def _text_extents(svg: str) -> list[tuple[float, float]]:
+    """SVG の `<text>` の描画範囲（左端, 右端）を、アンカーを考慮して求める。"""
+    import re
+
+    from yakkan.render.diagrams.base import text_width
+
+    out = []
+    for match in re.finditer(r"<text\b[^>]*>([^<]*)</text>", svg):
+        tag, text = match.group(0), match.group(1)
+        x = float(re.search(r'\bx="([-\d.]+)"', tag).group(1))
+        size = float(re.search(r'font-size="([\d.]+)"', tag).group(1))
+        anchor_match = re.search(r'text-anchor="(\w+)"', tag)
+        anchor = anchor_match.group(1) if anchor_match else "middle"
+        width = text_width(text, size)
+        left = x if anchor == "start" else (x - width if anchor == "end" else x - width / 2)
+        out.append((left, left + width))
+    return out
+
+
+def test_timelineの軸目盛が長くても枠からはみ出さない():
+    """両端の目盛は中央揃えだとラベルの半分が viewBox の外に出て切れていた。"""
+    from yakkan.models import Timeline, TimelineAxis, TimelineSpan
+    from yakkan.render.diagrams.base import DiagramStyle
+    from yakkan.render.diagrams.timeline import WIDTH, render
+
+    labels = ["申込みの受付日", "補償の開始日", "保険期間の満了日"]
+    diagram = Timeline(
+        axis=TimelineAxis(start=labels[0], end=labels[-1], ticks=labels),
+        spans=[TimelineSpan(id="s1", **{"from": labels[0]}, to=labels[-1], label="保険期間", lane=0)],
+        events=[],
+    )
+    svg = render(diagram, DiagramStyle(), "fig_t").svg
+    for left, right in _text_extents(svg):
+        assert left >= -0.5, f"左にはみ出している: {left}"
+        assert right <= WIDTH + 0.5, f"右にはみ出している: {right} > {WIDTH}"

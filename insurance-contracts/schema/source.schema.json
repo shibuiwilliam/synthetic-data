@@ -1504,6 +1504,18 @@
           "title": "Children",
           "type": "array"
         },
+        "kind_label": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Kind Label"
+        },
         "number_override": {
           "anyOf": [
             {
@@ -1538,14 +1550,22 @@
     },
     "PageBreakBlock": {
       "additionalProperties": false,
+      "description": "ここで改ページする。別表がページ境界で 1〜2 行だけ残るのを避けるために使う。\n\n描画結果に文字を持たないが、他のブロックと同じく `id` を持たせて\n`layout.elements` で位置を追えるようにする。",
       "properties": {
         "type": {
           "const": "page_break",
           "default": "page_break",
           "title": "Type",
           "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
         }
       },
+      "required": [
+        "id"
+      ],
       "title": "PageBreakBlock",
       "type": "object"
     },
