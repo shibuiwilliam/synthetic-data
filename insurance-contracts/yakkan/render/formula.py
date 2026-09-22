@@ -28,8 +28,10 @@ def formula_html(formula: Formula) -> str:
         elif isinstance(term, FormulaFraction):
             parts.append(
                 f'<span class="ffrac" id="{term_id}" data-kind="formula_fraction">'
-                f'<span class="num" id="{term_id}_num" data-kind="formula_num">{escape(term.fraction.num)}</span>'
-                f'<span class="den" id="{term_id}_den" data-kind="formula_den">{escape(term.fraction.den)}</span></span>'
+                f'<span class="num" id="{term_id}_num" data-kind="formula_num">'
+                f"{escape(term.fraction.num)}</span>"
+                f'<span class="den" id="{term_id}_den" data-kind="formula_den">'
+                f"{escape(term.fraction.den)}</span></span>"
             )
     layout_class = "formula formula-fraction" if formula.layout == "fraction" else "formula"
     return (
