@@ -190,13 +190,18 @@ type BBox = [x0: number, y0: number, x1: number, y1: number];   // PDFポイン�
 
 ### 5.9 qa.json
 ```ts
-type QA = { id: string; type: "locate"|"extract"|"definition"|"table_lookup"|"table_reason"|"figure_path"|"figure_fact"|"crossref"|"count"|"negative";
+type QA = { id: string; type: "locate"|"extract"|"definition"|"table_lookup"|"table_reason"|"figure_path"|"figure_fact"|"crossref"|"count"|"negative"|"apply";
             question: string; answer: string|number|string[]; answer_type: "string"|"number"|"list"|"boolean";
             evidence: string[] /* 要素id */; page_hint?: number[]; source: "auto"|"authored" };
 ```
 - 自動生成（`yakkan qa`）：見出し→ページ、条の見出し文言、表の (行見出し, 列見出し)→値、figure の次ノード、別表参照、定義語→定義、章内の条数、存在しない条（negative）。
 - 執筆（Claude）：1文書 10〜20 問。自然な日本語で、答えが本文・表・図から一意に決まるもの。
 - lint：`evidence` が存在し、`extract/table_lookup/definition` の answer 文字列が evidence の plain_text に含まれること。
+- `apply`（場面適用）：**与えられた場面に規定を当てはめて、文書に直接書かれていない値や結論を導く**問い。
+  例「入院保険金日額が５，０００円のご契約で胃の切除の手術を受けたとき、手術保険金の額は何円か」
+  → 別表の給付倍率を引いて掛け算する。答えが本文の文字列にならないので**包含検査の対象外**。
+  `table_lookup`（表から直接引く）や `table_reason`（表の中で比較する）と区別する。
+  自動生成はしない（場面の妥当性を機械で保証できないため）。**執筆 QA 専用の型。**
 
 ### 5.10 サンプル（抜粋・記法確認用）
 ```json

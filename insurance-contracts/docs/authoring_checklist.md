@@ -149,6 +149,24 @@ plan_matrix / procedure / rider_index / purpose_index / history）は
 - **図と算式の中でトークンが解決されない。** A2。lint L06 が弾くので平文で書き、
   数値は本文と手で揃える。
 
+## QA を書くときの型の選び方
+
+`extract` / `table_lookup` / `definition` は **answer が evidence の平文に含まれていること**が
+L14 で検査される。要約した答えや算出値を書くとエラーになる。
+
+| 問いの形 | 型 |
+|---|---|
+| 本文・表から**そのまま**引ける | `extract` `table_lookup` `definition` |
+| 表の中で**比べる**（最大・最小・どちらが大きい） | `table_reason` |
+| 場面を与えて**規定を当てはめ、値を導く** | **`apply`** |
+| 図の経路・隣接 | `figure_path`（答えは図に**実在するラベル**でなければ L14 が落とす） |
+| 図の記述の真偽 | `figure_fact` |
+| 参照先 | `crossref` ／ 数 | `count` ／ 存在しないもの | `negative` ／ ページ | `locate` |
+
+`apply` の例：「入院保険金日額が５，０００円のご契約で胃の切除の手術を受けたとき、
+手術保険金の額は何円か」→ 別表の給付倍率を引いて掛ける。**自動生成はしないので、
+場面適用型は執筆 QA でしか作れない。** 1 文書に 1〜3 問入れると評価の幅が出る。
+
 ## 仕上げの手順
 
     uv run yakkan lint content/<cid>          # error 0 / warn 0 にする

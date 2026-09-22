@@ -18,7 +18,8 @@
             "figure_fact",
             "crossref",
             "count",
-            "negative"
+            "negative",
+            "apply"
           ],
           "title": "Type",
           "type": "string"

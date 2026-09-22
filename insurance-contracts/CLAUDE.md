@@ -138,7 +138,7 @@ dataset/manifest.json      # 全文書の一覧（doc_id, genre, style, pages, s
 - RichText の許可トークンは `{ref:}` `{fn:n}` `{term:}` `{b:}` `{u:}` `{ruby:漢字|よみ}` `{br}` のみ。エスケープは `{{` `}}`。未知トークンと番号ラベルの直書きは lint エラー。
 - 表は `grid`（結合セル込みの見た目構造）と `records`／`header_path`（意味）を二重に持つ。図は6種の `Diagram` ＋ `alt` ＋ `facts`（図から読めるべき命題）。
 - `derived`（labels／refs／term_uses／footnote_index／plain_text／tables.header_path／figures.paths）は build が付与する。執筆時は書かない。
-- QA は10種別（locate/extract/definition/table_lookup/table_reason/figure_path/figure_fact/crossref/count/negative）。bbox は pt・原点左上を主とし、正規化 [0,1] を併記する（§15）。
+- QA は11種別（locate/extract/definition/table_lookup/table_reason/figure_path/figure_fact/crossref/count/negative/**apply**）。`apply` は場面適用（算出値を答える。執筆専用・包含検査の対象外）。bbox は pt・原点左上を主とし、正規化 [0,1] を併記する（§15）。
 
 ---
 

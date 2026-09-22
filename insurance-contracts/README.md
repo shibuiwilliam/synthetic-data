@@ -127,7 +127,8 @@ PDF のテキスト層には、**正解 1 件に対して複数回現れる文�
 ```
 
 - `type` は 10 種別：`locate` `extract` `definition` `table_lookup` `table_reason`
-  `figure_path` `figure_fact` `crossref` `count` `negative`。
+  `figure_path` `figure_fact` `crossref` `count` `negative` `apply`。
+  `apply` は「場面に規定を当てはめて値を導く」型で、執筆 QA にのみ現れる。
 - `source` が `auto` なら機械生成（1 文書 30 問）、`authored` なら人が書いたもの（15 問）。
   執筆 QA の原本は `content/<content_id>/qa_authored.json` にあり、`yakkan qa` が合流させる。
 - `evidence` は `layout.elements` に存在する要素 id なので、**そこから bbox が引ける**。

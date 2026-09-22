@@ -68,6 +68,10 @@ QAType = Literal[
     "crossref",
     "count",
     "negative",
+    #: 場面適用。与えられた場面に規定を当てはめて、**文書に直接書かれていない値や結論**を導く
+    #: （「日額5,000円で胃の切除を受けたとき、手術保険金はいくらか」→ 別表の倍率を掛けて算出）。
+    #: 答えが本文の文字列にならないので、L14 の包含検査の対象外にする。
+    "apply",
 ]
 AnswerType = Literal["string", "number", "list", "boolean"]
 

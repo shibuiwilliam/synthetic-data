@@ -31,8 +31,12 @@ _TYPES: dict[str, tuple[type, ...]] = {
     "boolean": (bool, str),
 }
 
-#: answer が evidence の平文に含まれていなければならない種別
+#: answer が evidence の平文に含まれていなければならない種別。
+#: `apply`（場面適用）は**算出値を答える**ので、ここに入れてはいけない。
 CONTAINMENT_TYPES = frozenset({"extract", "table_lookup", "definition"})
+
+#: 答えが文書の文字列にならない種別（包含検査をしない）。記録のために明示しておく。
+DERIVED_ANSWER_TYPES = frozenset({"apply", "table_reason", "negative", "count", "figure_fact"})
 
 #: 数値で答える種別
 NUMBER_TYPES = frozenset({"count"})

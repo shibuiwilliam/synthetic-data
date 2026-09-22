@@ -278,3 +278,27 @@ def test_figure_pathの正しいラベルは通る(answer):
     item = _qa(type="figure_path", answer=labels[0], answer_type="string", evidence=[figure.id])
     findings = [f for f in validate(QASet(doc_id="x", items=[item]), answer) if f.severity == "error"]
     assert findings == []
+
+
+def test_applyは包含検査の対象外(answer):
+    """場面適用は**算出値**を答えるので、本文の文字列でなくてよい。
+
+    これが無かったため、QA 執筆担当 3 人が「場面に規定を当てはめる問い」を
+    `table_reason` に寄せるしかなかった（docs/shared_fixes.md D3）。
+    """
+    node_id = next(iter(answer.source.derived.plain_text))
+    item = _qa(type="apply", answer="80,000円", answer_type="string", evidence=[node_id])
+    findings = [f for f in validate(QASet(doc_id="x", items=[item]), answer) if f.severity == "error"]
+    assert findings == []
+
+
+def test_applyもevidenceは必須(answer):
+    item = _qa(type="apply", answer="80,000円", answer_type="string", evidence=[])
+    findings = validate(QASet(doc_id="x", items=[item]), answer)
+    assert any("evidence が空" in f.message for f in findings)
+
+
+def test_自動生成はapplyを作らない(answer):
+    """場面の妥当性を機械で保証できないので、`apply` は執筆 QA 専用。"""
+    qa_set = generate(answer, count=30, seed=0)
+    assert all(item.type != "apply" for item in qa_set.items)
