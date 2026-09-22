@@ -5,6 +5,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from yakkan.compose import load_draft_or_errors
+from yakkan.lint import qa_authored as _qa_authored  # noqa: F401
 
 # ルール登録の副作用のために読み込む
 from yakkan.lint import quality as _quality  # noqa: F401
@@ -21,7 +22,7 @@ def lint_draft(
     only: list[str] | None = None,
     exclude: list[str] | None = None,
 ) -> list[Finding]:
-    """読み込み済みの執筆物を検査する。"""
+    """読み込み済みの執筆物を検査する（`content_dir` を伴わないので L16 は動かない）。"""
     findings = run_rules(LintContext(draft=draft, quick=quick), only=only)
     return _filter(findings, exclude)
 
@@ -42,7 +43,7 @@ def lint_content(
     if draft is None:
         empty = LintContext(draft=None, quick=quick, schema_errors=errors)  # type: ignore[arg-type]
         return run_rules(empty, only=["L00"])
-    findings = run_rules(LintContext(draft=draft, quick=quick), only=only)
+    findings = run_rules(LintContext(draft=draft, quick=quick, content_dir=content_dir), only=only)
     return _filter(findings, exclude)
 
 

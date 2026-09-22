@@ -515,3 +515,64 @@ def test_L01_番号を持たない参照先を弾く() -> None:
     ]
     index = DocumentIndex(ctx, body)
     assert resolve_ref(index, "ch1_a1_p2", "ch1_a1_p1").strip(), "空文字を返してはいけない"
+
+
+# --- L16 執筆 QA の配り方（docs/remaining_issues.md S1） ----------------------
+
+
+def _authored(items: list[dict]) -> dict:
+    return {"items": items}
+
+
+def _qa_item(qa_type: str) -> dict:
+    return {"type": qa_type, "question": "問い", "answer": "答え", "evidence": ["ch1_a1_p1"]}
+
+
+def _run_l16(tmp_path: Path, items: list[dict]) -> list[str]:
+    import json
+
+    from yakkan.lint.base import LintContext
+    from yakkan.lint.qa_authored import l16_authored_qa
+
+    (tmp_path / "qa_authored.json").write_text(
+        json.dumps(_authored(items), ensure_ascii=False), encoding="utf-8"
+    )
+    ctx = LintContext(draft=None, content_dir=tmp_path)  # type: ignore[arg-type]
+    return [f.message for f in l16_authored_qa(ctx)]
+
+
+def _balanced() -> list[dict]:
+    types = (
+        ["table_lookup"] * 2
+        + ["table_reason"]
+        + ["figure_fact"] * 2
+        + ["figure_path"]
+        + ["apply"]
+        + ["extract"] * 8
+    )
+    return [_qa_item(t) for t in types]
+
+
+def test_L16は配りが足りていれば通る(tmp_path: Path) -> None:
+    assert _run_l16(tmp_path, _balanced()) == []
+
+
+def test_L16はapplyが無いと落ちる(tmp_path: Path) -> None:
+    items = _balanced()
+    items[6] = _qa_item("extract")
+    messages = _run_l16(tmp_path, items)
+    assert any("apply" in m for m in messages)
+
+
+def test_L16は件数と観点の不足を数える(tmp_path: Path) -> None:
+    items = [_qa_item("extract")] * 14
+    messages = _run_l16(tmp_path, items)
+    assert any("14 問" in m for m in messages)
+    assert any(m.startswith("表に関する問いが") for m in messages)
+    assert any(m.startswith("図に関する問いが") for m in messages)
+
+
+def test_L16はevidenceの空を見つける(tmp_path: Path) -> None:
+    items = _balanced()
+    items[0] = {"type": "table_lookup", "question": "問い", "answer": "答え", "evidence": []}
+    assert any("evidence が無い" in m for m in _run_l16(tmp_path, items))

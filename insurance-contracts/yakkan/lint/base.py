@@ -9,6 +9,7 @@ from __future__ import annotations
 
 from collections.abc import Callable, Iterable, Iterator
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Literal
 
 from yakkan.models import SourceDraft
@@ -39,6 +40,8 @@ class LintContext:
     quick: bool = False
     #: compose / スキーマ検証の失敗メッセージ（draft が無いときに使う）
     schema_errors: list[str] = field(default_factory=list)
+    #: content ディレクトリ。`qa_authored.json` のように draft の外にある成果物を見る規則が使う
+    content_dir: Path | None = None
     _index: object | None = field(default=None, repr=False)
 
     @property
