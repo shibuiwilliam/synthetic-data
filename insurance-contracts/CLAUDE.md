@@ -241,6 +241,7 @@ uv run yakkan export                      # elements.jsonl / passages.jsonl / da
 uv run yakkan eval dataset/<doc_id> --pred pred.json   # 読み取りの採点（--oracle で自己評価）
 uv run yakkan eval --search-run run.json  # 検索の採点
 uv run yakkan manifest update
+uv run yakkan manifest check          # manifest が実ファイルと合っているか（make check にも入っている）
 uv run pytest -q ; uv run ruff check . ; make check
 ```
 - スラッシュコマンド `/author <content_id>`：§7.2 の 1〜4 を対話的に進める。`/review <doc_id>`：PNG を開き §7.8 で採点、修正案を parts に反映。`/batch <spec>`：バッチ生成と失敗の切り分け。

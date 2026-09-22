@@ -250,6 +250,10 @@ dataset/
 - **段組では 1 つの要素が複数の fragment に割れる。** `bboxes` は配列。
 - **同じ content を 2 つのスタイルで描いた文書がある。** 本文は同一で版面だけが違うので、
   レイアウト頑健性の評価に使える。**検索コーパスは重複を避けて content ごとに 1 スタイルだけ**採っている。
+- **qrels の grade 1 は 1 クエリ 20 件で打ち切ってある。** 打ち切ると qrels に出ないので
+  評価上は非適合と同じ扱いになる。どのクエリで切ったかは `queries.jsonl` の
+  `related_truncated` と `n_related_total` でわかる（1,944 クエリ中 28 件、
+  おもに「事故」のような頻出の定義語）。**この 28 件で Recall@k を解釈しない。**
 - すべて架空の会社・商品である（各文書の奥付に明記）。
 
 ## 採点
@@ -258,6 +262,7 @@ dataset/
 uv run yakkan eval dataset/<doc_id> --pred pred.json     # 読み取り
 uv run yakkan eval --search-run run.json                 # 検索
 uv run yakkan eval dataset/<doc_id> --oracle             # ハーネスの自己評価
+uv run yakkan eval dataset/<doc_id> --oracle --misread 0.3   # 現実の読み取り誤りで崩して採点
 ```
 """
 

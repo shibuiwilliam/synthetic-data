@@ -85,6 +85,10 @@ def test_満点の予測は満点になる() -> None:
     assert score["text"]["cer_macro"] == 0.0
     assert score["outline"]["f1"] == 1.0
     assert score["outline"]["kind_acc"] == 1.0
+    # 同じ (label, title) の見出しが複数あっても取り違えないこと（S7）。
+    # 出現回数を鍵に混ぜる前は、満点の予測でも page_acc が 0.39 まで落ちていた。
+    assert score["outline"]["page_acc"] == 1.0
+    assert score["outline"]["citation_acc"] == 1.0
     assert score["citation"]["coverage"] == 1.0, "本文ノードが全部 reading_order に出ていること"
     assert score["citation"]["citation_acc"] == 1.0
     assert score["tables"]["teds_macro"] == 1.0
@@ -225,3 +229,62 @@ def test_打ち切ったクエリには印がある() -> None:
         assert row["n_related"] <= row["n_related_total"]
         assert row["related_truncated"] == (row["n_related"] < row["n_related_total"])
     assert any(row["related_truncated"] for row in rows), "打ち切りが 1 件も無いなら印を検査できていない"
+
+
+# --- 現実の読み取り誤りへの反応（docs/remaining_issues.md S6） ----------------
+
+#: 崩しの強さ。`misread` は入れ子に崩すので、この順に指標が単調に悪化するはず
+MISREAD_RATES = (0.0, 0.05, 0.1, 0.2, 0.4, 0.7)
+
+#: 高いほど良い指標。**F1 ではなく recall を見る。**
+#: 要素を落とすと誤りも一緒に落ちて precision が上がり、F1 は跳ねることがある。
+MISREAD_LOWER = (
+    ("outline", "recall"),
+    ("citation", "citation_acc"),
+    ("tables", "teds_macro"),
+    ("tables", "cell_f1", "recall"),
+    ("figures", "node_f1", "recall"),
+    ("figures", "edge_f1", "recall"),
+    ("figures", "path_f1", "recall"),
+    ("reading_order", "tau_macro"),
+    ("enumerations", "order_exact"),
+    ("qa", "exact_match"),
+)
+
+
+def _dig(score: dict, path: tuple[str, ...]) -> float:
+    value: object = score
+    for key in path:
+        value = value[key]  # type: ignore[index]
+    return float(value)  # type: ignore[arg-type]
+
+
+@pytest.mark.skipif(_first_dataset() is None, reason="dataset/ が無い")
+@pytest.mark.parametrize("seed", [0, 3])
+def test_崩すほど指標が単調に悪くなる(seed: int) -> None:
+    """自己評価が循環しないようにするための検査（R6・S6）。
+
+    満点の予測を「現実の読み取り誤り」で少しずつ崩し、**強さに対して指標が
+    単調に悪化する**ことを確かめる。指標が誤りを吸収してしまう（正規化しすぎる、
+    突合が緩い）と単調性が崩れるので、満点が出ることだけを見るより強い検査になる。
+    """
+    from yakkan.answer import load_answer
+    from yakkan.eval import build_prediction, evaluate, misread
+
+    directory = _first_dataset()
+    assert directory is not None
+    answer = load_answer(directory)
+    items = json.loads((directory / "qa.json").read_text(encoding="utf-8"))["items"]
+    perfect = build_prediction(answer, items)
+    series = [evaluate(directory, misread(perfect, seed=seed, rate=r)) for r in MISREAD_RATES]
+
+    cer = [s["text"]["cer_macro"] for s in series]
+    assert cer[0] == 0.0, "崩さなければ満点のまま"
+    assert all(b >= a - 1e-9 for a, b in zip(cer, cer[1:], strict=False)), cer
+    assert cer[-1] > cer[1], "強く崩しても CER が動かないなら、崩し方が指標に届いていない"
+
+    for path in MISREAD_LOWER:
+        values = [_dig(s, path) for s in series]
+        assert values[0] == 1.0, f"{path} は崩さなければ満点"
+        assert all(b <= a + 1e-9 for a, b in zip(values, values[1:], strict=False)), (path, values)
+        assert values[-1] < values[0], f"{path} が強い崩しに反応していない"

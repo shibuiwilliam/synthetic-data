@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from pathlib import Path
+
 import pytest
 
 from yakkan.ids import (
@@ -58,3 +60,49 @@ def test_親子判定() -> None:
     assert not is_valid_node_id("chapter_four")
     assert node_id_matches_kind("ch4_s3_a1", "article")
     assert not node_id_matches_kind("ch4_s3_a1", "section")
+
+
+# --- manifest の鮮度（docs/remaining_issues.md S8） ---------------------------
+
+
+def test_manifestの食い違いを見つける(tmp_path: Path) -> None:
+    """`yakkan manifest update` を忘れたまま成果物を作り直すと、黙って古い値が残る。"""
+    import json
+
+    from yakkan.manifest import check, update
+
+    doc = tmp_path / "sample--style"
+    doc.mkdir(parents=True)
+    (doc / "source.json").write_text(
+        json.dumps(
+            {
+                "content_id": "sample",
+                "genre": "auto",
+                "seed": 1,
+                "meta": {"title": "t", "product_name": "p"},
+                "derived": {"tables": {}, "figures": {}, "footnote_index": [], "refs": []},
+            },
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+    (doc / "layout.json").write_text(
+        json.dumps(
+            {"doc_id": "sample--style", "style_id": "style", "page_count": 3, "elements": {}, "pages": []},
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+    (doc / "qa.json").write_text(json.dumps({"items": [{"id": "q1"}]}), encoding="utf-8")
+
+    update(tmp_path, verify=False)
+    assert check(tmp_path, verify=False) == [], "作り直した直後は一致している"
+
+    # qa.json だけ差し替えて manifest を更新しない
+    (doc / "qa.json").write_text(json.dumps({"items": [{"id": "q1"}, {"id": "q2"}]}), encoding="utf-8")
+    problems = check(tmp_path, verify=False)
+    assert any("qa_items" in p for p in problems), problems
+    assert any("checksum" in p for p in problems), problems
+
+    update(tmp_path, verify=False)
+    assert check(tmp_path, verify=False) == []

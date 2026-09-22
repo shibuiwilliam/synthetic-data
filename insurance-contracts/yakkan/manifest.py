@@ -128,7 +128,8 @@ def scan_document(doc_dir: Path, *, verify: bool = True) -> DocumentEntry | None
     )
 
 
-def update(dataset_dir: Path | None = None, *, verify: bool = True) -> ScanResult:
+def build(dataset_dir: Path | None = None, *, verify: bool = True) -> tuple[Manifest, Path]:
+    """`dataset/` を走査して一覧を組み立てる（**書き出しはしない**）。"""
     base = dataset_dir or DATASET_DIR
     base.mkdir(parents=True, exist_ok=True)
     entries = []
@@ -141,10 +142,59 @@ def update(dataset_dir: Path | None = None, *, verify: bool = True) -> ScanResul
         for name in ("passages.jsonl", "queries.jsonl", "qrels.jsonl")
         if (base / "search" / name).is_file()
     ]
-    manifest = Manifest(corpus_artifacts=corpus, documents=entries)
-    path = base / MANIFEST_NAME
+    return Manifest(corpus_artifacts=corpus, documents=entries), base / MANIFEST_NAME
+
+
+def update(dataset_dir: Path | None = None, *, verify: bool = True) -> ScanResult:
+    manifest, path = build(dataset_dir, verify=verify)
     path.write_text(
         json.dumps(manifest.model_dump(mode="json"), ensure_ascii=False, indent=2) + "\n",
         encoding="utf-8",
     )
     return ScanResult(manifest=manifest, path=path)
+
+
+def check(dataset_dir: Path | None = None, *, verify: bool = True) -> list[str]:
+    """`manifest.json` が実ファイルと合っているかを見る（書き換えない）。
+
+    生成し直したあと `manifest update` を忘れると、`checksums` と `qa_items` が
+    古いまま残る。配布物は manifest を目次として読まれるので、黙って陳腐化させない
+    （docs/remaining_issues.md S8）。**実際に 19 件の checksum 差分を見つけた。**
+
+    食い違いの説明を返す。空なら一致している。
+    """
+    fresh, path = build(dataset_dir, verify=verify)
+    if not path.is_file():
+        return [f"{path} が無い（`yakkan manifest update` を実行する）"]
+    try:
+        stored = Manifest.model_validate(json.loads(path.read_text(encoding="utf-8")))
+    except (json.JSONDecodeError, OSError, ValueError) as error:
+        return [f"{path} が読めない: {error}"]
+
+    problems: list[str] = []
+    if stored.corpus_artifacts != fresh.corpus_artifacts:
+        problems.append(f"corpus_artifacts が違う: {stored.corpus_artifacts} → {fresh.corpus_artifacts}")
+    stored_by_id = {d.doc_id: d for d in stored.documents}
+    fresh_by_id = {d.doc_id: d for d in fresh.documents}
+    for doc_id in sorted(set(fresh_by_id) - set(stored_by_id)):
+        problems.append(f"{doc_id}: manifest に無い")
+    for doc_id in sorted(set(stored_by_id) - set(fresh_by_id)):
+        problems.append(f"{doc_id}: manifest にあるが dataset に無い")
+    for doc_id in sorted(set(stored_by_id) & set(fresh_by_id)):
+        old_entry, new_entry = stored_by_id[doc_id], fresh_by_id[doc_id]
+        fields = [
+            ("pages", old_entry.pages, new_entry.pages),
+            ("qa_items", old_entry.qa_items, new_entry.qa_items),
+            ("artifacts", old_entry.artifacts, new_entry.artifacts),
+            ("page_images", old_entry.page_images, new_entry.page_images),
+        ]
+        # verify を省くと status は必ず unverified になるので、比べても意味がない
+        if verify:
+            fields.append(("status", old_entry.status, new_entry.status))
+        for name, was, now in fields:
+            if was != now:
+                problems.append(f"{doc_id}: {name} が古い（{was} → {now}）")
+        for name in sorted(set(old_entry.checksums) | set(new_entry.checksums)):
+            if old_entry.checksums.get(name) != new_entry.checksums.get(name):
+                problems.append(f"{doc_id}: {name} の checksum が古い")
+    return problems

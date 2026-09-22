@@ -515,18 +515,31 @@ def clean(
 
 @app.command()
 def manifest(
-    action: Annotated[str, typer.Argument(help="update のみ")] = "update",
+    action: Annotated[str, typer.Argument(help="update または check")] = "update",
     dataset_dir: Annotated[Path, typer.Option("--dataset", help="dataset/ のパス")] = Path("dataset"),
     verify_each: Annotated[
         bool, typer.Option("--verify/--no-verify", help="各文書を verify して status を決める")
     ] = True,
 ) -> None:
-    """dataset/manifest.json を作り直す（CLAUDE.md §11）。"""
+    """dataset/manifest.json を作り直す（`check` なら**書き換えずに**食い違いを報告する）。"""
+    from yakkan.manifest import check as run_check
     from yakkan.manifest import update as run
 
-    if action != "update":
-        console.print(f"[red]未知の操作: {action}[/red]（update のみ）")
+    if action not in ("update", "check"):
+        console.print(f"[red]未知の操作: {action}[/red]（update または check）")
         raise typer.Exit(code=2)
+    if action == "check":
+        problems = run_check(dataset_dir, verify=verify_each)
+        if problems:
+            console.print(f"[red]manifest.json が古い（{len(problems)} 件）[/red]")
+            for line in problems[:30]:
+                console.print(f"  {line}")
+            if len(problems) > 30:
+                console.print(f"  … 他 {len(problems) - 30} 件")
+            console.print("[yellow]`uv run yakkan manifest update` を実行すること[/yellow]")
+            raise typer.Exit(code=1)
+        console.print("[green]manifest.json は実ファイルと一致している[/green]")
+        return
     result = run(dataset_dir, verify=verify_each)
     table = Table(title="dataset/manifest.json", title_justify="left", header_style="bold")
     for column in ("doc_id", "genre", "style", "頁", "字数", "表", "図", "脚注", "参照", "status"):
@@ -629,12 +642,19 @@ def eval_command(
     oracle: Annotated[
         bool, typer.Option("--oracle", help="満点の予測を自分で作って採点する（自己評価）")
     ] = False,
+    misread_rate: Annotated[
+        float | None,
+        typer.Option(
+            "--misread",
+            help="--oracle の予測を現実の読み取り誤りで崩す強さ 0〜1",
+        ),
+    ] = None,
 ) -> None:
     """予測 JSON または検索結果を採点する（CLAUDE.md §9・docs/evaluation.md）。"""
     import json as _json
 
     from yakkan.answer import load_answer
-    from yakkan.eval import build_prediction, evaluate, evaluate_run, load_qrels, oracle_run
+    from yakkan.eval import build_prediction, evaluate, evaluate_run, load_qrels, misread, oracle_run
 
     result: dict
     if search_run is not None or (oracle and dataset_doc is None):
@@ -674,6 +694,8 @@ def eval_command(
             qa_file = dataset_doc / "qa.json"
             items = _json.loads(qa_file.read_text(encoding="utf-8"))["items"] if qa_file.exists() else []
             prediction = build_prediction(answer, items)
+            if misread_rate is not None:
+                prediction = misread(prediction, seed=0, rate=misread_rate)
         else:
             if pred is None:
                 console.print("[red]--pred か --oracle が要る[/red]")

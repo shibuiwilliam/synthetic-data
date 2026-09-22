@@ -179,6 +179,31 @@ L14 で検査される。要約した答えや算出値を書くとエラーに�
 | `apply` が 1 問以上 | **自動生成できない唯一の種別** |
 | `evidence` と `question` が空でない | L14 の前段 |
 
+## 組み立てヘルパ `scripts/authoring.py`
+
+parts の JSON を手で書くと、セルの id・`rowspan`・`records` を取り違えやすい。
+`scripts/authoring.py` に、表・列挙表・五十音の定義表・条の組み立てを置いてある。
+
+| 関数 | 作るもの |
+|---|---|
+| `C` / `merged` | セル 1 つ／結合セルに飲み込まれた位置 |
+| `table` | 見出し行 1 行の表（`records` も一緒に作るので `header_path` が取れる） |
+| `enum_table` | 文と一体の列挙表（番号欄は `{auto_label}`。**キャプションを付けない**） |
+| `kana_table` | 五十音の索引列を持つ定義表（索引列は行を結合） |
+| `art` / `jart` | 条（項・号・条末脚注・ブロック）／重要事項説明書のバッジつき大見出し |
+| `write` | UTF-8・indent 2・末尾改行で書く |
+
+```python
+from scripts.authoring import art, enum_table, table, write
+
+write("content/foo-0001/parts/ch1.json", {
+    "id": "ch1", "kind": "chapter", "title": "補償条項",
+    "children": [art("ch1_a1", "保険金を支払う場合", ["当会社は、…支払います。"])],
+})
+```
+
+**検証はしない。** 書いたら `uv run yakkan lint content/<cid>` を必ず通す。
+
 ## 仕上げの手順
 
     uv run yakkan lint content/<cid>          # error 0 / warn 0 にする

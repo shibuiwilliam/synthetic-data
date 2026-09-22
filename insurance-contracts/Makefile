@@ -7,7 +7,7 @@ UV    ?= uv
 DYLD_FALLBACK_LIBRARY_PATH ?= /opt/homebrew/lib
 export DYLD_FALLBACK_LIBRARY_PATH
 
-.PHONY: help setup check fmt lint test doctor smoke probe doc batch clean
+.PHONY: help setup check fmt lint test manifest-check doctor smoke probe doc batch clean
 
 help:                ## ターゲット一覧
 	@grep -E '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | awk -F':.*?## ' '{printf "  %-10s %s\n", $$1, $$2}'
@@ -15,7 +15,7 @@ help:                ## ターゲット一覧
 setup:               ## 依存を導入する（uv sync）
 	$(UV) sync
 
-check: lint test     ## lint + テスト（コミット前に必ず通す）
+check: lint test manifest-check  ## lint + テスト + manifest の鮮度（コミット前に必ず通す）
 
 fmt:                 ## ruff format を適用する
 	$(UV) run ruff format .
@@ -27,6 +27,13 @@ lint:                ## ruff（format 検査 + lint）
 
 test:                ## pytest
 	$(UV) run pytest
+
+manifest-check:      ## dataset/manifest.json が実ファイルと合っているか（dataset/ が無ければ飛ばす）
+	@if [ -f dataset/manifest.json ]; then \
+		$(UV) run yakkan manifest check --no-verify; \
+	else \
+		echo "dataset/ が無いので manifest の検査は飛ばす"; \
+	fi
 
 doctor:              ## 実行環境の検査
 	$(UV) run yakkan doctor
@@ -56,6 +63,7 @@ ifndef SPEC
 endif
 	$(UV) run yakkan batch $(SPEC)
 	$(UV) run yakkan manifest update
+	$(UV) run yakkan manifest check
 
 clean:               ## 一時生成物を消す（dataset/ は消さない）
 	rm -rf scratch .pytest_cache .ruff_cache

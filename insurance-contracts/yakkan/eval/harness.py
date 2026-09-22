@@ -30,6 +30,17 @@ def _pred_list(pred: dict[str, Any], key: str) -> list[dict[str, Any]]:
     return [v for v in value if isinstance(v, dict)]
 
 
+def _occurrence_keys_pairs(keys: list[tuple[str, str]]) -> list[tuple[tuple[str, str], int]]:
+    """`_occurrence_keys` の (label, title) 版。見出しの突合に使う。"""
+    seen: dict[tuple[str, str], int] = {}
+    out: list[tuple[tuple[str, str], int]] = []
+    for key in keys:
+        index = seen.get(key, 0)
+        seen[key] = index + 1
+        out.append((key, index))
+    return out
+
+
 def _occurrence_keys(texts: list[str]) -> list[tuple[str, int]]:
     """同じ本文が複数あっても取り違えないよう、(テキスト, 何回目) の鍵にする。
 
@@ -68,13 +79,20 @@ def score_outline(answer: Answer, pred: dict[str, Any]) -> dict[str, Any]:
     got = [(normalize(o.get("label", "")), normalize(o.get("title", ""))) for o in pred_items]
     result = set_f1(gold, got)
 
-    gold_by_key: dict[tuple[str, str], Any] = {}
-    for entry in answer.outline:
-        gold_by_key.setdefault((normalize(entry.label), normalize(entry.title)), entry)
+    # 同じ (label, title) の見出しは複数ある（「(1)」や、章をまたいで同名の条）。
+    # 鍵をテキストだけにすると満点の予測でも取り違え、page_acc が 0.39 まで落ちていた。
+    # 出現回数を鍵に混ぜて、n 番目の予測を n 番目の gold に当てる（docs/remaining_issues.md S7）。
+    gold_by_key: dict[tuple[str, str, int], Any] = dict(
+        zip(
+            [(k[0][0], k[0][1], k[1]) for k in _occurrence_keys_pairs(gold)],
+            answer.outline,
+            strict=False,
+        )
+    )
+    pred_keys = _occurrence_keys_pairs(got)
     kind_ok = page_ok = cite_ok = matched = 0
-    for item in pred_items:
-        key = (normalize(item.get("label", "")), normalize(item.get("title", "")))
-        entry = gold_by_key.get(key)
+    for item, ((label, title), occurrence) in zip(pred_items, pred_keys, strict=False):
+        entry = gold_by_key.get((label, title, occurrence))
         if entry is None:
             continue
         matched += 1

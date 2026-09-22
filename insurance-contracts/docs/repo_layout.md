@@ -31,6 +31,12 @@ yakkan-synth/
 ├─ dataset/<doc_id>/ …  dataset/manifest.json
 ├─ specs/batch_v1.yaml           # 生成バッチ定義（content×style×seed）
 ├─ tests/ (unit + golden)
+├─ scripts/                      # 実験・保守用。パッケージには入れない
+│   ├─ authoring.py              # 執筆ヘルパ（表・列挙表・条の組み立て）
+│   ├─ fill_records.py           # 表の records を grid から埋める
+│   ├─ calibrate_styles.py       # 実物のページ数から 1 ページの容量を当てる
+│   ├─ analyze_reference_pdf.py  # 参考 PDF の構造を測る（転載はしない）
+│   └─ probe_*.py                # WeasyPrint の私的 API の挙動確認（CLAUDE.md §14）
 └─ .claude/
     ├─ commands/ author.md review.md batch.md   # /author <content_id> 等
     ├─ agents/ author.md reviewer.md render-debugger.md
