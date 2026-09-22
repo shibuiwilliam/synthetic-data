@@ -361,7 +361,7 @@ auto-0001 では満点の予測でも `page_acc` 0.3851 / `citation_acc` 0.3649�
 | # | 残課題 | 影響する用途 | 重さ | 状態 |
 |---|---|---|---|---|
 | S8 | **`manifest.json` が黙って陳腐化する**（checksums が実ファイルと合わない） | 配布物の信頼性 | 中 | **完了** |
-| S9 | 検索評価セットと `elements.jsonl` に**スキーマが無く、素の dict で作っている** | U3/U4 の契約 | 中 | 未着手 |
+| S9 | 検索評価セットと `elements.jsonl` に**スキーマが無く、素の dict で作っている** | U3/U4 の契約 | 中 | **完了** |
 
 ---
 
@@ -404,4 +404,19 @@ auto-0001 では満点の予測でも `page_acc` 0.3851 / `citation_acc` 0.3649�
 **対処**：`ElementRow` / `Passage` / `Query` / `Qrel` を pydantic モデルにし、
 `export.py` と `search_set.py` をそれ経由にして、`EXPORTED_SCHEMAS` に足す。
 `yakkan schema export` で `schema/element.schema.json` などが出るようにする。
+
+### 実施（2026-09-22・完了）
+
+- `yakkan/export_models.py` に `ExportRow` を土台として `ElementRow`（＋ `ElementTable` /
+  `ElementFigure` / `ElementFigureNode` / `ElementEnumeration`）・`Passage` / `Query` / `Qrel`
+  を置いた。すべて `extra="forbid"`。
+- `export.py` と `search_set.py` を属性アクセスに直した（`passage["kind"]` → `passage.kind`）。
+- `EXPORTED_SCHEMAS` に足し、`schema/{element,passage,query,qrel}.schema.json` が出る。
+- **行の形は変えない。** スカラは `null` でも出し、`table` / `figure` / `figure_node` /
+  `enumeration` の入れ子だけを当てはまるときに出す（`jsonl_row()`）。
+  `exclude_none` を一律にかけると `row["parent_id"]` が KeyError になる。
+- 検証：書き出し直した 4 ファイルが**改修前とバイト単位で一致**することを確認した
+  （elements.jsonl・passages.jsonl・queries.jsonl・qrels.jsonl）。
+- `tests/unit/test_export_models.py` で「生成物がモデルを通る」「`schema/` が最新」
+  「任意の入れ子だけ出し分ける」を固定した。
 

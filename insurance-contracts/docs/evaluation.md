@@ -143,7 +143,21 @@ nDCG@1/5/10・Recall@1/5/10・MRR を、**クエリ種別ごとと全体で**報
 
 ---
 
-## 3. 生成のしかた
+## 3. スキーマ
+
+| ファイル | スキーマ | モデル |
+|---|---|---|
+| 予測 JSON | `schema/prediction.schema.json` | （手書き） |
+| 検索結果 JSON | `schema/search_run.schema.json` | （手書き） |
+| `elements.jsonl` | `schema/element.schema.json` | `yakkan.export_models.ElementRow` |
+| `passages.jsonl` | `schema/passage.schema.json` | `Passage` |
+| `queries.jsonl` | `schema/query.schema.json` | `Query` |
+| `qrels.jsonl` | `schema/qrel.schema.json` | `Qrel` |
+
+`uv run yakkan schema export` で書き出す。`tests/unit/test_export_models.py` が
+「生成物がモデルを通る」「`schema/` が最新」を固定している。
+
+## 4. 生成のしかた
 
 ```
 uv run yakkan export            # elements.jsonl / passages.jsonl / dataset/search/*

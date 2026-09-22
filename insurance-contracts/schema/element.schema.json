@@ -1,0 +1,361 @@
+{
+  "$defs": {
+    "ElementEnumeration": {
+      "additionalProperties": false,
+      "description": "要素が列挙の項目であるときの、親と何番目か。",
+      "properties": {
+        "enum_id": {
+          "title": "Enum Id",
+          "type": "string"
+        },
+        "enum_source": {
+          "title": "Enum Source",
+          "type": "string"
+        },
+        "enum_owner_id": {
+          "title": "Enum Owner Id",
+          "type": "string"
+        },
+        "index": {
+          "title": "Index",
+          "type": "integer"
+        },
+        "label": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Label"
+        }
+      },
+      "required": [
+        "enum_id",
+        "enum_source",
+        "enum_owner_id",
+        "index"
+      ],
+      "title": "ElementEnumeration",
+      "type": "object"
+    },
+    "ElementFigure": {
+      "additionalProperties": false,
+      "description": "要素が図そのものであるときの規模。",
+      "properties": {
+        "caption_label": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Caption Label"
+        },
+        "node_count": {
+          "title": "Node Count",
+          "type": "integer"
+        },
+        "edge_count": {
+          "title": "Edge Count",
+          "type": "integer"
+        },
+        "paths": {
+          "items": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "title": "Paths",
+          "type": "array"
+        }
+      },
+      "required": [
+        "node_count",
+        "edge_count"
+      ],
+      "title": "ElementFigure",
+      "type": "object"
+    },
+    "ElementFigureNode": {
+      "additionalProperties": false,
+      "description": "要素が図の中のノードであるときの出どころ。",
+      "properties": {
+        "figure_id": {
+          "title": "Figure Id",
+          "type": "string"
+        },
+        "node_id": {
+          "title": "Node Id",
+          "type": "string"
+        },
+        "role": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Role"
+        }
+      },
+      "required": [
+        "figure_id",
+        "node_id"
+      ],
+      "title": "ElementFigureNode",
+      "type": "object"
+    },
+    "ElementTable": {
+      "additionalProperties": false,
+      "description": "要素が表のセルであるときの位置と意味座標。",
+      "properties": {
+        "table_id": {
+          "title": "Table Id",
+          "type": "string"
+        },
+        "caption_label": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Caption Label"
+        },
+        "row": {
+          "title": "Row",
+          "type": "integer"
+        },
+        "col": {
+          "title": "Col",
+          "type": "integer"
+        },
+        "row_headers": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Row Headers",
+          "type": "array"
+        },
+        "col_headers": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Col Headers",
+          "type": "array"
+        }
+      },
+      "required": [
+        "table_id",
+        "row",
+        "col"
+      ],
+      "title": "ElementTable",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "`elements.jsonl` の 1 行。**評価スクリプトが最初に読む平らな索引**。",
+  "properties": {
+    "doc_id": {
+      "title": "Doc Id",
+      "type": "string"
+    },
+    "content_id": {
+      "title": "Content Id",
+      "type": "string"
+    },
+    "style_id": {
+      "title": "Style Id",
+      "type": "string"
+    },
+    "genre": {
+      "title": "Genre",
+      "type": "string"
+    },
+    "element_id": {
+      "title": "Element Id",
+      "type": "string"
+    },
+    "kind": {
+      "title": "Kind",
+      "type": "string"
+    },
+    "region": {
+      "title": "Region",
+      "type": "string"
+    },
+    "text": {
+      "title": "Text",
+      "type": "string"
+    },
+    "text_with_label": {
+      "title": "Text With Label",
+      "type": "string"
+    },
+    "label": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Label"
+    },
+    "heading_text": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Heading Text"
+    },
+    "node_kind": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Node Kind"
+    },
+    "citation": {
+      "default": "",
+      "title": "Citation",
+      "type": "string"
+    },
+    "parent_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Parent Id"
+    },
+    "path_ids": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Path Ids",
+      "type": "array"
+    },
+    "pages": {
+      "items": {
+        "type": "integer"
+      },
+      "title": "Pages",
+      "type": "array"
+    },
+    "bboxes": {
+      "items": {
+        "items": {
+          "type": "number"
+        },
+        "type": "array"
+      },
+      "title": "Bboxes",
+      "type": "array"
+    },
+    "bboxes_norm": {
+      "items": {
+        "items": {
+          "type": "number"
+        },
+        "type": "array"
+      },
+      "title": "Bboxes Norm",
+      "type": "array"
+    },
+    "repeated": {
+      "default": false,
+      "title": "Repeated",
+      "type": "boolean"
+    },
+    "table": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ElementTable"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "figure": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ElementFigure"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "figure_node": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ElementFigureNode"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "enumeration": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ElementEnumeration"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    }
+  },
+  "required": [
+    "doc_id",
+    "content_id",
+    "style_id",
+    "genre",
+    "element_id",
+    "kind",
+    "region",
+    "text",
+    "text_with_label"
+  ],
+  "title": "ElementRow",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

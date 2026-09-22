@@ -23,6 +23,7 @@ import unicodedata
 from collections.abc import Iterable
 from typing import Any
 
+from yakkan.export_models import Passage, Qrel, Query
 from yakkan.models import Answer, Figure, Table
 
 #: 1 パッセージの目安の長さ。これを超える条は項ごとに割る
@@ -60,26 +61,26 @@ def _passage(
     text: str,
     element_ids: list[str],
     citation: str,
-) -> dict[str, Any]:
-    return {
-        "passage_id": f"{answer.doc_id}::{passage_id}",
-        "doc_id": answer.doc_id,
-        "content_id": answer.source.content_id,
-        "genre": answer.source.genre,
-        "product_name": answer.source.meta.product_name,
-        "issuer": answer.source.meta.issuer.name,
-        "kind": kind,
-        "title": title,
-        "citation": citation,
-        "text": text,
-        "element_ids": element_ids,
-        "pages": _pages_of(answer, element_ids),
+) -> Passage:
+    return Passage(
+        passage_id=f"{answer.doc_id}::{passage_id}",
+        doc_id=answer.doc_id,
+        content_id=answer.source.content_id,
+        genre=answer.source.genre,
+        product_name=answer.source.meta.product_name,
+        issuer=answer.source.meta.issuer.name,
+        kind=kind,
+        title=title,
+        citation=citation,
+        text=text,
+        element_ids=element_ids,
+        pages=_pages_of(answer, element_ids),
         # qrels の部分適合（grade 1）を機械的に導くための関係。**derived に実在するものだけ**。
-        "terms_used": sorted(
+        terms_used=sorted(
             {u.term_id for u in answer.source.derived.term_uses if u.in_id in set(element_ids)}
         ),
-        "refs_to": sorted({r.to_id for r in answer.source.derived.refs if r.from_id in set(element_ids)}),
-    }
+        refs_to=sorted({r.to_id for r in answer.source.derived.refs if r.from_id in set(element_ids)}),
+    )
 
 
 def _text_of(answer: Answer, element_id: str, *, with_label: bool = True) -> str:
@@ -125,10 +126,10 @@ def _figure_text(answer: Answer, figure: Figure) -> str:
     return "\n".join(x for x in lines if x)
 
 
-def build_passages(answer: Answer) -> list[dict[str, Any]]:  # noqa: C901 - 単位ごとの分岐が本質
+def build_passages(answer: Answer) -> list[Passage]:  # noqa: C901 - 単位ごとの分岐が本質
     """1 文書ぶんのパッセージ。**検索エンジンに登録する単位**。"""
     derived = answer.source.derived
-    out: list[dict[str, Any]] = []
+    out: list[Passage] = []
     covered: set[str] = set()
 
     # 条（長い条は項ごとに割る）
@@ -252,18 +253,18 @@ GRADE_EXACT = 2
 GRADE_RELATED = 1
 
 
-def _passage_of_element(passages: list[dict[str, Any]]) -> dict[str, str]:
+def _passage_of_element(passages: list[Passage]) -> dict[str, str]:
     """要素 id → パッセージ id。表のセル・図のノードは容れ物のパッセージに寄せる。"""
     out: dict[str, str] = {}
     for passage in passages:
-        for element_id in passage["element_ids"]:
-            out.setdefault(element_id, passage["passage_id"])
+        for element_id in passage.element_ids:
+            out.setdefault(element_id, passage.passage_id)
     # 表のセル（`<table>__r1c2`）と表注は、その表のパッセージに寄せる
     for passage in passages:
-        if passage["kind"] in ("table", "figure"):
-            base = passage["element_ids"][0] if passage["element_ids"] else ""
+        if passage.kind in ("table", "figure"):
+            base = passage.element_ids[0] if passage.element_ids else ""
             if base:
-                out.setdefault(base, passage["passage_id"])
+                out.setdefault(base, passage.passage_id)
     return out
 
 
@@ -320,8 +321,8 @@ def _under(citation: str, prefix: str) -> bool:
 
 
 def build_search_set(  # noqa: C901 - クエリ種別ごとの分岐が本質
-    passages: list[dict[str, Any]], qa_by_doc: dict[str, list[dict[str, Any]]]
-) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    passages: list[Passage], qa_by_doc: dict[str, list[dict[str, Any]]]
+) -> tuple[list[Query], list[Qrel]]:
     """コーパス全体のクエリと qrels を作る。
 
     4 系統：
@@ -336,13 +337,13 @@ def build_search_set(  # noqa: C901 - クエリ種別ごとの分岐が本質
     **適合度は捏造しない。** grade 1 は `derived` に実在する関係（用語の使用・条項間参照・
     同じ条に属すること）からだけ導く。
     """
-    by_id = {p["passage_id"]: p for p in passages}
+    by_id = {p.passage_id: p for p in passages}
     element_index = _passage_of_element(passages)
-    by_doc: dict[str, list[dict[str, Any]]] = {}
+    by_doc: dict[str, list[Passage]] = {}
     for passage in passages:
-        by_doc.setdefault(passage["doc_id"], []).append(passage)
-    queries: list[dict[str, Any]] = []
-    qrels: list[dict[str, Any]] = []
+        by_doc.setdefault(passage.doc_id, []).append(passage)
+    queries: list[Query] = []
+    qrels: list[Qrel] = []
 
     def add(query_id: str, kind: str, text: str, hits: dict[str, int], note: str = "") -> None:
         exact = {p: g for p, g in hits.items() if p in by_id and g == GRADE_EXACT}
@@ -352,54 +353,54 @@ def build_search_set(  # noqa: C901 - クエリ種別ごとの分岐が本質
         trimmed = _spread(related, MAX_RELATED)
         merged = exact | trimmed
         queries.append(
-            {
-                "query_id": query_id,
-                "kind": kind,
-                "query": text,
-                "note": note,
-                "n_relevant": len(merged),
-                "n_exact": len(exact),
-                "n_related": len(trimmed),
+            Query(
+                query_id=query_id,
+                kind=kind,
+                query=text,
+                note=note,
+                n_relevant=len(merged),
+                n_exact=len(exact),
+                n_related=len(trimmed),
                 # 上限で切った分は qrels に出ないので、**Recall を誤解しないための印**を残す。
                 # 切られたパッセージは実際には関連するが、評価上は非適合として扱われる。
-                "n_related_total": len(related),
-                "related_truncated": len(related) > len(trimmed),
-            }
+                n_related_total=len(related),
+                related_truncated=len(related) > len(trimmed),
+            )
         )
         for passage_id, grade in sorted(merged.items()):
-            qrels.append({"query_id": query_id, "passage_id": passage_id, "grade": grade})
+            qrels.append(Qrel(query_id=query_id, passage_id=passage_id, grade=grade))
 
-    def related_of_article(article: dict[str, Any]) -> dict[str, int]:
+    def related_of_article(article: Passage) -> dict[str, int]:
         """条に対する「関連する」パッセージ：その条に属する表・図と、その条を参照する条。"""
         out: dict[str, int] = {}
-        citation = article["citation"]
-        element_ids = set(article["element_ids"])
-        for passage in by_doc.get(article["doc_id"], []):
-            if passage["passage_id"] == article["passage_id"]:
+        citation = article.citation
+        element_ids = set(article.element_ids)
+        for passage in by_doc.get(article.doc_id, []):
+            if passage.passage_id == article.passage_id:
                 continue
-            owns_block = passage["kind"] in ("table", "figure") and _under(passage["citation"], citation)
-            cites_it = bool(element_ids & set(passage.get("refs_to") or []))
+            owns_block = passage.kind in ("table", "figure") and _under(passage.citation, citation)
+            cites_it = bool(element_ids & set(passage.refs_to))
             if owns_block or cites_it:
-                out[passage["passage_id"]] = GRADE_RELATED
+                out[passage.passage_id] = GRADE_RELATED
         return out
 
     # --- term ---------------------------------------------------------------
-    definitions: dict[str, list[dict[str, Any]]] = {}
+    definitions: dict[str, list[Passage]] = {}
     term_ids: dict[str, set[str]] = {}
     for passage in passages:
-        if passage["kind"] == "definition" and passage["title"]:
-            definitions.setdefault(passage["title"], []).append(passage)
-            term_id = passage["passage_id"].split("::term::")[-1]
-            term_ids.setdefault(passage["title"], set()).add(term_id)
+        if passage.kind == "definition" and passage.title:
+            definitions.setdefault(passage.title, []).append(passage)
+            term_id = passage.passage_id.split("::term::")[-1]
+            term_ids.setdefault(passage.title, set()).add(term_id)
     for i, (term, hits) in enumerate(sorted(definitions.items()), start=1):
-        grades = {p["passage_id"]: GRADE_EXACT for p in hits}
+        grades = {p.passage_id: GRADE_EXACT for p in hits}
         wanted = term_ids.get(term, set())
-        docs = {p["doc_id"] for p in hits}
+        docs = {p.doc_id for p in hits}
         for passage in passages:
-            if passage["doc_id"] not in docs or passage["passage_id"] in grades:
+            if passage.doc_id not in docs or passage.passage_id in grades:
                 continue
-            if wanted & set(passage.get("terms_used") or []):
-                grades[passage["passage_id"]] = GRADE_RELATED
+            if wanted & set(passage.terms_used):
+                grades[passage.passage_id] = GRADE_RELATED
         add(
             f"q_term_{i:04d}",
             "term",
@@ -409,17 +410,17 @@ def build_search_set(  # noqa: C901 - クエリ種別ごとの分岐が本質
         )
 
     # --- heading -------------------------------------------------------------
-    headings: dict[str, list[dict[str, Any]]] = {}
+    headings: dict[str, list[Passage]] = {}
     for passage in passages:
-        if passage["kind"] != "article":
+        if passage.kind != "article":
             continue
-        title = passage["title"]
+        title = passage.title
         matched = re.search(r"（(.+)）$", title) or re.search(r"\((.+)\)$", title)
         name = matched.group(1) if matched else title
         if name and len(name) >= 3:
             headings.setdefault(name, []).append(passage)
     for i, (name, hits) in enumerate(sorted(headings.items()), start=1):
-        grades = {p["passage_id"]: GRADE_EXACT for p in hits}
+        grades = {p.passage_id: GRADE_EXACT for p in hits}
         for hit in hits:
             for passage_id, grade in related_of_article(hit).items():
                 grades.setdefault(passage_id, grade)
@@ -436,13 +437,13 @@ def build_search_set(  # noqa: C901 - クエリ種別ごとの分岐が本質
     for name, hits in sorted(headings.items()):
         if len(hits) < 2:
             continue  # 複数文書にある見出しだけが絞り込みの検査になる
-        for hit in sorted(hits, key=lambda p: p["passage_id"])[:1]:
+        for hit in sorted(hits, key=lambda p: p.passage_id)[:1]:
             scoped += 1
-            grades = {hit["passage_id"]: GRADE_EXACT} | related_of_article(hit)
+            grades = {hit.passage_id: GRADE_EXACT} | related_of_article(hit)
             add(
                 f"q_scope_{scoped:04d}",
                 "scoped",
-                f"{hit['product_name']}の{name}",
+                f"{hit.product_name}の{name}",
                 grades,
                 note="商品名で絞り込む項目検索（同名の条が他文書にもある）",
             )
@@ -461,15 +462,15 @@ def build_search_set(  # noqa: C901 - クエリ種別ごとの分岐が本質
                     grades[passage_id] = GRADE_EXACT
             if not grades:
                 continue
-            citations = {by_id[p]["citation"] for p in list(grades) if by_id[p]["citation"]}
+            citations = {by_id[pid].citation for pid in list(grades) if by_id[pid].citation}
             for passage in by_doc.get(doc_id, []):
-                if passage["passage_id"] in grades:
+                if passage.passage_id in grades:
                     continue
-                if any(_under(passage["citation"], c) or _under(c, passage["citation"]) for c in citations):
-                    grades[passage["passage_id"]] = GRADE_RELATED
+                if any(_under(passage.citation, c) or _under(c, passage.citation) for c in citations):
+                    grades[passage.passage_id] = GRADE_RELATED
             for passage_id in [p for p, g in grades.items() if g == GRADE_EXACT]:
                 article = by_id.get(passage_id)
-                if article and article["kind"] == "article":
+                if article and article.kind == "article":
                     for related_id, grade in related_of_article(article).items():
                         grades.setdefault(related_id, grade)
             n += 1

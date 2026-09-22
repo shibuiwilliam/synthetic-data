@@ -1,0 +1,26 @@
+{
+  "additionalProperties": false,
+  "description": "`qrels.jsonl` の 1 行。grade は 2＝答えがそこにある、1＝関連する。",
+  "properties": {
+    "query_id": {
+      "title": "Query Id",
+      "type": "string"
+    },
+    "passage_id": {
+      "title": "Passage Id",
+      "type": "string"
+    },
+    "grade": {
+      "title": "Grade",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "query_id",
+    "passage_id",
+    "grade"
+  ],
+  "title": "Qrel",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

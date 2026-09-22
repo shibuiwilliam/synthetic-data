@@ -3250,7 +3250,7 @@
     }
   },
   "additionalProperties": false,
-  "description": "`answer.json`：source ＋ layout ＋ 派生（ページ別テキスト・アウトライン）。",
+  "description": "source ＋ layout ＋ 派生（ページ別テキスト・アウトライン）。\n\n**`answer.json` には `source` と `layout` を書かない**（同じディレクトリに実体があり、\n内包すると同じ正解が 3 か所に並ぶ。docs/remaining_issues.md R3）。\n読み書きは `yakkan.answer.dump_answer()` / `load_answer()` を使う。\nメモリ上ではこれまでどおり 3 つを 1 つに持つ。",
   "properties": {
     "schema_version": {
       "const": "1.0",

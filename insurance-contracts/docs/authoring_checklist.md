@@ -196,10 +196,15 @@ parts の JSON を手で書くと、セルの id・`rowspan`・`records` を取�
 ```python
 from scripts.authoring import art, enum_table, table, write
 
-write("content/foo-0001/parts/ch1.json", {
-    "id": "ch1", "kind": "chapter", "title": "補償条項",
-    "children": [art("ch1_a1", "保険金を支払う場合", ["当会社は、…支払います。"])],
-})
+write(
+    "content/foo-0001/parts/ch1.json",
+    {
+        "id": "ch1",
+        "kind": "chapter",
+        "title": "補償条項",
+        "children": [art("ch1_a1", "保険金を支払う場合", ["当会社は、…支払います。"])],
+    },
+)
 ```
 
 **検証はしない。** 書いたら `uv run yakkan lint content/<cid>` を必ず通す。

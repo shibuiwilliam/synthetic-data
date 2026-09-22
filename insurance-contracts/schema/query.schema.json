@@ -1,0 +1,56 @@
+{
+  "additionalProperties": false,
+  "description": "`queries.jsonl` の 1 行。",
+  "properties": {
+    "query_id": {
+      "title": "Query Id",
+      "type": "string"
+    },
+    "kind": {
+      "title": "Kind",
+      "type": "string"
+    },
+    "query": {
+      "title": "Query",
+      "type": "string"
+    },
+    "note": {
+      "default": "",
+      "title": "Note",
+      "type": "string"
+    },
+    "n_relevant": {
+      "title": "N Relevant",
+      "type": "integer"
+    },
+    "n_exact": {
+      "title": "N Exact",
+      "type": "integer"
+    },
+    "n_related": {
+      "title": "N Related",
+      "type": "integer"
+    },
+    "n_related_total": {
+      "title": "N Related Total",
+      "type": "integer"
+    },
+    "related_truncated": {
+      "default": false,
+      "title": "Related Truncated",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "query_id",
+    "kind",
+    "query",
+    "n_relevant",
+    "n_exact",
+    "n_related",
+    "n_related_total"
+  ],
+  "title": "Query",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

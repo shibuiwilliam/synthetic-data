@@ -12,10 +12,19 @@ from __future__ import annotations
 
 import json
 import re
+from collections.abc import Sequence
 from pathlib import Path
 from typing import Any
 
 from yakkan.answer import load_answer
+from yakkan.export_models import (
+    ElementEnumeration,
+    ElementFigure,
+    ElementFigureNode,
+    ElementRow,
+    ElementTable,
+    ExportRow,
+)
 from yakkan.models import Answer
 
 #: 表のセル id（`<table_id>__r{row}c{col}`）
@@ -79,7 +88,7 @@ def _figure_index(answer: Answer) -> dict[str, dict[str, Any]]:
     return out
 
 
-def element_rows(answer: Answer) -> list[dict[str, Any]]:
+def element_rows(answer: Answer) -> list[ElementRow]:
     """`elements.jsonl` の行を作る。**テキストか bbox のどちらかを持つ要素**をすべて出す。"""
     source = answer.source
     layout = answer.layout
@@ -93,98 +102,93 @@ def element_rows(answer: Answer) -> list[dict[str, Any]]:
     caption_of = {tid: t.caption_label for tid, t in derived.tables.items()}
     caption_of |= {fid: f.caption_label for fid, f in derived.figures.items()}
 
-    rows: list[dict[str, Any]] = []
+    rows: list[ElementRow] = []
     ids = sorted(set(derived.plain_text) | set(layout.elements))
     for element_id in ids:
         element = layout.elements.get(element_id)
         plain = derived.plain_text.get(element_id)
         label_info = derived.labels.get(element_id)
         fragments = element.fragments if element else []
-        row: dict[str, Any] = {
-            "doc_id": answer.doc_id,
-            "content_id": source.content_id,
-            "style_id": layout.style_id,
-            "genre": source.genre,
-            "element_id": element_id,
-            "kind": element.kind if element else "unrendered",
-            "region": regions.get(element_id, "body"),
-            "text": plain.without_label if plain else "",
-            "text_with_label": plain.with_label if plain else "",
-            "label": (label_info.label if label_info else None) or (element.label if element else None),
-            "heading_text": label_info.heading_text if label_info else None,
-            "node_kind": label_info.kind if label_info else None,
-            "citation": label_info.citation if label_info else "",
-            "parent_id": label_info.parent_id if label_info else None,
-            "path_ids": list(label_info.path_ids) if label_info else [],
-            "pages": sorted({f.page for f in fragments}),
-            "bboxes": [list(f.bbox) for f in fragments],
-            "bboxes_norm": [_normalize_bbox(list(f.bbox), size) for f in fragments],
-            "repeated": any(f.repeated for f in fragments),
-        }
+        row = ElementRow(
+            doc_id=answer.doc_id,
+            content_id=source.content_id,
+            style_id=layout.style_id,
+            genre=source.genre,
+            element_id=element_id,
+            kind=element.kind if element else "unrendered",
+            region=regions.get(element_id, "body"),
+            text=plain.without_label if plain else "",
+            text_with_label=plain.with_label if plain else "",
+            label=(label_info.label if label_info else None) or (element.label if element else None),
+            heading_text=label_info.heading_text if label_info else None,
+            node_kind=label_info.kind if label_info else None,
+            citation=label_info.citation if label_info else "",
+            parent_id=label_info.parent_id if label_info else None,
+            path_ids=list(label_info.path_ids) if label_info else [],
+            pages=sorted({f.page for f in fragments}),
+            bboxes=[list(f.bbox) for f in fragments],
+            bboxes_norm=[_normalize_bbox(list(f.bbox), size) for f in fragments],
+            repeated=any(f.repeated for f in fragments),
+        )
         match = CELL_ID.match(element_id)
         if match and match.group("table") in derived.tables:
             table_id = match.group("table")
             path = header_paths.get(element_id)
-            row["table"] = {
-                "table_id": table_id,
-                "caption_label": caption_of.get(table_id),
-                "row": int(match.group("row")),
-                "col": int(match.group("col")),
-                "row_headers": list(path.row_headers) if path else [],
-                "col_headers": list(path.col_headers) if path else [],
-            }
+            row.table = ElementTable(
+                table_id=table_id,
+                caption_label=caption_of.get(table_id),
+                row=int(match.group("row")),
+                col=int(match.group("col")),
+                row_headers=list(path.row_headers) if path else [],
+                col_headers=list(path.col_headers) if path else [],
+            )
         if element_id in caption_of and element_id in derived.figures:
             figure = derived.figures[element_id]
-            row["figure"] = {
-                "caption_label": figure.caption_label,
-                "node_count": len(figure.graph.nodes),
-                "edge_count": len(figure.graph.edges),
-                "paths": figure.paths,
-            }
+            row.figure = ElementFigure(
+                caption_label=figure.caption_label,
+                node_count=len(figure.graph.nodes),
+                edge_count=len(figure.graph.edges),
+                paths=figure.paths,
+            )
         if element_id in enums:
-            row["enumeration"] = enums[element_id]
+            row.enumeration = ElementEnumeration(**enums[element_id])
         rows.append(row)
 
     # 図のノードは layout.elements に出ないので、別の行として足す
     for key, info in _figure_index(answer).items():
+        owner = derived.labels.get(info["figure_id"])
         rows.append(
-            {
-                "doc_id": answer.doc_id,
-                "content_id": source.content_id,
-                "style_id": layout.style_id,
-                "genre": source.genre,
-                "element_id": key,
-                "kind": "figure_node",
-                "region": "figure",
-                "text": info["label"],
-                "text_with_label": info["label"],
-                "label": None,
-                "heading_text": None,
-                "node_kind": None,
-                "citation": derived.labels.get(info["figure_id"], None).citation
-                if info["figure_id"] in derived.labels
-                else "",
-                "parent_id": info["figure_id"],
-                "path_ids": [],
-                "pages": [info["page"]] if info["page"] else [],
-                "bboxes": [info["bbox"]] if info["bbox"] else [],
-                "bboxes_norm": [_normalize_bbox(info["bbox"], size)] if info["bbox"] else [],
-                "repeated": False,
-                "figure_node": {
-                    "figure_id": info["figure_id"],
-                    "node_id": info["node_id"],
-                    "role": info["role"],
-                },
-            }
+            ElementRow(
+                doc_id=answer.doc_id,
+                content_id=source.content_id,
+                style_id=layout.style_id,
+                genre=source.genre,
+                element_id=key,
+                kind="figure_node",
+                region="figure",
+                text=info["label"],
+                text_with_label=info["label"],
+                citation=owner.citation if owner else "",
+                parent_id=info["figure_id"],
+                pages=[info["page"]] if info["page"] else [],
+                bboxes=[info["bbox"]] if info["bbox"] else [],
+                bboxes_norm=[_normalize_bbox(info["bbox"], size)] if info["bbox"] else [],
+                figure_node=ElementFigureNode(
+                    figure_id=info["figure_id"],
+                    node_id=info["node_id"],
+                    role=info["role"],
+                ),
+            )
         )
     return rows
 
 
-def write_jsonl(rows: list[dict[str, Any]], path: Path) -> int:
+def write_jsonl(rows: Sequence[ExportRow], path: Path) -> int:
+    """1 行 1 モデルで書き出す。行の形はモデルの `jsonl_row()` が決める。"""
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", encoding="utf-8") as handle:
         for row in rows:
-            handle.write(json.dumps(row, ensure_ascii=False, sort_keys=True) + "\n")
+            handle.write(json.dumps(row.jsonl_row(), ensure_ascii=False, sort_keys=True) + "\n")
     return len(rows)
 
 
