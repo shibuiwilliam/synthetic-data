@@ -764,7 +764,13 @@ class OutlineEntry(Model):
 
 
 class Answer(Model):
-    """`answer.json`：source ＋ layout ＋ 派生（ページ別テキスト・アウトライン）。"""
+    """source ＋ layout ＋ 派生（ページ別テキスト・アウトライン）。
+
+    **`answer.json` には `source` と `layout` を書かない**（同じディレクトリに実体があり、
+    内包すると同じ正解が 3 か所に並ぶ。docs/remaining_issues.md R3）。
+    読み書きは `yakkan.answer.dump_answer()` / `load_answer()` を使う。
+    メモリ上ではこれまでどおり 3 つを 1 つに持つ。
+    """
 
     schema_version: Literal["1.0"] = SCHEMA_VERSION
     doc_id: str
@@ -801,10 +807,14 @@ SourceDraft.model_rebuild()
 Source.model_rebuild()
 
 
-def dump_json(model: BaseModel, path: Path | None = None) -> str:
-    """仕様どおりの体裁（UTF-8・ensure_ascii=False・indent 2・定義順）で書き出す。"""
+def dump_json(model: BaseModel, path: Path | None = None, *, exclude: set[str] | None = None) -> str:
+    """仕様どおりの体裁（UTF-8・ensure_ascii=False・indent 2・定義順）で書き出す。
+
+    `exclude` を渡すとそのトップレベル項目を落とす（`answer.json` から
+    `source` / `layout` を外すのに使う。docs/remaining_issues.md R3）。
+    """
     text = json.dumps(
-        model.model_dump(mode="json", by_alias=True, exclude_none=False),
+        model.model_dump(mode="json", by_alias=True, exclude_none=False, exclude=exclude),
         ensure_ascii=False,
         indent=2,
         sort_keys=False,

@@ -15,6 +15,7 @@ import re
 from pathlib import Path
 from typing import Any
 
+from yakkan.answer import load_answer
 from yakkan.models import Answer
 
 #: 表のセル id（`<table_id>__r{row}c{col}`）
@@ -191,7 +192,7 @@ def export_dataset(dataset_dir: Path) -> dict[str, int]:
     """1 文書ぶんの評価向け派生成果物を書き出す。"""
     from yakkan.search_set import build_passages
 
-    answer = Answer.model_validate_json((dataset_dir / "answer.json").read_text(encoding="utf-8"))
+    answer = load_answer(dataset_dir)
     counts = {"elements": write_jsonl(element_rows(answer), dataset_dir / "elements.jsonl")}
     counts["passages"] = write_jsonl(build_passages(answer), dataset_dir / "passages.jsonl")
     return counts
@@ -216,7 +217,7 @@ dataset/
     pages/page-001.png …     150dpi のページ画像（VLM の入力）
     source.json              内容＋構造＋意味（レイアウト非依存）＋ derived
     layout.json              描画結果（ページ・要素の bbox・読み順・ヘッダ/フッタ）
-    answer.json              source ＋ layout ＋ ページ別テキスト ＋ outline
+    answer.json              ページ別テキスト ＋ outline（**source と layout は内包しない**）
     qa.json                  45 問（自動 30 ＋ 執筆 15）
     elements.jsonl           **1 行 1 要素の平らな索引。評価スクリプトはまずこれを読む**
     passages.jsonl           この文書ぶんの検索パッセージ
@@ -238,6 +239,9 @@ dataset/
 
 ## 注意点
 
+- **`answer.json` は `source` と `layout` を内包しない。** 同じディレクトリに実体があるので
+  参照で足りる（内包すると同じ正解が 3 か所に並び、どれが正か分からなくなる）。
+  3 つをまとめて扱いたいときは `yakkan.answer.load_answer(dataset_dir)` を使う。
 - **座標は pt・原点は左上。** `elements.jsonl` には正規化 [0,1] の `bboxes_norm` も入れてある。
   PNG は 150dpi なので、pt × 150/72 でピクセル座標になる。
 - **繰り返し表頭とヘッダ/フッタは PDF のテキスト層に何度も出る。**

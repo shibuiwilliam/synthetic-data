@@ -97,6 +97,8 @@ class Variants(Model):
     era: dict[str, float] = Field(default_factory=lambda: {"seireki": 1.0})
     issuer_kind: dict[str, float] = Field(default_factory=lambda: {"stock": 1.0})
     pet_name: dict[str, float] = Field(default_factory=lambda: {"present": 0.5, "absent": 0.5})
+    #: 表・図の番号の振り方（`chapter` は「表1-1」。docs/reference_structures.md #14）
+    caption_numbering: dict[str, float] = Field(default_factory=lambda: {"flat": 1.0})
     #: 入れ替えてよい章 id の集合（この中だけ順序を変える）
     order_shuffle: list[list[str]] = Field(default_factory=list)
     styles: list[str] = Field(default_factory=list)

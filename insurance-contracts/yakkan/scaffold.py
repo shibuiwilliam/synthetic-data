@@ -108,6 +108,8 @@ class Scaffolder:
         self.rng = random.Random(seed)
         # variants の抽選はここで一度だけ行い、本文の数字表記にも反映する
         self.digit_style = pick(self.rng, blueprint.variants.digit_style)
+        # 表番号の振り方も seed で選ぶ（blueprint の既定は flat）
+        self.caption_numbering = pick(self.rng, blueprint.variants.caption_numbering)
         self.constants: dict[str, str] = {}
         self.terms: dict[str, tuple[str, str]] = {}
         self.todo_count = 0
@@ -298,7 +300,7 @@ class Scaffolder:
                 "numbering_scheme": bp.numbering_scheme,
                 "article_heading": bp.article_heading,
                 "footnote_style": bp.footnote_style,
-                "caption_numbering": bp.caption_numbering,
+                "caption_numbering": self.caption_numbering,
                 "digit_style": digit_style,
                 "disclaimer": DISCLAIMER,
                 "constants": dict(sorted(self.constants.items())),

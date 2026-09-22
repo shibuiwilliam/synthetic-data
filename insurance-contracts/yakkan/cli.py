@@ -316,7 +316,7 @@ def qa(
     ここで自動 QA と合流させる。content 側に無ければ、既存 `qa.json` の
     `source: "authored"` を引き継ぐ（移行のための後方互換）。
     """
-    from yakkan.answer import build_answer
+    from yakkan.answer import build_answer, dump_answer
     from yakkan.models import Layout, QASet, Source, dump_json
     from yakkan.qa.auto import generate, pool_sizes
     from yakkan.qa.validate import validate as run_validate
@@ -338,7 +338,7 @@ def qa(
             raise typer.Exit(code=2)
         qa_set = QASet.model_validate_json(qa_path.read_text(encoding="utf-8"))
     else:
-        dump_json(answer, doc_dir / "answer.json")
+        dump_answer(answer, doc_dir)
         authored = _localize_authored(_load_authored(source.content_id, qa_path), answer)
         generated = generate(answer, count=count, seed=seed)
         qa_set = QASet(doc_id=answer.doc_id, items=generated.items + authored)
@@ -563,8 +563,8 @@ def export(
     """
     import json as _json
 
+    from yakkan.answer import load_answer
     from yakkan.export import export_dataset, write_jsonl, write_readme
-    from yakkan.models import Answer
     from yakkan.search_set import build_passages, build_search_set
 
     dirs = sorted(d for d in dataset_dir.iterdir() if d.is_dir() and (d / "answer.json").exists())
@@ -592,7 +592,7 @@ def export(
     corpus: list[dict] = []
     qa_by_doc: dict[str, list[dict]] = {}
     for directory in per_content.values():
-        answer = Answer.model_validate_json((directory / "answer.json").read_text(encoding="utf-8"))
+        answer = load_answer(directory)
         corpus.extend(build_passages(answer))
         qa_path = directory / "qa.json"
         if qa_path.exists():
@@ -633,8 +633,8 @@ def eval_command(
     """予測 JSON または検索結果を採点する（CLAUDE.md §9・docs/evaluation.md）。"""
     import json as _json
 
+    from yakkan.answer import load_answer
     from yakkan.eval import build_prediction, evaluate, evaluate_run, load_qrels, oracle_run
-    from yakkan.models import Answer
 
     result: dict
     if search_run is not None or (oracle and dataset_doc is None):
@@ -670,7 +670,7 @@ def eval_command(
             console.print("[red]dataset/<doc_id> を指定するか --search-run を使う[/red]")
             raise typer.Exit(code=2)
         if oracle:
-            answer = Answer.model_validate_json((dataset_doc / "answer.json").read_text(encoding="utf-8"))
+            answer = load_answer(dataset_doc)
             qa_file = dataset_doc / "qa.json"
             items = _json.loads(qa_file.read_text(encoding="utf-8"))["items"] if qa_file.exists() else []
             prediction = build_prediction(answer, items)

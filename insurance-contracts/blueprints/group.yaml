@@ -85,6 +85,9 @@ variants:
   era: { seireki: 1.0 }
   issuer_kind: { mutual: 0.5, stock: 0.5 }
   pet_name: { absent: 1.0 }
+  # 参考 #14（加入のしおり）は「（表1-1）」のように章番号を含む表番号を使う。
+  # 同じ会社の文書群なので、団体保険の中で両方の体裁が出るようにする。
+  caption_numbering: { flat: 0.5, chapter: 0.5 }
   order_shuffle: []
   styles: [grp-a4-1col-mincho, grp-a4land-2col-plain]
 

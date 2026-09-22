@@ -13,6 +13,8 @@ PDF のテキスト層には各ページに出るが、正解として二重に�
 
 from __future__ import annotations
 
+from pathlib import Path
+
 from yakkan.models import Answer, AnswerPage, Layout, OutlineEntry, Source
 
 #: `pages[].text` に入れる region。図の中の文字は SVG 側にあり text_lines には出ない。
@@ -111,3 +113,28 @@ def build_answer(source: Source, layout: Layout) -> Answer:
         pages=_page_texts(layout),
         outline=_outline(source, layout),
     )
+
+
+def dump_answer(answer: Answer, dataset_dir: Path) -> Path:
+    """`answer.json` を書く。**`source` と `layout` は書かない**。
+
+    同じディレクトリに `source.json` と `layout.json` の実体があるので、内包すると
+    同じ正解が 3 か所に並ぶ（34 文書で 36MB の重複。docs/remaining_issues.md R3）。
+    「どれが正か」が利用者に分からなくなるのが本当の問題なので、参照で足りるものは書かない。
+    読み戻しは `load_answer()` が 3 ファイルを結合する。
+    """
+    from yakkan.models import dump_json
+
+    path = dataset_dir / "answer.json"
+    dump_json(answer, path, exclude={"source", "layout"})
+    return path
+
+
+def load_answer(dataset_dir: Path) -> Answer:
+    """`answer.json` ＋ `source.json` ＋ `layout.json` を読んで `Answer` を組み立てる。"""
+    import json
+
+    payload = json.loads((dataset_dir / "answer.json").read_text(encoding="utf-8"))
+    payload["source"] = json.loads((dataset_dir / "source.json").read_text(encoding="utf-8"))
+    payload["layout"] = json.loads((dataset_dir / "layout.json").read_text(encoding="utf-8"))
+    return Answer.model_validate(payload)

@@ -20,6 +20,7 @@ import json
 from pathlib import Path
 from typing import Any
 
+from yakkan.answer import load_answer
 from yakkan.eval.metrics import cer, iou, kendall_tau, normalize, set_f1, teds
 from yakkan.models import Answer
 
@@ -410,7 +411,7 @@ def score_qa(qa_items: list[dict[str, Any]], pred: dict[str, Any]) -> dict[str, 
 
 
 def evaluate(dataset_dir: Path, prediction: dict[str, Any]) -> dict[str, Any]:
-    answer = Answer.model_validate_json((dataset_dir / "answer.json").read_text(encoding="utf-8"))
+    answer = load_answer(dataset_dir)
     qa_path = dataset_dir / "qa.json"
     qa_items = json.loads(qa_path.read_text(encoding="utf-8"))["items"] if qa_path.exists() else []
     return {

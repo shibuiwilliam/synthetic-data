@@ -73,12 +73,12 @@ def test_検索の指標() -> None:
 
 @pytest.mark.skipif(_first_dataset() is None, reason="dataset/ が無い")
 def test_満点の予測は満点になる() -> None:
+    from yakkan.answer import load_answer
     from yakkan.eval import build_prediction, evaluate
-    from yakkan.models import Answer
 
     directory = _first_dataset()
     assert directory is not None
-    answer = Answer.model_validate_json((directory / "answer.json").read_text(encoding="utf-8"))
+    answer = load_answer(directory)
     items = json.loads((directory / "qa.json").read_text(encoding="utf-8"))["items"]
     score = evaluate(directory, build_prediction(answer, items))
 
@@ -100,12 +100,12 @@ def test_満点の予測は満点になる() -> None:
 
 @pytest.mark.skipif(_first_dataset() is None, reason="dataset/ が無い")
 def test_崩した予測は点が下がる() -> None:
+    from yakkan.answer import load_answer
     from yakkan.eval import build_prediction, degrade, evaluate
-    from yakkan.models import Answer
 
     directory = _first_dataset()
     assert directory is not None
-    answer = Answer.model_validate_json((directory / "answer.json").read_text(encoding="utf-8"))
+    answer = load_answer(directory)
     items = json.loads((directory / "qa.json").read_text(encoding="utf-8"))["items"]
     perfect = build_prediction(answer, items)
     score = evaluate(directory, degrade(perfect, seed=1, rate=0.3))

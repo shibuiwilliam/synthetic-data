@@ -57,7 +57,8 @@ DYLD_FALLBACK_LIBRARY_PATH=/opt/homebrew/lib uv run yakkan doctor
 | `pages/page-NNN.png` | 150dpi のページ画像（画像ベースの読み取り検証用） |
 | `source.json` | 内容と意味。**レイアウト非依存**（判型・段組を変えても不変） |
 | `layout.json` | 描画結果。ページ・要素ごとの bbox・読み順・ヘッダ／フッタ |
-| `answer.json` | 上の 2 つ＋派生（ページ別の期待テキスト・アウトライン）。**評価はこれ 1 つを読めばよい** |
+| `answer.json` | 派生（ページ別の期待テキスト・アウトライン）。**`source` と `layout` は内包しない**（同じ場所に実体がある）。3 つをまとめて扱うときは `yakkan.answer.load_answer(dir)` |
+| `elements.jsonl` | 1 行 1 要素の平らな索引。**評価スクリプトはまずこれを読む** |
 | `qa.json` | 問答（自動生成 30 問＋執筆 15 問） |
 | `render.html` | デバッグ用の中間 HTML（配布対象外） |
 

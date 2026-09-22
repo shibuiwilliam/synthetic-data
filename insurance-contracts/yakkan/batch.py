@@ -101,7 +101,7 @@ def run(
     only: str | None = None,
 ) -> BatchResult:
     """spec を回す。`only` を渡すとその content_id だけ処理する。"""
-    from yakkan.answer import build_answer
+    from yakkan.answer import build_answer, dump_answer
     from yakkan.build import build_content
     from yakkan.compose import count_todos, raw_document
     from yakkan.lint.runner import lint_content
@@ -193,7 +193,7 @@ def run(
                 layout = Layout.model_validate_json((out_dir / "layout.json").read_text(encoding="utf-8"))
                 stored = Source.model_validate_json((out_dir / "source.json").read_text(encoding="utf-8"))
                 answer = build_answer(stored, layout)
-                dump_json(answer, out_dir / "answer.json")
+                dump_answer(answer, out_dir)
                 qa_path = out_dir / "qa.json"
                 from yakkan.cli import _load_authored, _localize_authored
 

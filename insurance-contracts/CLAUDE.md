@@ -58,7 +58,7 @@
 dataset/<doc_id>/
   source.json    # 執筆内容＋構造＋意味（レイアウト非依存）。派生値（ラベル・ヘッダ経路等）を build で付与済み
   layout.json    # レンダリング結果：ページ・要素ごとの bbox・読み順・ヘッダ/フッタ文字列
-  answer.json    # source + layout + 派生（ページ別テキスト、アウトライン）を統合した評価用正解
+  answer.json    # ページ別テキスト＋アウトライン（source と layout は同じ場所にあるので内包しない）
   qa.json        # 評価用問答（自動生成＋執筆）
   doc.pdf        # 生成PDF（フォント埋め込み、テキスト層あり）
   pages/page-001.png ...   # 150dpi のページ画像（画像ベース読み取りの検証用）
@@ -139,7 +139,7 @@ dataset/manifest.json      # 全文書の一覧（doc_id, genre, style, pages, s
 
 **`yakkan/models.py` `build.py` `richtext.py` `schema/` `content/` を触る作業では、着手前に必ず `docs/schema.md` を読む。**
 
-- 3層＋QA：`source.json`（執筆内容＋構造＋意味。スタイル非依存）／`layout.json`（描画結果・bbox・読み順）／`answer.json`（source＋layout＋ページ別期待テキスト＋outline）／`qa.json`。
+- 3層＋QA：`source.json`（執筆内容＋構造＋意味。スタイル非依存）／`layout.json`（描画結果・bbox・読み順）／`answer.json`（ページ別期待テキスト＋outline。**source と layout は内包しない**。まとめて扱うときは `yakkan.answer.load_answer()`）／`qa.json`。
 - `Node`（part/chapter/section/article/paragraph/item/subitem/subsubitem/appendix）は `title`（見出し文言）だけを持ち、番号ラベルは持たない。`Block` は paragraph/list/table/figure/formula/box/footnotes/qa_heading/page_break。
 - RichText の許可トークンは `{ref:}` `{fn:n}` `{term:}` `{b:}` `{u:}` `{ruby:漢字|よみ}` `{br}` のみ。エスケープは `{{` `}}`。未知トークンと番号ラベルの直書きは lint エラー。
 - 表は `grid`（結合セル込みの見た目構造）と `records`／`header_path`（意味）を二重に持つ。図は6種の `Diagram` ＋ `alt` ＋ `facts`（図から読めるべき命題）。
