@@ -422,7 +422,10 @@ def resolve_ref(index: DocumentIndex, from_id: str, to_id: str, mode: RefMode = 
     parts: list[str] = []
     for cid in chain:
         item = index[cid]
-        if with_title and item.node.kind in _TITLED_KINDS and item.node.title:
+        if item.node.kind == "rider":
+            # 特約は番号を持たないので、題名そのもので指す（「携行品損害補償特約第１条」）。
+            parts.append(item.node.title or "")
+        elif with_title and item.node.kind in _TITLED_KINDS and item.node.title:
             parts.append(f"{item.label}（{item.node.title}）")
         else:
             parts.append(item.label)

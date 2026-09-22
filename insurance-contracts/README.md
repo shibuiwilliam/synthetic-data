@@ -78,7 +78,8 @@ DYLD_FALLBACK_LIBRARY_PATH=/opt/homebrew/lib uv run yakkan doctor
 
 **`source`** — 執筆した内容に、`build` が派生を足したもの。
 
-- `body[]` / `appendices[]`：`Node` の木（part / chapter / section / article / paragraph / item …）。
+- `body[]` / `appendices[]`：`Node` の木（part / chapter / rider / section / article / paragraph / item …）。
+  `rider`（特約）は**番号を持たない**種別で、中の条は特約ごとに第1条から始まる。
   `Node` は **見出しの文言（`title`）しか持たない**。「第1条」のような番号ラベルは持たず、
   木の位置と番号方式から導出して `derived.labels` に入れる。
 - `derived.labels[node_id]`：`{ label, title, heading_text, path, depth }`。
@@ -88,7 +89,10 @@ DYLD_FALLBACK_LIBRARY_PATH=/opt/homebrew/lib uv run yakkan doctor
 - `derived.refs[]`：条項間参照。`{ from_id, to_id, mode, rendered }`。`rendered` が紙面上の表記。
 - `derived.tables[table_id].header_path[cell_id]`：セルの意味座標 `{ row_headers, col_headers }`。
   結合セルを展開したうえでの行見出し・列見出しなので、表の意味検索の正解に使える。
-- `derived.figures[fig_id]`：`node_order`（描画順）と `paths`（flowchart の開始→終了の全経路）。
+- `derived.figures[fig_id]`：`node_order`（描画順）と `paths`（flowchart の開始→終了の全経路）、
+  `resolved_labels`（図の中に書いたトークンの「生文字列 → 解決後」）。
+  **紙面に出るのは解決後の文字列**なので、図のラベルを正解として使うときはこれを当てる。
+  `derived.formulas[formula_id].resolved_labels` も同じ。
 - 表は `grid`（結合セル込みの見た目）と `records`（意味レコード）の**二重表現**を持つ。
 
 **`layout`** — 同じ内容を別スタイルで描けば変わる部分。

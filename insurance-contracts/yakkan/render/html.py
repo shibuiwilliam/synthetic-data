@@ -45,6 +45,7 @@ HEADING_TAGS = {
     # @page のヘッダで編と章を分けるのは CSS 側の属性セレクタで行う。
     "part": "h2",
     "chapter": "h2",
+    "rider": "h2",
     "section": "h3",
     "article": "h4",
     "appendix": "h2",
@@ -87,7 +88,7 @@ class HtmlBuilder:
     # --- ノード -------------------------------------------------------------
 
     #: ヘッダに経路を出すノード（部・章・別表）。節や条までは出さない。
-    HEADER_PATH_KINDS = frozenset({"part", "chapter", "appendix"})
+    HEADER_PATH_KINDS = frozenset({"part", "chapter", "rider", "appendix"})
 
     def _header_path(self, node: Node) -> str:
         """`@page` のヘッダに出す文字列（「第１編␣ご契約のしおり␣第３章␣…」）。

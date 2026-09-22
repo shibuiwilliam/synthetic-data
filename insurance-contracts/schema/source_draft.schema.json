@@ -1214,6 +1214,7 @@
           "enum": [
             "part",
             "chapter",
+            "rider",
             "section",
             "article",
             "paragraph",

@@ -36,6 +36,7 @@ from yakkan.models import NodeKind
 NODE_LETTER: dict[NodeKind, str] = {
     "part": "pt",
     "chapter": "ch",
+    "rider": "rider",
     "section": "s",
     "article": "a",
     "paragraph": "p",
@@ -47,7 +48,7 @@ NODE_LETTER: dict[NodeKind, str] = {
 }
 
 #: ルート直下に置ける種別（親 id を持たない）
-ROOT_KINDS: frozenset[str] = frozenset({"part", "chapter", "appendix"})
+ROOT_KINDS: frozenset[str] = frozenset({"part", "chapter", "rider", "appendix"})
 
 #: ブロック種別 → id 接頭辞
 BLOCK_PREFIX: dict[str, str] = {

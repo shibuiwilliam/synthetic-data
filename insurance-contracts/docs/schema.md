@@ -71,7 +71,9 @@ type TermDef = { id: string; term: string; definition: RichText; index_kana: "�
 
 type Node = {
   id: string;                  // 安定ID。scaffold が付与（例 "ch1", "ch4_s3", "ch4_s3_a1", "..._p2", "..._i3"）
-  kind: "part"|"chapter"|"section"|"article"|"paragraph"|"item"|"subitem"|"subsubitem"|"appendix"|"appendix_section";
+  kind: "part"|"chapter"|"rider"|"section"|"article"|"paragraph"|"item"|"subitem"|"subsubitem"|"appendix"|"appendix_section";
+  // "rider"（特約）は番号を持たない。中の条は特約ごとに第１条から始まり、普通保険約款の
+  // 章の続き番号にならない。`{ref:}` は特約の題名で指す（「携行品損害補償特約第１条」）。
   title?: string;              // 見出し文言のみ（「告知義務」）。番号ラベルは書かない
   text?: RichText;             // paragraph/item 等の本文
   summary?: string;            // もくじ用の要約（auto の章）

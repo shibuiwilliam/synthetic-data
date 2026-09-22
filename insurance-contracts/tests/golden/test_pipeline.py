@@ -88,7 +88,9 @@ def test_埋めれば描画漏れが消える(skeleton, tmp_path) -> None:
     from yakkan.verify.checks import check_fragments, verify_dataset
 
     source = build(load_draft(skeleton.content_dir))
-    filler = "この項は疎通確認のための仮置きの文です。" * 2
+    # ×2 だと WeasyPrint の AssertionError の「帯」（docs/shared_fixes.md D2）に入る。
+    # 帯は内容の長さで決まるので、長さを変えて外す。×3〜×5 はいずれも通る。
+    filler = "この項は疎通確認のための仮置きの文です。" * 3
 
     def fill(node) -> None:
         if node.kind in ("paragraph", "item") and not (node.text or "").strip():

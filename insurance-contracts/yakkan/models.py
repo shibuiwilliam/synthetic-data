@@ -26,6 +26,9 @@ DigitStyle = Literal["fullwidth", "halfwidth"]
 NodeKind = Literal[
     "part",
     "chapter",
+    # 特約。普通保険約款の章の続き番号にしないための独立した種別
+    # （docs/shared_fixes.md A4）。番号を持たず、中の条は特約ごとに第１条から始まる。
+    "rider",
     "section",
     "article",
     "paragraph",

@@ -404,7 +404,7 @@ class Scaffolder:
         nid = f"rider_{rider_id.removeprefix('rider_')}"
         return {
             "id": nid,
-            "kind": "chapter",
+            "kind": "rider",
             "title": "",
             TODO_KEY: "特約。適用条件／用語の定義／補償／普通約款の準用 の4条構成にする",
             "children": [

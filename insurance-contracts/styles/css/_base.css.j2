@@ -78,7 +78,7 @@ h2 { font-size: {{ s.h2_pt }}pt; margin: 0 0 2.6mm;
    別々の編の値を拾って噛み合わなくなる（「第２編…第６章（実は第１編）」が出た）。
    `derived.labels[].path` から組むので、ヘッダの文字列と header_path の正解が必ず一致する。 */
 h2[data-headerpath] { string-set: chapter attr(data-headerpath); }
-h2[data-kind="appendix"] { column-span: none; }
+h2[data-kind="appendix"], h2[data-kind="rider"] { column-span: none; }
 h3 { font-size: {{ s.h3_pt }}pt; margin: 2.6mm 0 1.6mm; break-after: avoid;
 {%- if style.headings.band %}
      color: {{ p.accent }}; border-bottom: 0.5pt solid {{ p.accent }};
