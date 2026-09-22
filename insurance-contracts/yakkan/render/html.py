@@ -321,6 +321,7 @@ def build_css(style: Style, source: Source) -> str:
         font_faces=font_face_css(),
         fallbacks=fallbacks,
         form_code=source.meta.form_code,
+        digit_style=source.meta.digit_style,
     )
 
 

@@ -6,6 +6,14 @@
 /* body の既定マージン 8px を必ず消す（docs/gotchas.md：本文幅が左右 6pt ずつ削られる） */
 body { margin: 0; }
 
+{%- if digit_style == 'fullwidth' %}
+/* 全角の算用数字でページ番号を振るための counter-style（WeasyPrint で使えることを probe で確認）。 */
+@counter-style zenkaku {
+  system: numeric;
+  symbols: "０" "１" "２" "３" "４" "５" "６" "７" "８" "９";
+}
+{%- endif %}
+
 @page {
   /* CSS の B5 は ISO B5（176×250mm）で JIS B5（182×257mm）と違うため、寸法を mm で明示する */
   size: {{ style.page.width_mm }}mm {{ style.page.height_mm }}mm;
@@ -17,7 +25,10 @@ body { margin: 0; }
     font-family: '{{ style.fonts.heading }}'; font-size: 8pt; color: {{ p.rule }};
   }
   @bottom-center {
-    content: counter(page);
+    /* ページ番号は文書の `digit_style` に合わせる。全角の文書で `counter(page)` を
+       そのまま使うと、本文が全角なのにページ番号だけ半角になって表記が割れる。
+       （様式番号は執筆物の文字列なので、そちらの表記は content の判断に従う。） */
+    content: counter(page{% if digit_style == 'fullwidth' %}, zenkaku{% endif %});
     font-family: '{{ style.fonts.heading }}'; font-size: 8pt; color: {{ p.text }};
   }
   @bottom-right {
