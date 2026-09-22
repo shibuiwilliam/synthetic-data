@@ -1,0 +1,146 @@
+# eval_dataset_plan.md — 評価データセットとしての充足性レビューと改修計画
+
+> 2026-09-22。ユーザーから提示された 4 つの利用目的に対して、現状の `dataset/`（34 文書・468 ページ）が
+> 評価データとして足りているかを実測でレビューし、不足を埋める計画を書く。
+> **着手前にこの全文を読むこと。** 完了した項目は「状態」列を更新する。
+
+## 0. 利用目的（ユーザー提示）
+
+| # | 目的 | 評価したいこと |
+|---|---|---|
+| U1 | LLM/VLM のドキュメント読み取り精度 | テキストの正確さ＋**構造内の位置づけ**（第1章第2項）＋**表と図の構造** |
+| U2 | 読み取ったテキストの構造解析 | テキストが構造のどこに属するか（章・条・項、列挙の N 番目） |
+| U3 | 読み取り結果を JSON で出力し後続処理へ | **予測 JSON を採点できる**形にデータが整理されていること |
+| U4 | 検索エンジン（全文・ベクトル・ハイブリッド・ランク学習） | **クエリ → ヒットすべきテキスト**の対応（qrels）があること |
+
+---
+
+## 1. 現状の実測（34 文書）
+
+| 項目 | 数 |
+|---|---|
+| 文書 / ページ | 34 / 468 |
+| layout の要素 | 26,699 |
+| 期待テキスト（`derived.plain_text`） | 12,735 |
+| 表 / うち `records` あり | 400 / 236 |
+| 図 | 111（tree 22・steps 27・timeline 26・flowchart 21・annotated_mock 9・matrix 6） |
+| QA | 1,532（11 種別） |
+
+`source.json` / `layout.json` / `answer.json` / `qa.json` / `doc.pdf` / `pages/*.png` が全文書にある。
+
+---
+
+## 2. 用途別の充足レビュー
+
+### U1 LLM/VLM の読み取り精度 — **おおむね足りるが 3 点欠ける**
+
+足りているもの：
+- ページ画像（150dpi PNG）と PDF、ページ別の期待テキスト `answer.pages[].text`
+- 要素ごとの bbox（`layout.elements[].fragments[]`、pt・原点左上）、ページ内の読み順
+- 表の `grid`（結合セル込み）＋ `header_path`（セルの意味座標）＋ `records`
+- 図の `diagram`（種別ごとの生データ）＋ `alt` ＋ `facts` ＋ `layout.figures[].nodes` の bbox
+
+欠けているもの：
+- **F1. 図の正規化グラフが無い。** `derived.figures[].paths` は **flowchart（21 点）にしか入っていない**。
+  残り 90 点は空。また `nodes` / `edges` を 6 種共通の形で持っていないため、
+  読み取り側の予測（ノード集合・エッジ集合）と機械的に突き合わせられない。
+  CLAUDE.md §9 が掲げる「図ノード/エッジ F1」が現状では計算できない。
+- **F2. 構造内の位置づけが機械可読でない。** `derived.labels[].path` は祖先の `heading_text` の**文字列配列**で、
+  `path_ids` も `kind` も無く、「第2章 第1条 (1)」のような**正規化された引用文字列**も無い。
+  U1 の中心である「文章の位置づけを読めるか」を採点する土台が無い。
+- **F3. 要素インデックスが無い。** 「この要素は何で、どこに属し、何ページのどこにあり、本文は何か」を
+  1 か所で引ける表が無い。`source.derived.labels` ＋ `derived.plain_text` ＋ `layout.elements` を
+  利用者が join する必要がある（34 文書 × 3 ファイルの結合は評価スクリプトの定型作業になる）。
+
+### U2 構造解析 — **不足**
+
+- **F4. `outline` が浅い。** キーは `id / depth / label / title / heading_text / page` のみ。
+  **`kind` も `parent_id` も無い**ので「この見出しは条か項か」「どの章に属するか」が辿れない。
+  深さは数値だけで、木として復元するには id の命名規則に頼るしかない（規則に依存するのは脆い）。
+- **F5. 列挙の位置づけが取れない。** 列挙表のセルには `derived.tables[].auto_labels` で「①」が入るが、
+  「この項目は ch1_a3_p1 の列挙の 3 番目」という関係が正解として出ていない。
+- F2・F3 は U2 にもそのまま効く。
+
+### U3 予測 JSON の採点 — **不足（評価ハーネスが無い）**
+
+- **F6. `yakkan eval` が未実装。** `yakkan/eval/` は `__init__.py` だけの空パッケージ。
+  CLAUDE.md §9 が指標（CER・outline F1・表 TEDS・表セル F1・図 F1・QA 一致・読み順 Kendall τ）を
+  定めているが、コードも**予測 JSON のスキーマも無い**。何をどの形で出せば採点されるのかが未定義。
+- **F7. `dataset/` の並びが評価向きでない。** `answer.json` は `source` と `layout` を丸ごと内包して
+  1 文書 1.7MB あり、採点に使う部分（ページ別テキスト・outline・表・図）が埋もれている。
+  文書ごとの成果物一覧も `manifest.json` に無い。
+
+### U4 検索評価 — **まったく無い**
+
+- **F8. パッセージ（チャンク）が無い。** 検索エンジンに登録する単位（安定 id つきのテキスト片と、
+  その構造メタデータ）が出力されていない。
+- **F9. クエリと正解（qrels）が無い。** QA はあるが、QA は「1 つの答え」を採点するもので、
+  **「このクエリに対してどのパッセージが適合か」という多対多の判定**ではない。
+  全文検索・ベクトル検索・ハイブリッド・ランク学習の評価には、
+  **段階付き適合度（2=完全一致、1=部分的に関連、0=非適合）**を持つ qrels が要る。
+
+### その他（品質上の欠陥）
+
+- **F10. `layout.elements[].kind` に WeasyPrint の内部クラス名が混ざる。**
+  auto-0001 で 1,059 要素中 **396 件が `InlineBox` / `BlockBox`**（目次のリンクとページ番号の span）。
+  `data-kind` を付け忘れている箇所で、正解データとしては誤り。
+
+---
+
+## 3. 改修計画
+
+**方針**：`source` / `layout` / `answer` は正解の一次資料として保ったまま、
+**評価向けの派生成果物を追加する**。既存の形を壊さない（読み取り側の既存コードを無効にしない）。
+
+| # | 施策 | 埋める欠落 | 依存 | 状態 |
+|---|---|---|---|---|
+| P1 | 図の正規化グラフ `derived.figures[].graph`（`nodes[] {id,label,role}` / `edges[] {from,to,label}`）と、全 6 種の `paths` | F1 | — | 未着手 |
+| P2 | `LabelInfo` に `kind` / `path_ids` / `citation`（「第2章 第1条 (1)」）を追加 | F2 | — | 未着手 |
+| P3 | `outline` に `kind` / `parent_id` / `path_ids` / `citation` を追加 | F4 | P2 | 未着手 |
+| P4 | 列挙の親子を `derived.enumerations[]` に出す（親要素 id・順番・ラベル・セル id） | F5 | — | 未着手 |
+| P5 | `elements.jsonl` を出力（1 行 1 要素：id・kind・citation・parent_id・page・bbox・text・table/figure 所属） | F3 | P2 P4 | 未着手 |
+| P6 | 予測 JSON スキーマ `schema/prediction.schema.json` を定義し、`docs/evaluation.md` に書く | F6 | P1–P5 | 未着手 |
+| P7 | `yakkan eval` を実装（CER・outline F1・表 TEDS・表セル F1・図 F1・QA・読み順 τ） | F6 | P6 | 未着手 |
+| P8 | 検索評価セット `passages.jsonl` / `queries.jsonl` / `qrels.jsonl` と `yakkan search-set` | F8 F9 | P5 | 未着手 |
+| P9 | `manifest.json` に成果物一覧とスキーマ版、`dataset/README.md` を追加 | F7 | P1–P8 | 未着手 |
+| P10 | 目次の span に `data-kind` を付ける（`toc_link` / `toc_page`） | F10 | — | 未着手 |
+
+### 各施策の設計メモ
+
+**P1 図の正規化グラフ**
+6 種を共通の有向グラフに落とす。ノードの `role` は種別ごとの意味（`step` / `span` / `event` / `field` /
+`legend` / `row` / `col` / `cell`）。エッジは種別ごとに定義する：
+flowchart は宣言された edges、tree は親→子、steps は順番、timeline は目盛の順と区間の端点、
+matrix は行→セル→列、annotated_mock はバッジ→凡例。
+`paths` は「入次数 0 のノード → 出次数 0 のノード」の全経路（ラベル列）。
+
+**P2/P3 構造位置**
+`citation` は**紙面の表記をそのまま連ねた文字列**にする（「第2章　第1条（この条項の補償内容）　(1)」ではなく、
+番号だけを連ねた「第2章 第1条 (1)」）。読み取り側が出す位置づけと素直に比較できる形にする。
+`path_ids` は祖先の id 配列。`kind` は `NodeKind`。
+
+**P5 elements.jsonl**
+1 行 1 要素の JSON Lines。評価スクリプトが最初に読む唯一のファイルにする。
+表のセルは `table_id` / `row` / `col` / `row_headers` / `col_headers` を持たせる。
+図のノードは `figure_id` / `node_id` を持たせる。
+
+**P8 検索評価セット**
+- `passages.jsonl`：検索単位。**条（article）を 1 パッセージ**とし、長い条は項で分割する。
+  表は 1 表 1 パッセージ（`records` を平文化したものを併記）、図は `alt` ＋ `facts` を 1 パッセージ。
+  各パッセージは `citation` / `page` / `element_ids` を持つ。
+- `queries.jsonl`：クエリは 3 系統で作る。
+  (a) **項目検索**：見出し文言・定義語・表の行見出しから機械生成（「告知義務」「携行品損害補償特約」）。
+  (b) **意味検索**：既存 QA の `question` を流用（答えの根拠パッセージが正解）。
+  (c) **否定・紛らわしい**：他文書の同名見出しを含め、文書横断で誤ヒットを測れるようにする。
+- `qrels.jsonl`：`query_id` / `passage_id` / `grade`（2 / 1 / 0）。
+  grade 2 は「答えがそのパッセージにある」、1 は「同じ条の別の項・関連する表」など。
+  **コーパスは 34 文書を横断**（同一ジャンルの別文書に似た条があるので、弁別力のある評価になる）。
+
+### 進め方
+
+1. P10 → P1 → P2 → P3 → P4（正解データの拡充。`yakkan batch` で全文書を作り直す）
+2. P5（`elements.jsonl`）→ P8（検索評価セット）
+3. P6 → P7（予測スキーマと `yakkan eval`）。**自己評価**：`answer.json` から作った「完璧な予測」と
+   「わざと崩した予測」を通して、指標が期待どおり動くことを確かめる
+4. P9（並びと README）
+5. 各段で `make check` と `yakkan batch` を通し、機能単位でコミットする
