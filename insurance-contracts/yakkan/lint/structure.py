@@ -43,6 +43,36 @@ def _size_ok(block, req: Requirement) -> bool:
     return True
 
 
+def _descendants_of(draft) -> dict[str, set[str]]:
+    """ノード id → そのノード自身と配下のノード id の集合。
+
+    `Requirement.under`（「このノードの配下に要る」）の判定に使う。
+    box の中のブロックは owner が box の id になるので、それも配下に含める。
+    """
+    from yakkan.models import BoxBlock
+
+    out: dict[str, set[str]] = {}
+
+    def box_ids(blocks: list) -> set[str]:
+        ids: set[str] = set()
+        for block in blocks:
+            if isinstance(block, BoxBlock):
+                ids.add(block.id)
+                ids |= box_ids(block.blocks)
+        return ids
+
+    def collect(node) -> set[str]:
+        ids = {node.id} | box_ids(node.blocks)
+        for child in node.children or []:
+            ids |= collect(child)
+        out[node.id] = ids
+        return ids
+
+    for node in draft.body + draft.appendices:
+        collect(node)
+    return out
+
+
 @rule("L04", "blueprint の必須要素と最小件数を満たす")
 def l04_required_elements(ctx: LintContext) -> Iterator[Finding]:
     blueprint = _blueprint(ctx)
@@ -50,9 +80,19 @@ def l04_required_elements(ctx: LintContext) -> Iterator[Finding]:
         yield Finding("L04", "warn", f"blueprint が読めない: blueprints/{ctx.draft.genre}.yaml")
         return
 
-    blocks = [b for b, _owner, _article in iter_blocks(ctx.draft)]
+    owned = [(b, owner) for b, owner, _article in iter_blocks(ctx.draft)]
+    blocks = [b for b, _owner in owned]
+    descendants = _descendants_of(ctx.draft)
     for req in blueprint.all_requirements():
-        hits = [b for b in blocks if _matches(b, req)]
+        # `under` は「そのノードの配下に要る」という指定。
+        # 実装が無く、文書のどこかに 1 つあれば通ってしまっていた。
+        scope = blocks
+        if req.under:
+            allowed = descendants.get(req.under)
+            if allowed is None:
+                continue  # そのノード自体が無い場合は、下の別表チェックが warn で報告する
+            scope = [b for b, owner in owned if owner in allowed]
+        hits = [b for b in scope if _matches(b, req)]
         sized = [b for b in hits if _size_ok(b, req)]
         label = req.kind + (f"/{req.subtype}" if req.subtype else "")
         if len(sized) < req.min_count:
@@ -67,6 +107,21 @@ def l04_required_elements(ctx: LintContext) -> Iterator[Finding]:
                 "error",
                 f"必須要素が足りない: {label}{size} が {len(sized)}/{req.min_count} 件{detail}",
             )
+
+    # 別表：blueprint が挙げたものが content に無い／題材が違う場合は warn。
+    # どちらも執筆の判断で変えてよい（別表を削るのも、題材を差し替えるのも実際に起きた）。
+    node_ids = set(descendants)
+    for spec in blueprint.appendices:
+        if spec.optional:
+            continue
+        if spec.id not in node_ids:
+            yield Finding(
+                "L04",
+                "warn",
+                f"blueprint が挙げる{spec.kind_label}が無い: {spec.id}"
+                f"（{'／'.join(spec.title_options[:2])}）。意図して削ったなら blueprint も直す",
+            )
+            continue
 
     # 用語の定義（defined_terms）の件数
     term_req = next((r for r in blueprint.all_requirements() if r.subtype == "definitions"), None)

@@ -133,9 +133,13 @@ riders:
 appendices:
   - { id: app1, title_options: ["後遺障害等級表"], table: grade_schedule, min_rows: 10,
       todo: "等級×障害の程度×支払割合。抜粋10行以上" }
-  - { id: app2, title_options: ["短期率表"], table: rate, min_rows: 8, kind_label: "付表",
-      todo: "既経過期間×短期率の横長表" }
-  - { id: app3, title_options: ["月割表"], table: rate, min_rows: 6, kind_label: "付表" }
+  # 期間と率の表は横長（期間を列に並べる／2行）にも縦長（期間を行に並べる）にも書ける。
+  # どちらも実物にあるので、lint は「空でないこと」だけを見る（min_rows: 2）。
+  - { id: app2, title_options: ["短期率表"], table: rate, min_rows: 2, kind_label: "付表",
+      todo: "既経過期間×短期率。横長・縦長のどちらでもよい" }
+  # 月割表は「1か月→12分の1」のように規則が自明で情報量が無く、本文からの参照も付きにくい。
+  # auto-0001 では reviewer の指摘で削除した。置くかどうかは執筆の判断に委ねる。
+  - { id: app3, title_options: ["月割表"], table: rate, min_rows: 6, kind_label: "付表", optional: true }
 
 variants:
   digit_style: { fullwidth: 0.7, halfwidth: 0.3 }

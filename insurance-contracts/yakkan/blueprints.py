@@ -70,11 +70,22 @@ class RiderSpec(Model):
 
 
 class AppendixSpec(Model):
+    """別表 1 つぶんの下書き。
+
+    `table` は **scaffold が置く表の下書き**であって、lint の検査対象ではない。
+    同一ジャンル 3 文書は別表の題材を変えて書くのが前提なので（L15 の重複率を下げるため）、
+    `semantic_type` を要件にすると正当な差別化が落ちる。
+    lint が見るのは「この別表の中に `min_rows` 行以上の表が 1 つある」ことだけ。
+    """
+
     id: str
     title_options: list[str]
     table: SemanticType | None = None
     min_rows: int = 0
+    min_cols: int | None = None
     kind_label: str = "別表"
+    #: 執筆の判断で落としてよい別表（落としても warn を出さない）
+    optional: bool = False
     todo: str = ""
 
 
@@ -122,6 +133,27 @@ class Blueprint(Model):
         out = list(self.required)
         for node in self.iter_skeleton():
             out.extend(node.required)
+        # 別表の中身も検査する。ここに入れていなかったため、
+        # 「rate 5行以上の表が文書のどこかに 1 つ」しか見ておらず、
+        # **別表が空でも通ってしまっていた**（travel で発覚）。
+        #
+        # ただし **`subtype`（題材）は指定しない**。同一ジャンル 3 文書は別表の題材を
+        # 変えて書くのが前提で（L15 の重複率を下げるため）、`semantic_type` を
+        # error にすると正当な差別化が落ちる。題材の食い違いは L04 が warn で見る。
+        for spec in self.appendices:
+            if spec.table is None:
+                continue
+            out.append(
+                Requirement(
+                    kind="table",
+                    subtype=None,
+                    min_count=1,
+                    min_rows=spec.min_rows or None,
+                    min_cols=spec.min_cols,
+                    under=spec.id,
+                    note=f"{spec.kind_label}（{spec.id}）の中に要る",
+                )
+            )
         return out
 
 

@@ -16,8 +16,9 @@ front_matter:
 required:
   - { kind: table, subtype: definitions, min_rows: 12 }
   - { kind: table, subtype: benefit_schedule, min_rows: 5, note: "保険金の種類一覧（入院/手術/通院/死亡/後遺障害）" }
-  - { kind: table, subtype: surgery_schedule, min_rows: 8, note: "手術の種類と給付倍率表（別表・C5）" }
-  - { kind: table, subtype: grade_schedule, min_rows: 8, note: "後遺障害等級表（抜粋）" }
+  # 別表の題材は 3 文書で変える前提なので、`semantic_type` では縛らない
+  # （縛ると「支払限度額の一覧」を grade_schedule と偽るような歪みが出る）。
+  # 「別表に 8 行以上の表がある」ことは appendices 側で検査する。
   - { kind: table, subtype: procedure, min_rows: 4, min_cols: 2, note: "保険金請求時の提出書類表（C7）" }
   - { kind: figure, subtype: timeline, note: "責任開始日・免責期間のタイムライン（D5）" }
   - { kind: figure, subtype: steps, note: "告知から契約までの流れ（D7）" }

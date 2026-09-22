@@ -22,7 +22,7 @@ required:
       note: "名称／支払事由／支払額／受取人の表（C2）" }
   - { kind: table, subtype: procedure, min_rows: 3, min_cols: 2, note: "保険料払込方法と猶予期間の表" }
   - { kind: table, subtype: generic, min_rows: 3, note: "税制上の取扱い表" }
-  - { kind: table, subtype: surgery_schedule, min_rows: 6, note: "別表：手術の種類表" }
+  # 別表の題材は 3 文書で変える前提なので `semantic_type` では縛らない（appendices 側で行数を検査）。
   - { kind: figure, subtype: steps, note: "手続きの流れ図（D7）" }
   - { kind: figure, subtype: timeline, note: "失効と復活のタイムライン（D5）" }
   - { kind: box, subtype: caution, min_count: 2, note: "クーリング・オフの説明枠など" }
