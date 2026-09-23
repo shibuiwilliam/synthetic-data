@@ -636,3 +636,66 @@ def test_L17はstubの列を覆わないheader_colsを見つける() -> None:
     bad = list(l17_header_cols(LintContext(draft=draft(0))))
     assert bad and "header_cols=0" in bad[0].message
     assert list(l17_header_cols(LintContext(draft=draft(1)))) == []
+
+
+# --- L18 列挙用の表に caption を付けない（docs/remaining_issues.md Z2） --------
+
+
+def test_L18は列挙用の表にcaptionが付いているとerror() -> None:
+    """`semantic_type: enumeration` に `caption` を付けると、build が「表N」を振って
+
+    紙面に印字される一方、eval の `_gold_tables` は採点対象から除外する（採点は
+    `derived.enumerations` 側で行う）ため、紙面どおりに読んだ予測が表として扱われて
+    表セル F1 を壊す（auto-0001・quake-0002 で実際に発生）。
+    """
+    from yakkan.lint.base import LintContext
+    from yakkan.lint.table_headers import l18_enumeration_table_caption
+    from yakkan.models import SourceDraft
+
+    def draft(semantic_type: str, caption: str | None) -> SourceDraft:
+        table = {
+            "type": "table",
+            "id": "tbl_x",
+            "caption": caption,
+            "semantic_type": semantic_type,
+            "layout": {"header_rows": 0, "header_cols": 1, "col_widths": [10, 90]},
+            "grid": [
+                [
+                    {"id": "tbl_x__r0c0", "text": "{auto_label}", "role": "stub"},
+                    {"id": "tbl_x__r0c1", "text": "免責事由その1。", "role": "body"},
+                ],
+            ],
+        }
+        return SourceDraft.model_validate(
+            {
+                "content_id": "x",
+                "genre": "auto",
+                "seed": 1,
+                "meta": {
+                    "title": "t",
+                    "issuer": {"name": "n", "kind": "stock", "short_name": "n"},
+                    "product_name": "p",
+                    "edition_date": "2026-10-01",
+                    "form_code": "F1",
+                    "numbering_scheme": "nonlife",
+                    "digit_style": "halfwidth",
+                    "disclaimer": "d",
+                },
+                "front_matter": {"cover": {"title": "t", "issuer_name": "n", "form_code": "F1"}},
+                "body": [
+                    {
+                        "id": "ch1",
+                        "kind": "chapter",
+                        "title": "章",
+                        "children": [{"id": "ch1_a1", "kind": "article", "title": "条", "blocks": [table]}],
+                    }
+                ],
+            }
+        )
+
+    bad = list(l18_enumeration_table_caption(LintContext(draft=draft("enumeration", "免責事由"))))
+    assert bad and "semantic_type=enumeration" in bad[0].message
+    bad_excl = list(l18_enumeration_table_caption(LintContext(draft=draft("exclusions", "免責事由"))))
+    assert bad_excl and "semantic_type=exclusions" in bad_excl[0].message
+    assert list(l18_enumeration_table_caption(LintContext(draft=draft("enumeration", None)))) == []
+    assert list(l18_enumeration_table_caption(LintContext(draft=draft("generic", "表題")))) == []

@@ -209,7 +209,7 @@ golf-0001 では 96 件中 57 件がこれで、**入れないと F1 が 0.58、
 | `flowchart` | 宣言された節点（`start` / `process` / `decision` / `end`） | 宣言された矢印（`flow`） |
 | `tree` | 各節点 | 親 → 子（`child`） |
 | `steps` | 段（`step`）＋ 段の説明行（`detail`）・お願い（`ask`）・書類例（`doc`） | 段の順（`next`）と 段 → 説明（`child`） |
-| `timeline` | 目盛（`event`）＋ 区間（`span`） | 目盛の順（`next`）と区間の端点 |
+| `timeline` | 目盛（`tick`）＋ 区間（`span`）＋ できごと（`event`）の3種 | 目盛どうしの順（`tick→tick`、`next`）／区間→両端の目盛（`span→tick`、`from`・`to`）／できごと→対応する目盛（`event→tick`、`at`）。**区間・できごとのノードを介さず目盛どうしを直接つないではいけない**（区間は目盛の弦ではなく、目盛につながる独立したノード） |
 | `annotated_mock` | 記載欄（`field`）＋ 凡例（`legend`） | 欄 → 凡例（`explains`） |
 | `matrix` | 行（`row`）・列（`col`）・交点（`cell`）・凡例（`legend`） | 行 → 交点 → 列（`cell`） |
 

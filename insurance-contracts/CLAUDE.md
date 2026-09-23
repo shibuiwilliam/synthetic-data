@@ -146,6 +146,7 @@
 | L15 | 類似度：既存 content との文単位重複 > 30% | warn |
 | L16 | 執筆 QA の件数と観点の配り方（15 問・表 3・図 3・apply 1 以上） | error |
 | L17 | 表の `header_cols` が行見出し（`role: stub`）の列を覆っている | error |
+| L18 | 列挙用に組んだ表（`semantic_type: enumeration/exclusions`）に `caption` を付けない | error |
 
 各ルールの検査ロジック・実装上の注意点は `docs/lint_rules.md`。
 

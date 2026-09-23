@@ -61,3 +61,29 @@ def l17_header_cols(ctx: LintContext) -> Iterator[Finding]:
                 f"行見出しが header_path に出ず、表の意味座標が崩れる",
                 element_id=block.id,
             )
+
+
+@rule("L18", "列挙用に組んだ表（semantic_type: enumeration/exclusions）に caption を付けない")
+def l18_enumeration_table_caption(ctx: LintContext) -> Iterator[Finding]:
+    """`build.assign_caption_labels` は `caption` の有無だけを見て「表N」を振る。
+
+    `semantic_type` が enumeration/exclusions の表は、eval ハーネス（`_gold_tables`）が
+    表としての採点対象から外す（列挙として `derived.enumerations` 側で採点する）。
+    ここに `caption` を付けると、紙面には「表N」が印字されて実在の表と見分けが付かないのに
+    採点からは除外される、という矛盾が起きる。実際に auto-0001（2 件）・quake-0002（4 件）で
+    起きており、blind な読み手（HITL_TODO.md H7）が「表5」「表6」として律儀に読み取った
+    結果、表セル F1 が 0.53 まで落ちた（`docs/remaining_issues.md` Z2）。
+    """
+    from yakkan.build import AUTO_LABEL_TYPES
+
+    for block, _owner, _article in iter_blocks(ctx.draft):
+        if not isinstance(block, Table):
+            continue
+        if block.semantic_type in AUTO_LABEL_TYPES and (block.caption or "").strip():
+            yield Finding(
+                "L18",
+                "error",
+                f"semantic_type={block.semantic_type} の表に caption が付いている"
+                "（列挙として採点され表番号は振らない設計なので、caption は null にする）",
+                element_id=block.id,
+            )

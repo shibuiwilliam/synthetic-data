@@ -27,6 +27,7 @@
 | L15 | `yakkan/lint/quality.py` | `quick=False`。既存 content との文単位重複率を計算（`--similarity` 指定時のみ実行） |
 | L16 | `yakkan/lint/qa_authored.py` | 執筆 QA（`docs/authoring_checklist.md` 由来）の件数・観点配分・evidence 有無 |
 | L17 | `yakkan/lint/table_headers.py` | `header_cols`（`role: stub` の列）が行見出しを覆っているかを検査 |
+| L18 | `yakkan/lint/table_headers.py` | `semantic_type` が `enumeration`／`exclusions`（`yakkan.build.AUTO_LABEL_TYPES`）の表に `caption` が付いていないかを検査。付いていると `build.assign_caption_labels` が「表N」を振ってしまい、紙面には印字されるのに eval の `_gold_tables` は採点対象から除外する、という矛盾が起きる（`docs/remaining_issues.md` Z2） |
 
 ## 実行順・実行モードの注意
 - `runner.py` がルールを集約する。`--quick` は `quick=False` を付けたルール（L07・L15）を飛ばす。フック（`.claude/settings.json`）から `*.json` 保存後に自動実行されるのはこの quick 版。
