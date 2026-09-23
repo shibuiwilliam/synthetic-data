@@ -35,13 +35,24 @@ def _leading_stub_columns(table: Table) -> int:
     return count
 
 
-@rule("L17", "表の header_cols が行見出し（stub）の列を覆っている")
+@rule("L17", "表の header_cols が行見出しの列を覆っている")
 def l17_header_cols(ctx: LintContext) -> Iterator[Finding]:
     for block, _owner, _article in iter_blocks(ctx.draft):
         if not isinstance(block, Table):
             continue
-        stub = _leading_stub_columns(block)
         declared = block.layout.header_cols
+        if declared == 0:
+            # この体裁の表はどれも 1 列目が行の見出しになっている（15 種別すべてで
+            # header_cols >= 1。外れ値は 2 表だけだった）。0 のままだと `header_path` が
+            # 行見出しを持たず、意味座標の正解が崩れる。
+            yield Finding(
+                "L17",
+                "error",
+                "header_cols=0。1 列目は行見出しのはずで、0 のままだと header_path が行見出しを持たない",
+                element_id=block.id,
+            )
+            continue
+        stub = _leading_stub_columns(block)
         if stub > declared:
             yield Finding(
                 "L17",
