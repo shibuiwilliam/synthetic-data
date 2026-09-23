@@ -256,8 +256,8 @@ dataset/
   レイアウト頑健性の評価に使える。**検索コーパスは重複を避けて content ごとに 1 スタイルだけ**採っている。
 - **qrels の grade 1 は 1 クエリ 20 件で打ち切ってある。** 打ち切ると qrels に出ないので
   評価上は非適合と同じ扱いになる。どのクエリで切ったかは `queries.jsonl` の
-  `related_truncated` と `n_related_total` でわかる（1,944 クエリ中 28 件、
-  おもに「事故」のような頻出の定義語）。**この 28 件で Recall@k を解釈しない。**
+  `related_truncated` と `n_related_total` でわかる（現行の生成では {n_queries} クエリ中
+  {n_truncated} 件、おもに「事故」のような頻出の定義語）。**この件数で Recall@k を解釈しない。**
 - すべて架空の会社・商品である（各文書の奥付に明記）。
 
 ## 採点
@@ -271,7 +271,17 @@ uv run yakkan eval dataset/<doc_id> --oracle --misread 0.3   # 現実の読み�
 """
 
 
-def write_readme(dataset_dir: Path) -> Path:
+def write_readme(dataset_dir: Path, queries: Sequence[Any] = ()) -> Path:
+    """`README` テンプレートに現行コーパスの実測値を埋めて書き出す。
+
+    grade 1 の打ち切り件数（qrels の解釈に直結する）は文書構成が変わるたびに動くので、
+    文字列に固定値を焼き込むと `yakkan export` を再実行しても更新されない
+    （docs/remaining_issues.md Z 系：実際に auto-0001/quake-0002/travel-0003 の
+    caption 修正だけで 1,944→1,946 に動いた）。呼び出し側の `build_search_set` が
+    返す `queries` から都度数える。
+    """
+    n_queries = len(queries)
+    n_truncated = sum(1 for q in queries if getattr(q, "related_truncated", False))
     path = dataset_dir / "README.md"
-    path.write_text(README, encoding="utf-8")
+    path.write_text(README.format(n_queries=f"{n_queries:,}", n_truncated=n_truncated), encoding="utf-8")
     return path

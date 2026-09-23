@@ -615,7 +615,7 @@ def export(
     write_jsonl(corpus, search_dir / "passages.jsonl")
     write_jsonl(queries, search_dir / "queries.jsonl")
     write_jsonl(qrels, search_dir / "qrels.jsonl")
-    write_readme(dataset_dir)
+    write_readme(dataset_dir, queries)
     console.print(
         f"[green]検索評価セット[/green] {search_dir} / "
         f"パッセージ {len(corpus)} 件・クエリ {len(queries)} 件・qrels {len(qrels)} 件"
