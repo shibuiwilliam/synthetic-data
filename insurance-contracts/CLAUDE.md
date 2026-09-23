@@ -12,7 +12,7 @@
 「本物そっくりだが完全に架空の日本語保険約款」を **正解JSON → PDF** の順で生成し、ドキュメント読み取り（テキスト／章節項構造／表／図の構造と意味）の開発検証用データセットを作る。1文書 **20ページ以下**。JSON が唯一の真実（single source of truth）であり、PDF はその決定論的な描画結果である。
 
 ### 0.2 セッション開始時の手順
-1. 本ファイルを読む。次に `docs/decisions.md`（設計変更履歴）と `docs/progress.md`（進捗・次の一手）を読む。存在しなければ §12 の P0 から着手する。
+1. 本ファイルを読む。次に `docs/decisions.md`（設計変更履歴）と `docs/progress.md`（進捗・次の一手）を読む。存在しなければ §12 の P0 から着手する。**`HITL_TODO.md` に人間待ちの項目がある場合、そこに挙がった判断を AI が代わりに下さない**（push・公開・架空性や転載の最終確認など）。
 2. `uv run yakkan doctor` で環境（Python・WeasyPrint・フォント・poppler）を確認する（P0 完了後）。
 3. 作業は §12 のフェーズ順。フェーズをまたぐ設計変更は `docs/decisions.md` に「日付／変更／理由／影響」を追記してから行う。
 4. 終了前に `make check`（lint + pytest）を通し、`docs/progress.md` を更新する。
