@@ -23,3 +23,6 @@ scratch/
 # reviewer の指摘一覧（作業用）。実在約款の疑いがある文を引用することがあるので
 # リポジトリには入れない（CLAUDE.md §0.4-1）。
 .review/
+
+
+HITL_TODO.md

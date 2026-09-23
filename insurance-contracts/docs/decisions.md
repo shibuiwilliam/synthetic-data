@@ -15,8 +15,9 @@ CLAUDE.md §0.2-3 / §0.3 の運用ファイル。**設計変更・probe 結果�
 | 2026-09-21 | 上記に加え §3（構造分析）→docs/reference_structures.md、§1.1→docs/schema.md 冒頭、§10→docs/repo_layout.md も移設 | §3.2 が「分析結果は reference_structures.md に書く」と定めており追記先を一意にするため。§1.1 の検証対象表はデータモデルと不可分。§10 は250行目安に収めるため。いずれも要約せず全文移設 | CLAUDE.md、docs/ | 確定 |
 | 2026-09-21 | `@docs/...` の import は使わない。参照はバッククォート付きのパス表記にし、「触る前に読む」を §0.3 の表で強制する | 公式ドキュメント（code.claude.com/docs/en/memory）で「Imported files are expanded and loaded into context at launch」を確認。import すると分割の目的が失われる | CLAUDE.md §0.3 | 確定 |
 | 2026-09-21 | 恒常ルールは `.claude/rules/*.md` に置き、frontmatter `paths:` で対象ファイルを限定する | 同ドキュメントで path-scoped rule が現行仕様として利用可能なことを確認（「only load into context when Claude works with matching files」「Path-scoped rules trigger when Claude reads files matching the pattern」）。`paths:` 無しのルールは毎セッション読み込まれる | `.claude/rules/` | 確定 |
-| 2026-09-21 | 分割後の CLAUDE.md は291行。250行の目安を約40行超過した状態で止めた | §0・§2・§8・§11・§12・§14 を要約せず残す指示と両立させた結果。さらに削るなら §1.2（成果物の構成）と §9（評価ハーネス）を docs 送りにする案があるが、毎セッション参照する頻度が高いため保留 | CLAUDE.md | 仮決め |
-| 2026-09-21 | git は親リポジトリ `synthetic-data` をそのまま使い、`insurance-contracts/` 配下に `git init` しない。`.gitignore` は本ディレクトリに置く | 親（`/Users/shibuiyusuke/tmp/synthetic-data`）が既に git リポジトリで LICENSE/README を管理している。入れ子リポジトリは gitlink 化して事故のもと | リポジトリ運用 | 仮決め（ユーザー確認待ち） |
+| 2026-09-21 | 分割後の CLAUDE.md は291行。250行の目安を約40行超過した状態で止めた | §0・§2・§8・§11・§12・§14 を要約せず残す指示と両立させた結果。さらに削るなら §1.2（成果物の構成）と §9（評価ハーネス）を docs 送りにする案があるが、毎セッション参照する頻度が高いため保留 | CLAUDE.md | 撤回（2026-09-23、下記で確定） |
+| 2026-09-23 | CLAUDE.md を239行に再分割。§1・§3〜§7・§9・§10・§13・§15 の要約をさらに圧縮し、区切り線（`---`）を除去。新規に `docs/lint_rules.md`（lint 各ルールの実装ファイル対応表）を作成しリンク。§0・§2・§8・§11・§12・§14 は要約せず維持 | HITL_TODO.md H8（「CLAUDE.mdが291行」の仮決めを確定させる）への対応。全文はどの docs にも既に移設済みだったため、圧縮しても情報は失われない | CLAUDE.md、docs/lint_rules.md | 確定 |
+| 2026-09-21 | git は親リポジトリ `synthetic-data` をそのまま使い、`insurance-contracts/` 配下に `git init` しない。`.gitignore` は本ディレクトリに置く | 親（`/Users/shibuiyusuke/tmp/synthetic-data`）が既に git リポジトリで LICENSE/README を管理している。入れ子リポジトリは gitlink 化して事故のもと | リポジトリ運用 | 確定（2026-09-23、HITL_TODO.md H8 でユーザー確認済み） |
 | 2026-09-21 | 親 `.gitignore` の `parts/` `lib/` `build/` `dist/` `var/` `downloads/` を、本ディレクトリの `.gitignore` で打ち消す | Python 汎用 ignore のため `content/<cid>/parts/*.json`（CLAUDE.md §13 でコミット対象と明記）が無言で除外される。`library/`, `build.py` は無事だが将来の `lib/` も危険 | `content/`, `library/` | 確定 |
 | 2026-09-21 | `dataset/` は Git LFS を使わずコミット対象外にする | CLAUDE.md §13 の二択のうち、`specs/` から再生成できるため。§0.4-3「dataset/ は生成物であり手で書き換えない」とも整合 | `.gitignore` | 確定 |
 | 2026-09-21 | WeasyPrint を `==70.0` で固定（当初 66.0 と書いたが PyPI 最新は 70.0） | CLAUDE.md §6.1 は `>=62` かつ「版を固定」。決定論（§0.4-4）のため `==` で固定する | `pyproject.toml`、全描画 | 確定 |
@@ -27,7 +28,7 @@ CLAUDE.md §0.2-3 / §0.3 の運用ファイル。**設計変更・probe 結果�
 | 2026-09-21 | SVG 内テキストは PDF のテキスト層に載る。往復比較では `region: "figure"` として本文から除外する | smoke で図のラベル 3 件が pdfplumber で抽出できることを確認。ヘッダ・フッタ・繰り返し表頭と同じ扱いが要る | §5.7 `layout.json`、§6.9 | 確定 |
 | 2026-09-21 | テンプレート CSS に `body { margin: 0 }` を必ず入れる | `body` 既定マージン 8px が本文幅を左右 6pt ずつ削り、@page マージンの指定と実寸がずれる（box ツリーの実測で発覚） | `styles/css/`、テンプレート | 確定 |
 | 2026-09-21 | フォントは `assets/fonts/` に実体を同梱し、SHA256 を `SOURCES.md` に記録する（計 36MB） | CLAUDE.md §6.2 の「同梱」に従う。決定論のためには版だけでなく実ファイルの同一性が要る。ダウンロードスクリプト方式は取得元の消滅に弱い | リポジトリ容量、`assets/fonts/` | 確定 |
-| 2026-09-21 | BIZ UDP明朝 / BIZ UDPゴシックは P0 では取得しない | v1 の必須要素ではなく、当該スタイルは Noto で代替できる。取得元は `assets/fonts/SOURCES.md` に記録済み | 付録A `life-a4-1col-gothic` | 仮決め |
+| 2026-09-21 | BIZ UDP明朝 / BIZ UDPゴシックは P0 では取得しない | v1 の必須要素ではなく、当該スタイルは Noto で代替できる。取得元は `assets/fonts/SOURCES.md` に記録済み | 付録A `life-a4-1col-gothic` | 確定（2026-09-23、HITL_TODO.md H8 でユーザー確認済み。v1 では取得しない） |
 | 2026-09-21 | macOS では `DYLD_FALLBACK_LIBRARY_PATH=/opt/homebrew/lib` が必須。Makefile と `.claude/settings.json` の `env` で渡す | Homebrew の dylib が dyld の既定検索パスに無く、WeasyPrint の import が落ちる | 開発環境全体、CI を組むときも同様 | 確定 |
 | 2026-09-21 | `dataset/` の手編集防止は `permissions.deny` の `Edit(/dataset/**)` と PreToolUse フックの二重で行う | 公式ドキュメントより、パス規則は `Edit(...)` でしか評価されない（`Write(...)` は無視され警告になる）。フックは拒否理由（作り直す手順）を提示できるため併用する | `.claude/settings.json`、`.claude/hooks/` | 確定 |
 | 2026-09-21 | **仕様を追記**：`Cover` 型を定義した（§5.2 が `front_matter.cover: Cover` と書きながら型が無かった） | 表紙も PDF に文字列が出る以上、JSON から導出できなければ §0.4-3 に反する | `docs/schema.md` §5.2、`yakkan/models.py` | 確定 |
@@ -58,7 +59,7 @@ CLAUDE.md §0.2-3 / §0.3 の運用ファイル。**設計変更・probe 結果�
 | 2026-09-21 | verify に V10（図）を追加：図のノード座標が layout にあること、ラベルが PDF のテキスト層から読めること | SVG の中身は box ツリーに出ないため、図が「描かれたつもりで空」でも他の検査は通ってしまう | `yakkan/verify/checks.py` | 確定 |
 | 2026-09-21 | **参考URL 8 件の構造分析を完了**（`docs/reference_structures.md` の分析ログ）。取得は 8/8 成功。構造だけを測る道具 `scripts/analyze_reference_pdf.py` を追加した（本文を一切出力しない） | P4 の blueprint 設計に実測値が要る。文章を持ち込まずに構造を記録する手順を道具として固定した | `blueprints/`（P4）、CLAUDE.md §3.1 の追記案 | 確定 |
 | 2026-09-21 | **#5（marinepass）は「リスク細分型海外旅行保険」と判明**。§15 の既定値「海外旅行保険風」と一致するため、**travel の題材は既定値のままで確定してよい**とユーザーに提案する | フッタの文書名で商品種別を特定。§4.1 の travel 必須要素とも矛盾しない | CLAUDE.md §15、`blueprints/travel.yaml` | 提案（ユーザー回答待ち） |
-| 2026-09-21 | travel の blueprint に「節を使わないフラット階層」「小型判（約 106×151mm）の style」「全角括弧の項番号」を足す案。**回答をもらうまで仮案とし travel.yaml は確定させない** | 実物が節 0 回・ポケット判・全角括弧 997 回 | `blueprints/travel.yaml`、styles | 仮決め |
+| 2026-09-21 | travel の blueprint に「節を使わないフラット階層」「小型判（約 106×151mm）の style」「全角括弧の項番号」を足す案。**回答をもらうまで仮案とし travel.yaml は確定させない** | 実物が節 0 回・ポケット判・全角括弧 997 回 | `blueprints/travel.yaml`、styles | 確定（2026-09-23、HITL_TODO.md H8 でユーザー確認済み。v1 では追加しない。実物に寄せたくなったら再検討） |
 | 2026-09-21 | **CLAUDE.md §4 の「auto は 2 段組」は実物と食い違う**（#1 は 1 段組、2 段組だったのは #3 地震保険）。段組はジャンル固定にせず style 側の軸にする案を B-1 として提出 | 目視で確認。段組の自動判定は幅広の表があると誤るため目視を正とした | CLAUDE.md §4 の表、付録A、`blueprints/` | 提案（P4 で反映） |
 | 2026-09-21 | **項の括弧幅を `digit_style` から独立させる案**（B-2）。実物は全角（#1#5）と半角（#2#3#4）で二分される | P1 で「括弧幅は digit_style が一括で決める」と判断したが、実測では同じ会社の商品間でも割れており、独立した軸として扱うほうが実物に近い | `yakkan/numbering.py`、`meta`、docs/schema.md | 提案（P4 で反映） |
 | 2026-09-21 | **ルビを v1 の対象に戻す案**（B-9）。P6 送りをやめる | #3 の本文で実際に使われていた。P3 で代替実装（inline-block 積み）が動くことは確認済みで、追加コストが小さい | CLAUDE.md §15、`blueprints/quake.yaml` | 提案（ユーザー回答待ち） |
@@ -70,7 +71,7 @@ CLAUDE.md §0.2-3 / §0.3 の運用ファイル。**設計変更・probe 結果�
 | 2026-09-21 | `chars_per_page_estimate` を実測で較正した（`scripts/calibrate_styles.py`）。1 ページ目に描かれた文字数を box ツリーから数える | 当初の見積りは最大 1.6 倍ずれていた。段落単位で数えると分解能が粗く別スタイルが同値になるため、文字単位で数える | `styles/*.yaml`、lint L09 | 確定 |
 | 2026-09-21 | style を 8 種にした（付録A の 7 種 ＋ `nl-a4-1col-plain`） | P4-a で見つけた「装飾のない素組みの Web 配布 PDF」型（参考 #2）を oneday の既定にするため | `styles/`、`blueprints/oneday.yaml` | 確定 |
 | 2026-09-21 | `@page` のサイズは CSS キーワードではなく **mm で明示**する | CSS の `B5` は ISO B5（176×250mm）で、JIS B5（182×257mm）と違う。style の yaml と実寸が食い違うと bbox 検証が狂う | `styles/css/_base.css.j2` | 確定 |
-| 2026-09-21 | `life-a4-1col-gothic` の BIZ UDPゴシックは Noto Sans JP で代替する | 付録A は BIZ UD を指定しているが未取得（`assets/fonts/SOURCES.md`）。同梱外フォントを使うと verify V02 で落ちる | `styles/life-a4-1col-gothic.yaml` | 仮決め |
+| 2026-09-21 | `life-a4-1col-gothic` の BIZ UDPゴシックは Noto Sans JP で代替する | 付録A は BIZ UD を指定しているが未取得（`assets/fonts/SOURCES.md`）。同梱外フォントを使うと verify V02 で落ちる | `styles/life-a4-1col-gothic.yaml` | 確定（2026-09-23、HITL_TODO.md H8 でユーザー確認済み） |
 | 2026-09-21 | **目次を 2 パス描画にする**：1 パス目で実ページを測り、2 パス目で番号を文字として埋める | `target-counter` が長い目次で収束せず、印字と実ページが食い違う。正解データに誤ったページ番号を残せない | `yakkan/render/weasy.py`、`styles/css/_base.css.j2`、verify V04 | 確定 |
 | 2026-09-21 | `.para`（ぶら下げ段落）に `break-inside: avoid` を必須にする | 無いと段またぎで grid が壊れ、本文がヘッダ帯に食い込む（実測 y=35pt）。P2 で記録した「ラベルだけ取り残される」問題も同時に解消 | `styles/css/_base.css.j2`。1 項は段の高さの半分までに収める制約が付く | 確定 |
 | 2026-09-21 | 往復比較（V03）はヘッダ・フッタ帯の文字を除外して行う | ページをまたぐ段落の途中に次ページの furniture が挟まり、必ず不一致になる | `yakkan/verify/checks.py` | 確定 |
@@ -81,6 +82,9 @@ CLAUDE.md §0.2-3 / §0.3 の運用ファイル。**設計変更・probe 結果�
 | 2026-09-21 | L05 の `records` 照合は **トークンを解いた平文**で行う | `records` は「意味読み取り用の正規化レコード」なので、`{const:}` 入りの生テキストと突き合わせるのは筋が違う（author からの指摘） | `yakkan/lint/structure.py` | 確定 |
 | 2026-09-21 | scaffold がライブラリ本文の数字を文書の `digit_style` にそろえる | ライブラリは 1 つの表記で書いてあるため、そのままだと L10 が「digit_style と逆の数字が混ざっている」と警告する | `yakkan/scaffold.py` | 確定 |
 | 2026-09-21 | part は **章ごとに 1 ファイル**に割る（`20_<章id>.json`） | 1 ファイルにまとめると author サブエージェントを並列で走らせたときに衝突する | `yakkan/scaffold.py`、CLAUDE.md §7.2 | 確定 |
+| 2026-09-23 | **人間による最終レビュー4件（HITL_TODO.md H2〜H5）を完了**：架空性（発行体名・商品名・連絡先30件超）、転載なし（参考14件との抜き取り突合）、560ページの版面目視、執筆QA450問（うち apply型36問の算出値）。いずれも「問題ない」で確認 | CLAUDE.md §0.4-1/§0.4-2/§0.4-7 が定める「AI が代わりに下さない」判断。機械検査（lint/verify）で確認できる範囲は既に全通過済みで、今回は機械検査の対象外部分（実在ブランドとの類似、実物との言い回しの一致、視覚的な「それらしさ」、保険実務としての妥当性）を人間が確認した | `content/`、`dataset/`、HITL_TODO.md | 確定 |
+| 2026-09-23 | **評価仕様3点（HITL_TODO.md H6）を人間が承認し確定**：(a) 列挙として組んだ表を表の母数から除外し enumerations だけで採点する（TEDS 0.2663→1.0）、(b) outline に番号付き項を含める（見出しF1 0.5778→0.9841）、(c) qrels の grade1 を1クエリ20件で打ち切る（未実装だと1,100件超が母数に残る） | AI が技術的に合理的と判断したが評価の定義を変えるため、データセットを使う側の承認が必要だった（`docs/evaluation.md`・`docs/remaining_issues.md` X3-1/X3-2/S5 に実測値つきで記録済み） | `docs/evaluation.md`、`yakkan/answer.py`、`yakkan/search_set.py` | 確定 |
+| 2026-09-23 | **GitHub への push を実行**（HITL_TODO.md H1）。`main` を 62 コミット・`dataset-v1`〜`dataset-v6` の全6タグを `origin`（`shibuiwilliam/synthetic-data`、既存の **private** リポジトリ）へ push。可視性（public/private）は変更していない（現状の private を維持）。`dataset/` は `.gitignore` 済みで今回も push 対象外のまま | ユーザーが HITL_TODO.md の決定欄に「許可する」と記入。push 前に `gh repo view` で private であることを確認し、`git push --dry-run` で fast-forward のみであることを確認してから実行した | GitHub リモート `origin/main`、`origin` のタグ | 確定 |
 
 ---
 
