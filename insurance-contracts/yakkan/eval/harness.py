@@ -177,9 +177,17 @@ def _gold_tables(answer: Answer) -> list[dict[str, Any]]:
     from yakkan.lint.walk import iter_blocks
     from yakkan.models import Table
 
+    # **列挙として組んだ表は「表」として採点しない。**
+    # 「次に掲げる事由」の受けなどは、紙面では格子に組まれているが読み手には箇条書きで、
+    # 実際に VLM は `enumerations` に出した。両方に出すことを求めると同じ中身を二重に
+    # 数えることになり、正しく読めた予測の TEDS が下がる（golf-0001 で 13 表中 6 表が
+    # これに当たり、TEDS が 0.27 まで落ちた。docs/remaining_issues.md X3）。
+    # 中身は `derived.enumerations` で採点されるので、取りこぼしにはならない。
+    as_enumeration = {e.id for e in answer.source.derived.enumerations if e.source == "table"}
+
     out = []
     for block, _owner, _article in iter_blocks(answer.source):
-        if not isinstance(block, Table):
+        if not isinstance(block, Table) or block.id in as_enumeration:
             continue
         derived = answer.source.derived.tables.get(block.id)
         grid = [
@@ -217,13 +225,16 @@ def _gold_tables(answer: Answer) -> list[dict[str, Any]]:
 def score_tables(answer: Answer, pred: dict[str, Any]) -> dict[str, Any]:
     gold = _gold_tables(answer)
     pred_items = _pred_list(pred, "tables")
-    by_caption = {t["caption_label"]: t for t in gold if t["caption_label"]}
+    # キャプションは**正規化して**突き合わせる。全角の文書は gold が「表１」、
+    # 読み取り側は「表1」と出すのが自然で、生の文字列比較だと当たらない
+    # （docs/remaining_issues.md X3）。当たらないと位置での対応づけに落ちる。
+    by_caption = {normalize(t["caption_label"]): t for t in gold if t["caption_label"]}
     used: set[int] = set()
     scores: list[float] = []
     triple_gold: list[tuple[str, str, str]] = []
     triple_pred: list[tuple[str, str, str]] = []
     for i, item in enumerate(pred_items):
-        target = by_caption.get(item.get("caption_label"))
+        target = by_caption.get(normalize(item.get("caption_label") or ""))
         if target is None and i < len(gold):
             target = gold[i]
         if target is None:
@@ -267,7 +278,7 @@ def score_figures(answer: Answer, pred: dict[str, Any]) -> dict[str, Any]:
         for d in derived.values()
     ]
     pred_items = _pred_list(pred, "figures")
-    by_caption = {g["caption_label"]: g for g in gold if g["caption_label"]}
+    by_caption = {normalize(g["caption_label"]): g for g in gold if g["caption_label"]}
     nodes_g: list[str] = []
     nodes_p: list[str] = []
     edges_g: list[str] = []
@@ -276,7 +287,7 @@ def score_figures(answer: Answer, pred: dict[str, Any]) -> dict[str, Any]:
     paths_p: list[str] = []
     used: set[int] = set()
     for i, item in enumerate(pred_items):
-        target = by_caption.get(item.get("caption_label"))
+        target = by_caption.get(normalize(item.get("caption_label") or ""))
         if target is None and i < len(gold):
             target = gold[i]
         if target is None:

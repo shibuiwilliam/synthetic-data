@@ -196,6 +196,8 @@ dataset/manifest.json      # 全文書の一覧（doc_id, genre, style, pages, s
 | L13 | 奥付 disclaimer 存在、meta 必須項目 | error |
 | L14 | QA：型と answer の整合、evidence の存在、extract 系の answer が evidence テキストに含まれる | error |
 | L15 | 類似度：既存 content との文単位重複 > 30% | warn |
+| L16 | 執筆 QA の件数と観点の配り方（15 問・表 3・図 3・apply 1 以上） | error |
+| L17 | 表の `header_cols` が行見出し（`role: stub`）の列を覆っている | error |
 
 ---
 

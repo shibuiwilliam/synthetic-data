@@ -97,7 +97,7 @@ def _edge(svg: Svg, a, b, edge, style: DiagramStyle) -> None:
 
     svg.polyline(points, dashed=dashed, arrow=True)
     if edge.label:
-        svg.text(
+        svg.edge_label(
             label_at[0],
             label_at[1],
             edge.label,

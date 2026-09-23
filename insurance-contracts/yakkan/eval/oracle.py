@@ -58,9 +58,13 @@ def build_prediction(answer: Answer, qa_items: list[dict[str, Any]] | None = Non
                 }
             )
 
+    # 列挙として組んだ表は `enumerations` で採点するので `tables` には出さない
+    # （採点側と同じ除き方をする。docs/remaining_issues.md X3）。
+    as_enumeration = {e.id for e in derived.enumerations if e.source == "table"}
+
     tables: list[dict[str, Any]] = []
     for block, _owner, _article in iter_blocks(answer.source):
-        if not isinstance(block, Table):
+        if not isinstance(block, Table) or block.id in as_enumeration:
             continue
         table_derived = derived.tables.get(block.id)
         grid = [

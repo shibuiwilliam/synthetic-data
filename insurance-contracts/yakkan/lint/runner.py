@@ -11,6 +11,7 @@ from yakkan.lint import qa_authored as _qa_authored  # noqa: F401
 from yakkan.lint import quality as _quality  # noqa: F401
 from yakkan.lint import rules as _rules  # noqa: F401
 from yakkan.lint import structure as _structure  # noqa: F401
+from yakkan.lint import table_headers as _table_headers  # noqa: F401
 from yakkan.lint.base import Finding, LintContext, run_rules
 from yakkan.models import SourceDraft
 

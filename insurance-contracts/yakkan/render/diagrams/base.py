@@ -113,6 +113,10 @@ class Svg:
     height: float = 0.0
     parts: list[str] = field(default_factory=list)
     nodes: dict[str, Box] = field(default_factory=dict)
+    #: 置いた辺ラベルの矩形。重なりを避けるために覚えておく
+    _label_boxes: list[tuple[float, float, float, float]] = field(default_factory=list)
+    #: 辺ラベルは**最後に**描く。先に描くと、後から引かれた連結線が白地の上を横切る
+    _label_parts: list[str] = field(default_factory=list)
 
     @property
     def arrow_id(self) -> str:
@@ -238,6 +242,46 @@ class Svg:
             attrs.insert(0, f'id="{element_id}"')
         self.parts.append(f"<text {' '.join(attrs)}>{escape(content)}</text>")
 
+    def edge_label(
+        self,
+        x: float,
+        y: float,
+        content: str,
+        *,
+        size: float | None = None,
+        anchor: str = "middle",
+        color: str | None = None,
+    ) -> None:
+        """辺のラベル。**重なりを避け、線の上に白地を敷いてから**描く。
+
+        同じ位置に 2 本の辺のラベルが来ると文字が重なって読めなくなる
+        （golf-0001 の図2 で「90日以内」と「いいえ（30日以内）」が重なった。
+        docs/remaining_issues.md X3）。置いた矩形を覚えておき、ぶつかるときは
+        下へずらす。連結線がラベルを貫くのも読みにくいので、白い下地を敷く。
+        """
+        size = size or self.style.font_size
+        width = text_width(content, size)
+        left = {"start": x, "middle": x - width / 2, "end": x - width}[anchor]
+        for _ in range(5):
+            box = (left - 1.5, y - size, left + width + 1.5, y + size * 0.3)
+            if not any(
+                box[0] < other[2] and other[0] < box[2] and box[1] < other[3] and other[1] < box[3]
+                for other in self._label_boxes
+            ):
+                break
+            y += size + 2.5
+        else:
+            box = (left - 1.5, y - size, left + width + 1.5, y + size * 0.3)
+        self._label_boxes.append(box)
+        before = len(self.parts)
+        self.parts.append(
+            f'<rect x="{_n(box[0])}" y="{_n(box[1])}" width="{_n(box[2] - box[0])}" '
+            f'height="{_n(box[3] - box[1])}" fill="#ffffff" stroke="none"/>'
+        )
+        self.text(x, y, content, size=size, anchor=anchor, color=color)
+        self._label_parts.extend(self.parts[before:])
+        del self.parts[before:]
+
     def text_block(
         self,
         cx: float,
@@ -268,7 +312,7 @@ class Svg:
         svg = (
             f'<svg id="{self.figure_id}__svg" data-kind="diagram" '
             f'viewBox="0 0 {_n(width)} {_n(height)}" width="{_n(width)}" height="{_n(height)}" '
-            f'role="img">{defs}{"".join(self.parts)}</svg>'
+            f'role="img">{defs}{"".join(self.parts)}{"".join(self._label_parts)}</svg>'
         )
         return SvgResult(svg=svg, width=width, height=height, nodes=dict(self.nodes))
 

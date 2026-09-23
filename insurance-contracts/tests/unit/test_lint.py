@@ -577,3 +577,62 @@ def test_L16はevidenceの空を見つける(tmp_path: Path) -> None:
     items = _balanced()
     items[0] = {"type": "table_lookup", "question": "問い", "answer": "答え", "evidence": []}
     assert any("evidence が無い" in m for m in _run_l16(tmp_path, items))
+
+
+# --- L17 表の header_cols（docs/remaining_issues.md X3） ----------------------
+
+
+def test_L17はstubの列を覆わないheader_colsを見つける() -> None:
+    """`role: stub` は行見出しの宣言。header_cols が 0 だと意味座標が崩れる。"""
+    from yakkan.lint.base import LintContext
+    from yakkan.lint.table_headers import l17_header_cols
+    from yakkan.models import SourceDraft
+
+    def draft(header_cols: int) -> SourceDraft:
+        table = {
+            "type": "table",
+            "id": "tbl_x",
+            "caption": "表題",
+            "semantic_type": "generic",
+            "layout": {"header_rows": 1, "header_cols": header_cols, "col_widths": [40, 60]},
+            "grid": [
+                [
+                    {"id": "tbl_x__r0c0", "text": "義務の名称", "role": "header"},
+                    {"id": "tbl_x__r0c1", "text": "内容", "role": "header"},
+                ],
+                [
+                    {"id": "tbl_x__r1c0", "text": "損害防止義務", "role": "stub"},
+                    {"id": "tbl_x__r1c1", "text": "努めること。", "role": "body"},
+                ],
+            ],
+        }
+        return SourceDraft.model_validate(
+            {
+                "content_id": "x",
+                "genre": "auto",
+                "seed": 1,
+                "meta": {
+                    "title": "t",
+                    "issuer": {"name": "n", "kind": "stock", "short_name": "n"},
+                    "product_name": "p",
+                    "edition_date": "2026-10-01",
+                    "form_code": "F1",
+                    "numbering_scheme": "nonlife",
+                    "digit_style": "halfwidth",
+                    "disclaimer": "d",
+                },
+                "front_matter": {"cover": {"title": "t", "issuer_name": "n", "form_code": "F1"}},
+                "body": [
+                    {
+                        "id": "ch1",
+                        "kind": "chapter",
+                        "title": "章",
+                        "children": [{"id": "ch1_a1", "kind": "article", "title": "条", "blocks": [table]}],
+                    }
+                ],
+            }
+        )
+
+    bad = list(l17_header_cols(LintContext(draft=draft(0))))
+    assert bad and "header_cols=0" in bad[0].message
+    assert list(l17_header_cols(LintContext(draft=draft(1)))) == []

@@ -347,3 +347,48 @@ def test_Recallの上限を併記する() -> None:
     )
     assert result["overall"]["recall_ceiling@10"] < 1.0, "上限が 1 なら、この指標を出す意味がない"
     assert result["overall"]["recall_ceiling@1"] < result["overall"]["recall_ceiling@10"]
+
+
+# --- 表と見出しの数え方（docs/remaining_issues.md X3） ------------------------
+
+
+@pytest.mark.skipif(_first_dataset() is None, reason="dataset/ が無い")
+def test_列挙として組んだ表は表として数えない() -> None:
+    """同じ中身を tables と enumerations の両方に出させない（X3）。"""
+    from yakkan.answer import load_answer
+    from yakkan.eval.harness import _gold_tables
+
+    directory = _first_dataset()
+    assert directory is not None
+    answer = load_answer(directory)
+    as_enum = {e.id for e in answer.source.derived.enumerations if e.source == "table"}
+    scored = _gold_tables(answer)
+    # 採点対象の表は、どれも列挙として数えられていない
+    from yakkan.lint.walk import iter_blocks
+    from yakkan.models import Table
+
+    all_tables = [b.id for b, _o, _a in iter_blocks(answer.source) if isinstance(b, Table)]
+    assert len(scored) == len(all_tables) - len(as_enum & set(all_tables))
+
+
+def test_キャプションは正規化して突き合わせる() -> None:
+    """全角の文書は gold が「表１」、読み取り側は「表1」と出すのが自然（X3）。"""
+    from yakkan.eval.harness import score_tables
+    from yakkan.models import Answer
+
+    class _Fake:
+        """`score_tables` が触るところだけを持つ最小の偽物。"""
+
+    answer = Answer.model_construct()  # type: ignore[call-arg]
+    gold = [{"caption_label": "表１", "grid": [["あ", "い"]], "triples": []}]
+    pred = {"tables": [{"caption_label": "表1", "grid": [["あ", "い"]], "cells": []}]}
+
+    import yakkan.eval.harness as harness
+
+    original = harness._gold_tables
+    harness._gold_tables = lambda _a: gold  # type: ignore[assignment]
+    try:
+        result = score_tables(answer, pred)
+    finally:
+        harness._gold_tables = original  # type: ignore[assignment]
+    assert result["teds_macro"] == 1.0

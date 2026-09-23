@@ -139,7 +139,7 @@
                       "semantic_type": "procedure",
                       "layout": {
                         "header_rows": 1,
-                        "header_cols": 0,
+                        "header_cols": 1,
                         "repeat_header": true,
                         "style": "grid"
                       },
