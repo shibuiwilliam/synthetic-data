@@ -88,3 +88,62 @@ def test_スキーマが最新である() -> None:
         if path.read_text(encoding="utf-8") != want:
             stale.append(f"{path} が古い")
     assert not stale, f"{stale}（`uv run yakkan schema export` を実行する）"
+
+
+# --- 予測の形（docs/remaining_issues.md W3・W5） ------------------------------
+
+
+def test_予測のkindの語彙はNodeKindと一致する() -> None:
+    """語彙が二重管理になると、片方だけ増えて読み取り側が当てられなくなる。"""
+    import typing
+
+    from yakkan.export_models import NodeKindName
+    from yakkan.models import NodeKind
+
+    assert set(typing.get_args(NodeKindName)) == set(typing.get_args(NodeKind))
+
+
+def test_予測モデルは全キー任意() -> None:
+    """「出さない観点はその指標が 0 になるだけ」という約束をモデルでも守る。"""
+    from yakkan.export_models import Prediction
+
+    empty = Prediction.model_validate({})
+    assert empty.pages == [] and empty.outline == [] and empty.qa == []
+    Prediction.model_validate({"pages": [{"number": 1, "text": "あ"}]})
+
+
+def test_予測モデルは知らないkindを弾く() -> None:
+    """VLM が `subsection` と出して種別正解率 0.0 になった（W5）。黙って 0 にしない。"""
+    import pytest as _pytest
+    from pydantic import ValidationError
+
+    from yakkan.export_models import Prediction
+
+    with _pytest.raises(ValidationError):
+        Prediction.model_validate({"outline": [{"label": "1", "kind": "subsection"}]})
+    Prediction.model_validate({"outline": [{"label": "1", "kind": "chapter"}]})
+    Prediction.model_validate({"outline": [{"label": "1", "kind": None}]}), "分からなければ null"
+
+
+def test_予測の警告は採点を止めない() -> None:
+    from yakkan.cli import _prediction_warnings
+
+    assert _prediction_warnings({"pages": [{"number": 1, "text": "あ"}]}) == []
+    problems = _prediction_warnings({"outline": [{"label": "1", "kind": "subsection"}]})
+    assert problems and any("kind" in p for p in problems)
+    assert any("docs/evaluation.md" in p for p in problems), "直し方の案内を添える"
+
+
+def test_図のエッジはfromとtoで書ける() -> None:
+    """`from` は Python の予約語。予測 JSON では `from` のまま書けること。"""
+    from yakkan.export_models import PredictionFigure
+
+    figure = PredictionFigure.model_validate(
+        {
+            "caption_label": "図1",
+            "nodes": [{"id": "a", "label": "甲"}, {"id": "b", "label": "乙"}],
+            "edges": [{"from": "a", "to": "b", "relation": "flow"}],
+            "paths": [["甲", "乙"]],
+        }
+    )
+    assert figure.edges[0].from_ == "a"

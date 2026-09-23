@@ -188,13 +188,23 @@ svg { display: block; max-width: 100%; }
 
 /* 目次は段組コンテナの外に置くので column-span は不要（docs/gotchas.md） */
 nav.toc { margin-bottom: 4mm; font-size: {{ s.toc_pt }}pt; }
+/* リーダー罫は**点線の罫**で引く。`leader('.')` は WeasyPrint が本物の「.」を描くので、
+   PDF のテキスト層に数千字の点が入り、`answer.pages[].text` もそれを含んでしまう。
+   文字単位で完璧に読んだページが CER 0.775 になった（docs/remaining_issues.md W6）。
+   `scripts/probe_toc_leader.py` で 4 案を実測し、これを採った
+   （float 案は同じ見た目だが CLAUDE.md §2-6 が本文での float を禁じている）。 */
+/* リーダーは **box に触らない下線**で描く。`border-bottom` だと行が 0.4pt 高くなり、
+   ページ送りがずれて WeasyPrint が段またぎの内容を黙って落とした
+   （golf-0001 の 2 スタイルで条末脚注が消え V03 が落ちた。CLAUDE.md §14）。
+   余白で相殺しても直らなかったので、高さを 1 ミリも変えない下線にした。 */
 nav.toc .toc-line { display: block; margin: 0 0 0.9mm; }
 nav.toc .toc-line a { text-decoration: none; color: inherit; }
-nav.toc .toc-line a::after { content: leader('.') target-counter(attr(href), page); }
+nav.toc .toc-line a::after { content: leader(' ') target-counter(attr(href), page);
+                             text-decoration: underline dotted; }
 /* 2 パス目：ページ番号を文字として埋めた場合は target-counter を使わない
    （WeasyPrint の target-counter は長い目次で収束せず、印字と実ページがずれる。
      docs/gotchas.md「目次のページ番号が収束しない」） */
-nav.toc .toc-line a.fixed::after { content: leader('.'); }
+nav.toc .toc-line a.fixed::after { content: leader(' '); text-decoration: underline dotted; }
 nav.toc .d0 { font-family: '{{ style.fonts.heading }}', sans-serif; font-weight: 700; margin-top: 1.6mm; }
 nav.toc .d1 { margin-left: 1.6em; }
 nav.toc .d2 { margin-left: 3.2em; }

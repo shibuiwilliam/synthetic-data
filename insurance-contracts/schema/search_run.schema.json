@@ -1,25 +1,39 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://example.jp/yakkan/search_run.schema.json",
-  "title": "yakkan 検索結果",
-  "description": "docs/evaluation.md §2。クエリごとの順位つきパッセージ id。",
-  "type": "object",
-  "properties": {
-    "runs": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "properties": {
-          "query_id": { "type": "string" },
-          "passages": {
-            "type": "array",
-            "description": "順位の高い順。passage_id は passages.jsonl のもの。",
-            "items": { "type": "string" }
-          }
+  "$defs": {
+    "SearchRunEntry": {
+      "additionalProperties": false,
+      "properties": {
+        "query_id": {
+          "title": "Query Id",
+          "type": "string"
         },
-        "required": ["query_id", "passages"]
-      }
+        "passages": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Passages",
+          "type": "array"
+        }
+      },
+      "required": [
+        "query_id"
+      ],
+      "title": "SearchRunEntry",
+      "type": "object"
     }
   },
-  "required": ["runs"]
+  "additionalProperties": false,
+  "description": "検索結果（docs/evaluation.md §2）。",
+  "properties": {
+    "runs": {
+      "items": {
+        "$ref": "#/$defs/SearchRunEntry"
+      },
+      "title": "Runs",
+      "type": "array"
+    }
+  },
+  "title": "SearchRun",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
 }

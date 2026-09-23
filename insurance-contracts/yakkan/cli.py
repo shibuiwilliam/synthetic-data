@@ -623,6 +623,120 @@ def export(
     )
 
 
+#: `yakkan eval --all` の表に出す指標。**端末で読める幅に絞る**——
+#: 全指標は `--out` の JSON に入っている。
+_ALL_METRICS: list[tuple[str, tuple[str, ...]]] = [
+    ("CER", ("text", "cer_macro")),
+    ("見出し", ("outline", "f1")),
+    ("cite", ("citation", "citation_acc")),
+    ("cov", ("citation", "coverage")),
+    ("TEDS", ("tables", "teds_macro")),
+    ("図ノード", ("figures", "node_f1", "f1")),
+    ("列挙", ("enumerations", "order_exact")),
+    ("読み順", ("reading_order", "tau_macro")),
+    ("QA", ("qa", "exact_match")),
+]
+
+
+def _dig(score: dict, path: tuple[str, ...]) -> float:
+    value: object = score
+    for key in path:
+        if not isinstance(value, dict):
+            return 0.0
+        value = value.get(key, 0.0)
+    return float(value) if isinstance(value, int | float) else 0.0
+
+
+def _prediction_warnings(payload: object) -> list[str]:
+    """予測の形を検査して、直すべき点を人の言葉で返す。**採点は止めない。**
+
+    形が違っても指標が 0 になるだけで理由が分からない、という状態を避ける
+    （VLM が `kind: "subsection"` と出して kind 正解率 0.0 になった。
+    docs/remaining_issues.md W5）。
+    """
+    from pydantic import ValidationError
+
+    from yakkan.export_models import Prediction
+
+    try:
+        Prediction.model_validate(payload)
+    except ValidationError as error:
+        out: list[str] = []
+        for item in error.errors()[:8]:
+            where = ".".join(str(x) for x in item["loc"])
+            out.append(f"{where}: {item['msg']}")
+        if len(error.errors()) > 8:
+            out.append(f"… 他 {len(error.errors()) - 8} 件")
+        out.append("語彙は docs/evaluation.md §3。当てられないものは出さない（null）でよい")
+        return out
+    return []
+
+
+def _eval_all(
+    *,
+    dataset_dir: Path,
+    pred_dir: Path | None,
+    oracle: bool,
+    misread_rate: float | None,
+    out: Path | None,
+) -> None:
+    """dataset/ の全文書を採点して、文書ごとの表と平均を出す。
+
+    41 文書の平均を出すのにその場かぎりのスクリプトを書く、という状態を無くす
+    （docs/remaining_issues.md W2）。
+    """
+    import json as _json
+
+    from yakkan.answer import load_answer
+    from yakkan.eval import build_prediction, evaluate, misread
+
+    rows: list[tuple[str, dict]] = []
+    skipped: list[str] = []
+    for doc in sorted(p for p in dataset_dir.iterdir() if p.is_dir()):
+        if not (doc / "answer.json").exists():
+            continue
+        if oracle:
+            answer = load_answer(doc)
+            qa_file = doc / "qa.json"
+            items = _json.loads(qa_file.read_text(encoding="utf-8"))["items"] if qa_file.exists() else []
+            prediction: dict = build_prediction(answer, items)
+            if misread_rate is not None:
+                prediction = misread(prediction, seed=0, rate=misread_rate)
+        else:
+            if pred_dir is None:
+                console.print("[red]--all には --pred-dir か --oracle が要る[/red]")
+                raise typer.Exit(code=2)
+            path = pred_dir / f"{doc.name}.json"
+            if not path.is_file():
+                skipped.append(doc.name)
+                continue
+            prediction = _json.loads(path.read_text(encoding="utf-8"))
+        rows.append((doc.name, evaluate(doc, prediction)))
+
+    if not rows:
+        console.print("[red]採点できる文書が無い[/red]")
+        raise typer.Exit(code=2)
+
+    table = Table(title=f"読み取り評価（{len(rows)} 文書）", title_justify="left", header_style="bold")
+    table.add_column("doc_id", overflow="fold")
+    for label, _path in _ALL_METRICS:
+        table.add_column(label, justify="right")
+    for name, score in rows:
+        table.add_row(name, *[f"{_dig(score, path):.3f}" for _l, path in _ALL_METRICS])
+    means = {label: sum(_dig(s, path) for _n, s in rows) / len(rows) for label, path in _ALL_METRICS}
+    table.add_row("**平均**", *[f"{means[label]:.3f}" for label, _p in _ALL_METRICS])
+    console.print(table)
+    if skipped:
+        console.print(f"[yellow]予測が無くて飛ばした文書 {len(skipped)} 件[/yellow]: {skipped[:5]}")
+    if out is not None:
+        out.write_text(
+            _json.dumps({"documents": {n: s for n, s in rows}, "mean": means}, ensure_ascii=False, indent=2)
+            + "\n",
+            encoding="utf-8",
+        )
+        console.print(f"書き出した {out}")
+
+
 @app.command("eval")
 def eval_command(
     dataset_doc: Annotated[
@@ -649,6 +763,11 @@ def eval_command(
             help="--oracle の予測を現実の読み取り誤りで崩す強さ 0〜1",
         ),
     ] = None,
+    every: Annotated[bool, typer.Option("--all", help="dataset/ の全文書を採点して平均を出す")] = False,
+    pred_dir: Annotated[
+        Path | None,
+        typer.Option("--pred-dir", help="--all のとき、<doc_id>.json を探すディレクトリ"),
+    ] = None,
 ) -> None:
     """予測 JSON または検索結果を採点する（CLAUDE.md §9・docs/evaluation.md）。"""
     import json as _json
@@ -657,6 +776,15 @@ def eval_command(
     from yakkan.eval import build_prediction, evaluate, evaluate_run, load_qrels, misread, oracle_run
 
     result: dict
+    if every:
+        _eval_all(
+            dataset_dir=Path("dataset"),
+            pred_dir=pred_dir,
+            oracle=oracle,
+            misread_rate=misread_rate,
+            out=out,
+        )
+        return
     if search_run is not None or (oracle and dataset_doc is None):
         qrels = load_qrels(qrels_path)
         queries = [
@@ -701,6 +829,8 @@ def eval_command(
                 console.print("[red]--pred か --oracle が要る[/red]")
                 raise typer.Exit(code=2)
             prediction = _json.loads(pred.read_text(encoding="utf-8"))
+            for line in _prediction_warnings(prediction):
+                console.print(f"[yellow]予測の形[/yellow] {line}")
         result = evaluate(dataset_doc, prediction)
         table = Table(title=f"読み取り評価 {result['doc_id']}", title_justify="left", header_style="bold")
         table.add_column("観点")

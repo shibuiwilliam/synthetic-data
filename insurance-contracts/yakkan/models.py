@@ -834,9 +834,16 @@ def json_schema(model: type[BaseModel]) -> dict[str, Any]:
 #: `yakkan schema export` が書き出すモデル。
 def _export_row_models() -> dict[str, type[BaseModel]]:
     """評価向けの派生成果物の型（`yakkan/export_models.py`）。循環 import を避けて遅延で引く。"""
-    from yakkan.export_models import ElementRow, Passage, Qrel, Query
+    from yakkan.export_models import ElementRow, Passage, Prediction, Qrel, Query, SearchRun
 
-    return {"element": ElementRow, "passage": Passage, "query": Query, "qrel": Qrel}
+    return {
+        "element": ElementRow,
+        "passage": Passage,
+        "query": Query,
+        "qrel": Qrel,
+        "prediction": Prediction,
+        "search_run": SearchRun,
+    }
 
 
 EXPORTED_SCHEMAS: dict[str, type[BaseModel]] = {

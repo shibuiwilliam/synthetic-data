@@ -388,3 +388,17 @@ PDF に描かれなかった**。V05（描画漏れ）も V06（はみ出し）�
 `figcaption` のときと違って本文欠落は起きなかった（全 34 データセットで verify error 0 を確認）。
 
 **教訓**：「fragment はあるのに PDF にテキストが無い」ときは、bbox が版面の外に出ていないか見る。
+
+## 目次のリーダー罫は `leader('.')` で書かない（2026-09-23）
+
+`content: leader('.')` は WeasyPrint が**本物の「.」を描く**ので、PDF のテキスト層に
+1 ページあたり数百字の点が入る。`answer.pages[].text` もそれを含むため、
+**文字単位で完璧に読んだページの CER が 0.775 になった**（docs/remaining_issues.md W6）。
+
+`leader(' ')` ＋ `text-decoration: underline dotted` に替えた。
+**`border-bottom` で罫を引いてはいけない**——行が 0.4pt 高くなるだけで
+ページ送りがずれ、golf-0001 の 2 スタイルで条末脚注が消えた（V03 が検出）。
+余白で相殺しても直らない。box の大きさを変えない描き方を選ぶこと。
+
+実測は `scripts/probe_toc_leader.py`（5 案）。
+

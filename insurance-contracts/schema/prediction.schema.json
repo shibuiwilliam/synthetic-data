@@ -1,125 +1,436 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://example.jp/yakkan/prediction.schema.json",
-  "title": "yakkan 読み取り予測",
-  "description": "docs/evaluation.md §1。すべてのキーは任意で、無い観点は指標が 0 になるだけ。",
-  "type": "object",
+  "$defs": {
+    "PredictionCell": {
+      "additionalProperties": false,
+      "description": "表のセルの意味座標。`grid`（見た目）とは**別に**採点する。",
+      "properties": {
+        "row_headers": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Row Headers",
+          "type": "array"
+        },
+        "col_headers": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Col Headers",
+          "type": "array"
+        },
+        "value": {
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "value"
+      ],
+      "title": "PredictionCell",
+      "type": "object"
+    },
+    "PredictionEdge": {
+      "additionalProperties": false,
+      "properties": {
+        "from": {
+          "title": "From",
+          "type": "string"
+        },
+        "to": {
+          "title": "To",
+          "type": "string"
+        },
+        "relation": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Relation"
+        }
+      },
+      "required": [
+        "from",
+        "to"
+      ],
+      "title": "PredictionEdge",
+      "type": "object"
+    },
+    "PredictionElement": {
+      "additionalProperties": false,
+      "description": "本文の要素。**読み順に**並べる（読み順の τ はこの並びで測る）。",
+      "properties": {
+        "text": {
+          "title": "Text",
+          "type": "string"
+        },
+        "page": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Page"
+        },
+        "kind": {
+          "anyOf": [
+            {
+              "enum": [
+                "part",
+                "chapter",
+                "rider",
+                "section",
+                "article",
+                "paragraph",
+                "item",
+                "subitem",
+                "subsubitem",
+                "appendix",
+                "appendix_section"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Kind"
+        },
+        "citation": {
+          "default": "",
+          "title": "Citation",
+          "type": "string"
+        },
+        "bbox": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "number"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Bbox"
+        }
+      },
+      "required": [
+        "text"
+      ],
+      "title": "PredictionElement",
+      "type": "object"
+    },
+    "PredictionEnumeration": {
+      "additionalProperties": false,
+      "properties": {
+        "citation": {
+          "default": "",
+          "title": "Citation",
+          "type": "string"
+        },
+        "items": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Items",
+          "type": "array"
+        }
+      },
+      "title": "PredictionEnumeration",
+      "type": "object"
+    },
+    "PredictionFigure": {
+      "additionalProperties": false,
+      "properties": {
+        "caption_label": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Caption Label"
+        },
+        "nodes": {
+          "items": {
+            "$ref": "#/$defs/PredictionNode"
+          },
+          "title": "Nodes",
+          "type": "array"
+        },
+        "edges": {
+          "items": {
+            "$ref": "#/$defs/PredictionEdge"
+          },
+          "title": "Edges",
+          "type": "array"
+        },
+        "paths": {
+          "items": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "title": "Paths",
+          "type": "array"
+        }
+      },
+      "title": "PredictionFigure",
+      "type": "object"
+    },
+    "PredictionNode": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "label": {
+          "default": "",
+          "title": "Label",
+          "type": "string"
+        },
+        "role": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Role"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "title": "PredictionNode",
+      "type": "object"
+    },
+    "PredictionOutline": {
+      "additionalProperties": false,
+      "description": "見出し 1 件。`kind` の語彙は docs/evaluation.md §3。迷ったら null。",
+      "properties": {
+        "label": {
+          "default": "",
+          "title": "Label",
+          "type": "string"
+        },
+        "title": {
+          "default": "",
+          "title": "Title",
+          "type": "string"
+        },
+        "heading_text": {
+          "default": "",
+          "title": "Heading Text",
+          "type": "string"
+        },
+        "kind": {
+          "anyOf": [
+            {
+              "enum": [
+                "part",
+                "chapter",
+                "rider",
+                "section",
+                "article",
+                "paragraph",
+                "item",
+                "subitem",
+                "subsubitem",
+                "appendix",
+                "appendix_section"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Kind"
+        },
+        "page": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Page"
+        },
+        "citation": {
+          "default": "",
+          "title": "Citation",
+          "type": "string"
+        }
+      },
+      "title": "PredictionOutline",
+      "type": "object"
+    },
+    "PredictionPage": {
+      "additionalProperties": false,
+      "description": "ページ本文。ヘッダ・フッタ・図中の文字は含めない。",
+      "properties": {
+        "number": {
+          "title": "Number",
+          "type": "integer"
+        },
+        "text": {
+          "default": "",
+          "title": "Text",
+          "type": "string"
+        }
+      },
+      "required": [
+        "number"
+      ],
+      "title": "PredictionPage",
+      "type": "object"
+    },
+    "PredictionQA": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "answer": {
+          "default": null,
+          "title": "Answer"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "title": "PredictionQA",
+      "type": "object"
+    },
+    "PredictionTable": {
+      "additionalProperties": false,
+      "properties": {
+        "caption_label": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Caption Label"
+        },
+        "grid": {
+          "items": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "title": "Grid",
+          "type": "array"
+        },
+        "cells": {
+          "items": {
+            "$ref": "#/$defs/PredictionCell"
+          },
+          "title": "Cells",
+          "type": "array"
+        }
+      },
+      "title": "PredictionTable",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "読み取りの予測 JSON（docs/evaluation.md §1）。\n\n**すべてのキーが任意。** 出さない観点はその指標が 0 になるだけで、他は採点される。\n突合は中身で行う（予測に我々の内部 id は無い前提）。",
   "properties": {
-    "doc_id": { "type": "string" },
+    "doc_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Doc Id"
+    },
     "pages": {
-      "type": "array",
       "items": {
-        "type": "object",
-        "properties": { "number": { "type": "integer" }, "text": { "type": "string" } },
-        "required": ["number", "text"]
-      }
+        "$ref": "#/$defs/PredictionPage"
+      },
+      "title": "Pages",
+      "type": "array"
     },
     "outline": {
-      "type": "array",
       "items": {
-        "type": "object",
-        "properties": {
-          "label": { "type": "string" },
-          "title": { "type": "string" },
-          "heading_text": { "type": "string" },
-          "kind": { "type": ["string", "null"] },
-          "page": { "type": "integer" },
-          "citation": { "type": "string" }
-        }
-      }
+        "$ref": "#/$defs/PredictionOutline"
+      },
+      "title": "Outline",
+      "type": "array"
     },
     "elements": {
-      "type": "array",
-      "description": "読み順に並べる。読み順の Kendall τ はこの並びで測る。",
       "items": {
-        "type": "object",
-        "properties": {
-          "text": { "type": "string" },
-          "page": { "type": "integer" },
-          "kind": { "type": ["string", "null"] },
-          "citation": { "type": "string" },
-          "bbox": { "type": "array", "items": { "type": "number" }, "minItems": 4, "maxItems": 4 }
-        },
-        "required": ["text"]
-      }
+        "$ref": "#/$defs/PredictionElement"
+      },
+      "title": "Elements",
+      "type": "array"
     },
     "tables": {
-      "type": "array",
       "items": {
-        "type": "object",
-        "properties": {
-          "caption_label": { "type": ["string", "null"] },
-          "grid": {
-            "type": "array",
-            "description": "結合を展開した矩形。被結合位置には結合元の値を入れる。",
-            "items": { "type": "array", "items": { "type": "string" } }
-          },
-          "cells": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "row_headers": { "type": "array", "items": { "type": "string" } },
-                "col_headers": { "type": "array", "items": { "type": "string" } },
-                "value": { "type": "string" }
-              },
-              "required": ["value"]
-            }
-          }
-        }
-      }
+        "$ref": "#/$defs/PredictionTable"
+      },
+      "title": "Tables",
+      "type": "array"
     },
     "figures": {
-      "type": "array",
       "items": {
-        "type": "object",
-        "properties": {
-          "caption_label": { "type": ["string", "null"] },
-          "nodes": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "id": { "type": "string" },
-                "label": { "type": "string" },
-                "role": { "type": "string" }
-              },
-              "required": ["label"]
-            }
-          },
-          "edges": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "from": { "type": "string" },
-                "to": { "type": "string" },
-                "relation": { "type": "string" }
-              },
-              "required": ["from", "to"]
-            }
-          },
-          "paths": { "type": "array", "items": { "type": "array", "items": { "type": "string" } } }
-        }
-      }
+        "$ref": "#/$defs/PredictionFigure"
+      },
+      "title": "Figures",
+      "type": "array"
     },
     "enumerations": {
-      "type": "array",
       "items": {
-        "type": "object",
-        "properties": {
-          "citation": { "type": "string" },
-          "items": { "type": "array", "items": { "type": "string" } }
-        }
-      }
+        "$ref": "#/$defs/PredictionEnumeration"
+      },
+      "title": "Enumerations",
+      "type": "array"
     },
     "qa": {
-      "type": "array",
       "items": {
-        "type": "object",
-        "properties": { "id": { "type": "string" }, "answer": {} },
-        "required": ["id"]
-      }
+        "$ref": "#/$defs/PredictionQA"
+      },
+      "title": "Qa",
+      "type": "array"
     }
-  }
+  },
+  "title": "Prediction",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
 }

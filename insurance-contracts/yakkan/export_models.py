@@ -17,9 +17,25 @@
 
 from __future__ import annotations
 
-from typing import ClassVar
+from typing import ClassVar, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
+
+#: 見出し・要素の種別。`yakkan.models.NodeKind` と同じ語彙
+#: （import すると循環するので、ここで宣言して `tests` で一致を固定する）。
+NodeKindName = Literal[
+    "part",
+    "chapter",
+    "rider",
+    "section",
+    "article",
+    "paragraph",
+    "item",
+    "subitem",
+    "subsubitem",
+    "appendix",
+    "appendix_section",
+]
 
 
 class ExportRow(BaseModel):
@@ -159,3 +175,114 @@ class Qrel(ExportRow):
     query_id: str
     passage_id: str
     grade: int
+
+
+# --- 読み取り側が出す形（docs/evaluation.md §1・§2） --------------------------
+
+
+class PredictionPage(ExportRow):
+    """ページ本文。ヘッダ・フッタ・図中の文字は含めない。"""
+
+    number: int
+    text: str = ""
+
+
+class PredictionOutline(ExportRow):
+    """見出し 1 件。`kind` の語彙は docs/evaluation.md §3。迷ったら null。"""
+
+    label: str = ""
+    title: str = ""
+    heading_text: str = ""
+    kind: NodeKindName | None = None
+    page: int | None = None
+    citation: str = ""
+
+
+class PredictionElement(ExportRow):
+    """本文の要素。**読み順に**並べる（読み順の τ はこの並びで測る）。"""
+
+    text: str
+    page: int | None = None
+    kind: NodeKindName | None = None
+    citation: str = ""
+    #: pt・原点左上。出すと IoU が採点される
+    bbox: list[float] | None = None
+
+
+class PredictionCell(ExportRow):
+    """表のセルの意味座標。`grid`（見た目）とは**別に**採点する。"""
+
+    row_headers: list[str] = Field(default_factory=list)
+    col_headers: list[str] = Field(default_factory=list)
+    value: str
+
+
+class PredictionTable(ExportRow):
+    caption_label: str | None = None
+    #: 結合を展開した矩形。被結合位置には結合元の値を入れる
+    grid: list[list[str]] = Field(default_factory=list)
+    cells: list[PredictionCell] = Field(default_factory=list)
+
+
+class PredictionNode(ExportRow):
+    #: 予測の中で一意ならなんでもよい（edges から参照するためだけに使う）
+    id: str
+    label: str = ""
+    role: str | None = None
+
+
+class PredictionEdge(ExportRow):
+    from_: str = Field(alias="from")
+    to: str
+    relation: str | None = None
+
+    model_config = ConfigDict(extra="forbid", populate_by_name=True)
+
+
+class PredictionFigure(ExportRow):
+    caption_label: str | None = None
+    nodes: list[PredictionNode] = Field(default_factory=list)
+    edges: list[PredictionEdge] = Field(default_factory=list)
+    paths: list[list[str]] = Field(default_factory=list)
+
+
+class PredictionEnumeration(ExportRow):
+    #: 親（導入文）の位置づけ
+    citation: str = ""
+    #: 行頭の番号は**付けても付けなくてもよい**（docs/remaining_issues.md T8）
+    items: list[str] = Field(default_factory=list)
+
+
+class PredictionQA(ExportRow):
+    #: `qa.json` の id をそのまま使う
+    id: str
+    answer: object = None
+
+
+class Prediction(ExportRow):
+    """読み取りの予測 JSON（docs/evaluation.md §1）。
+
+    **すべてのキーが任意。** 出さない観点はその指標が 0 になるだけで、他は採点される。
+    突合は中身で行う（予測に我々の内部 id は無い前提）。
+    """
+
+    doc_id: str | None = None
+    pages: list[PredictionPage] = Field(default_factory=list)
+    outline: list[PredictionOutline] = Field(default_factory=list)
+    elements: list[PredictionElement] = Field(default_factory=list)
+    tables: list[PredictionTable] = Field(default_factory=list)
+    figures: list[PredictionFigure] = Field(default_factory=list)
+    enumerations: list[PredictionEnumeration] = Field(default_factory=list)
+    qa: list[PredictionQA] = Field(default_factory=list)
+
+
+class SearchRunEntry(ExportRow):
+    query_id: str
+    #: 順位つきの passage_id
+    passages: list[str] = Field(default_factory=list)
+
+
+class SearchRun(ExportRow):
+    """検索結果（docs/evaluation.md §2）。"""
+
+    runs: list[SearchRunEntry] = Field(default_factory=list)

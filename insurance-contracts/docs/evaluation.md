@@ -149,7 +149,60 @@ nDCG@1/5/10・Recall@1/5/10・MRR を、**クエリ種別ごとと全体で**報
 
 ---
 
-## 3. スキーマ
+## 3. 予測に使う語彙
+
+**採点は完全一致で行う。** 何を出せばよいかがここに書いていないと当てようがないので、
+語彙をここに定める（docs/remaining_issues.md W5。VLM が `section` / `subsection` と出して
+`kind` 正解率 0.0 になった）。
+
+### `outline[].kind` と `elements[].kind`
+
+`part` / `chapter` / `rider`（特約）/ `section` / `article` / `paragraph` /
+`item` / `subitem` / `subsubitem` / `appendix`（別表・付表）/ `appendix_section`。
+
+**`kind` は紙面の記号ではなく構造の深さを表す。** 条を持たないジャンル
+（重要事項説明書）でも、いちばん外の区分が `chapter`、その下が `section`、
+本文を持つ単位が `article`、その中の列挙が `item`。
+
+| 紙面 | kind |
+|---|---|
+| 「第N編」 | `part` |
+| 「第N章」／重要事項説明書の「1」「2」の大見出し | `chapter` |
+| 番号を持たない特約の題名（「携行品損害補償特約」） | `rider` |
+| 「第N節」／重要事項説明書の「(1)」「(2)」 | `section` |
+| 「第N条」／重要事項説明書の「①」「②」の小見出し | `article` |
+| 条の中の「(1)」「1」の項 | `paragraph` |
+| 「①」「1.」の号 | `item` |
+| 「別表N」「付表N」「附則」 | `appendix` |
+| 別表の中の「第N」 | `appendix_section` |
+
+**迷ったら出さない**（`null`）。出さなければ `kind_acc` の母数から外れるだけで、
+他の指標は下がらない。
+
+### `tables[].cells`
+
+`grid` は**見た目**（結合を展開した矩形）、`cells` は**意味**（行見出し・列見出し・値の 3 つ組）。
+**別々に採点する。** `grid` が完全一致（TEDS 1.0）でも、`cells` を出さなければ
+表セル F1 は 0 になる。両方出すこと。
+
+### `figures[].nodes` の粒度
+
+図の中の**文字が入る箱はすべて 1 ノード**。段の見出しだけでなく、段に添えた説明行も数える。
+種別ごとの `role`：
+
+| 図の種別 | ノード | エッジ |
+|---|---|---|
+| `flowchart` | 宣言された節点（`start` / `process` / `decision` / `end`） | 宣言された矢印（`flow`） |
+| `tree` | 各節点 | 親 → 子（`child`） |
+| `steps` | 段（`step`）＋ 段の説明行（`detail`）・お願い（`ask`）・書類例（`doc`） | 段の順（`next`）と 段 → 説明（`child`） |
+| `timeline` | 目盛（`event`）＋ 区間（`span`） | 目盛の順（`next`）と区間の端点 |
+| `annotated_mock` | 記載欄（`field`）＋ 凡例（`legend`） | 欄 → 凡例（`explains`） |
+| `matrix` | 行（`row`）・列（`col`）・交点（`cell`）・凡例（`legend`） | 行 → 交点 → 列（`cell`） |
+
+`paths` は「入次数 0 のノード → 出次数 0 のノード」の全経路をラベルの列で。
+**`role` は採点に使わない**（ノードは `label` の多重集合で突き合わせる）。
+
+## 4. スキーマ
 
 | ファイル | スキーマ | モデル |
 |---|---|---|
@@ -163,7 +216,7 @@ nDCG@1/5/10・Recall@1/5/10・MRR を、**クエリ種別ごとと全体で**報
 `uv run yakkan schema export` で書き出す。`tests/unit/test_export_models.py` が
 「生成物がモデルを通る」「`schema/` が最新」を固定している。
 
-## 4. 生成のしかた
+## 5. 生成のしかた
 
 ```
 uv run yakkan export            # elements.jsonl / passages.jsonl / dataset/search/*
