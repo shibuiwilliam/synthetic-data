@@ -40,6 +40,44 @@ unzip -joq /tmp/NotoSerifJP.zip 'SubsetOTF/JP/NotoSerifJP-Regular.otf' -d assets
 shasum -a 256 assets/fonts/NotoSerifJP-Regular.otf   # 上表の値と一致すること
 ```
 
+## 派生ファイル：`.ttf`（TrueType 輪郭に変換した Noto Serif/Sans JP）
+
+**取得日：2026-09-26。** 外部から新規取得したのではなく、上表の `.otf`（CFF 輪郭）
+から `scripts/otf_to_ttf.py`（fontTools の `Cu2QuPen`、変換誤差上限 0.001em）で
+**ローカルに変換して作った派生ファイル**。理由は `docs/gotchas.md`
+「WeasyPrint が CFF（.otf）を埋め込むと、macOS の Preview/Quick Look で本文が
+描画されない」を見ること。`yakkan/fonts.py` の `FONTS` はこの `.ttf` を参照する。
+`.otf` は出典検証用にそのまま残してあり、削除しない。
+
+輪郭の形以外（cmap・advance width・グリフ数・Unicode 被覆）は元の `.otf` と同一
+であることを検証済み（GID 単位の advance width が全グリフで完全一致。CID フォントは
+再読み込みのたびにグリフ"名前"が変わるため、名前ではなく GID の並び順で比較する）。
+
+| ファイル | 変換元 | fontTools 版 | サイズ | SHA256 |
+|---|---|---|---|---|
+| `NotoSerifJP-Regular.ttf` | `NotoSerifJP-Regular.otf` | 4.65.0 | 7.1 MB | `5eed9fac420df96bd691b895fed605e8ab9aa533a6f88d034e54df936597bfa3` |
+| `NotoSerifJP-Bold.ttf` | `NotoSerifJP-Bold.otf` | 4.65.0 | 7.1 MB | `f6a1447463e5e82c104117fd0af16995151515580d80464cf34f039429dcda7b` |
+| `NotoSansJP-Regular.ttf` | `NotoSansJP-Regular.otf` | 4.65.0 | 5.2 MB | `c008f942721bf0f025c5b8ce08a4e481ec2d1ace2cc8978dc20d1742a7d8b18b` |
+| `NotoSansJP-Bold.ttf` | `NotoSansJP-Bold.otf` | 4.65.0 | 5.1 MB | `143d8ad6acb4fb0776181e941f5732c3e8a51855d3b71304fbd0e1e7a9c00721` |
+
+**この変換はバイト単位では決定論的ではない**（同じ入力・同じ fontTools 版で
+再実行しても SHA256 は一致しない。実測済み）。輪郭点の走査順など fontTools 内部の
+非決定的な要素が原因とみられ、原因は未特定。そのため `.ttf` は`.otf` と同様に
+**一度作った実体をこのままコミットして固定資産として扱う**（CLAUDE.md §0.4-4 の
+決定論は「同じ資産から同じ PDF が作れること」を指し、資産自体の生成手順の
+再現性までは要求していない）。再変換する場合は、cmap・GID 単位の advance width が
+元の `.otf` と一致することを必ず検証してから差し替える（`scripts/otf_to_ttf.py` は
+変換のみを行い、この検証は別途 Python で行う。上の「advance width が完全一致」の
+記述を参照）。
+
+```bash
+# 作り直す場合（既存の .ttf は上書きされる。差し替え前に検証すること）
+uv run python scripts/otf_to_ttf.py assets/fonts/NotoSerifJP-Regular.otf
+```
+
+ライセンスは変換元と同じ **SIL Open Font License 1.1**（OFL は派生フォントの
+再配布・改変を明示的に許可している）。
+
 ## ライセンス本文
 
 - `LICENSE-NotoSerifJP.txt` / `LICENSE-NotoSansJP.txt`：SIL Open Font License 1.1（Noto CJK のリリース同梱物）

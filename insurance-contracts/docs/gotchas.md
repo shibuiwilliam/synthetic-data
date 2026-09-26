@@ -402,3 +402,41 @@ PDF に描かれなかった**。V05（描画漏れ）も V06（はみ出し）�
 
 実測は `scripts/probe_toc_leader.py`（5 案）。
 
+## WeasyPrint が CFF（.otf）を埋め込むと、macOS の Preview/Quick Look で本文が描画されない（2026-09-26）
+
+**症状**：`doc.pdf` は pdfplumber（テキスト抽出）・pypdfium2・poppler（`pdftoppm`）の
+いずれでも正しくページ数・文字数・可視インクが確認できるのに、macOS の Preview.app /
+Quick Look で開くと本文が空に見える、とユーザーから3回にわたり指摘された。
+lint・verify（V01〜V10、往復一致・はみ出し・決定論）はすべて通過しており、
+**この不具合は正解データ側の検査では検出できない**（テキスト抽出はできるが、
+Apple の Quartz/PDFKit だけが描画できない、という組み合わせのため）。
+
+**原因の特定**：`pdffonts` で調べると、影響する 26/41 文書は本文フォントが
+`Noto Serif JP` / `Noto Sans JP`（`.otf`＝CFF アウトライン）で
+`CID Type 0C (OT)` として埋め込まれていた。影響の無い文書は
+`IPAexMincho` / `IPAexGothic`（`.ttf`＝TrueType アウトライン）で
+`CID TrueType` として埋め込まれていた。**この境界は 41 文書中 1 文書の例外もなく
+一致した**（`styles/*.yaml` の `fonts.body`/`fonts.heading` が Noto か IPAex かで
+完全に予測できる）。WeasyPrint 70.0 が CFF フレーバーの CID キー付き OpenType を
+`pydyf` で PDF に埋め込む際の構造が、pdfium・poppler には寛容に読めるが、
+Apple の Quartz/PDFKit には拒否される（本文が空白）という互換性問題だった。
+
+**対処**：フォントの輪郭形式だけを TrueType に変換した（見た目・cmap・advance width は
+変えない）。`scripts/otf_to_ttf.py`（fontTools の `Cu2QuPen` で三次ベジェ→二次ベジェ
+近似、誤差上限 0.001em）で `NotoSerifJP-{Regular,Bold}.ttf` /
+`NotoSansJP-{Regular,Bold}.ttf` を生成し、`yakkan/fonts.py` の `FONTS` を
+`.otf` から `.ttf` に差し替えた。元の `.otf` は出典検証用に残してある
+（`assets/fonts/SOURCES.md`）。
+
+**検証**：変換前後で (1) cmap の Unicode 被覆集合が完全一致、(2) 全グリフの
+advance width が GID 単位で完全一致（≠ 名前単位。CID フォントは再読み込みのたびに
+グリフ名が変わるので名前で比較すると誤検知する）、(3) WeasyPrint で再レンダリングした
+テスト文字列の画素が旧フォントと 99.6% 一致（残差は輪郭近似によるアンチエイリアス縁のみ）
+を確認。影響する 26 文書を再 render・再 verify し、ページ数・レイアウトの変化が
+無いことを確認した（advance width が不変なので改行・改ページは動かない）。
+
+**教訓**：往復検証（テキスト抽出の一致）と決定論（バイト一致）だけでは、
+「特定の PDF ビューアだけが描画に失敗する」不具合は検出できない。
+CJK フォントを同梱するときは `pdffonts` で埋め込み種別（Type0C か TrueType か）を
+毎回確認し、可能なら `.ttf` を選ぶ。
+

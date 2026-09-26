@@ -35,23 +35,30 @@ class FontSpec:
 
 
 #: 本文・見出し・記号フォールバックに使うフォント一覧（docs/rendering.md §6.2）。
+#: Noto Serif/Sans JP は `.ttf`（TrueType 輪郭）を使う。元は `.otf`（CFF）だったが、
+#: WeasyPrint 70.0 が CFF を `CIDFontType0` で埋め込むと macOS の Quartz/PDFKit
+#: （Preview.app・Quick Look）で本文が描画されない不具合があるため、
+#: `scripts/otf_to_ttf.py`（fontTools の cu2qu）で TrueType 輪郭に変換した
+#: （advance width は不変。cmap・字体は同一。docs/gotchas.md 2026-09-26）。
+#: 元の `.otf` は `assets/fonts/` に残してあり、出典の検証には `.otf` の SHA256 を使う
+#: （`assets/fonts/SOURCES.md`）。
 FONTS: tuple[FontSpec, ...] = (
     FontSpec(
-        "noto-serif-jp-regular", "Noto Serif JP", 400, "normal", "NotoSerifJP-Regular.otf", "本文（明朝）"
+        "noto-serif-jp-regular", "Noto Serif JP", 400, "normal", "NotoSerifJP-Regular.ttf", "本文（明朝）"
     ),
     FontSpec(
-        "noto-serif-jp-bold", "Noto Serif JP", 700, "normal", "NotoSerifJP-Bold.otf", "本文太字（明朝）"
+        "noto-serif-jp-bold", "Noto Serif JP", 700, "normal", "NotoSerifJP-Bold.ttf", "本文太字（明朝）"
     ),
     FontSpec(
         "noto-sans-jp-regular",
         "Noto Sans JP",
         400,
         "normal",
-        "NotoSansJP-Regular.otf",
+        "NotoSansJP-Regular.ttf",
         "本文・見出し（ゴシック）",
     ),
     FontSpec(
-        "noto-sans-jp-bold", "Noto Sans JP", 700, "normal", "NotoSansJP-Bold.otf", "見出し太字（ゴシック）"
+        "noto-sans-jp-bold", "Noto Sans JP", 700, "normal", "NotoSansJP-Bold.ttf", "見出し太字（ゴシック）"
     ),
     FontSpec("ipaexm", "IPAexMincho", 400, "normal", "ipaexm.ttf", "高密度スタイル（明朝）"),
     FontSpec("ipaexg", "IPAexGothic", 400, "normal", "ipaexg.ttf", "高密度スタイル（ゴシック）"),
