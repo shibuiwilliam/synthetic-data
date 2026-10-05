@@ -17,26 +17,25 @@
 | | [`../insurance-contracts/`](../insurance-contracts/) | [`../contracts/`](../contracts/) |
 |---|---|---|
 | 通称 | yakkan-synth（保険約款） | keiyaku-synth（契約書） |
-| 状態 | 完済（`dataset_version: v7`） | データセット v1 完成（2026-10-05） |
+| 進捗 | 完済（`dataset_version: v7`） | データセット v1 完成（2026-10-05） |
 | 規模 | 10 genre・100 content・114 文書・1,458 ページ・QA 5,085 | 10 doctype・50 content・100 文書・657 ページ・QA 4,500 |
 | 本プロジェクトへの供給 | **基底仕様**（スキーマ・描画規約・評価ハーネス・検索評価セット・データカード・配布手順） | **コード供給元の第一候補**。`family`+`doctype`・宣言的 numbering 3 方式・`{party:}`・`head_matter`・逐条解説・lint L19–L26・verify V01–V11 を**実装済み** |
 
 keiyaku-synth は「将来 docsynth の `families/contract/` として切り出せる形を保つ」という方針で作られており、
 本プロジェクトの P0〜P1（移植とコア汎用化）の半分が契約書ドメインで先に済んでいる。
-どちらを基盤に P0 を始めるかは**人間の判断待ち**（`HITL_TODO.md` D1）で、既定は keiyaku ベース。
+どちらを基盤に P0 を始めるかは**人間の判断待ち**で、既定は keiyaku ベース。
 
 ## 状態
 
 **仕様策定済み・実装は P0 から。** 2026-10-05 に姉妹 2 本の到達点（keiyaku の 100 文書と lint L19–L26、
 yakkan の v7・検索クエリ 10 種・データカード・配布）へ仕様を追随させた。
-現在地は `docs/progress.md`、フェーズ別の詳細タスクは `docs/plan.md`、人間の判断待ちは `HITL_TODO.md`。
+現在地は `docs/progress.md`、フェーズ別の詳細タスクは `docs/plan.md`。
 
 ## ドキュメント
 
 | ファイル | 中身 |
 |---|---|
 | `CLAUDE.md` | 憲章：ハードルール・設計原則・ファミリー一覧・lint（L00–L26）・マイルストーン P0–P9 |
-| `HITL_TODO.md` | **人間の判断が要る項目**（AI が代わりに決めない）と、決まった判断の台帳 |
 | `docs/architecture.md` | コア／ファミリーの境界、姉妹からの移植方針・棚卸し表 |
 | `docs/schema.md` | 正解 JSON のデータモデル（基底仕様への差分＋姉妹が実証した拡張一覧＋statute 差分） |
 | `docs/families.md` | ファミリー定義仕様と contract / terms / regulations / statute / insurance のカタログ |
@@ -71,7 +70,7 @@ macOS では `make` 経由で `DYLD_FALLBACK_LIBRARY_PATH` が自動で付く（
 参考にした実在文書は**構造のみ**で、文章は一切引用していない。各文書末尾に架空である旨を明記する。
 **生成物は読み取り検証用のダミーであり、法的に有効な文書ではない。実務に使わないこと。**
 
-生成物（`dataset/`）の配布条件は**未決**（`HITL_TODO.md` D2）。
+生成物（`dataset/`）の配布条件は**未決**（人間の判断待ち）。
 先行例として yakkan-synth は Hugging Face Datasets ＋ GitHub Releases・**CC BY 4.0** で配っている。
 手順と注意点は `docs/distribution.md`。同梱フォントは SIL Open Font License 1.1（Noto 系）と
 IPA フォントライセンス v1.0（IPAex 系）で、いずれも再配布と埋め込みが認められている。

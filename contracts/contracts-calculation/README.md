@@ -17,7 +17,7 @@
            └─▶ 正解表（どの単位がどのルールの根拠か）
 ```
 
-設計の正本は [`DESIGN.md`](DESIGN.md)、運用規則は [`CLAUDE.md`](CLAUDE.md)。
+運用規則は [`CLAUDE.md`](CLAUDE.md)。
 
 ## 本体への依存（重要）
 
@@ -36,7 +36,7 @@
 
 ```bash
 cd contracts/contracts-calculation
-uv run --project .. python -m pytest -q     # 生成器自身のテスト（約 40 秒）
+uv run --project .. python -m pytest -q     # 生成器自身のテスト（約 90 秒）
 uv run --project .. ruff check src tests scripts
 ```
 
@@ -107,7 +107,7 @@ uv run --project .. python -m contracts_calculation.cli publish --data dataset -
 
 ## 検証
 
-生成した文書は**全ゲートを通ったものだけ**を出す（DESIGN.md §14）。
+生成した文書は**全ゲートを通ったものだけ**を出す。
 
 | | 検査 |
 |---|---|
@@ -125,7 +125,7 @@ uv run --project .. python -m contracts_calculation.cli publish --data dataset -
 ## ディレクトリ
 
 ```
-src/contracts_calculation/   # 生成器（構成は DESIGN.md §7）
+src/contracts_calculation/   # 生成器本体
 packs/                       # パラメータ候補・入力概念の語彙・祝日の固定版（JSON）
 tests/                       # 生成器自身のテスト
 examples/                    # 回帰基準の 3 文書（生成物。scripts/update_examples.py で更新）
@@ -139,12 +139,9 @@ scripts/                     # 祝日の作成・examples の更新・データ�
 
 | 文書 | 役割 |
 |---|---|
-| [`DESIGN.md`](DESIGN.md) | 設計の正本（計算仕様・演算語彙 §12.2・意味論 §12.3・パターン §8・ゲート §14） |
 | [`CLAUDE.md`](CLAUDE.md) | プロジェクト憲章。守ること（規則 1〜13）・現状・コマンド |
-| [`TASK.md`](TASK.md) | タスク台帳と進捗ログ |
-| [`HITL.md`](HITL.md) | 人間の意思決定の依頼と記録 |
-| [`PROMPT.md`](PROMPT.md) | 開発を進めるためのプロンプト集（人間が貼る） |
 | [`docs/hf_publish.md`](docs/hf_publish.md) | Hugging Face 公開形の仕様（許可リスト・公開前ゲート） |
+| [`docs/data_card.md`](docs/data_card.md) | データカードの生成仕様 |
 | [`docs/README.md`](docs/README.md) | 調査・レビュー・決定の記録の索引 |
 
 実装と文書が食い違ったら、**実装ではなく文書を先に直す**。
@@ -152,11 +149,13 @@ scripts/                     # 祝日の作成・examples の更新・データ�
 ## 現況
 
 開発フェーズ（M0〜M6）は完了し、運用モードにある。計算・判定のパターンは **K01〜K31 の 31 種**。
-v1 データセットの構成は 4 プロファイル × 20 基準契約（HITL.md HC-2 の決定）。
+生成物は用途によって 2 系統ある：**v1**（`data/<profile>/<cid>/`。4 プロファイル × 20 基準契約）と、
+Hugging Face 公開用に積んだ**100 文書セット**（`dataset/`。standard・hard・basic・challenge の混成、
+calc_seed 1〜6）。
 
-規模・内訳・品質保証・制限と偏りは、生成物側の **`<data>/data-card.md`（データカード）** を見る。
+規模・内訳・品質保証・制限と偏りは、各生成物側の **`<data>/data-card.md`（データカード）** を見る。
 データカードと説明書は実測だけから生成するので、データを足せば自動で更新される（固定文字列に統計値を
-焼き込まない）。残作業は `TASK.md` §2。
+焼き込まない）。
 
 ## 制限と注意
 
@@ -165,11 +164,12 @@ v1 データセットの構成は 4 プロファイル × 20 基準契約（HITL
 - 税率・法定利率・祝日は法令の実装ではない。契約書に書かれた値か、外部からの入力として扱う。
 - 祝日は 2026〜2033 年の固定版（`packs/calendar/holidays_jp.json`）。実行時に外部へ取りに行かない。
 - 生成の経路で LLM を呼ばない。生成は決定的である（同じ seed なら同じ出力）。
-- 生成物（契約書 JSON・PDF・仕様・正解プログラム・テスト）の**配布条件は未決**である
-  （`HITL.md` HC-3。本体の決定に従属する）。決まるまで外部配布はしない。Hugging Face 公開形は
-  組み上がっているが、`license: other`／`undecided` のままで、アップロードは人間が行う（HC-4）。
 
 ## ライセンス
 
-コードはリポジトリ直下の [`LICENSE`](../../LICENSE)（MIT）に従う。
-生成物の配布条件は上記のとおり未決である。
+コード（`src/`・`scripts/`・`tests/`）はリポジトリ直下の [`LICENSE`](../../LICENSE)（MIT）に従う。
+
+生成物（契約書 JSON・PDF・仕様・正解プログラム・テスト）の**配布条件は未決**である（本体プロジェクトの
+決定に従属する）。決まるまで外部配布はしない。Hugging Face 公開形（`publish` の出力）は組み上げ済みで
+公開前ゲートも通っているが、`license: other`／`undecided` のままカードに出力され、アップロードの実行は
+人間が行う。

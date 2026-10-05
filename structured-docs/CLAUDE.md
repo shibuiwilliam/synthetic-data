@@ -26,15 +26,14 @@
 ドメイン知識は**ファミリー**（§4）としてプラグイン化し、コアはドメイン非依存に保つ。
 
 ### 0.2 セッション開始時の手順
-1. 本ファイルを読む。次に `docs/decisions.md`（設計変更履歴）と `docs/progress.md`（進捗・次の一手）、
-   **`HITL_TODO.md`（人間の判断待ち）** を読む。計画の正本は `docs/plan.md`。
-   **`HITL_TODO.md` に未回答の項目がある場合、その判断を AI が代わりに下さない**
-   （コード基盤の切替・push・公開・配布条件・架空性や転載の最終確認など）。
-   判断待ちでも、それに依存しない作業は進めてよい。
+1. 本ファイルを読む。次に `docs/decisions.md`（設計変更履歴）と `docs/progress.md`（進捗・次の一手）を読む。
+   計画の正本は `docs/plan.md`。
+   **コード基盤の切替・push・公開・配布条件・架空性や転載の最終確認など、人間が決めるべき事項は
+   AI が代わりに決めない。** 判断待ちの事項に依存しない作業は、それを待たずに進めてよい。
 2. `uv run docsynth doctor` で環境（Python・WeasyPrint・Pango・フォント・pdfium）を確認する（P0 完了後）。
 3. 作業は §12 のフェーズ順。フェーズをまたぐ設計変更は `docs/decisions.md` に「日付／変更／理由／影響／状態」を
    追記してから行う。
-4. 終了前に `make check`（lint + pytest + manifest 鮮度 ＋ データカード鮮度）を通し、`docs/progress.md` を更新する。
+4. 終了前に `make check`（lint ＋ pytest ＋ manifest 鮮度 ＋ データカード鮮度）を通し、`docs/progress.md` を更新する。
 5. 触る領域に対応する `docs/*.md`（§0.3 の表）を着手前に読む。**読まずに実装しない。**
 
 ### 0.3 本ファイルの運用ルール
@@ -55,7 +54,6 @@
   | **生成物の配布・ライセンス表示** | **`docs/distribution.md`**（判断と実行は人間。AI は生成と検査だけ） |
   | フェーズの詳細タスク・依存 | `docs/plan.md` |
   | ファイル新規作成・配置 | `docs/repo_layout.md` |
-  | 人間の判断が要ること | **`HITL_TODO.md`** |
   | 設計変更／進捗／環境の癖 | `docs/decisions.md` `docs/progress.md` `docs/gotchas.md` |
 
 - **`@docs/...` の import は使わない**（import は launch 時に全文展開され、分割の目的が失われる。yakkan-synth 2026-09-21 確認）。参照はバッククォート付きパス表記で書く。
@@ -63,7 +61,7 @@
 - 同じ修正指示を2回受けたら、本ファイルか `.claude/rules/` に追記する。
 - 環境固有の発見は `docs/gotchas.md` に書く。**姉妹の `../insurance-contracts/docs/gotchas.md` と
   `../contracts/docs/gotchas.md` は本プロジェクトでも全項目有効**として扱う（§14）。
-- 本ファイルは**360 行／36KB 以内を目安**とする（ファミリー 5・doctype 20・lint 27 規則で §4・§8・
+- 本ファイルは**360 行／36KB 以内を目安**とする（ファミリー 5・doctype 26・lint 27 規則で §4・§8・
   §12・§15 の表が伸びるため。yakkan 240 行・keiyaku 350 行）。超えそうなら docs へ移す。
 
 ### 0.4 絶対に守ること（Hard rules）
@@ -76,7 +74,7 @@
 7. **検証は視覚でも行う**：新ファミリー・新 doctype・新スタイルの初回は必ずページ PNG を自分の目で確認する。ページ数と lint が通っても崩れていることはある（verify で検出できない欠陥が実在する。yakkan X4）。
 8. **コアにドメイン知識を入れない**：「甲・乙」「約款」「利用規約」等の語彙・番号方式・必須要素をコアのコードに直書きしない。すべて `families/` の宣言（YAML）または family フックに置く（§2-2）。
 9. **番号と当事者呼称は書かせず計算する**：「第1条」「(1)」「甲」を本文に直書きしない。`{ref:}` `{party:}` 等のトークンで書き、build が解決する（§5・L03・L19）。
-10. 秘密情報・API キーをコミットしない。ネットワーク取得は参考URLと公式パッケージのみ。**生成物を外部サービス（商用 OCR / VLM API）へ送らない**（§15。必要になったら `HITL_TODO.md` に起票）。
+10. 秘密情報・API キーをコミットしない。ネットワーク取得は参考URLと公式パッケージのみ。**生成物を外部サービス（商用 OCR / VLM API）へ送らない**（§15。方針を変える場合は人間の判断を仰ぐ）。
 
 ---
 
@@ -293,7 +291,7 @@ uv run docsynth clean --stale ; make check               # check は manifest �
 
 | フェーズ | 内容 | DoD |
 |---|---|---|
-| **P0 移植** | **`../contracts/keiyaku/` → `docsynth/`** をコピー＆改名（リネームのみ・挙動不変）。評価基盤・データカード・`.ttf` フォント・tests・scripts・`.claude/` を含む（基盤の選択は `HITL_TODO.md` D1） | `make check` が通り、smoke が keiyaku と同一出力。棚卸しを `docs/architecture.md` §5 に記録 |
+| **P0 移植** | **`../contracts/keiyaku/` → `docsynth/`** をコピー＆改名（リネームのみ・挙動不変）。評価基盤・データカード・`.ttf` フォント・tests・scripts・`.claude/` を含む（基盤の選択は人間の判断待ち） | `make check` が通り、smoke が keiyaku と同一出力。棚卸しを `docs/architecture.md` §5 に記録 |
 | **P1 コア汎用化** | family レジストリ（`contract` 固定値をレジストリに開く）、宣言的 numbering の一般化（counter kanji/iroha 含む）、semantic registry、lint の family 対応（L04/L10/L13/L16/L20 の要件をファミリー宣言から読む） | 単体テスト。numbering YAML **8 方式**（contract 3 ＋ insurance 5）が姉妹の実装と同一ラベル・同一参照解決を出す golden |
 | **P2 同等性** | insurance（yakkan の oneday・teikan）と contract（keiyaku の nda・lease・employment）を family として再生成 | `answer.json` が姉妹の生成物と一致（許容差は decisions.md）。CI に組込み |
 | **P3 contract 完成** | keiyaku の 10 doctype・3 numbering・4 style・50 content を `families/contract/` へ移し切る | 全 doctype が verify/review を通り manifest に ready |
@@ -301,7 +299,7 @@ uv run docsynth clean --stale ; make check               # check は manifest �
 | **P5 regulations** | shugyo/kitei、附則・改正履歴・別表、各 1 文書 | 同上 |
 | **P6 statute** | law/jorei、漢数字/イロハ・枝番・条範囲つき目次・関係条つき別表・公布情報、各 1 文書。**要probe 2 件（条見出し 2 行構成・漢数字ラベル幅）を先に実施** | 同上＋`docs/schema.md` §11 の設計課題を decisions で確定 |
 | **P7 データセット v1** | 自動QA・執筆QA・batch（5 ファミリー × doctype × content × 1–2 style）・export・データカード | 全文書 ready。`eval --all --oracle` 全満点。検索評価セットが V-S1〜V-S9 を通る。baseline_reader が全文書で完走 |
-| **P8 検証・硬化** | 規則ベース → VLM → 盲検読み取り → HITL（`docs/validation_plan.md` の V-A〜V-F） | `docs/evaluation.md` §8 の 6 条件。`HITL_TODO.md` の全項目に人間の決定。v1 タグ（打つのは人間） |
+| **P8 検証・硬化** | 規則ベース → VLM → 盲検読み取り → HITL（`docs/validation_plan.md` の V-A〜V-F） | `docs/evaluation.md` §8 の 6 条件。人間の判断待ち事項すべてに決定が下りている。v1 タグ（打つのは人間） |
 | **P9 拡張** | 新ファミリー追加手順の文書化検証（1 ファミリーを手順書だけで追加）、style 追加、insurance 残 8 genre、配布（`docs/distribution.md`） | 手順書 `docs/families.md` §7 のとおりに第三者（別セッション）が追加できる |
 
 各フェーズ終了時に `docs/progress.md` を更新し、次フェーズの最初の 3 タスクを書いておく。
@@ -332,11 +330,11 @@ macOS の DYLD パス等）**は本プロジェクトでも有効。** render/la
 
 ---
 
-## 15. 決定事項（経緯と仮決めは `docs/decisions.md`、人間の判断は `HITL_TODO.md`）
+## 15. 決定事項（経緯と仮決めは `docs/decisions.md`）
 
 | 項目 | 決定 | 状態 |
 |---|---|---|
-| コード基盤 | **`../contracts/keiyaku/`（keiyaku-synth）をコピーして改名**し本リポジトリで発展させる。insurance の資産は yakkan から持ち込む。両姉妹は凍結された参照実装 | **仮決め**（`HITL_TODO.md` D1） |
+| コード基盤 | **`../contracts/keiyaku/`（keiyaku-synth）をコピーして改名**し本リポジトリで発展させる。insurance の資産は yakkan から持ち込む。両姉妹は凍結された参照実装 | **仮決め**（人間の判断待ち） |
 | 正解スキーマ | 両姉妹と互換（`genre`→`family`+`doctype` 等の差分＋基底確定後の拡張。`schema_version: "2.0"`。`docs/schema.md`） | 確定 |
 | renderer | WeasyPrint 70.0 固定（姉妹の probe 実測 22 項目を継承・再実測しない） | 確定 |
 | フォント | `.ttf`（TrueType 輪郭）版を同梱（CFF は macOS Preview で不可視） | 確定 |
@@ -348,11 +346,11 @@ macOS の DYLD パス等）**は本プロジェクトでも有効。** render/la
 | 印影・手書き | 描画しない。記名押印欄は枠と「印」の文字のみ | 仮決め |
 | 様式型の選択欄 | `■`（選択）/`□`（未選択）。`☑`（U+2611）は使わない | 確定 |
 | 縦書き・ルビ・スキャン劣化 | 対象外（ルビ・縦組み見出しは yakkan が実測のうえ不採用） | 確定 |
-| v1 規模 | 5 ファミリー・20 doctype。**content を足して増やし、style を重ねて数を増やさない** | 仮決め |
+| v1 規模 | 5 ファミリー・26 doctype。**content を足して増やし、style を重ねて数を増やさない** | 仮決め |
 | `apply` QA の確定手順 | 機械検算 → 読み幅の明示 → 人間の承認（keiyaku H5 の手順） | 確定 |
 | 外部サービスへの送信 | しない（商用 OCR / VLM API を使わない） | 仮決め |
-| 生成物の配布条件 | **未決**。先例は yakkan の Hugging Face ＋ CC BY 4.0（`docs/distribution.md`） | 未決（`HITL_TODO.md` D2） |
+| 生成物の配布条件 | **未決**。先例は yakkan の Hugging Face ＋ CC BY 4.0（`docs/distribution.md`） | 未決（人間の判断待ち） |
 | Python／パッケージ管理 | Python 3.12／uv | 確定 |
 
 新たな未決事項が出たら既定値で進めたうえで `docs/decisions.md` に「仮決め」として記録する。
-**人間が決めるべきものは `HITL_TODO.md` に起票し、AI が代わりに決めない。**
+**人間が決めるべきものは明示したうえで人間の判断を待ち、AI が代わりに決めない。**

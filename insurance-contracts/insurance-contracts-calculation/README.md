@@ -9,11 +9,7 @@ G1〜G12）を全部通った文書だけを出力します。
 
 | 読むもの | 内容 |
 |---|---|
-| `DESIGN.md` | 設計の正本 |
-| `TASK.md` | 計画・残作業・**実測の現況**（§2。文書数・ケース数・ゲートの結果） |
 | `CLAUDE.md` | 守る規律（Claude Code が毎セッション読む） |
-| `HITL.md` | 人間の意思決定の依頼と記録 |
-| `PROMPT.md` | セッション用プロンプト集 |
 | `docs/` | 実測の記録（図の上限・G12 解答可能性・本体の不具合・データカードの仕様・**HF 公開の手順**） |
 
 ## 前提
@@ -29,7 +25,7 @@ cd insurance-contracts && uv sync && make doctor   # 本体の環境を整える
 ```
 
 対象は 8 種目（auto・quake・health・oneday・travel・golf・group・life）。`teikan` と `jyusetsu` は
-計算規定が無い／条を持たないため対象外である。
+計算規定が無い／条を持たないため対象外です。
 
 ## できること
 
@@ -75,9 +71,9 @@ PYTHONPATH=src uv run --project .. python -m insurance_contracts_calculation.cli
 ```
 
 出力先は `out/` でも、拡張自身の `dataset/` でもよい（どちらも git 無視）。書き込みを拒むのは
-**本体の** `dataset/` だけである（本体の `manifest check` が壊れるため）。
+**本体の** `dataset/` だけです（本体の `manifest check` が壊れるため）。
 `dataset/` の内訳は **`dataset/data-card.md`**（実測のデータカード）と `dataset/_run_report.json`
-（生成時の記録）にあり、作り方は `TASK.md` §4.1 にある。
+（生成時の記録）にあります。
 
 ```bash
 # データカード（データを足したら自動で更新される。鮮度は make check が見る）
@@ -117,12 +113,12 @@ PYTHONPATH=src uv run --project .. python -m insurance_contracts_calculation.cli
 
 ## 配布と利用
 
-- **このリポジトリに入るのは生成器・設計文書・回帰の基準 1 文書（`examples/`）だけ**です。
+- **このリポジトリに入るのは生成器（`src/`）と回帰の基準 1 文書（`examples/`）だけ**です。
   データセット本体（`out/`・`dataset/`。約 2.2GB の PDF・PNG・`layout.json`）はコミットしません
-  （`TASK.md` §4.1 のコマンドで再生成できます）。`examples/` も描画結果は持たず、比較に使う
-  `policy.json` と `calc/` だけを置いています。
-- **Hugging Face での公開を準備しています**（`HITL.md` H11）。公開用のリポジトリは
-  次のコマンドで組みます。**組むだけで、push もアップロードもしません**（実行は人の作業）。
+  （上記の `generate` / `batch` コマンドで再生成できます）。`examples/` も描画結果は持たず、
+  比較に使う `policy.json` と `calc/` だけを置いています。
+- **Hugging Face での公開を準備しています。** 公開用のリポジトリは次のコマンドで組みます。
+  **組むだけで、push もアップロードもしません**（実行は人の作業）。
   手順と確認項目は `docs/hf_publication.md` にあります。
 
   ```bash
@@ -131,6 +127,6 @@ PYTHONPATH=src uv run --project .. python -m insurance_contracts_calculation.cli
       --license cc-by-4.0 --repo-id <account>/yakkan-calc
   ```
 
-  **ライセンスは仮決め（`cc-by-4.0`）です。** 公開前に確定してください（`HITL.md` §1 の H11-a）。
+  **ライセンスは仮決め（`cc-by-4.0`）です。** 公開前に確定してください。
 - 生成したデータを評価に使うときは、正解を学習に混ぜないでください。何を渡し何を渡さないかの
-  線引きは `icc export`（`DESIGN.md` §10.3 の軸 A）が機械的に分けます。
+  線引きは `icc export` が機械的に分けます。

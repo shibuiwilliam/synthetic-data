@@ -22,19 +22,18 @@
 JSON が唯一の真実（single source of truth）であり、PDF はその決定論的な描画結果である。
 
 ### 0.2 セッション開始時の手順
-1. 本ファイルを読む。次に **`TASK.md`（`contracts/` 全体の計画と残作業の入口）**・
-   `docs/decisions.md`（設計変更履歴）・`docs/progress.md`（進捗）を読む。
-   **`HITL_TODO.md` に依頼中の項目がある場合、そこに挙がった判断を AI が代わりに下さない**
-   （コミット・公開・範囲の決めごと・架空性や転載の最終確認など）。
-   判断待ちでも、依存しない作業（`TASK.md` §2.2）は進めてよい。
+1. 本ファイルを読む。次に `docs/decisions.md`（設計変更履歴）・`docs/progress.md`（進捗）を読む。
+   **人間の判断が必要な項目（コミット・公開・範囲の決めごと・架空性や転載の最終確認など）を
+   AI が代わりに決めない。** 判断待ちの項目があっても、それに依存しない作業は進めてよい。
 2. `uv run keiyaku doctor` で環境（Python・WeasyPrint・Pango・フォント・pdfium）を確認する（P0 完了後）。
 3. 作業は §12 のフェーズ順。フェーズをまたぐ設計変更は `docs/decisions.md` に「日付／変更／理由／影響／状態」を
    追記してから行う。
 4. 終了前に `make check`（ruff + pytest + manifest 鮮度）を通し、`docs/progress.md` を更新する。
-5. 触る領域に対応する `docs/*.md`（§0.3 の表）を着手前に読む。**読まずに実装しない。**
+5. 触る領域の docs（§0.3 の表）を着手前に読む。
 
 ### 0.3 本ファイルの運用ルール
-- 詳細仕様は `docs/` に分割してある。**該当領域を触る作業では、着手前に必ず対応する docs を読む。**
+- 詳細仕様は `docs/` に分割してある。**該当領域を触る作業では、着手前に必ず対応する docs を読む。
+  読まずに実装しない。**
 
   | 触るもの | 先に読む |
   |---|---|
@@ -48,8 +47,6 @@ JSON が唯一の真実（single source of truth）であり、PDF はその決�
   | データセットの検証・硬化（読み取り検証・HITL） | `docs/validation_plan.md` |
   | **データカード（`dataset/data-card.md`）の生成・節の追加** | **`docs/data_card.md`** |
   | **データセットの公開（Hugging Face）・`keiyaku/publish.py`・`specs/publish.yaml`** | **`docs/publishing.md`** |
-  | **何を次にやるか・残作業の状態** | **`TASK.md`**（`contracts/` 全体。サブプロジェクトの細目は `contracts-calculation/TASK.md`） |
-  | **人間の判断が要ること** | **`HITL_TODO.md`**（依頼・記録・管理。サブ固有は `contracts-calculation/HITL.md`） |
   | フェーズの詳細タスク・依存 | `docs/plan.md` |
   | lint ルールの実装位置・検査ロジック | `docs/lint_rules.md` |
   | ファイル新規作成・配置 | `docs/repo_layout.md` |
@@ -58,15 +55,13 @@ JSON が唯一の真実（single source of truth）であり、PDF はその決�
 - **`@docs/...` の import は使わない。** import されたファイルは launch 時に全文がコンテキストへ展開され、
   分割の目的（毎セッションのコンテキスト削減）が失われる（yakkan-synth 2026-09-21 に公式ドキュメントで確認）。
   参照は必ずバッククォート付きのパス表記で書く。
-- 開発を進めるための指示文（フェーズ別・デバッグ別・サブエージェント用）は `PROMPT.md` にある。
-  **人間が貼るものなので本ファイルから import せず、参照だけにとどめる。**
 - 小さな恒常ルールは `.claude/rules/*.md` に置き、frontmatter の `paths:` で対象を限定する。
 - 同じ修正指示を2回受けたら、その内容を本ファイルか `.claude/rules/` に追記する。
 - 環境固有の発見（ライブラリの癖、コマンドの落とし穴）は auto memory に任せず `docs/gotchas.md` に書く。
   **`../insurance-contracts/docs/gotchas.md` の全項目は本プロジェクトでも有効**として扱う（§14）。
 - 本ファイルは **350 行／35KB 以内を目安**とする（yakkan 240 行・28KB、docsynth 288 行・27KB。本プロジェクトは
   doctype が 10 種あり §4・§8・§15 の表が長い）。超えそうなら docs へ移す。ただし §0・§2・§8・§12・§15 は
-  要約せずに残す。**現状は 390 行・36KB で目安を超えている**（`docs/decisions.md` 26）。
+  要約せずに残す。**現状は 398 行・37KB で目安を超えている**（`docs/decisions.md` 26）。
   次に足すときは §8 の lint 表を `docs/lint_rules.md` へ全面移送して戻す。
 
 ### 0.4 絶対に守ること（Hard rules）
@@ -107,8 +102,9 @@ JSON が唯一の真実（single source of truth）であり、PDF はその決�
 （passages/queries/qrels）・`dataset/README.md`（読み方 ＝ **Hugging Face のデータセットカード**。
 frontmatter つき）・`dataset/views/*.jsonl`（Viewer 用の平らな射影）・`dataset/licenses/`・
 `dataset/SHA256SUMS`（以上は `keiyaku publish` の生成物。`docs/publishing.md`）・**`dataset/data-card.md`**
-（データカード＝規模・内訳・作り方・品質保証・制限と偏り・ライセンス）。**後 2 つは export が
-実測値を埋め込んで生成する**——固定文字列に統計値を焼き込まない（`docs/data_card.md`）。
+（データカード＝規模・内訳・作り方・品質保証・制限と偏り・ライセンス）。**`dataset/README.md` と
+`dataset/data-card.md` は export が実測値を埋め込んで生成する**——固定文字列に統計値を
+焼き込まない（`docs/data_card.md`）。
 
 ### 1.2 制約と非目標（v1）
 - 日本語横書きのみ。生成は Claude Code セッション内で完結（骨組み・検証・描画は Python、本文の執筆は Claude）。
@@ -338,7 +334,7 @@ uv run keiyaku clean --stale ; make check          # check は manifest とデ�
 | **P4 別紙・目録型** | `purchase` `lease`（頭書）`license`（実施料表）：blueprint と各 1 文書。`head_matter` の描画確定 | 3 文書 ready。頭書 ↔ 本文の値が `{const:}`（L11）で縛れている |
 | **P5 様式型・長文型** | `employment`（`contract-form`）`contracting`（約款型）`sysdev`（基本＋個別）：各 1 文書。`commentary` 実装 | 3 文書 ready。条なし・目次なし文書で verify がスキップを明記して通る |
 | **P6 データセット v1** | 各 doctype の 2〜3 本目・`specs/batch_v1.yaml`（≈ **40–60 文書**）・自動QA・執筆QA・export | 全文書 ready。`eval --all --oracle` 全満点。`baseline_reader` が全文書で完走 |
-| **P7 検証・硬化** | 規則ベース → VLM → 盲検読み取り → HITL（`docs/validation_plan.md`） | `docs/evaluation.md` §6 の 5 条件。`HITL_TODO.md` の全項目に人間の決定。~~v1 タグ~~（H9 で「タグは打たない」と決定） |
+| **P7 検証・硬化** | 規則ベース → VLM → 盲検読み取り → HITL（`docs/validation_plan.md`） | `docs/evaluation.md` §6 の 5 条件。人間の判断が必要な残項目がすべて解消していること。~~v1 タグ~~（タグは打たないと決定済み） |
 | **P8 拡張** | A3 縦 style・2 段組・doctype 追加（保証・代理店・フランチャイズ 等）・docsynth への切り出し検討 | 各機能に verify とテスト |
 
 各フェーズ終了時に `docs/progress.md` を更新し、次フェーズの最初の 3 タスクを書いておく。
@@ -386,17 +382,17 @@ render / layout / verify を触る前に必ず読む。とくに：
 | 番号方式 | `contract-standard` と `contract-form` の 2 方式 | 仮決め |
 | ページ上限 | doctype ごと（既定 12・絶対上限 20）。§4 の目標ページ | 仮決め |
 | v1 規模 | 10 doctype × 2–3 content × 1–2 style ≈ 40–60 文書（2026-09-28 に 41 文書で達成） | 確定 |
-| 拡張後の規模 | **10 doctype × 5 content × 1〜2 style ＝ 100 文書**（2026-10-05。H10 の決定。`docs/decisions.md` 143）。**style を重ねて数を増やさず content を足す**——同系の style を重ねてもレイアウト頑健性の検証にならない（`docs/doctypes.md` §7） | 確定 |
+| 拡張後の規模 | **10 doctype × 5 content × 1〜2 style ＝ 100 文書**（2026-10-05。`docs/decisions.md` 143）。**style を重ねて数を増やさず content を足す**——同系の style を重ねてもレイアウト頑健性の検証にならない（`docs/doctypes.md` §7） | 確定 |
 | 執筆 QA の配分 | 15 問／表 3・図 2・apply 2 以上（契約書は図が少ないため yakkan の「図 3」を 2 に下げ、`apply` を 2 に上げる） | 仮決め |
 | 法令引用 | 実在法令・裁判所・官公庁は名称のみ。**法令の条番号は書かない** | 仮決め |
 | 印影・手書き・収入印紙 | 印影画像と手書きは描画しない。記名押印欄は枠と「印」、収入印紙欄は枠と文字のみ | 仮決め |
 | 縦書き・ルビ・スキャン劣化 | 対象外（yakkan が実測のうえ不採用） | 確定 |
 | `samples/` の扱い | リポジトリにコミットしない（`.gitignore`）。`samples/SOURCES.md` だけ残す | 確定 |
-| リポジトリへの記録 | **`contracts/` 本体を AI がコミットする**（2026-10-05・H9。`contracts-calculation/` は含めず別扱い。**タグは打たない**）。追跡の対象・非対象は `docs/repo_layout.md` | 確定 |
+| リポジトリへの記録 | **`contracts/` 本体を AI がコミットする**（2026-10-05。`contracts-calculation/` は含めず別扱い。**タグは打たない**）。追跡の対象・非対象は `docs/repo_layout.md` | 確定 |
 | `content/`・`specs/` のコミット | **コミットしない**（2026-10-05・ユーザー指示。`docs/decisions.md` 152）。公開後の第三者は独自に生成する前提 | 確定 |
-| ライセンス | 同梱フォントは OFL 1.1 / IPA FL v1.0（再配布可）。**コードの宣言（`pyproject.toml` の `Proprietary`）が親リポジトリの `LICENSE`（MIT）と食い違っている**。生成物の配布条件とあわせて **H13** で決める | 未決 |
-| データセットの公開先 | **Hugging Face Hub**（`specs/publish.yaml` が宣言。2026-10-05 のユーザー指示。アカウント `cvusk`）。`dataset/` をそのまま上げられる形に `keiyaku publish` が整える（`docs/publishing.md`）。**リポジトリ名・可視性・実行者は H15**、**名義は H16** | 準備完了・公開は未実施 |
-| 生成物の配布条件 | **未決（H13）**。`specs/publish.yaml` の `license.id` が `undecided` のあいだ、カードは「未決」と書き frontmatter に `license` を出さず、`scripts/upload_hf.py` は**アップロードを拒否する** | 未決 |
+| ライセンス | 同梱フォントは OFL 1.1 / IPA FL v1.0（再配布可）。**コードの宣言（`pyproject.toml` の `Proprietary`）が親リポジトリの `LICENSE`（MIT）と食い違っている**。生成物の配布条件とあわせて決める | 未決 |
+| データセットの公開先 | **Hugging Face Hub**（`specs/publish.yaml` が宣言。2026-10-05 のユーザー指示。アカウント `cvusk`）。`dataset/` をそのまま上げられる形に `keiyaku publish` が整える（`docs/publishing.md`）。**リポジトリ名・可視性・実行者、および公開時の名義は未決** | 準備完了・公開は未実施 |
+| 生成物の配布条件 | **未決**。`specs/publish.yaml` の `license.id` が `undecided` のあいだ、カードは「未決」と書き frontmatter に `license` を出さず、`scripts/upload_hf.py` は**アップロードを拒否する** | 未決 |
 | Python／パッケージ管理 | Python 3.12 ／ uv | 確定 |
 
 新たな未決事項が出たら**既定値で進めたうえで** `docs/decisions.md` に「仮決め」として記録する。

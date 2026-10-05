@@ -7,8 +7,8 @@
 - 1 文書 20 ページ以下。テキスト・章節項構造・表・図・参照関係・QA を正解として持つ。
 - 仕様は `CLAUDE.md`（憲章）と `docs/`（詳細）。**実装と食い違ったら仕様側を先に直す。**
 
-現況（`dataset_version: v7`）：**10 ジャンル・100 content・114 データセット**
-（うち `ready` 113／`failed` 1）・**1,458 ページ**・QA 5,085 問。
+現況（`dataset_version: v7`）：**10 ジャンル・100 content・113 データセット**
+（`ready` 113／`failed` 0）・**1,437 ページ**・QA 5,085 問。
 素性（規模・内訳・検証結果・制限と偏り）は生成物側の **`dataset/data-card.md`** を最初に読む。
 
 ## セットアップ
@@ -46,11 +46,10 @@ DYLD_FALLBACK_LIBRARY_PATH=/opt/homebrew/lib uv run yakkan doctor
 | `docs/` | 詳細仕様（schema / rendering / style_guide / blueprints / repo_layout）と運用ログ（decisions / progress / gotchas） |
 | `yakkan/` | Python パッケージ（モデル・番号付け・描画・レイアウト抽出・検証・QA・CLI） |
 | `blueprints/` `styles/` `library/` | ジャンル定義・スタイル・条文ライブラリ（宣言） |
-| `content/<content_id>/` | 執筆成果（コミットする） |
-| `specs/batch_*.yaml` | 生成バッチの定義（content × style × seed）。`dataset/` はここから再生成する |
+| `content/<content_id>/` | 執筆成果（コミットしない。`blueprints/` から `scaffold`→執筆で再生成する） |
+| `specs/batch_*.yaml` | 生成バッチの定義（content × style × seed）。コミットしない。`dataset/` はここから再生成する |
 | `dataset/<doc_id>/` | 生成物（コミットしない。`specs/` から再生成する。**手編集禁止**） |
 | `assets/fonts/` | 同梱フォント（OFL / IPA ライセンス。出典は `SOURCES.md`） |
-| `TASK.md` | 人間の判断・作業を待っている項目の一覧（AI は未回答の判断を代わりに下さない） |
 | `insurance-contracts-calculation/` | 計算・判定の規定とその正解プログラムを足す**別プロジェクト**。本体とは独立に扱う |
 
 配置の正本は `docs/repo_layout.md`。新しいファイルを置く前にそちらを読む。
@@ -234,7 +233,7 @@ uv run yakkan eval --search-run run.json               # 検索の採点
 
 - **コード・仕様・執筆成果（`yakkan/` `docs/` `content/` ほか）**：親リポジトリの `LICENSE`（MIT）。
 - **同梱フォント**：OFL / IPA フォントライセンス。出典・版・SHA256 は `assets/fonts/SOURCES.md`。
-- **生成データセット（`dataset/`）**：**CC BY 4.0**（`TASK.md` T11・2026-10-05 決定）。
+- **生成データセット（`dataset/`）**：**CC BY 4.0**（2026-10-05 決定）。
   本文と帰属の書き方は `dataset/LICENSE`。配布先は Hugging Face Datasets
   `cvusk/synthetic-japanese-insurance-documents`（控えを GitHub Releases）。
   手順は **`docs/distribution.md`**。

@@ -10,7 +10,7 @@
 「本物そっくりだが完全に架空の日本語保険約款」を **正解JSON → PDF** の順で生成し、ドキュメント読み取り（テキスト／章節項構造／表／図の構造と意味）の開発検証用データセットを作る。1文書 **20ページ以下**。JSON が唯一の真実（single source of truth）であり、PDF はその決定論的な描画結果である。
 
 ### 0.2 セッション開始時の手順
-1. 本ファイルを読む。次に `TASK.md`（判断待ちの一覧）・`docs/decisions.md`（設計変更履歴）・`docs/progress.md`（進捗・次の一手）を読む。存在しなければ §12 の P0 から着手する。**`TASK.md` / `HITL_TODO.md` に人間待ちの項目がある場合、そこに挙がった判断を AI が代わりに下さない**（push・公開・コミット範囲・評価仕様の変更・架空性や転載の最終確認など）。判断待ちでも `TASK.md` §2 の作業は進めてよい。
+1. 本ファイルを読む。次に `docs/decisions.md`（設計変更履歴）・`docs/progress.md`（進捗・次の一手）を読む。存在しなければ §12 の P0 から着手する。**人間の判断を待っている項目（push・公開・コミット範囲・評価仕様の変更・架空性や転載の最終確認など）については、その判断を AI が代わりに下さない。** 判断待ちの対象外の作業は進めてよい。
 2. `uv run yakkan doctor` で環境（Python・WeasyPrint・フォント・poppler）を確認する（P0 完了後）。
 3. 作業は §12 のフェーズ順。フェーズをまたぐ設計変更は `docs/decisions.md` に「日付／変更／理由／影響」を追記してから行う。
 4. 終了前に `make check`（lint + pytest）を通し、`docs/progress.md` を更新する。
@@ -25,7 +25,7 @@
   | `yakkan/render/` `layout/` `verify/` `numbering.py` `styles/css/` | `docs/rendering.md` |
   | `content/` の執筆・`library/clauses/`・QA 執筆 | `docs/style_guide.md` ＋ `docs/authoring_checklist.md` |
   | `blueprints/` `styles/` `yakkan/scaffold.py` `compose.py` | `docs/blueprints.md` |
-  | 構造分析・参考URL の扱い | `docs/reference_structures.md` |
+  | 構造分析・参考URL の扱い | `docs/reference_structures.md`（URL一覧は `docs/reference_urls.md`、ローカルのみ） |
   | ファイル新規作成・配置 | `docs/repo_layout.md` |
   | 評価ハーネス・予測 JSON の形 | `docs/evaluation.md` ＋ `docs/eval_dataset_plan.md` |
   | `yakkan/search_set.py`・検索クエリと qrels の生成 | `docs/search_query_plan.md`（実施計画）＋ `docs/search_query_design.md`（設計）＋ `docs/evaluation.md` §2 |
@@ -78,7 +78,7 @@
 - **C 表**：定義表／保険金一覧（算式入り）／免責列挙／等級表／プラン比較マトリクス／2段ヘッダ　**D 図**：構成ツリー／対応ステップ／受取りまでの流れ／タイムライン／手続きフロー
 - **E 装飾**：2段組、左右異ヘッダ、丸数字・記号、囲み注意書き、商品名バッジ　**F 体裁**：F1素組み／F2標準／F3解説冊子。**生成ではF1とF2のみ再現し、F3のイラストは作らない**
 
-参考URLの一覧・**転載禁止**の運用・分析ログは `docs/reference_structures.md` §3.2。読んでよいのは構造把握のためだけで、文章はメモにも残さない（§0.4-1）。
+参考URLの一覧は `docs/reference_urls.md`（ローカルのみ・`.gitignore` 対象）、**転載禁止**の運用・分析ログは `docs/reference_structures.md` §3.2。読んでよいのは構造把握のためだけで、文章はメモにも残さない（§0.4-1）。
 
 ## 4. ジャンル定義と設計図（blueprint）
 
@@ -87,11 +87,11 @@
 | genre | 名称 | 目標ページ | 段組（既定） | 番号方式 | 文体 |
 |---|---|---|---|---|---|
 | `auto` | 総合自動車保険 約款（しおり抜粋付き） | 14–20 | 2段 | nonlife | 敬体 |
-| `oneday` | 1日型自動車保険 約款 | 8–12 | 1段/2段 | nonlife | 敬体 |
+| `oneday` | 1日型自動車保険 約款 | 8–14 | 1段/2段 | nonlife | 敬体 |
 | `quake` | 地震保険 約款 | 10–14 | 2段 | nonlife | 敬体 |
 | `health` | 傷害・疾病保険（からだの保険）約款 | 14–20 | 2段 | nonlife | 敬体 |
 | `life` | 生命保険 ご契約のしおり＋約款 | 16–20 | 1段 | life | 敬体 |
-| `teikan` | 保険会社 定款 | 6–10 | 1段 | teikan | 常体 |
+| `teikan` | 保険会社 定款 | 8–13 | 1段 | teikan | 常体 |
 | `travel` | 海外旅行保険 約款 | 10–16 | 1段/2段 | nonlife | 敬体 |
 | `golf` | 賠償責任保険 約款集（ゴルファー保険） | 12–18 | 2段（横長小型判） | nonlife | 敬体 |
 | `group` | 団体保険 普通保険約款＋特約条項 | 12–18 | 1段／横向きA4 2段 | group | 敬体 |
@@ -226,7 +226,7 @@ uv run pytest -q ; uv run ruff check . ; make check
 
 ## 15. 決定事項（確定）
 
-- データセット規模：**10ジャンル × 10 content = 100 content**を 13 スタイルで描き 114 文書（ready 113 / failed 1・1,458ページ・QA 5,085問・`dataset_version: v7`）。一部の content を複数スタイルで描いてレイアウト頑健性の対を作る。当初の計画値は「7ジャンル × 3 content ≈ 30 文書」で、P5 以降に段階的に拡張した（`docs/progress.md` のセッション記録）。実測は `dataset/data-card.md`
+- データセット規模：**10ジャンル × 10 content = 100 content**を 13 スタイルで描き 113 文書（ready 113 / failed 0・1,437ページ・QA 5,085問・`dataset_version: v7`）。一部の content を複数スタイルで描いてレイアウト頑健性の対を作る。当初の計画値は「7ジャンル × 3 content ≈ 30 文書」で、P5 以降に段階的に拡張した（`docs/progress.md` のセッション記録）。実測は `dataset/data-card.md`
 - `travel` の題材：海外旅行保険（参考URL #5 の実物で確認済み）
 - 縦書き：v1対象外。P6で表見出しの回転のみ
 - ルビ：作らない（`scripts/probe_ruby.py` で実測。ルビとして組まれず読みがテキスト層に混ざる）
@@ -234,7 +234,7 @@ uv run pytest -q ; uv run ruff check . ; make check
 - PDFのタグ付け（tagged PDF）：作らない
 - QAの言語・件数：日本語、自動生成30問＋執筆15問／文書
 - 正解bboxの座標系：pt・原点左上を主とし、正規化[0,1]を併記
-- 配布形式：`dataset/` ディレクトリ ＋ `manifest.json`。**配布先は Hugging Face Datasets `cvusk/synthetic-japanese-insurance-documents`（控えを GitHub Releases）。ライセンスは CC BY 4.0**（`TASK.md` T7・T11・2026-10-05 決定）。手順は `docs/distribution.md`
+- 配布形式：`dataset/` ディレクトリ ＋ `manifest.json`。**配布先は Hugging Face Datasets `cvusk/synthetic-japanese-insurance-documents`（控えを GitHub Releases）。ライセンスは CC BY 4.0**（2026-10-05 決定）。手順は `docs/distribution.md`
 - 実在法令：法令名のみ引用し、条番号は書かない
 - Python／パッケージ管理：Python 3.12／uv
 

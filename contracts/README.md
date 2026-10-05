@@ -40,7 +40,7 @@
 全文書が verify・qa とも error 0。規則ベース読み取り・VLM・**構築経緯を知らない盲検エージェント 5 本**まで
 検証済み（`docs/validation_plan.md` の V-A〜V-F）。
 
-現況の要約は `CURRENT_STATUS.md`、**残作業と計画は `TASK.md`**、詳しい経緯は `docs/progress.md`。
+進捗の詳しい経緯は `docs/progress.md`。
 
 `dataset/` は生成物なのでリポジトリに入れていない。下の手順で再生成する。
 
@@ -98,9 +98,6 @@ uv run keiyaku eval --all --oracle          # 全文書・全指標が満点に�
 | ファイル | 中身 |
 |---|---|
 | `CLAUDE.md` | **プロジェクト憲章**：ハードルール・設計原則・doctype 一覧・lint（L00–L26）・マイルストーン P0–P8 |
-| `TASK.md` | **計画と残作業の入口**（本体＋サブプロジェクト `contracts-calculation/`） |
-| `CURRENT_STATUS.md` | ある時点の状況報告（規模・品質・フェーズ・読むときの注意） |
-| `PROMPT.md` | **開発プロンプト集**：フェーズ別・デバッグ別の指示文 48 本＋サブエージェント用プロンプト |
 | `docs/architecture.md` | yakkan からの移植方針・モジュール棚卸し表・コアと宣言の境界 |
 | `docs/schema.md` | 正解 JSON のデータモデル（yakkan 基底仕様への差分＋契約書の追加要素） |
 | `docs/doctypes.md` | 10 doctype のカタログ（必須要素・variants）・番号方式・style プリセット |
@@ -116,7 +113,6 @@ uv run keiyaku eval --all --oracle          # 全文書・全指標が満点に�
 | `docs/lint_rules.md` | lint 各ルールの実装位置と検査ロジック |
 | `docs/repo_layout.md` | ディレクトリ構成と運用ルール |
 | `docs/decisions.md` `progress.md` `gotchas.md` | 運用ログ（設計変更履歴／進捗／環境の癖） |
-| `HITL_TODO.md` | **人間の判断が要る項目**（AI が代わりに決めない）と、決まった判断の台帳 |
 
 ## データセットの読み方
 
@@ -154,7 +150,7 @@ uv run python scripts/upload_hf.py             # 何が上がるかを数える�
 ```
 
 公開先・名義・除外などの**決定は `specs/publish.yaml`**（`specs/` で唯一コミットするファイル）。
-**配布条件（ライセンス）が未決のあいだアップロードは拒否される**（下記・`HITL_TODO.md` H13）。
+**配布条件（ライセンス）が未決のあいだアップロードは拒否される**（下記を参照）。
 仕様は `docs/publishing.md`。
 
 ## 参考サンプル（`samples/`）
@@ -178,7 +174,7 @@ uv run python scripts/upload_hf.py             # 何が上がるかを数える�
 - **同梱フォント**（`assets/fonts/`）：SIL Open Font License 1.1（Noto 系）と
   IPA フォントライセンス v1.0（IPAex 系）。いずれも再配布と埋め込みが認められている。
   出典・版・SHA256 は `assets/fonts/SOURCES.md`。
-- **生成物**（`dataset/` の PDF・JSON・PNG）の配布条件は**未決**（`HITL_TODO.md` H13）。
+- **生成物**（`dataset/` の PDF・JSON・PNG）の配布条件は**未決**。
   決まるまで外部配布しない。公開（Hugging Face）の準備は済んでいるが、
   `specs/publish.yaml` の `license.id` が `undecided` のあいだ、カードは「未決」と表示し、
   frontmatter に `license` を出さず、`scripts/upload_hf.py` は**アップロードを拒否する**。
