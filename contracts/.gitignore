@@ -41,6 +41,9 @@ __pycache__/
 HITL_TODO.md
 HITL_apply_review.md
 
+# 計画と残作業の管理。内部向けの進行管理なので公開しない（2026-10-05 にユーザーの判断で追跡を外した）。
+TASK.md
+
 # 作業指示用のプロンプト。内部向けなので公開しない
 PROMPT.md
 
