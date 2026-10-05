@@ -1,0 +1,142 @@
+# ライセンス契約書（docs/doctypes.md §4.3）。
+# 参考：samples/license/（INPIT 特許実施許諾・特許ノウハウ・商標使用許諾、特許庁モデル契約）。
+# **構造だけを参考にし、文章はすべて書き下ろす**（CLAUDE.md §0.4-1）。
+#
+# 骨格：条文型＋別表 2 点。P1（docs/reference_structures.md §4 の #7）で確かめた実物の特徴：
+#   - 実施料は**一時金＋ランニング**の二本立てで、ランニングは**売上区分 × 料率**の階層表になる（CT9）。
+#   - 対象権利は別表に「登録番号 × 名称 × 出願日」で並べる。**登録番号は架空にする**（CLAUDE.md §0.4-2）。
+#   - 逐条解説つきの実物が 2 件あるが、`commentary` は P5 の variant で試す（本 blueprint では扱わない）。
+#   - 敬体の実物が 2 件あった（decisions 63）。`tone` の実装は P4 の範囲外なので v1 は常体で書く。
+doctype: license
+family: contract
+description: 特許の実施許諾契約書。条文型＋別表 2 点（対象権利・実施料）
+target_pages: [6, 12]
+page_limit: 14
+numbering_scheme: contract-standard
+default_style: ct-a4-1col-mincho
+skeleton_kind: articles
+front_matter: { cover: false, toc: false }
+
+parties:
+  count: [2, 2]
+  presets:
+    - - { key: licensor,  alias: 甲, role_label: 許諾者 }
+      - { key: licensee,  alias: 乙, role_label: 実施権者 }
+    - - { key: holder, alias: 甲, role_label: 甲 }
+      - { key: user,   alias: 乙, role_label: 乙 }
+
+required:
+  - { kind: node, subtype: preamble,  min_count: 1 }
+  - { kind: node, subtype: signature, min_count: 1 }
+  - { kind: node, subtype: appendix,  min_count: 2, note: "別表 2 点（対象権利・実施料）" }
+  - { kind: table, min_count: 2, min_rows: 4, note: "対象権利の表と料率表（型は執筆者が決める）" }
+  - { kind: enumeration, min_count: 2, min_items: 3, note: "許諾の範囲・解除事由などの列挙" }
+  - { kind: figure, min_count: 1, note: "報告から支払までのサイクル（種別は執筆者が決める）" }
+  - { kind: ref, min_count: 10, note: "条項間参照＋別表への参照" }
+  - { kind: term, min_count: 5 }
+
+skeleton:
+  - id: pre
+    kind: preamble
+    chars: 200
+    todo: "{party:...|full} で両当事者を導入し、何の実施を許諾するかを 1 文で述べる"
+  - id: a1
+    kind: article
+    title_options: ["定義"]
+    chars: 600
+    todo: "対象権利・実施品・正味販売価格・改良発明 など、算定に効く語を定義する"
+  - id: a2
+    kind: article
+    title_options: ["実施権の許諾", "許諾"]
+    chars: 700
+    todo: "**地域・期間・態様・独占/非独占**を書き分ける。対象権利は {ref:sch1} に委ねる"
+  - id: a3
+    kind: article
+    title_options: ["実施料"]
+    chars: 700
+    todo: "一時金とランニングの二本立て。料率は {ref:sch2} に委ね、本文は算定の基礎を書く"
+  - id: a4
+    kind: article
+    title_options: ["報告および支払", "実施報告"]
+    chars: 700
+    todo: "報告の頻度・期限・記載事項と、支払の期日。図でも示す"
+    required: [{ kind: figure, min_count: 1 }]
+  - id: a5
+    kind: article
+    title_options: ["帳簿および監査", "監査"]
+    chars: 500
+    todo: "帳簿の保存期間と、監査の申入れ・費用の負担（差異が出たときの扱い）"
+  - id: a6
+    kind: article
+    title_options: ["改良発明の取扱い", "改良発明"]
+    chars: 500
+    todo: "どちらが行った改良かで分け、通知義務と実施の可否を書く"
+  - id: a7
+    kind: article
+    title_options: ["保証および非保証", "保証"]
+    chars: 500
+    todo: "**第三者の権利を侵害しないことは保証しない**旨を明記する（この doctype 固有）"
+  - id: a8
+    kind: article
+    title_options: ["権利の維持および不争", "権利の維持"]
+    chars: 500
+    todo: "年金の負担と、実施権者が権利の有効性を争わない義務"
+  - id: a9
+    kind: article
+    title_options: ["契約期間"]
+    chars: 400
+  - id: a10
+    kind: article
+    title_options: ["解除"]
+    chars: 500
+  - id: a11
+    kind: article
+    title_options: ["契約終了後の措置", "終了後の在庫"]
+    chars: 500
+    todo: "在庫の販売を認める期間と、その間の実施料の扱い"
+  - id: a12
+    kind: article
+    title_options: ["協議"]
+    chars: 220
+    clause: consultation
+  - id: a13
+    kind: article
+    title_options: ["合意管轄"]
+    chars: 220
+    clause: jurisdiction
+
+appendices:
+  - id: sch1
+    title_options: ["対象権利の表示", "対象となる特許権"]
+    kind_label: 別表
+    min_rows: 4
+    min_cols: 3
+    todo: "登録番号 × 名称 × 出願日。**登録番号は架空**にする（実在の番号を書かない）"
+  - id: sch2
+    title_options: ["実施料の料率", "実施料"]
+    kind_label: 別表
+    min_rows: 4
+    min_cols: 2
+    todo: "売上区分 × 料率の階層表。本文の一時金と噛み合わせる（L11）"
+
+riders: { count: [0, 0], pool: [] }
+
+authored_qa: { count: 15, table_min: 3, figure_min: 2, apply_min: 2 }
+
+closing_options:
+  - "本契約の成立を証するため、本書{copies}通を作成し、{parties}が記名押印のうえ、各１通を保有する。"
+
+variants:
+  # 逐条解説つきの版（CT13・CT21）。実物の INPIT／特許庁のモデル契約がこの形。
+  # 解説は `commentary` ブロックで条または項に付ける（docs/schema.md §11.3）。
+  commentary: { "false": 0.7, "true": 0.3 }
+  digit_style: { fullwidth: 0.5, halfwidth: 0.5 }
+  era: { seireki: 0.9, wareki: 0.1 }
+  parties_preset: [0, 1]
+  copies: { "2": 0.95, "1": 0.05 }
+  stamp_duty: { "true": 0.5, "false": 0.5 }
+  # **2 style 目は版面が最も遠いものを選ぶ**（docs/doctypes.md §7）。
+  # `gothic` は mincho と同系（A4 1 段・無装飾）なので組にしない。
+  styles: [ct-a4-1col-mincho, ct-a4-1col-form, ct-a4-1col-gothic]
+
+budget: { chars_min: 5500, chars_max: 12000, footnotes_min: 0 }

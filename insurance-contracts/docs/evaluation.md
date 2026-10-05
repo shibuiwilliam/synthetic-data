@@ -16,7 +16,7 @@
 | bbox（画像からの位置あわせ） | `layout.elements[].fragments[].bbox` | IoU 平均 ／ IoU≥0.5 の当たり率 |
 | 読み順 | `layout.pages[].reading_order` | Kendall の τ |
 | QA | `qa.json` | 完全一致 ／ 部分一致 |
-| 検索 | `dataset/search/{passages,queries,qrels}.jsonl` | nDCG@k ／ Recall@k ／ MRR |
+| 検索 | `dataset/search/{passages,queries,qrels}.jsonl` | nDCG@k ／ Recall@k ／ `exact_recall@k` ／ `r_precision` ／ MRR ／ `doc@1` ／ `confusion@k` ／ `false_positive_rate` |
 
 **突合はすべて中身で行う。** 予測に我々の内部 id は無い前提なので、
 テキストの正規化一致（NFKC ＋ 空白除去）、見出しは `(label, title)`、
@@ -104,36 +104,71 @@ uv run yakkan eval dataset/auto-0001--nl-a4-2col-mincho --pred pred.json --out s
 | `citation` | 「第2章 第1条」。**構造で絞り込む検索の評価に使う** |
 | `text` | 登録する本文（表は行ごとに平文化、図は alt ＋ facts ＋ 経路） |
 | `element_ids` / `pages` | 元の要素とページ（ハイライト・出典表示の検証用） |
+| `context_header` | 「〈商品名〉／〈発行者〉／〈citation〉」の 1 行。**索引に前置するかは利用者の選択** |
 
 **コーパスは content ごとに 1 スタイル**だけを採る。同じ内容を別スタイルで描いた文書は
 本文が同一で、検索評価では重複ノイズにしかならないため。
 
+**`definition` は定義表（`semantic_type: definitions`）の 1 行**である。
+`source.json` の `defined_terms` は `{term:}` 解決用のメタデータで**紙面に描画されていない**ので、
+パッセージにしない（紙面に存在しない正解を作らないため。`outline` から紙面に出ない節点を
+外した `docs/remaining_issues.md` T7 と同じ方針）。定義表そのものは `table` として別に出ているので、
+**同じ定義文が `definition`（行）と `table`（表全体）の 2 つの粒度で引ける**。
+`term` クエリでは行が grade 2、表が grade 1 になる。
+
 ### クエリと qrels
 
-`queries.jsonl`（`query_id` / `kind` / `query` / `note` / `n_relevant` / `n_exact` /
-`n_related` / `n_related_total` / `related_truncated`）と
-`qrels.jsonl`（`query_id` / `passage_id` / `grade`）。**grade は 2＝答えがそこにある、1＝関連する。**
-qrels に無い組み合わせは 0（非適合）。
+`queries.jsonl` と `qrels.jsonl`（`query_id` / `passage_id` / `grade`）。
+**grade は 2＝答えがそこにある、1＝関連する。** qrels に無い組み合わせは 0（非適合）。
+
+| フィールド | 意味 |
+|---|---|
+| `query_id` | `q_<kind>_<生成キーのハッシュ>`。**content が増えても変わらない**（旧版の通し番号との対応は `id_map.json`） |
+| `kind` | 下表の 10 種 |
+| `query` | 検索器に渡すクエリ文 |
+| `filters` | 構造化した絞り込み条件（`issuer` / `product_name` / `genre`）。**空でなければクエリの一部** |
+| `facet_in_text` | 絞り込みの手がかりがクエリ文そのものに入っているか |
+| `relevance_rule` | この gold がどの規則で作られたか（何を返せばよいかが読めるように） |
+| `hard_negatives` | **字面は一致するが非適合**なパッセージ（他商品の同名条など）。grade は 0 |
+| `n_relevant` / `n_exact` / `n_related` / `n_related_total` / `related_truncated` | 適合の件数と打ち切りの印 |
+
+**`filters` はクエリの一部である。** 同じ文言でも `filters` が違えば別のクエリとして採点する
+（「「(4)」は何ページにありますか」は 20 文書で同じ文字列になり、
+文書を絞らないと答えが決まらない。`qa` の 56% が「第N条」「表N」のような文書ローカルな
+番号だけを手がかりにしている）。**メタデータを索引していない検索器は `filtered` を
+構造的に解けない**ので、何を索引したかを `search_run.json` の `index_setting` に申告する。
 
 **grade 1 は 1 クエリ 20 件で打ち切る**（`MAX_RELATED`）。打ち切ると qrels に出ないので、
 評価上は非適合と同じ扱いになる。どのクエリで何件落としたかは
-`related_truncated` / `n_related_total` でわかる（打ち切られるのは全体の数%程度で、
-おもに「事故」のような頻出の定義語）。正確な件数は文書構成が変わるたびに動くため
-ここには固定値を書かない。**`dataset/README.md`（`yakkan export` が実測値を埋め込んで
-生成する）か、`queries.jsonl` を `related_truncated` で集計して確認する。**
-打ち切るときは文書をまたいで均等に拾うので、特定の文書だけが残ることはない。
+`related_truncated` / `n_related_total` でわかる。正確な件数は文書構成が変わるたびに動くため
+ここには固定値を書かない（`dataset/README.md` が実測値を埋め込んで生成される）。
 
-| kind | 作り方 | 何を測るか |
-|---|---|---|
-| `term` | 定義語そのもの | 項目検索。正解は**全文書の**その語の定義パッセージ |
-| `heading` | 条の見出し文言 | 項目検索。**同名の条が複数文書にある**ので、網羅性が要る |
-| `scoped` | 「商品名＋見出し」 | 絞り込み。同名の条があるなかで**その文書だけ**を当てる |
-| `qa` | 既存 QA の問い | 意味検索。正解は evidence を含むパッセージ（同じ条の別項は grade 1） |
+| kind | 作り方 | gold | 何を測るか |
+|---|---|---|---|
+| `term` | **コーパス中 1 文書だけが定義している語**（`df_docs == 1`） | grade 2 = その語の定義行、grade 1 = 同じ文書でその語を使っている条 | 項目検索。**字面一致で解けて当然**だが対象は一意に決まる |
+| `heading` | **1 文書だけが持つ条見出しの文言**（番号ラベルは落とす） | grade 2 = 同名の条、grade 1 = その条の表・図とその条を参照する条 | 同上 |
+| `scoped` | 「会社名＋商品名＋見出し」 | grade 2 = **その文書の同名の条すべて** | テキストだけで文書を絞れるか |
+| `filtered` | 見出しの文言のみ＋`filters` | 同上 | メタデータ索引・ハイブリッド絞り込み |
+| `enumeration` | **広く使われる語・見出しの網羅要求**（「…をすべて挙げてください」） | grade 2 = 全文書のその語の定義行／同名の条。**grade 1 は作らない** | 網羅。`Recall@100` と `r_precision` で読む |
+| `qa` | 既存 QA の問い＋`filters` | grade 2 = evidence を含むパッセージ、grade 1 = 同じ条の別のパッセージ | 意味検索 |
+| `definition_masked` | **その語を使っている条文**を文脈として与え、語を `〔用語〕` に隠す | grade 2 = その語の定義行、grade 1 = 出題に使った条文 | 意味で結びつける力。**字面では解けない** |
+| `multi_hop` | 参照元の文言（参照先の見出しは書かない） | grade 2 = **参照先**の条、grade 1 = 参照元 | 参照を辿れるか |
+| `situational` | 執筆 QA の `apply` から**場面の記述だけ**を採る | grade 2 = 根拠の条、grade 1 = 同じ条の別のパッセージ | 場面から条文を引く力 |
+| `no_answer` | その文書に**無い**見出し・用語を `filters` で絞って聞く | **空集合**（`qrels.jsonl` に 1 行も出ない） | 根拠が無いときに黙れるか |
+
+**広く使われる語を素のクエリにしない**のが設計の要点である。「保険金」は 80 文書・
+1,969 パッセージに出るのに定義表に項目を立てているのは 2 文書だけで、
+**どの文書を返すべきかがクエリから決まらない**。`df_literal >= 10`（コーパス 90 文書の
+約 1/9 ＝ 1 ジャンルぶん）の語は `enumeration` に回し、順位ではなく網羅を測る
+（設計の根拠は `docs/search_query_design.md`、実施の記録は `docs/search_query_plan.md`）。
 
 ### 検索結果の形
 
 ```jsonc
-{ "runs": [ { "query_id": "q_head_0001", "passages": ["doc::ch1_a1", "doc::ch2_a3", "…"] } ] }
+{
+  "index_setting": "text_only",   // text_only / with_context_header / with_metadata
+  "runs": [ { "query_id": "q_heading_1f3a…", "passages": ["doc::ch1_a1", "doc::ch2_a3", "…"] } ]
+}
 ```
 
 ```
@@ -141,14 +176,31 @@ uv run yakkan eval --search-run run.json
 uv run yakkan eval --oracle                 # 満点の並びで自己評価
 ```
 
-nDCG@1/5/10・Recall@1/5/10・MRR を、**クエリ種別ごとと全体で**報告する。
+**`no_answer` のクエリには空の `passages` を返す**（何も返さないのが正解）。
+`runs` に含めなければ採点されない。
 
-**Recall@k は 1 に届かないことがある。** 適合が k 件を超えるクエリでは、上位 k 件を
-すべて適合で埋めても `k / 適合数` が上限になる。満点の並びでも全体の recall@10 は
-0.976（term は 0.869）。到達できる上限を `recall_ceiling@k` として併記してあるので、
-**Recall@k はこの上限と比べて読む**（docs/remaining_issues.md T2）。
-順位の良し悪しを見たいときは nDCG@k を使う。
+### 指標
 
+**kind ごとと全体で報告する。** kind によって意味のある指標が違う。
+
+| 指標 | 読み方 |
+|---|---|
+| `ndcg@1/5/10/100` | 順位の良し悪し。`term` / `heading` / `scoped` / `filtered` / `qa` の主指標 |
+| `recall@k` ／ `recall_ceiling@k` | **上限と比べて読む。** 適合が k 件を超えるクエリでは `k / 適合数` が上限（T2） |
+| `exact_recall@5/10` | **grade 2 だけを見た再現率。** grade 1 が字面で簡単に取れる kind（`definition_masked` はクエリ文が grade 1 の引用）では、「答えそのもの」を引けたかが `recall@k` から読めない |
+| `r_precision` | 上位 R 件（R = 適合数）の適合率。`enumeration` の主指標 |
+| `mrr` | 最初の適合の順位 |
+| `doc@1` / `doc_recall@5/10` | **正しい文書を引けたか。** 文書同定と文書内の順位付けは別の能力（実測：`scoped` は doc@1 0.904 なのに ndcg@1 0.058 ＝ 文書は当たるが条が当たらない） |
+| `confusion@5/10` | 上位 k 件に占める `hard_negatives` の割合。**広く使われる単語で釣られていないか** |
+| `false_positive_rate` | `no_answer` で 1 件以上返したか。**0.0 が正解** |
+
+`no_answer` の行は `ndcg` 等が 0.0 と表示されるが、これは**その kind では測れない**という意味で、
+読むべきは `false_positive_rate` だけである。
+
+**評価セットが簡単すぎないかの目安**として、`dataset/README.md` に素朴な検索器 3 系統
+（`title` 完全一致・文字 2-gram BM25・文字 unigram TF-IDF）のスコア表が
+`yakkan export` のたびに実測されて埋め込まれる。**nDCG@1 が 0.85 を超え、かつ 3 系統の差が
+0.2 未満の kind は、順位の良し悪しを測る分解能が無い**ので印が付く。
 ---
 
 ## 3. 予測に使う語彙
@@ -223,7 +275,7 @@ golf-0001 では 96 件中 57 件がこれで、**入れないと F1 が 0.58、
 | ファイル | スキーマ | モデル |
 |---|---|---|
 | 予測 JSON | `schema/prediction.schema.json` | （手書き） |
-| 検索結果 JSON | `schema/search_run.schema.json` | （手書き） |
+| 検索結果 JSON | `schema/search_run.schema.json` | `SearchRun`（`index_setting` つき） |
 | `elements.jsonl` | `schema/element.schema.json` | `yakkan.export_models.ElementRow` |
 | `passages.jsonl` | `schema/passage.schema.json` | `Passage` |
 | `queries.jsonl` | `schema/query.schema.json` | `Query` |

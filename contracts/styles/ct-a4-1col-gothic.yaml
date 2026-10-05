@@ -1,0 +1,17 @@
+style_id: ct-a4-1col-gothic
+description: A4・1段組・ゴシック10pt。下線見出し・プレーンなページ番号（法律事務所サンプル風）
+page: { size: A4, width_mm: 210, height_mm: 297, margin_mm: { top: 22, right: 20, bottom: 22, left: 20 } }
+columns: { count: 1, gap_mm: 0 }
+fonts: { body: "Noto Sans JP", heading: "Noto Sans JP", symbol_fallback: ["Noto Sans Symbols", "Noto Sans Symbols 2"] }
+sizes: { body_pt: 10, line_height: 1.7, h1_pt: 12.5, h2_pt: 11, h3_pt: 10.5, h4_pt: 10,
+         table_pt: 9.5, note_pt: 8.5, toc_pt: 10, cover_pt: 15 }
+palette: { text: "#000000", rule: "#000000", accent: "#000000", band: "#f2f2f2", note_bg: "#fafafa" }
+headings: { band: false }
+table: { border: horizontal }
+margin_note: article_end
+header: title
+page_number: plain
+parties_style: table
+signature_layout: horizontal
+# `nda-0001`（4 ページ）から較正（2026-09-26）。**1 文書ぶんなので暫定**（P6 で再較正）。
+chars_per_page_estimate: 925

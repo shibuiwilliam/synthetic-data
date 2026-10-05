@@ -1,0 +1,24 @@
+# 重要事項説明書（yakkan の `_label_jyusetsu`）。**条を持たない。**
+# 大見出しは番号のみ、節が（1）、条の位置に丸数字の小見出しが来る。
+# **P2-2 の表現力検証専用の fixture**（docs/schema.md §7）。
+scheme: jyusetsu
+levels:
+  part:       { format: "{n}",    counter: arabic }
+  chapter:    { format: "{n}",    counter: arabic }
+  section:    { format: "({n})",  counter: arabic }
+  article:    { format: "{n}",    counter: circled }
+  paragraph:  { counter: none }
+  item:       { format: "{n}",    counter: circled }
+  subitem:    { format: "{n}.",   counter: katakana }
+  subsubitem: { format: "({n})",  counter: katakana }
+appendix: { kind_label: 別表 }
+appendix_levels:
+  appendix_section: { format: "第{n}",  counter: arabic }
+  paragraph:        { format: "{n}．",  counter: arabic }
+  item:             { format: "{n}",    counter: circled }
+  subitem:          { format: "{n}.",   counter: katakana }
+  subsubitem:       { format: "({n})",  counter: roman }
+footnote: { inline: "（*{n}）" }
+continuous_articles: false
+paragraph_ref_style: printed
+ref: { article_with_title: true, no_chapter_prefix: false }

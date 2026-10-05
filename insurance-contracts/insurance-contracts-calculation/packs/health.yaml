@@ -1,0 +1,195 @@
+# 傷害・疾病保険（genre: health）の計算パック。
+genre: health
+
+chapters:
+  injury: ["傷害条項", "傷害に関する補償"]
+  sickness: ["疾病条項", "疾病および介護に関する補償", "介護条項"]
+  basic: ["基本条項"]
+
+term_aliases:
+  insured: [insured]
+  policyholder: [policyholder]
+  injury: [injury]
+  sickness: [sickness, cancer]
+  hospitalization: [hospitalization]
+  outpatient: [outpatient]
+  surgery: [surgery, advanced, advanced_medical]
+  doctor: [doctor]
+  hospital: [hospital, clinic]
+  treatment: [treatment, medical_care]
+  waiting_period: [waiting_period, waiting, deductible_term]
+  liability_start: [liability_start, responsibility_start]
+  residual_disability: [residual_disability, body_impairment]
+fallbacks:
+  insured: 被保険者
+  policyholder: 保険契約者
+  injury: 傷害
+  sickness: 疾病
+  hospitalization: 入院
+  outpatient: 通院
+  surgery: 手術
+  doctor: 医師
+  hospital: 病院または診療所
+  treatment: 治療
+  waiting_period: 免責期間
+  liability_start: 責任開始日
+  residual_disability: 後遺障害
+
+vocab:
+  rate_name: 支払倍率
+  grade_name: 後遺障害の等級
+  months_name: 経過月数
+  days_name: 日数
+  amount_name: 損害の額
+  payable_days_name: 支払の対象となる日数
+  years_name: 経過年数
+  deadline_effect: 保険金を支払います。
+  waiting_start: 責任の開始する日
+  sub_benefit: 付随する費用
+  period_end: 保険期間の末日
+  waiting_span: 支払の対象とならない期間
+  payable_span: 支払の対象となる期間
+  waiting_event: 責任の開始
+  mark_pay: ○
+  mark_nopay: ×
+  legend_pay: 支払います
+  legend_nopay: 支払いません
+  matrix_row_title: 競技中かどうか
+  matrix_col_title: 書面による請求
+  matrix_row1: 競技または競技の練習中
+  matrix_row2: 試運転または曲技の最中
+  matrix_row3: 通常の使用の最中
+  matrix_row4: その他の場合
+  matrix_col1: 書面による請求があった
+  matrix_col2: 口頭での連絡のみ
+  matrix_col3: 請求がない
+  payable_event: 支払の対象となる期間の開始
+  enum_value_header: 取扱い
+  enum_value: 支払いません
+  exclusion_competition: 山岳登はん、スカイダイビングその他これらに類する危険な運動を行っている間に生じた{t:injury}
+  exclusion_no_claim: 医師の治療を伴わない場合
+  q_immobile: "{t:hospitalization}を伴うものか"
+  q_min_days: "{t:treatment}に{days}以上を要するか"
+  q_other_cover: 他の保険契約から同じ費用の保険金が支払われるか
+  flow_start: "{t:injury}の発生"
+
+param_ranges:
+  deductible: {choices: [5000, 8000, 10000, 15000, 20000, 25000, 30000], unit: JPY}
+  limit: {choices: [80000, 100000, 150000, 200000, 250000, 300000, 400000, 500000], unit: JPY}
+  sub_limit: {choices: [20000, 30000, 40000, 50000, 60000, 80000, 100000], unit: JPY}
+  aggregate_limit: {choices: [1000000, 2000000, 3000000], unit: JPY}
+  daily: {choices: [2000, 3000, 4000, 5000, 6000, 7000, 8000, 10000], unit: JPY}
+  min_days: {choices: [2, 3, 4, 5, 6, 7], unit: DAY}
+  max_days: {choices: [30, 40, 50, 60, 80, 90, 100, 120], unit: DAY}
+  round_unit: {choices: [100, 500, 1000, 5000], unit: JPY}
+  max_months: {choices: [12, 18, 24, 30, 36, 48, 60], unit: MONTH}
+  rate_top: {choices: [40, 50], unit: PERCENT}
+  rate_step: {choices: [5, 10], unit: PERCENT}
+  threshold_amount: {choices: [30000, 50000, 80000, 100000, 150000, 200000, 300000], unit: JPY}
+  notice_days: {choices: [30, 60], unit: DAY}
+  payment_days: {choices: [30, 45], unit: DAY}
+  waiting_days: {choices: [7, 14, 30], unit: DAY}
+  max_count: {choices: [2, 3, 5], unit: COUNT}
+
+subjects:
+  - key: stay
+    benefit: 入院一時金
+    anchor: injury
+    requires: [hospitalization]
+    trigger: "{t:insured}が{t:injury}により{t:hospitalization}をした場合"
+    patterns: [P03, P14, P18]
+    inputs:
+      start_date:
+        concept: start_date
+        desc: 責任の開始した日
+      event_date:
+        concept: accident_date
+        desc: 入院を開始した日
+      days: {concept: hospital_days, desc: 入院した日数}
+      immobile: {concept: hospitalized, desc: "{t:doctor}の指示による{t:hospitalization}であるかどうか"}
+      other_cover: {concept: rentacar_paid, desc: 他の保険契約から同じ給付が行われるかどうか}
+    vocab:
+      example_title: 入院一時金の計算例
+
+  - key: outcare
+    benefit: 通院一時金
+    anchor: injury
+    requires: [outpatient]
+    trigger: "{t:insured}が{t:injury}により{t:outpatient}をした場合"
+    patterns: [P02, P01, P11]
+    inputs:
+      count:
+        concept: visit_count
+        desc: 通院の回数
+      amount: {concept: treatment_cost, desc: 通院のために支出した費用の額}
+    vocab:
+      example_title: 通院一時金の計算例
+
+  - key: aftereffect
+    benefit: 後遺障害特別給付金
+    anchor: injury
+    requires: [residual_disability]
+    trigger: "{t:insured}が{t:injury}により{t:residual_disability}が生じた場合"
+    patterns: [P04]
+    inputs:
+      amount: {concept: insured_amount, desc: 保険証券記載の保険金額}
+      grade: {concept: disability_grade, min: 1, max: 5}
+    vocab:
+      example_title: 等級に応じた支払の例
+
+  - key: procedure
+    benefit: 手術特別給付金
+    anchor: sickness
+    requires: [surgery]
+    trigger: "{t:insured}が{t:sickness}により{t:surgery}を受けた場合"
+    patterns: [P05, P07]
+    inputs:
+      amount: {concept: insured_amount, desc: 保険証券記載の保険金額}
+      months: {concept: elapsed_full_months, desc: 責任開始日から手術の日までの経過月数}
+      extra: {concept: extra_days}
+    vocab:
+      example_title: 手術特別給付金の計算例
+
+  - key: homecare
+    benefit: 療養援助費用保険金
+    anchor: sickness
+    requires: []
+    trigger: "{t:insured}が{t:treatment}のために居宅の改装その他の費用を支出した場合"
+    patterns: [P06, P01, P12]
+    inputs:
+      amount: {concept: actual_cost, desc: 療養のために支出した費用の額}
+      share_num: {concept: hospital_days, desc: 療養に要した日数}
+      share_den: {concept: outpatient_days, desc: 保険証券記載の支払の対象となる日数}
+      competition: {concept: competition}
+      doctor: {concept: doctor_order}
+    vocab:
+      example_title: 療養援助費用の計算例
+
+  - key: relapse
+    benefit: 再入院給付金
+    anchor: sickness
+    requires: [liability_start]
+    trigger: "{t:insured}が{t:liability_start}の後に生じた{t:sickness}により入院した場合"
+    patterns: [P18, P11]
+    inputs:
+      start_date: {concept: start_date, desc: 責任開始日}
+      event_date: {concept: accident_date, desc: 入院を開始した日}
+      count: {concept: visit_count, min: 0, max: 10, desc: 入院した回数}
+    vocab:
+      example_title: 再入院給付金の支払の例
+      waiting_start: "{t:insured}の責任開始日"
+
+  - key: frontier
+    benefit: 先進医療費用保険金
+    anchor: sickness
+    requires: []
+    trigger: "{t:insured}が先進医療に該当する療養を受けた場合"
+    patterns: [P13, P16, P08]
+    inputs:
+      amount: {concept: actual_cost, desc: 先進医療の技術料として支出した額}
+      sub_amount: {concept: treatment_cost, desc: 先進医療に伴う交通費および宿泊費の額}
+      policy_limit: {concept: policy_limit, desc: 保険証券に記載された先進医療費用の限度額}
+      paid: {concept: paid_amount, desc: この保険契約についてすでに支払った先進医療費用保険金の額}
+    vocab:
+      example_title: 先進医療費用の支払の例
+      sub_benefit: 交通費および宿泊費

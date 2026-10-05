@@ -1,0 +1,156 @@
+# 生命保険（genre: life。ご契約のしおり＋普通保険約款）の計算パック。
+#
+# この種目は `part`（しおり／約款／特約条項）の下に章がある。章のタイトルで追加先を探すので、
+# 入れ子でも引き当てられる。ページの余裕が薄い文書が多いので、分量の予算に収まるものだけを使う。
+genre: life
+
+chapters:
+  payment: ["保険金の支払", "保険金および給付金の支払", "給付金の支払"]
+  contract: ["ご契約の締結と維持", "保険契約の締結および維持", "ご契約後のお取扱い", "保険契約の変更および消滅"]
+
+term_aliases:
+  insured: [insured]
+  policyholder: [policyholder]
+  beneficiary: [beneficiary]
+  severe_disability: [severe_disability]
+  surrender_value: [surrender_value]
+  grace: [grace]
+  revival: [revival]
+  lapse: [lapse]
+  responsibility_start: [responsibility_start]
+  proxy_claimant: [proxy_claimant, proxy]
+fallbacks:
+  insured: 被保険者
+  policyholder: 保険契約者
+  beneficiary: 保険金受取人
+  severe_disability: 高度障害状態
+  surrender_value: 解約返戻金
+  grace: 猶予期間
+  revival: 復活
+  lapse: 失効
+  responsibility_start: 責任開始期
+  proxy_claimant: 指定代理請求人
+
+vocab:
+  rate_name: 支払割合
+  grade_name: 障害の等級
+  months_name: 経過月数
+  years_name: 経過年数
+  days_name: 日数
+  amount_name: 損害の額
+  payable_days_name: 支払の対象となる日数
+  enum_value_header: 取扱い
+  enum_value: 支払いません
+  deadline_effect: 保険金を支払います。
+  waiting_start: "{t:responsibility_start}"
+  sub_benefit: 付随する費用
+  period_end: 保険期間の満了の日
+  waiting_span: 支払の対象とならない期間
+  payable_span: 支払の対象となる期間
+  waiting_event: 責任の開始
+  payable_event: 支払の対象となる期間の開始
+  mark_pay: ○
+  mark_nopay: ×
+  legend_pay: 支払います
+  legend_nopay: 支払いません
+  matrix_row_title: 請求の事由
+  matrix_col_title: 書面による請求
+  matrix_row1: 故意によるものである場合
+  matrix_row2: 重大な過失によるものである場合
+  matrix_row3: 不慮の事由によるものである場合
+  matrix_row4: その他の場合
+  matrix_col1: 書面による請求があった
+  matrix_col2: 口頭での連絡のみ
+  matrix_col3: 請求がない
+  exclusion_competition: "{t:policyholder}または{t:insured}の故意によって生じた場合"
+  exclusion_no_claim: 必要な書類の提出が行われなかった場合
+  q_immobile: 医師の診断書が提出されたか
+  q_min_days: 療養に{days}以上を要するか
+  q_other_cover: 他の保険契約から同じ給付が行われるか
+  flow_start: 支払の事由の発生
+
+param_ranges:
+  deductible: {choices: [5000, 10000, 20000, 30000, 50000], unit: JPY}
+  limit: {choices: [100000, 150000, 200000, 300000, 400000, 500000], unit: JPY}
+  sub_limit: {choices: [20000, 30000, 50000, 60000, 80000, 100000], unit: JPY}
+  aggregate_limit: {choices: [1000000, 2000000, 3000000], unit: JPY}
+  daily: {choices: [3000, 4000, 5000, 6000, 8000, 10000], unit: JPY}
+  min_days: {choices: [2, 3, 4, 5, 7], unit: DAY}
+  max_days: {choices: [30, 60, 90, 120, 180], unit: DAY}
+  round_unit: {choices: [100, 500, 1000, 5000], unit: JPY}
+  max_months: {choices: [12, 18, 24, 36, 48, 60], unit: MONTH}
+  rate_top: {choices: [30, 40, 50], unit: PERCENT}
+  rate_step: {choices: [5, 10], unit: PERCENT}
+  threshold_amount: {choices: [50000, 80000, 100000, 200000, 300000], unit: JPY}
+  payment_days: {choices: [20, 30, 45], unit: DAY}
+  waiting_days: {choices: [7, 14, 30], unit: DAY}
+  max_count: {choices: [2, 3], unit: COUNT}
+
+subjects:
+  - key: consolation
+    benefit: 遺族見舞金
+    anchor: payment
+    requires: [beneficiary]
+    trigger: "{t:beneficiary}が保険金の請求にあたり臨時の費用を支出した場合"
+    patterns: [P02, P01, P07]
+    inputs:
+      amount: {concept: actual_cost, desc: 臨時に支出した費用の額}
+    vocab:
+      example_title: 遺族見舞金の支払の例
+
+  - key: impairment
+    benefit: 障害状態特別給付金
+    anchor: payment
+    requires: [severe_disability]
+    trigger: "{t:insured}が{t:severe_disability}に該当した場合"
+    patterns: [P04]
+    inputs:
+      amount: {concept: insured_amount, desc: 保険証券記載の保険金額}
+      grade: {concept: disability_grade, min: 1, max: 5, desc: 障害の等級}
+    vocab:
+      example_title: 等級に応じた支払の例
+
+  - key: recuperation
+    benefit: 療養援助給付金
+    anchor: payment
+    requires: []
+    trigger: "{t:insured}が療養のために費用を支出した場合"
+    patterns: [P03, P14, P18]
+    inputs:
+      start_date:
+        concept: start_date
+        desc: 責任の開始した日
+      event_date:
+        concept: treatment_start
+        desc: 療養を開始した日
+      days: {concept: hospital_days, desc: 療養のために入院した日数}
+      immobile: {concept: doctor_order}
+      other_cover: {concept: rentacar_paid, desc: 他の保険契約から同じ給付が行われるかどうか}
+    vocab:
+      example_title: 療養援助給付金の計算例
+
+  - key: elapsed_bonus
+    benefit: 経過年数別給付金
+    anchor: payment
+    requires: []
+    trigger: "{t:insured}が保険期間の中途で所定の事由に該当した場合"
+    patterns: [P17, P05]
+    inputs:
+      amount: {concept: insured_amount, desc: 保険証券記載の保険金額}
+      years: {concept: elapsed_years, desc: 保険契約の締結の日からの経過年数}
+      months: {concept: elapsed_full_months, desc: 保険契約の締結の日からの経過月数}
+      extra: {concept: extra_days}
+    vocab:
+      example_title: 経過年数に応じた支払の例
+
+  - key: claim_term
+    benefit: 給付金の支払の期限
+    anchor: contract
+    requires: []
+    trigger: "{t:beneficiary}から給付金の請求に必要な書類の提出を受けた場合"
+    patterns: [P10]
+    inputs:
+      base_date: {concept: document_date}
+    vocab:
+      example_title: 支払期限の数え方
+      deadline_effect: 給付金を支払います。

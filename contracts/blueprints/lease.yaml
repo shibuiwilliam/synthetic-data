@@ -1,0 +1,136 @@
+# 建物賃貸借契約書（docs/doctypes.md §4.2）。
+# 参考：samples/lease/（国交省 賃貸住宅標準契約書・定期賃貸住宅標準契約書・法律事務所の建物賃貸借）。
+# **構造だけを参考にし、文章はすべて書き下ろす**（CLAUDE.md §0.4-1）。
+#
+# 骨格：**頭書型**。P1（docs/reference_structures.md §4 の #6）で確かめた実物の特徴：
+#   - 頭書は**単一の大型表ではなく、見出しで区切られた独立の表の連なり**。
+#     `purchase` の頭書（番号付き項目の羅列）とは別の型で、同じ `kind: head_matter` で表せる。
+#   - 各表は記入欄型（行見出し列＋記入欄）で結合セルを多用し、表の直後に注記が付く。
+#   - **3 者以上**（貸主・借主・管理業者・家賃債務保証業者）が普通（CT15）。
+#   - 修繕の分担表（部位 × 当事者）が別表にある（CT8）。
+# 注意：頭書は行数が多いので、**結合セルがページ境界をまたぐと継続側が空欄になる**（verify V11）。
+#       A4 1 段で収まる列数は **15 列まで**（docs/gotchas.md の実測）。
+doctype: lease
+family: contract
+description: 建物賃貸借契約書。頭書型＋修繕の分担表。当事者 3 者
+target_pages: [8, 14]
+page_limit: 16
+numbering_scheme: contract-standard
+default_style: ct-a4-1col-mincho
+skeleton_kind: head_matter
+front_matter: { cover: false, toc: false }
+
+parties:
+  count: [2, 3]
+  presets:
+    - - { key: lessor,    alias: 甲, role_label: 貸主 }
+      - { key: lessee,    alias: 乙, role_label: 借主 }
+      - { key: guarantor, alias: 丙, role_label: 家賃債務保証業者 }
+    - - { key: lessor, alias: 甲, role_label: 貸主 }
+      - { key: lessee, alias: 乙, role_label: 借主 }
+
+required:
+  - { kind: node, subtype: preamble,    min_count: 1 }
+  - { kind: node, subtype: head_matter, min_count: 1, note: "頭書（物件・期間・賃料・当事者）" }
+  - { kind: node, subtype: signature,   min_count: 1 }
+  - { kind: node, subtype: appendix,    min_count: 1, note: "別表 1 点以上（修繕の負担区分ほか）" }
+  - { kind: table, min_count: 3, min_rows: 3, note: "頭書の表 2 つ以上と別表（型は執筆者が決める）" }
+  - { kind: enumeration, min_count: 2, min_items: 4, note: "禁止行為・解除事由の列挙" }
+  - { kind: figure, min_count: 1, note: "明渡しの手続きか契約期間のタイムライン" }
+  - { kind: ref, min_count: 12, note: "条項間参照＋**頭書への参照**＋別表への参照" }
+  - { kind: term, min_count: 5 }
+
+skeleton:
+  - id: pre
+    kind: preamble
+    chars: 200
+    todo: "{party:...|full} で当事者を導入する。**3 者**のときは丙（保証業者）も導入する"
+  - id: head
+    kind: head_matter
+    chars: 900
+    todo: "**見出しで区切った表の連なり**にする（物件の表示／契約期間／賃料・共益費／敷金／当事者）。
+           本文は {ref:head} で指す。値は {const:} で置き、本文と噛み合わせる（L11）"
+  - id: a1
+    kind: article
+    title_options: ["契約の目的物", "賃貸借の目的物"]
+    chars: 300
+    todo: "{ref:head} に記載の建物を賃貸借の目的とする旨。用途の制限も"
+  - id: a2
+    kind: article
+    title_options: ["契約期間および更新", "契約期間"]
+    chars: 600
+    todo: "{ref:head} の期間を引き、更新の手続きと更新料を書く。図でも示す"
+    required: [{ kind: figure, min_count: 1 }]
+  - id: a3
+    kind: article
+    title_options: ["賃料", "賃料および共益費"]
+    chars: 600
+    todo: "{ref:head} の額を引き、支払の期日と方法、**日割の計算**を書く（apply QA の土台）"
+  - id: a4
+    kind: article
+    title_options: ["敷金"]
+    chars: 600
+    todo: "預入れ・充当・返還の期限。返還額の計算を明確に"
+  - id: a5
+    kind: article
+    title_options: ["使用上の禁止事項", "禁止行為"]
+    chars: 600
+    todo: "禁止行為を号で 4 項目以上。承諾を要する行為と禁止する行為を分ける"
+  - id: a6
+    kind: article
+    title_options: ["修繕"]
+    chars: 600
+    todo: "分担は {ref:sch1}（別表）に委ね、本文は手続き（通知・立会い・緊急時）を書く"
+  - id: a7
+    kind: article
+    title_options: ["解除"]
+    chars: 600
+    todo: "催告解除と無催告解除を書き分け、事由を列挙する"
+  - id: a8
+    kind: article
+    title_options: ["明渡しおよび原状回復", "明渡し"]
+    chars: 700
+    todo: "明渡しの期限、原状回復の範囲（通常損耗を除く）、残置物の扱い"
+  - id: a9
+    kind: article
+    title_options: ["保証", "家賃債務の保証"]
+    chars: 500
+    todo: "**3 者の variant のときだけ置く**。保証業者の求償と、借主の通知義務"
+    movable: true
+  - id: a10
+    kind: article
+    title_options: ["協議"]
+    chars: 220
+    clause: consultation
+  - id: a11
+    kind: article
+    title_options: ["合意管轄"]
+    chars: 220
+    clause: jurisdiction
+
+appendices:
+  - id: sch1
+    title_options: ["修繕費用の負担区分", "修繕の分担"]
+    kind_label: 別表
+    min_rows: 8
+    min_cols: 3
+    todo: "部位 × 貸主/借主 の負担区分。**凡例を置き、本文の修繕の条と噛み合わせる**（L11）"
+
+riders: { count: [0, 0], pool: [] }
+
+authored_qa: { count: 15, table_min: 3, figure_min: 2, apply_min: 2 }
+
+closing_options:
+  - "本契約の成立を証するため、本書{copies}通を作成し、{parties}が記名押印のうえ、各１通を保有する。"
+
+variants:
+  digit_style: { fullwidth: 0.7, halfwidth: 0.3 }
+  era: { seireki: 0.7, wareki: 0.3 }
+  parties_preset: [0, 1]
+  copies: { "3": 0.6, "2": 0.4 }
+  stamp_duty: { "false": 0.9, "true": 0.1 }
+  # **2 style 目は版面が最も遠いものを選ぶ**（docs/doctypes.md §7）。
+  # `gothic` は mincho と同系（A4 1 段・無装飾）なので組にしない。
+  styles: [ct-a4-1col-mincho, ct-a4-1col-form]
+
+budget: { chars_min: 7000, chars_max: 15000, footnotes_min: 0 }

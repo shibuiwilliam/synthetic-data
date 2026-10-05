@@ -7,6 +7,10 @@
 - 1 文書 20 ページ以下。テキスト・章節項構造・表・図・参照関係・QA を正解として持つ。
 - 仕様は `CLAUDE.md`（憲章）と `docs/`（詳細）。**実装と食い違ったら仕様側を先に直す。**
 
+現況（`dataset_version: v7`）：**10 ジャンル・100 content・114 データセット**
+（うち `ready` 113／`failed` 1）・**1,458 ページ**・QA 5,085 問。
+素性（規模・内訳・検証結果・制限と偏り）は生成物側の **`dataset/data-card.md`** を最初に読む。
+
 ## セットアップ
 
 必要なもの：Python 3.12（uv が入れる）、[uv](https://docs.astral.sh/uv/)、Pango。
@@ -43,8 +47,13 @@ DYLD_FALLBACK_LIBRARY_PATH=/opt/homebrew/lib uv run yakkan doctor
 | `yakkan/` | Python パッケージ（モデル・番号付け・描画・レイアウト抽出・検証・QA・CLI） |
 | `blueprints/` `styles/` `library/` | ジャンル定義・スタイル・条文ライブラリ（宣言） |
 | `content/<content_id>/` | 執筆成果（コミットする） |
+| `specs/batch_*.yaml` | 生成バッチの定義（content × style × seed）。`dataset/` はここから再生成する |
 | `dataset/<doc_id>/` | 生成物（コミットしない。`specs/` から再生成する。**手編集禁止**） |
 | `assets/fonts/` | 同梱フォント（OFL / IPA ライセンス。出典は `SOURCES.md`） |
+| `TASK.md` | 人間の判断・作業を待っている項目の一覧（AI は未回答の判断を代わりに下さない） |
+| `insurance-contracts-calculation/` | 計算・判定の規定とその正解プログラムを足す**別プロジェクト**。本体とは独立に扱う |
+
+配置の正本は `docs/repo_layout.md`。新しいファイルを置く前にそちらを読む。
 
 ## データセットの読み方
 
@@ -59,10 +68,24 @@ DYLD_FALLBACK_LIBRARY_PATH=/opt/homebrew/lib uv run yakkan doctor
 | `layout.json` | 描画結果。ページ・要素ごとの bbox・読み順・ヘッダ／フッタ |
 | `answer.json` | 派生（ページ別の期待テキスト・アウトライン）。**`source` と `layout` は内包しない**（同じ場所に実体がある）。3 つをまとめて扱うときは `yakkan.answer.load_answer(dir)` |
 | `elements.jsonl` | 1 行 1 要素の平らな索引。**評価スクリプトはまずこれを読む** |
+| `passages.jsonl` | 1 行 1 パッセージ（検索評価の単位）。`elements.jsonl` を検索向けに束ねたもの |
 | `qa.json` | 問答（自動生成 30 問＋執筆 15 問） |
 | `render.html` | デバッグ用の中間 HTML（配布対象外） |
 
-`dataset/manifest.json` に全文書の一覧（ページ数・字数・表/図/脚注/参照の数・status）がある。
+`dataset/` の直下にはコーパス全体のファイルがある。
+
+| パス | 中身 |
+|---|---|
+| `manifest.json` | 全文書の一覧（ページ数・字数・表/図/脚注/参照の数・status）と `dataset_version` |
+| `data-card.md` | **利用者向けデータカード**（規模・内訳・正解の中身・検証結果・制限と偏り）。最初に読む |
+| `README.md` | **Hugging Face のデータセットカード**（要約・読み方・ベースライン表・ライセンス・引用） |
+| `LICENSE` | CC BY 4.0 の表示と帰属の書き方（埋め込みフォントの扱いも） |
+| `.gitattributes` | HF Hub 用。`*.png` と `*.pdf` を Git LFS で追跡する |
+| `qa.jsonl` | 全文書の QA を 1 行 1 問に平らにしたもの（HF の `qa` コンフィグ） |
+| `documents.jsonl` | `manifest.json` を 1 行 1 文書に平らにしたもの（HF の `documents` コンフィグ） |
+| `search/` | 検索評価セット：`passages.jsonl`／`queries.jsonl`／`qrels.jsonl`／`id_map.json` |
+
+これらは手で書かず `uv run yakkan export` ／ `manifest update` ／ `datacard update` で作り直す。
 
 ### answer.json の構造
 
@@ -136,7 +159,7 @@ PDF のテキスト層には、**正解 1 件に対して複数回現れる文�
                "evidence": ["tbl_x__r2c3"], "page_hint": [5], "source": "auto" } ] }
 ```
 
-- `type` は 10 種別：`locate` `extract` `definition` `table_lookup` `table_reason`
+- `type` は 11 種別：`locate` `extract` `definition` `table_lookup` `table_reason`
   `figure_path` `figure_fact` `crossref` `count` `negative` `apply`。
   `apply` は「場面に規定を当てはめて値を導く」型で、執筆 QA にのみ現れる。
 - `source` が `auto` なら機械生成（1 文書 30 問）、`authored` なら人が書いたもの（15 問）。
@@ -174,11 +197,46 @@ uv run yakkan render content/auto-0001 [--style <id>] [--report]      # PDF と 
 uv run yakkan verify dataset/<doc_id>                                 # 正解の検証
 uv run yakkan qa dataset/<doc_id> [--validate] [--report]             # answer.json と QA
 uv run yakkan manifest update                                         # 一覧の作り直し
+uv run yakkan datacard update                                         # dataset/data-card.md
+uv run yakkan export                                                  # 評価向けの派生成果物
+uv run yakkan schema export                                           # schema/*.schema.json
 uv run yakkan clean --stale                                           # 古い生成物の掃除
+
+uv run yakkan eval dataset/<doc_id> --pred pred.json   # 読み取りの採点（--oracle で自己評価）
+uv run yakkan eval --search-run run.json               # 検索の採点
 ```
+
+版面の目視レビュー（崩れはページ数と lint が通っても起きる）は、`render` が既定で出す
+`dataset/<doc_id>/pages/*.png` を開いて行う。手順は `.claude/commands/review.md`（`/review <doc_id>`）と
+`docs/authoring_checklist.md`。
+
+## 評価
+
+| 対象 | コマンド | 指標 |
+|---|---|---|
+| 読み取り（OCR / レイアウト / 表 / 図 / QA） | `yakkan eval dataset/<doc_id> --pred pred.json` | ページ別 CER・outline F1・構造位置 citation・表 TEDS とセル F1・図のノード/辺/経路 F1・読み順 Kendall τ・QA 一致 |
+| 検索 / RAG | `yakkan eval --search-run run.json` | nDCG@k・Recall@k・`exact_recall@k`・`r_precision`・MRR・`doc@1`・`confusion@k`・`false_positive_rate` |
+
+予測 JSON の形は `schema/prediction.schema.json`、検索結果の形は `schema/search_run.schema.json`、
+語彙と採点のしかたは `docs/evaluation.md`。`--oracle` で満点の予測を作れるので、
+採点側の実装を検証してから本番の予測を流すとよい。
+
+検索クエリは 10 種（`term` `heading` `scoped` `filtered` `enumeration` `qa`
+`definition_masked` `multi_hop` `situational` `no_answer`）。素朴な文字 2-gram BM25 で
+飽和する kind（`term`・`heading`）には `dataset/README.md` のベースライン表で印を付けてある。
+設計の経緯は `docs/search_query_design.md`、実測は `docs/search_query_plan.md`。
 
 ## ライセンスと架空性
 
 生成される文書の会社名・商品名・連絡先・様式番号はすべて架空で、実在の保険会社・商品とは関係がない。
 参考にした実在約款は **構造のみ**（見出し階層・表の列構成・図の種別）で、文章は一切引用していない。
-同梱フォントのライセンスは `assets/fonts/SOURCES.md` を参照。
+参考にした URL の一覧は `docs/reference_structures.md` §3.2。
+
+- **コード・仕様・執筆成果（`yakkan/` `docs/` `content/` ほか）**：親リポジトリの `LICENSE`（MIT）。
+- **同梱フォント**：OFL / IPA フォントライセンス。出典・版・SHA256 は `assets/fonts/SOURCES.md`。
+- **生成データセット（`dataset/`）**：**CC BY 4.0**（`TASK.md` T11・2026-10-05 決定）。
+  本文と帰属の書き方は `dataset/LICENSE`。配布先は Hugging Face Datasets
+  `cvusk/synthetic-japanese-insurance-documents`（控えを GitHub Releases）。
+  手順は **`docs/distribution.md`**。
+  なお `doc.pdf` には描画に使った字形の**サブセットが埋め込まれている**（OFL / IPA）。
+  フォントファイル自体はデータセットに含まれない。

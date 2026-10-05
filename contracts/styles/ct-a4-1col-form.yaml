@@ -1,0 +1,19 @@
+style_id: ct-a4-1col-form
+description: A4・1段組・ゴシック9pt。様式型（罫線の太い記入欄が本体。employment・官公庁様式風）
+page: { size: A4, width_mm: 210, height_mm: 297, margin_mm: { top: 15, right: 13, bottom: 15, left: 13 } }
+columns: { count: 1, gap_mm: 0 }
+fonts: { body: "Noto Sans JP", heading: "Noto Sans JP", symbol_fallback: ["Noto Sans Symbols", "Noto Sans Symbols 2"] }
+sizes: { body_pt: 9, line_height: 1.5, h1_pt: 11.5, h2_pt: 10, h3_pt: 9.5, h4_pt: 9,
+         table_pt: 8.5, note_pt: 8, toc_pt: 9, cover_pt: 14 }
+palette: { text: "#000000", rule: "#000000", accent: "#000000", band: "#eeeeee", note_bg: "#ffffff" }
+headings: { band: false }
+# 帳票らしく罫線を太めにする（docs/rendering.md §4.5）
+table: { border: form }
+margin_note: article_end
+header: title
+page_number: plain
+parties_style: table
+signature_layout: horizontal
+# `nda-0001`（3 ページ）から較正（2026-09-26）。**1 文書ぶんなので暫定**。
+# 様式型（employment）を描いたら、そちらで較正し直す（版面の想定が違う）。
+chars_per_page_estimate: 1296

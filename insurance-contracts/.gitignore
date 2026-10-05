@@ -1,16 +1,26 @@
 # insurance-contracts (yakkan-synth) 固有の .gitignore
 # 親リポジトリ ../.gitignore（Python 汎用テンプレート）の補正と、生成物の除外を行う。
-# 方針は CLAUDE.md §13 / docs/decisions.md（2026-09-21）を参照。
+# 方針は CLAUDE.md §13 / docs/repo_layout.md / docs/decisions.md（2026-09-21）を参照。
+#
+# 注意：.gitignore は行末コメントを解釈しない（`foo/  # 説明` は "foo/  # 説明" という
+# パターンになる）。説明は必ず独立した行に書く。
+#
+# ここに **書いていない** もの：
+#   - __pycache__/ *.pyc .pytest_cache/ .ruff_cache/ → 親の .gitignore が受け持つ
+#   - insurance-contracts-calculation/ → 別プロジェクト。本体とは別にコミットするので
+#     意図的に除外しない（docs/repo_layout.md「2026-10-05 に整理したもの」）
 
-# ---- 親の除外を打ち消す ---------------------------------------------------
-# 親の `parts/`（setuptools 由来）が content/<content_id>/parts/ を無言で除外する。
-# content/ は執筆成果であり必ずコミットする。ディレクトリ単位で除外されていると
-# 配下のファイルは再包含できないため、ディレクトリ自体を否定する。
-!parts/
-!content/**/parts/
-
-# ---- 生成物（コミットしない。specs/ から再生成する） ----------------------
+# ---- 生成物・再生成可能な入力（コミットしない） ---------------------------
+# 2026-10-05：ユーザー決定により content/ と specs/ も非コミット化。
+# 公開後の第三者は blueprints/ + yakkan/ + library/clauses/ から
+# 自分で scaffold/author/batch を実行して独自に再生成する前提（docs/decisions.md）。
+# 親の `parts/`（setuptools 由来）が content/<content_id>/parts/ を無言で除外するが、
+# content/ 自体を丸ごと除外するのでここでは打ち消さない。
 dataset/
+content/
+specs/
+# 作業前バックアップ。再生成できる
+dataset_bkup/
 *.pdf
 *.log
 
@@ -18,11 +28,24 @@ dataset/
 .venv/
 .DS_Store
 CLAUDE.local.md
+# probe と smoke の出力先（make clean で消える）
 scratch/
 
-# reviewer の指摘一覧（作業用）。実在約款の疑いがある文を引用することがあるので
+# ---- ローカル作業ファイル -------------------------------------------------
+# reviewer の指摘一覧。実在約款の疑いがある文を引用することがあるので
 # リポジトリには入れない（CLAUDE.md §0.4-1）。
 .review/
 
-
+# 人間の判断・レビュー待ちの詳細と経緯。内部向けの残件リストなので公開しない
+# （2026-10-05 にユーザーの判断で追跡を外した。入口の TASK.md はコミットする）。
 HITL_TODO.md
+
+# 作業指示用のプロンプト。内部向けなので公開しない
+PROMPT.md
+
+# ある時点の現況報告。内部向けのスナップショットなので公開しない（正本は TASK.md / docs/progress.md）
+CURRENT_STATUS.md
+
+# 実在保険会社の公開PDFへの直接URL一覧。GitHubにはコミットしない
+# （docs/reference_structures.md §3.2 から 2026-10-05 に分離。docs/decisions.md）
+docs/reference_urls.md

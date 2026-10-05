@@ -1,0 +1,223 @@
+# 自動車保険（genre: auto）の計算パック。
+# ここには**語彙と値域だけ**を置く。式はパターン、文型は realize/lexicon_ja.py にある。
+genre: auto
+
+# 章の分類 → 既定の約款に現れる章タイトル（前方一致ではなく完全一致で探す）
+chapters:
+  own_damage: ["お車に関する補償", "車両条項", "車両に関する補償"]
+  liability: ["賠償責任条項", "賠償に関する補償", "賠償責任に関する補償"]
+  injury: ["人身傷害に関する補償", "人身傷害条項", "傷害に関する補償"]
+  basic: ["基本条項"]
+
+# 用語の概念 → 既定の約款で使われうる用語ID（優先順）。無ければ fallback の平語を使う
+term_aliases:
+  car: [insured_car, target_car, vehicle_damage]
+  accident: [accident]
+  insured: [insured]
+  policyholder: [policyholder]
+  total_loss: [total_loss]
+  agreed_value: [agreed_value, insured_value, vehicle_amount]
+  residual_disability: [residual_disability]
+  deductible: [deductible]
+  repair_cost: [repair_cost]
+  written_notice: [written_notice]
+fallbacks:
+  car: 被保険自動車
+  accident: 事故
+  insured: 被保険者
+  policyholder: 保険契約者
+  total_loss: 全損
+  agreed_value: 協定保険価額
+  residual_disability: 後遺障害
+  deductible: 免責金額
+  repair_cost: 修理費
+  written_notice: 書面
+
+# 種目に共通する語彙（文型が使う名詞）
+vocab:
+  rate_name: 支払割合
+  grade_name: 後遺障害の等級
+  months_name: 経過月数
+  days_name: 日数
+  amount_name: 損害の額
+  payable_days_name: 支払の対象となる日数
+  years_name: 経過年数
+  deadline_effect: 保険金を支払います。
+  waiting_start: 保険期間の初日
+  sub_benefit: 付随する費用
+  period_end: 保険期間の末日
+  waiting_span: 支払の対象とならない期間
+  payable_span: 支払の対象となる期間
+  waiting_event: 責任の開始
+  mark_pay: ○
+  mark_nopay: ×
+  legend_pay: 支払います
+  legend_nopay: 支払いません
+  matrix_row_title: 競技中かどうか
+  matrix_col_title: 書面による請求
+  matrix_row1: 競技または競技の練習中
+  matrix_row2: 試運転または曲技の最中
+  matrix_row3: 通常の使用の最中
+  matrix_row4: その他の場合
+  matrix_col1: 書面による請求があった
+  matrix_col2: 口頭での連絡のみ
+  matrix_col3: 請求がない
+  payable_event: 支払の対象となる期間の開始
+  enum_value_header: 取扱い
+  enum_value: 支払いません
+  exclusion_competition: 競技、競技の練習または試運転のために{t:car}を使用している間に生じた損害
+  exclusion_no_claim: 損害の発生後、遅滞なく書面による請求が行われなかった場合
+  q_immobile: "{t:car}が自力で走行できないか"
+  q_min_days: 修理に{days}以上を要するか
+  q_other_cover: 代替の車両の費用について保険金が支払われるか
+  flow_start: "{t:accident}の発生"
+
+# パラメータの値域（きりのよい値から選ぶ）
+param_ranges:
+  deductible: {choices: [8000, 10000, 12000, 15000, 20000, 25000, 30000, 40000], unit: JPY}
+  limit: {choices: [80000, 100000, 120000, 150000, 180000, 200000, 250000, 300000, 400000, 500000], unit: JPY}
+  sub_limit: {choices: [20000, 30000, 40000, 50000, 60000, 80000, 100000], unit: JPY}
+  aggregate_limit: {choices: [500000, 1000000, 2000000], unit: JPY}
+  daily: {choices: [2000, 2500, 3000, 4000, 5000, 6000, 7000, 8000], unit: JPY}
+  min_days: {choices: [2, 3, 4, 5, 6, 7], unit: DAY}
+  max_days: {choices: [10, 12, 15, 18, 20, 25, 30, 40], unit: DAY}
+  round_unit: {choices: [100, 500, 1000, 5000, 10000], unit: JPY}
+  max_months: {choices: [24, 30, 36, 42, 48, 54, 60], unit: MONTH}
+  rate_top: {choices: [30, 40, 50], unit: PERCENT}
+  rate_step: {choices: [5, 10], unit: PERCENT}
+  grade_rate_top: {choices: [100], unit: PERCENT}
+  threshold_amount: {choices: [50000, 80000, 100000, 150000, 200000, 250000, 300000], unit: JPY}
+  notice_days: {choices: [30, 60], unit: DAY}
+  payment_days: {choices: [30, 45], unit: DAY}
+  waiting_days: {choices: [7, 14], unit: DAY}
+  max_count: {choices: [2, 3, 5], unit: COUNT}
+
+subjects:
+  - key: pane
+    benefit: ガラス修理費用保険金
+    anchor: own_damage
+    requires: [car]
+    trigger: "{t:car}の窓ガラスのみに損害が生じ、これを修理した場合"
+    patterns: [P02, P01, P08, P15]
+    inputs:
+      amount: {concept: repair_cost}
+      sub_amount: {concept: actual_cost, desc: ガラスの脱着に要した費用の額}
+    vocab:
+      example_title: ガラスだけが壊れたとき
+      sub_benefit: ガラス脱着費用
+
+  - key: replacement
+    benefit: 買替費用保険金
+    anchor: own_damage
+    requires: [car, total_loss]
+    trigger: "{t:car}が{t:total_loss}となり、{t:insured}が代替の自動車を取得した場合"
+    patterns: [P05, P17]
+    inputs:
+      amount: {concept: agreed_value}
+      months: {concept: elapsed_full_months}
+      extra: {concept: extra_days}
+    vocab:
+      example_title: 買替費用保険金の計算例
+
+  - key: alt_transport
+    benefit: 代替交通費用保険金
+    anchor: own_damage
+    requires: [car]
+    trigger: "{t:car}の損害により{t:insured}が公共交通機関を利用した場合"
+    patterns: [P14, P03]
+    inputs:
+      immobile: {concept: immobile, desc: "{t:car}が自力で走行できない状態にあるかどうか"}
+      days: {concept: repair_days}
+      other_cover: {concept: rentacar_paid}
+    vocab:
+      example_title: 修理の間の交通費
+
+  - key: carry
+    benefit: 引取費用保険金
+    anchor: own_damage
+    requires: [car]
+    trigger: "{t:car}が走行不能となり、{t:insured}がこれを修理工場まで搬送した場合"
+    patterns: [P06, P01]
+    inputs:
+      amount: {concept: actual_cost, desc: 搬送に要した費用の額}
+      share_num: {concept: insured_amount, desc: 保険証券記載の車両保険金額}
+      share_den: {concept: agreed_value}
+    vocab:
+      example_title: 搬送費用の計算例
+
+  - key: disability
+    benefit: 後遺障害特別保険金
+    anchor: injury
+    requires: [residual_disability]
+    trigger: "{t:insured}が{t:accident}により{t:residual_disability}が生じた場合"
+    patterns: [P04]
+    inputs:
+      amount: {concept: insured_amount}
+      grade: {concept: disability_grade}
+    vocab:
+      example_title: 等級に応じた支払の例
+
+  - key: belongings
+    benefit: 身の回り品保険金
+    anchor: own_damage
+    requires: [car]
+    trigger: "{t:car}に積載していた{t:insured}の身の回り品に損害が生じた場合"
+    patterns: [P02, P12, P07]
+    inputs:
+      amount: {concept: baggage_value, desc: 身の回り品の損害の額}
+      sub_amount: {concept: equipment_value, desc: 高価品の損害の額}
+      competition: {concept: competition}
+      doctor: {concept: written_claim}
+    vocab:
+      example_title: 身の回り品の支払の例
+      sub_benefit: 高価品に係る保険金
+
+  - key: payment_term
+    benefit: 保険金の支払期限
+    anchor: basic
+    requires: []
+    trigger: "{t:insured}から保険金の請求に必要な書類の提出を受けた場合"
+    patterns: [P10]
+    inputs:
+      base_date: {concept: document_date}
+    vocab:
+      example_title: 支払期限の数え方
+
+  - key: effects_detail
+    benefit: 身の回り品明細保険金
+    anchor: own_damage
+    requires: [car]
+    trigger: "{t:car}に積載していた物について、明細を添えて請求があった場合"
+    patterns: [P09]
+    inputs:
+      items: {concept: item_loss, arg: loss_items, desc: 明細に記載された1件ごとの損害の額}
+    vocab:
+      example_title: 明細による支払の例
+
+  - key: counsel
+    benefit: 法律相談費用保険金
+    anchor: liability
+    requires: []
+    trigger: "{t:insured}が{t:accident}について弁護士に法律上の相談をした場合"
+    patterns: [P13, P11, P16]
+    inputs:
+      amount: {concept: actual_cost, desc: 法律相談のために支出した費用の額}
+      policy_limit: {concept: policy_limit, desc: 保険証券に記載された法律相談費用の限度額}
+      count: {concept: visit_count, min: 0, max: 10, desc: 法律相談を行った回数}
+      paid: {concept: paid_amount, desc: この保険契約についてすでに支払った法律相談費用保険金の額}
+    vocab:
+      example_title: 法律相談費用の支払の例
+
+  - key: newcar
+    benefit: 新車特約保険金
+    anchor: own_damage
+    requires: [car, agreed_value]
+    trigger: "{t:car}の初度登録から一定の期間内に{t:total_loss}となった場合"
+    patterns: [P17, P15]
+    inputs:
+      amount: {concept: agreed_value}
+      years: {concept: elapsed_years, desc: 初度登録の日からの経過年数}
+      sub_amount: {concept: actual_cost, desc: 買替えに要した付随費用の額}
+    vocab:
+      example_title: 新車特約の計算例
+      years_name: 経過年数

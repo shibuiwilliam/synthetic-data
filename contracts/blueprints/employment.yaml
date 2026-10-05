@@ -1,0 +1,106 @@
+# 雇用契約書・労働条件通知書（docs/doctypes.md §5.1）。
+# 参考：samples/employment/（厚労省モデル労働条件通知書・労働局の記載例・ハローワークの雇入通知書）。
+# **構造だけを参考にし、文章はすべて書き下ろす**（CLAUDE.md §0.4-1）。
+#
+# 骨格：**様式型**。P1（docs/reference_structures.md §4 の #8）で確かめた実物の特徴：
+#   - **条を 1 つも持たない。** 本体は 2 列の巨大表（左＝項目名・右＝記載内容）。
+#   - 右列の中の階層は `1` → `(1)` → `・` で、丸数字は出ない。
+#   - **記名押印欄を持たない**（当事者は表の行として導入される）→ `signature: forbidden`。
+#   - 選択は記号（`■` / `□`）で表す（docs/decisions.md 91）。
+#
+# 【転載禁止の要注意点】**実在の厚労省様式の項目の並びと語形をそのまま写さない。**
+# 様式の項目順は指紋の典型（docs/style_guide.md §2.1 の 4）。順序を変え、語形を言い換える。
+doctype: employment
+family: contract
+description: 労働条件通知書。様式型（条を持たない）・記名押印欄なし
+target_pages: [2, 6]
+page_limit: 8
+numbering_scheme: contract-form
+default_style: ct-a4-1col-form
+skeleton_kind: form
+# 様式型の見出しは「(1)　始業・終業の時刻」——**番号だけが括弧**で、見出し文言は括弧で囲まない。
+# 既定の `inline`（条文型の「第1条（目的）」）のままだと「(1)（始業…）」と括弧が二重になる。
+article_heading: plain
+signature: forbidden
+front_matter: { cover: false, toc: false }
+
+parties:
+  count: [2, 2]
+  presets:
+    - - { key: employer, alias: 事業主, role_label: 事業主 }
+      - { key: worker,   alias: 労働者, role_label: 労働者 }
+
+required:
+  - { kind: node, subtype: preamble, min_count: 1, note: "交付の趣旨を述べる前置き" }
+  - { kind: table, min_count: 3, min_rows: 4, note: "記入欄の表を 3 つ以上（型は執筆者が決める）" }
+  - { kind: enumeration, min_count: 2, min_items: 3, note: "休暇・退職の事由などの列挙" }
+  - { kind: figure, min_count: 1, note: "1 日の勤務時間帯か所定労働時間の内訳" }
+  - { kind: ref, min_count: 6 }
+  - { kind: term, min_count: 4 }
+
+skeleton:
+  - id: pre
+    kind: preamble
+    chars: 180
+    todo: "交付者と受領者、交付の趣旨を述べる。**記名押印欄は置かない**（この doctype は持たない）"
+  - id: c1
+    kind: chapter
+    title_options: ["契約の期間"]
+    chars: 400
+    todo: "**有期／無期の選択欄**を記入欄の表で置く。更新の判断基準も"
+    required: [{ kind: table, min_count: 1, min_rows: 4 }]
+  - id: c2
+    kind: chapter
+    title_options: ["就業の場所および業務の内容"]
+    chars: 400
+    todo: "雇入れ直後と変更の範囲を書き分ける"
+  - id: c3
+    kind: chapter
+    title_options: ["労働時間および休憩"]
+    chars: 600
+    todo: "始業・終業の時刻、休憩、所定外労働の有無。図でも示す"
+    required: [{ kind: figure, min_count: 1 }]
+  - id: c4
+    kind: chapter
+    title_options: ["休日および休暇"]
+    chars: 500
+    todo: "定例日・非定例日と、年次有給休暇の付与日数を列挙にする"
+  - id: c5
+    kind: chapter
+    title_options: ["賃金"]
+    chars: 900
+    todo: "**記入欄の表で 10 行以上**（基本賃金・諸手当・割増率・締切・支払日・支払方法・控除）"
+    required: [{ kind: table, min_count: 1, min_rows: 10 }]
+  - id: c6
+    kind: chapter
+    title_options: ["退職に関する事項"]
+    chars: 500
+    todo: "定年、自己都合退職の手続き、解雇の事由を列挙にする"
+  - id: c7
+    kind: chapter
+    title_options: ["社会保険および雇用保険"]
+    chars: 300
+    todo: "加入の有無を選択欄で示す"
+  - id: c8
+    kind: chapter
+    title_options: ["相談の窓口"]
+    chars: 250
+
+appendices: []
+riders: { count: [0, 0], pool: [] }
+
+authored_qa: { count: 15, table_min: 3, figure_min: 2, apply_min: 2 }
+
+closing_options: []
+
+variants:
+  digit_style: { fullwidth: 0.4, halfwidth: 0.6 }
+  era: { seireki: 0.8, wareki: 0.2 }
+  parties_preset: [0]
+  copies: { "1": 1.0 }
+  stamp_duty: { "false": 1.0 }
+  # **2 style 目は版面が最も遠いものを選ぶ**（docs/doctypes.md §7）。
+  # `gothic` は mincho と同系（A4 1 段・無装飾）なので組にしない。
+  styles: [ct-a4-1col-form, ct-a4-1col-mincho]
+
+budget: { chars_min: 2500, chars_max: 6500, footnotes_min: 0 }

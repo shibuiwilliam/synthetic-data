@@ -1,0 +1,45 @@
+# 契約書の標準的な番号方式（docs/schema.md §7.1・docs/doctypes.md §6）。
+#
+# 条文型・頭書型・目録型・約款型で共通して使う。実物の契約書の大多数がこの形。
+#   条    第1条（見出し）   ※章を持つ文書でも**全編通し番号**（章ごとに振り直さない）
+#   項    1 ／ 2            ※第1項は無番号（印字しない）
+#   号    (1) (2)
+#   細目  ア イ ウ
+#   細々目 (ｱ) (ｲ)
+#
+# 第1項が無番号なので、項・号への `{ref:}` は印字どおりに連ねると空文字になる。
+# `paragraph_ref_style: written` で「第1項」「第1項第4号」と書き下す
+# （yakkan の group で 18 件の実害が出た規則。docs/schema.md §7）。
+scheme: contract-standard
+description: 契約書の標準（条は全編通し／第1項無番号／号は括弧数字／細目はカタカナ）
+levels:
+  part:       { format: "第{n}編", counter: arabic }
+  chapter:    { format: "第{n}章", counter: arabic }
+  section:    { format: "第{n}節", counter: arabic }
+  article:    { format: "第{n}条", counter: arabic }
+  paragraph:  { format: "{n}",    counter: arabic, skip_first: true }
+  item:       { format: "({n})",  counter: arabic }
+  subitem:    { format: "{n}",    counter: katakana }
+  subsubitem: { format: "({n})",  counter: katakana }
+# 別紙・別表・様式は呼び名ごとに独立採番する（Node.kind_label で切り替える）。
+appendix: { kind_label: 別紙 }
+# 別紙の中は本文と別の体系（「第1 …」「1 …」「(1) …」）。
+appendix_levels:
+  # 節が 1 つしかない別紙で「第1」だけの空見出しを出さない（実物の別紙も、節を分けるときだけ番号を振る）
+  appendix_section: { format: "第{n}",  counter: arabic, skip_when_single: true }
+  paragraph:        { format: "{n}",    counter: arabic }
+  item:             { format: "({n})",  counter: arabic }
+  subitem:          { format: "{n}",    counter: katakana }
+  subsubitem:       { format: "({n})",  counter: roman }
+# 頭書の中は本文と別の体系。実物（国交省 物品購入契約書様式）は、条件の項目を
+# **括弧なしの算用数字**で振る（docs/reference_structures.md §4 の #5）。
+head_matter_levels:
+  item:    { format: "{n}",   counter: arabic }
+  subitem: { format: "({n})", counter: arabic }
+  # 頭書の項目の中身は**項ではなく説明の行**なので番号を振らない。
+  # 本文の規則に落ちると 2 行目以降に「2」が付き、注記（※ …）まで採番されていた。
+  paragraph: { format: "", counter: none }
+footnote: { inline: "（*{n}）" }
+continuous_articles: true
+paragraph_ref_style: written
+ref: { article_with_title: true, no_chapter_prefix: true }

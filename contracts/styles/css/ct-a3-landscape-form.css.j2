@@ -1,0 +1,9 @@
+{% include "ct-a4-1col-form.css.j2" %}
+
+/* --- ct-a3-landscape-form の差分：A3 横 1 枚物を左右 2 面に使う --- */
+/* 段の間に細い縦罫を引く（実物は左面＝頭書／右面＝条文を罫線で分ける） */
+.cols { column-rule: 0.4pt solid {{ p.rule }}; }
+/* 1 枚物なので、段の途中で表や図が割れないほうが実物に近い。
+   **段またぎ（column-span）は使わない**——WeasyPrint が以降の内容を黙って捨てる
+   （CLAUDE.md §14）。 */
+figure.table-wrap, figure.figure-wrap { break-inside: avoid; }

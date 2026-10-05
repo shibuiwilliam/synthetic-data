@@ -1,0 +1,39 @@
+{
+  "$defs": {
+    "SearchRunEntry": {
+      "additionalProperties": false,
+      "properties": {
+        "query_id": {
+          "title": "Query Id",
+          "type": "string"
+        },
+        "passages": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Passages",
+          "type": "array"
+        }
+      },
+      "required": [
+        "query_id"
+      ],
+      "title": "SearchRunEntry",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "検索結果（docs/evaluation.md §2）。",
+  "properties": {
+    "runs": {
+      "items": {
+        "$ref": "#/$defs/SearchRunEntry"
+      },
+      "title": "Runs",
+      "type": "array"
+    }
+  },
+  "title": "SearchRun",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

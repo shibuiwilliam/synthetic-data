@@ -1,0 +1,22 @@
+{
+  "clause_id": "severability",
+  "scheme": "contract-standard",
+  "title_options": [
+    "分離可能性",
+    "条項の一部無効"
+  ],
+  "variants": [
+    {
+      "id": "v1",
+      "tone": "standard",
+      "paragraphs": [
+        {
+          "text": "本契約のいずれかの条項が無効または執行不能と判断された場合であっても、他の条項の効力は影響を受けない。"
+        },
+        {
+          "text": "{ref:$p1}の場合、{party:$a}および{party:$b}は、無効または執行不能とされた条項の趣旨に最も近い有効な内容となるよう協議する。"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,44 @@
+# insurance-contracts-calculation（本体 insurance-contracts の拡張）
+#
+# 実行は本体の venv に同居させる（TASK.md §2.3）。本体の pyproject.toml は変更しない。
+#   PYTHONPATH=src uv run --project .. python -m insurance_contracts_calculation.cli --help
+#
+# ここに置くのは ruff と pytest の設定、およびパッケージの素性だけである。
+# 依存は本体の venv が持つもの（pydantic・pyyaml・weasyprint ほか）を使う。
+# ただし **生成物**（calc/programs/・calc/tests/）は標準ライブラリだけで動く（DESIGN.md §11.1）。
+[project]
+name = "insurance-contracts-calculation"
+version = "0.2.0"
+description = "日本語保険約款の合成データに計算・判定の規定と正解プログラムを足す拡張"
+readme = "README.md"
+requires-python = ">=3.12,<3.13"
+license = { text = "Proprietary" }
+dependencies = []
+
+[project.scripts]
+icc = "insurance_contracts_calculation.cli:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/insurance_contracts_calculation"]
+
+# 本体（../pyproject.toml）と同じ規約にそろえる。親から `ruff check .` を回したときに
+# 設定が食い違わないようにするため、値を写してある。
+[tool.ruff]
+line-length = 110
+target-version = "py312"
+extend-exclude = ["examples", "out"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+markers = [
+    "slow: seed を広く振る確認（既定では -m 'not slow' で外す）",
+    "base: 本体（yakkan）の import が要る確認",
+]

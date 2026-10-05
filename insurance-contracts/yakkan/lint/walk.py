@@ -204,14 +204,13 @@ def iter_blocks(draft: SourceDraft) -> Iterator[tuple[object, str, str | None]]:
         table = getattr(front, name)
         if table is not None:
             yield table, f"front_matter.{name}", None
+    kinds = _node_kinds(draft)
     for node, ancestors in iter_nodes(draft.body + draft.appendices):
-        article_id = node.id if node.kind in FOOTNOTE_OWNER_KINDS else _nearest_article(ancestors, draft)
+        article_id = node.id if node.kind in FOOTNOTE_OWNER_KINDS else _nearest_article(ancestors, kinds)
         yield from walk(node.blocks, node.id, article_id)
     yield from walk(draft.back_matter.colophon, "back_matter.colophon", None)
     yield from walk(draft.back_matter.contact, "back_matter.contact", None)
 
-
-_ARTICLE_CACHE: dict[int, dict[str, str]] = {}
 
 #: 脚注（`footnotes` ブロック）を持てるノード。
 #: 条が基本だが、**別表にも注記が付く**ので appendix 系も所属先として認める
@@ -221,12 +220,19 @@ _ARTICLE_CACHE: dict[int, dict[str, str]] = {}
 FOOTNOTE_OWNER_KINDS = frozenset({"article", "appendix"})
 
 
-def _nearest_article(ancestors: tuple[str, ...], draft: SourceDraft) -> str | None:
+def _node_kinds(draft: SourceDraft) -> dict[str, str]:
+    """ノードID → 種別。走査 1 回につき 1 つ作る。
+
+    かつてこれを `id(draft)` をキーにしたモジュール変数にキャッシュしていたが、
+    Python は回収したオブジェクトのアドレスを再利用するため、**別の draft のために
+    作った表が当たって** L02 が間欠的に誤報した（docs/decisions.md 2026-10-03）。
+    呼び出し側はもともと全ノードを走査しているので、都度作っても計算量は変わらない。
+    """
+    return {node.id: node.kind for node, _ in iter_nodes(draft.body + draft.appendices)}
+
+
+def _nearest_article(ancestors: tuple[str, ...], kinds: dict[str, str]) -> str | None:
     """直近の「脚注の所属先」を返す。番号は所属先ごとに 1 から振り直す。"""
-    kinds = _ARTICLE_CACHE.setdefault(id(draft), {})
-    if not kinds:
-        for node, _ in iter_nodes(draft.body + draft.appendices):
-            kinds[node.id] = node.kind
     for ancestor in reversed(ancestors):
         if kinds.get(ancestor) in FOOTNOTE_OWNER_KINDS:
             return ancestor
@@ -249,8 +255,9 @@ def iter_texts(draft: SourceDraft) -> Iterator[OwnedText]:
         for i, note in enumerate(term.notes):
             yield OwnedText(term.id, f"{term.id}.notes[{i}]", note, True)
 
+    kinds = _node_kinds(draft)
     for node, ancestors in iter_nodes(draft.body + draft.appendices):
-        article_id = node.id if node.kind in FOOTNOTE_OWNER_KINDS else _nearest_article(ancestors, draft)
+        article_id = node.id if node.kind in FOOTNOTE_OWNER_KINDS else _nearest_article(ancestors, kinds)
         if node.title:
             yield OwnedText(node.id, f"{node.id}.title", node.title, False, article_id)
         if node.text:

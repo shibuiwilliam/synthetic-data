@@ -1,0 +1,23 @@
+# 損害保険の約款（yakkan の `_label_nonlife` を宣言で書き下したもの）。
+# **P2-2 の表現力検証専用の fixture**であり、契約書の生成には使わない（docs/schema.md §7）。
+scheme: nonlife
+levels:
+  part:       { format: "第{n}編", counter: arabic }
+  chapter:    { format: "第{n}章", counter: arabic }
+  section:    { format: "第{n}節", counter: arabic }
+  article:    { format: "第{n}条", counter: arabic }
+  paragraph:  { format: "({n})",  counter: arabic, skip_when_single: true }
+  item:       { format: "{n}",    counter: circled }
+  subitem:    { format: "{n}.",   counter: katakana }
+  subsubitem: { format: "({n})",  counter: katakana }
+appendix: { kind_label: 別表 }
+appendix_levels:
+  appendix_section: { format: "第{n}",  counter: arabic }
+  paragraph:        { format: "{n}．",  counter: arabic }
+  item:             { format: "{n}",    counter: circled }
+  subitem:          { format: "{n}.",   counter: katakana }
+  subsubitem:       { format: "({n})",  counter: roman }
+footnote: { inline: "（*{n}）" }
+continuous_articles: false
+paragraph_ref_style: printed
+ref: { article_with_title: true, no_chapter_prefix: false }

@@ -5,6 +5,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from yakkan.compose import load_draft_or_errors
+from yakkan.lint import parts_index as _parts_index  # noqa: F401
 from yakkan.lint import qa_authored as _qa_authored  # noqa: F401
 
 # ルール登録の副作用のために読み込む

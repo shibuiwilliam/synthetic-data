@@ -1,0 +1,646 @@
+"""Source → HTML（docs/rendering.md §6.3）。
+
+- すべての正解要素に `id` と `data-kind` を付ける。`layout.json` はこれを拾う。
+- 見出しはラベル span と文言 span を分ける。
+- 項・号は CSS grid のぶら下げインデント。float・絶対配置は本文に使わない。
+- 段またぎの表は `<figure>` でくるんでそちらに `column-span: all` を当てる
+  （`<table>` 直接指定は効かない：docs/decisions.md 2026-09-21）。
+"""
+
+from __future__ import annotations
+
+from dataclasses import dataclass, field
+from html import escape
+from pathlib import Path
+
+from jinja2 import Environment, FileSystemLoader, StrictUndefined
+
+from keiyaku.build import BuildContext, enumeration_labels
+from keiyaku.fonts import font_face_css
+from keiyaku.models import (
+    BoxBlock,
+    Cell,
+    CommentaryBlock,
+    Figure,
+    FootnotesBlock,
+    Formula,
+    ListBlock,
+    ListItem,
+    Node,
+    PageBreakBlock,
+    ParagraphBlock,
+    PartiesBlock,
+    QaHeadingBlock,
+    RevisionHistoryBlock,
+    Source,
+    Table,
+)
+from keiyaku.numbering import HEADING_SPACE, NumberingContext, footnote_marker
+from keiyaku.render.inline import InlineContext, render_inline
+from keiyaku.styles import Style
+
+TEMPLATES_DIR = Path(__file__).resolve().parent / "templates"
+CSS_DIR = Path(__file__).resolve().parents[2] / "styles" / "css"
+
+#: 見出しの HTML タグ（ぶら下げ段落にしない種別）
+HEADING_TAGS = {
+    # part と chapter は同じ h2（版面を変えないため）。
+    # @page のヘッダで編と章を分けるのは CSS 側の属性セレクタで行う。
+    "part": "h2",
+    "chapter": "h2",
+    "rider": "h2",
+    "section": "h3",
+    "article": "h4",
+    "appendix": "h2",
+    "appendix_section": "h3",
+}
+PARAGRAPH_KINDS = {"paragraph", "item", "subitem", "subsubitem"}
+
+
+def _is_trailing(block) -> bool:
+    """条末（子ノードの後）に置くブロックか。脚注と欄外注がこれにあたる（docs/schema.md §5.6）。"""
+    if isinstance(block, FootnotesBlock):
+        return True
+    return isinstance(block, BoxBlock) and block.style == "margin_note"
+
+
+def _captioned(label: str, caption: str) -> str:
+    """「表1-1　用語の意味」。番号が無い表・図は表題だけを出す。
+
+    `caption_numbering: chapter` では章に属さない表・図に番号を振らない
+    （docs/remaining_issues.md S2）。build の `plain_text` も同じ形にしているので、
+    ここで区切りの全角空白を落とさないと往復比較（V03）が落ちる。
+    """
+    return f"{label}\u3000{caption}" if label else caption
+
+
+#: 下に段落を抱えると字下げを引き継がせる親の kind（号・細目・細々目）
+_INDENTED_PARENTS = frozenset({"item", "subitem", "subsubitem"})
+
+
+@dataclass
+class HtmlBuilder:
+    """1 文書ぶんの HTML を組み立てる。"""
+
+    source: Source
+    style: Style
+    ctx: BuildContext
+    notes: list[str] = field(default_factory=list)
+    #: 図 id → SVG の描画結果（viewBox 内のノード bbox を持つ）
+    figure_nodes: dict = field(default_factory=dict)
+
+    def inline_ctx(self, element_id: str, auto_label: str = "") -> InlineContext:
+        return InlineContext(
+            resolve_ref=lambda target, mode: self.ctx.resolve_ref(target, mode, element_id),
+            resolve_term=lambda term_id: self.ctx.terms.get(term_id, term_id),
+            resolve_const=lambda key: self.source.meta.constants.get(key, ""),
+            footnote_marker=lambda n: footnote_marker(self.ctx.numbering, n),
+            resolve_party=lambda key, mode: self.ctx.resolve_party(key, mode),
+            auto_label=auto_label,
+            element_id=element_id,
+        )
+
+    def inline(self, text: str, element_id: str, auto_label: str = "") -> str:
+        return render_inline(text, self.inline_ctx(element_id, auto_label))
+
+    # --- ノード -------------------------------------------------------------
+
+    #: ヘッダに経路を出すノード（部・章・別表）。節や条までは出さない。
+    HEADER_PATH_KINDS = frozenset({"part", "chapter", "rider", "appendix"})
+
+    def _header_path(self, node: Node) -> str:
+        """`@page` のヘッダに出す文字列（「第１編␣ご契約のしおり␣第３章␣…」）。
+
+        `derived.labels[].path`（祖先の heading_text）に自分の heading_text を足す。
+        **別表は編の外**にあるので祖先を付けない。
+        """
+        if node.kind not in self.HEADER_PATH_KINDS:
+            return ""
+        info = self.source.derived.labels.get(node.id)
+        if info is None:
+            return ""
+        if node.kind == "appendix":
+            return info.heading_text
+        return HEADING_SPACE.join([*info.path, info.heading_text])
+
+    def node_html(self, node: Node, depth: int = 0) -> str:
+        parts: list[str] = []
+        info = self.source.derived.labels[node.id]
+        label = info.label
+        title = node.title or ""
+        if node.kind in PARAGRAPH_KINDS:
+            # `article_heading == "above"` の第1項は、条ラベルを本文の先頭に走り込ませる
+            parts.append(self._paragraph_html(node, info.run_in_label or label))
+        else:
+            # 同じ体裁では、条の見出し行に条ラベルを出さない（heading_text も「（見出し）」）
+            if node.kind == "article" and self.source.meta.article_heading == "above":
+                label = ""
+            tag = HEADING_TAGS.get(node.kind, "h4")
+            label_span = (
+                f'<span class="label" id="{node.id}_label" data-kind="label">{escape(label)}</span>'
+                if label
+                else ""
+            )
+            # derived.heading_text と PDF のテキスト層を一字一句そろえる。
+            # 条は「第１条（告知義務）」、それ以外は「第１章␣賠償責任条項」（␣ は U+3000）。
+            # 間隔を CSS の margin で空けるとテキスト層に文字が入らず heading_text と食い違う。
+            heading_mode = self.source.meta.article_heading
+            if node.kind == "article" and title and heading_mode != "plain":
+                # 「第１条（告知義務）」。`above` では label_span を出さないので「（告知義務）」になる。
+                title_text, separator = f"（{title}）", ""
+            else:
+                # `plain`（条を持たない説明書）は「①　主な特約の概要」（括弧なし・全角空白）
+                title_text = title
+                separator = HEADING_SPACE if (label and title) else ""
+            sep_span = f'<span class="sep">{separator}</span>' if separator else ""
+            title_span = (
+                f'<span class="title" id="{node.id}_title" data-kind="title">{escape(title_text)}</span>'
+                if title_text
+                else ""
+            )
+            # ヘッダに出す経路を **1 本の文字列**として渡す。
+            # 編と章を別々の CSS string にすると、編の境界がページ途中に来たとき
+            # 別々の編の値を拾って噛み合わなくなる（life-0002 で「第2編…第6章（実は第1編）」が出た）。
+            header_path = self._header_path(node)
+            path_attr = f' data-headerpath="{escape(header_path)}"' if header_path else ""
+            # 見出しの分類ラベル（「契約概要」「注意喚起情報」）。
+            # 独立した id を持たせて bbox を取れるようにする（docs/reference_structures.md #9）。
+            badges = "".join(
+                f'<span class="badge" id="{node.id}__badge{i}" data-kind="badge">{escape(b)}</span>'
+                for i, b in enumerate(node.badges)
+            )
+            parts.append(
+                f'<{tag} id="{node.id}" data-kind="{node.kind}"{path_attr}>'
+                f"{label_span}{sep_span}{title_span}{badges}</{tag}>"
+            )
+        # 条末に置くブロック（脚注・欄外注）は子（項）をすべて出してから最後に置く。
+        # それ以外のブロック（項に付く列挙表など）は、その場に置く。
+        leading = [b for b in node.blocks if not _is_trailing(b)]
+        trailing = [b for b in node.blocks if _is_trailing(b)]
+        for block in leading:
+            parts.append(self.block_html(block, node.id))
+        for child in node.children:
+            parts.append(self.node_html(child, depth + 1))
+        for block in trailing:
+            parts.append(self.block_html(block, node.id))
+        return "\n".join(p for p in parts if p)
+
+    def _under_class(self, node: Node) -> str:
+        """号の下に置いた説明段落に、**親の字下げ**を引き継ぐためのクラスを付ける。
+
+        HTML は親子を入れ子にせず**兄弟として並べる**ので、CSS の子孫セレクタでは
+        深さを表せない。`data-kind` だけで字下げを決めると、号の下の説明段落が
+        版面の左端まで戻ってしまう（実物の契約書は号より深く下げる。
+        `docs/reference_structures.md` §4 の #2「号が小見出し＋説明段落を持つ形」）。
+        """
+        info = self.source.derived.labels.get(node.id)
+        parent_id = info.parent_id if info else None
+        parent = self.source.derived.labels.get(parent_id) if parent_id else None
+        if parent and parent.kind in _INDENTED_PARENTS:
+            return f" under-{parent.kind}"
+        return ""
+
+    def _paragraph_html(self, node: Node, label: str) -> str:
+        text = self.inline(node.text or "", node.id)
+        under = self._under_class(node)
+        if not label:
+            return f'<div class="para no-label{under}" id="{node.id}" data-kind="{node.kind}">{text}</div>'
+        return (
+            f'<div class="para{under}" id="{node.id}" data-kind="{node.kind}">'
+            f'<span class="label" id="{node.id}_label" data-kind="label">{escape(label)}</span>'
+            f'<span class="text" id="{node.id}_text" data-kind="text">{text}</span></div>'
+        )
+
+    # --- ブロック -----------------------------------------------------------
+
+    def block_html(self, block, owner_id: str | None = None) -> str:
+        """`owner_id` は、このブロックがぶら下がるノード（備考の見出しに条ラベルを出すのに使う）。"""
+        match block:
+            case ParagraphBlock():
+                return (
+                    f'<div class="para no-label" id="{block.id}" data-kind="paragraph">'
+                    f"{self.inline(block.text, block.id)}</div>"
+                )
+            case ListBlock():
+                return self._list_html(block)
+            case PartiesBlock():
+                return self._parties_html(block)
+            case RevisionHistoryBlock():
+                return self._revision_history_html(block)
+            case CommentaryBlock():
+                return self._commentary_html(block)
+            case Table():
+                return self._table_html(block)
+            case Figure():
+                return self._figure_html(block)
+            case Formula():
+                return self._formula_html(block)
+            case BoxBlock():
+                inner = "\n".join(self.block_html(b) for b in block.blocks)
+                title = (
+                    f'<span class="box-title" id="{block.id}_title" data-kind="box_title">'
+                    f"{escape(block.title)}</span>"
+                    if block.title
+                    else ""
+                )
+                anchor = f' data-anchor="{block.anchor}"' if block.anchor else ""
+                return (
+                    f'<div class="box" id="{block.id}" data-kind="box" data-style="{block.style}"{anchor}>'
+                    f"{title}{inner}</div>"
+                )
+            case FootnotesBlock():
+                lines = []
+                for note in block.notes:
+                    note_id = f"{block.id}__n{note.n}"
+                    marker = escape(footnote_marker(self.ctx.numbering, note.n))
+                    lines.append(
+                        f'<div class="fn-line" id="{note_id}" data-kind="footnote">'
+                        f'<span class="label">{marker}</span>'
+                        f'<span class="text">{self.inline(note.text, note_id)}</span></div>'
+                    )
+                # 団体保険は「第N条　備考」の枠で示す（docs/reference_structures.md #13）。
+                head = ""
+                cls = "footnotes"
+                if self.source.meta.footnote_style == "remarks_box":
+                    cls = "footnotes remarks"
+                    owner = self.source.derived.labels.get(owner_id or "")
+                    caption = f"{owner.label}　備考" if owner and owner.label else "備考"
+                    head = (
+                        f'<div class="remarks-head" id="{block.id}__head" '
+                        f'data-kind="remarks_head">{escape(caption)}</div>'
+                    )
+                return (
+                    f'<div class="{cls}" id="{block.id}" data-kind="footnotes">'
+                    + head
+                    + "".join(lines)
+                    + "</div>"
+                )
+            case QaHeadingBlock():
+                return f'<h4 id="{block.id}" data-kind="qa_heading">{escape(block.question)}</h4>'
+            case PageBreakBlock():
+                # **段組コンテナを閉じて開き直す**ことで改ページする。
+                # `break-before: page` は multicol の中では効かない（書き方を 5 通り試して全滅）。
+                return (
+                    f'</div><div class="page-break" id="{block.id}" data-kind="page_break"></div>'
+                    f'<div class="cols">'
+                )
+        return ""
+
+    # --- 契約書のブロック（docs/rendering.md §4）------------------------------
+
+    def _party_rows(self, keys: list[str]) -> list:
+        """描く当事者を `meta.parties` の順で返す（`keys` が空なら全件）。"""
+        parties = self.source.meta.parties
+        if not keys:
+            return list(parties)
+        index = {p.key: p for p in parties}
+        return [index[k] for k in keys if k in index]
+
+    def _parties_html(self, block: PartiesBlock) -> str:
+        """当事者表示。**文字列はすべて `meta.parties` から導出する**（手書き文字列なし）。
+
+        `style.parties_style` で表形式（役割名 × 名称）と行形式を切り替える。
+        """
+        parties = self._party_rows(block.keys)
+        if self.style.parties_style == "table":
+            rows = []
+            for party in parties:
+                role = party.role_label or party.alias
+                rows.append(
+                    f'<tr><th id="{block.id}__{party.key}_role" data-kind="party_role">{escape(role)}</th>'
+                    f'<td id="{block.id}__{party.key}_name" data-kind="party_name">'
+                    f"{escape(party.name)}</td></tr>"
+                )
+            return (
+                f'<div class="parties" id="{block.id}" data-kind="parties">'
+                f'<table class="parties-table"><tbody>{"".join(rows)}</tbody></table></div>'
+            )
+        lines = []
+        for party in parties:
+            role = party.role_label or party.alias
+            lines.append(
+                f'<p class="sig-line" id="{block.id}__{party.key}" data-kind="party_line">'
+                f"{escape(role)}{HEADING_SPACE}{escape(party.name)}</p>"
+            )
+        return (
+            f'<div class="parties parties-lines" id="{block.id}" data-kind="parties">{"".join(lines)}</div>'
+        )
+
+    def _revision_history_html(self, block: RevisionHistoryBlock) -> str:
+        """改定履歴。`semantic_type: history` の表と同じ体裁で描く。"""
+        caption = (
+            f'<caption id="{block.id}_caption" data-kind="caption">{escape(block.caption)}</caption>'
+            if block.caption
+            else ""
+        )
+        rows = []
+        for i, entry in enumerate(block.entries):
+            rows.append(
+                f'<tr><th id="{block.id}__r{i}c0" data-kind="cell">{escape(entry.date)}</th>'
+                f'<td id="{block.id}__r{i}c1" data-kind="cell">'
+                f"{self.inline(entry.note, f'{block.id}__r{i}c1')}</td></tr>"
+            )
+        return (
+            f'<div class="revision-history" id="{block.id}" data-kind="revision_history">'
+            f'<table class="tbl">{caption}<tbody>{"".join(rows)}</tbody></table></div>'
+        )
+
+    def _commentary_html(self, block: CommentaryBlock) -> str:
+        """逐条解説。本文と地色・サイズで区別する（`region` は layout 側で commentary になる）。"""
+        title = (
+            f'<div class="heading" id="{block.id}_title" data-kind="commentary_title">'
+            f"{escape(block.title)}</div>"
+            if block.title
+            else ""
+        )
+        paragraphs = "".join(
+            f'<p id="{block.id}__p{i}" data-kind="commentary">{self.inline(text, f"{block.id}__p{i}")}</p>'
+            for i, text in enumerate(block.text)
+        )
+        return (
+            f'<div class="commentary" id="{block.id}" data-kind="commentary" '
+            f'data-anchor="{block.anchor}">{title}{paragraphs}</div>'
+        )
+
+    def signature_html(self, node: Node) -> str:
+        """後文＋契約日＋記名押印欄（＋収入印紙欄）。
+
+        **欄の文字列はすべて `meta` から導出する**（`parties` の名称・住所・代表者、
+        `contract_date`、`stamp_duty`）。執筆者は後文の言い回しだけを書く。
+        後文と日付は同じ wrapper に入れて分離を禁じる（docs/rendering.md §4.4）。
+        """
+        meta = self.source.meta
+        intro = "\n".join(self._paragraph_html(child, "") for child in node.children)
+        date_html = ""
+        if meta.contract_date:
+            date_html = (
+                f'<p class="signature-date" id="{node.id}_date" data-kind="contract_date">'
+                f"{escape(self._format_date(meta.contract_date))}</p>"
+            )
+        stamp = ""
+        if meta.stamp_duty:
+            stamp = f'<div class="stamp-duty" id="{node.id}_stamp" data-kind="stamp_duty">収入印紙</div>'
+        blocks = []
+        for party in self._party_rows(node.parties):
+            lines = []
+            if party.address:
+                lines.append(
+                    f'<p class="sig-line" id="{node.id}__{party.key}_addr" data-kind="sig_address">'
+                    f"住所{HEADING_SPACE}{escape(party.address)}</p>"
+                )
+            lines.append(
+                f'<p class="sig-line" id="{node.id}__{party.key}_name" data-kind="sig_name">'
+                f"{escape(party.alias)}{HEADING_SPACE}{escape(party.name)}</p>"
+            )
+            rep = escape(party.representative) if party.representative else ""
+            seal = f'<span class="seal" id="{node.id}__{party.key}_seal" data-kind="seal">印</span>'
+            lines.append(
+                f'<p class="sig-line" id="{node.id}__{party.key}_rep" data-kind="sig_rep">{rep}{seal}</p>'
+            )
+            blocks.append(
+                f'<div class="sig-block" id="{node.id}__{party.key}" data-kind="sig_block">'
+                f"{''.join(lines)}</div>"
+            )
+        rows = "".join(blocks)
+        if self.style.signature_layout == "horizontal":
+            rows = f'<div class="sig-row">{rows}</div>'
+        return (
+            f'<div class="signature" id="{node.id}" data-kind="signature">'
+            f'<div class="signature-intro">{intro}{date_html}</div>'
+            f"{stamp}{rows}</div>"
+        )
+
+    def _format_date(self, iso: str) -> str:
+        """「2026-04-01」→「２０２６年４月１日」。**表記は `digit_style` に従う**。
+
+        本文が全角なのに日付だけ半角になると紙面の表記が割れる
+        （yakkan のページ番号で同じ問題が起きた。docs/rendering.md §2）。
+        """
+        from keiyaku.numbering import to_digits
+
+        try:
+            year, month, day = (int(part) for part in iso.split("-"))
+        except ValueError:
+            return iso
+        style = self.source.meta.digit_style
+        return f"{to_digits(year, style)}年{to_digits(month, style)}月{to_digits(day, style)}日"
+
+    def _list_html(self, block: ListBlock) -> str:
+        def items(items_: list[ListItem], depth: int) -> str:
+            out = []
+            for item in items_:
+                out.append(
+                    f'<div class="para no-label" id="{item.id}" data-kind="list_item" '
+                    f'style="margin-left:{depth * 1.6}em">{self.inline(item.text, item.id)}</div>'
+                )
+                if item.children:
+                    out.append(items(item.children, depth + 1))
+            return "".join(out)
+
+        return f'<div class="list" id="{block.id}" data-kind="list">{items(block.items, 0)}</div>'
+
+    def _table_html(self, table: Table) -> str:
+        auto = enumeration_labels(table, self.ctx)
+        header_rows = table.layout.header_rows
+        rows_html: list[str] = []
+        for r, row in enumerate(table.grid):
+            cells: list[str] = []
+            for cell in row:
+                if not isinstance(cell, Cell):
+                    continue  # 被結合位置は描画しない
+                tag = "th" if cell.role == "header" else "td"
+                classes = []
+                if cell.role == "stub":
+                    classes.append("stub")
+                if cell.align:
+                    classes.append(f"align-{cell.align}")
+                attrs = f' class="{" ".join(classes)}"' if classes else ""
+                if cell.rowspan > 1:
+                    attrs += f' rowspan="{cell.rowspan}"'
+                if cell.colspan > 1:
+                    attrs += f' colspan="{cell.colspan}"'
+                body = self.inline(cell.text, cell.id, auto_label=auto.get(cell.id, ""))
+                cells.append(
+                    f'<{tag} id="{cell.id}" data-kind="cell" data-role="{cell.role}"{attrs}>{body}</{tag}>'
+                )
+            rows_html.append((r, "".join(cells)))
+
+        head = "".join(f"<tr>{html}</tr>" for r, html in rows_html if r < header_rows)
+        body = "".join(f"<tr>{html}</tr>" for r, html in rows_html if r >= header_rows)
+        thead = f"<thead>{head}</thead>" if head else ""
+        caption_label = self.source.derived.tables[table.id].caption_label or ""
+        # 表題は `<caption>` として **表の中に**置く。外に置くと段・ページの境界で
+        # 表題だけが取り残される（docs/shared_fixes.md B1）。`break-after: avoid` は
+        # 本文欠落を招くので使わない。
+        caption = ""
+        if table.caption:
+            caption = (
+                f'<caption id="{table.id}__caption" data-kind="caption">'
+                f"{escape(_captioned(caption_label, table.caption))}</caption>"
+            )
+        notes = "".join(
+            f'<div class="table-note" id="{table.id}__note{i}" data-kind="table_note">'
+            f"{self.inline(note, f'{table.id}__note{i}')}</div>"
+            for i, note in enumerate(table.notes)
+        )
+        span = " span-all" if table.layout.span_columns else ""
+        enum_class = " enumeration" if table.semantic_type == "enumeration" else ""
+        # col_widths（比率）は <colgroup> で渡す。指定が無ければブラウザ既定の自動幅
+        colgroup = ""
+        if table.layout.col_widths:
+            total = sum(table.layout.col_widths) or 1
+            cols = "".join(f'<col style="width:{w / total * 100:.2f}%">' for w in table.layout.col_widths)
+            colgroup = f"<colgroup>{cols}</colgroup>"
+        return (
+            f'<figure class="table-wrap{span}" id="{table.id}__wrap" data-kind="table_wrap">'
+            f'<table id="{table.id}" data-kind="table" data-semantic="{table.semantic_type}"'
+            f' class="{enum_class.strip()}">{caption}{colgroup}{thead}'
+            f"<tbody>{body}</tbody></table>{notes}</figure>"
+        )
+
+    def _figure_html(self, figure: Figure) -> str:
+        from keiyaku.build import resolve_strings
+        from keiyaku.render.diagrams import DiagramStyle, render_diagram
+
+        derived = self.source.derived.figures[figure.id]
+        # 図の中の {const:} {term:} {ref:} は build が解決済み。SVG を組む前に当てる（A2）
+        figure = resolve_strings(figure, derived.resolved_labels)
+        caption_label = derived.caption_label or ""
+        caption = ""
+        if figure.caption:
+            caption = (
+                f'<figcaption id="{figure.id}__caption" data-kind="caption">'
+                f"{escape(_captioned(caption_label, figure.caption))}</figcaption>"
+            )
+        span = " span-all" if figure.size == "full" else ""
+        result = render_diagram(figure.diagram, DiagramStyle.from_style(self.style), figure.id)
+        # ノードの viewBox 内 bbox を控えておき、描画後にページ座標へ変換する（§6.8-3）
+        self.figure_nodes[figure.id] = result
+        return (
+            f'<figure class="figure-wrap{span}" id="{figure.id}__wrap" data-kind="figure_wrap">'
+            f'<div class="figure-body" id="{figure.id}" data-kind="figure">{result.svg}</div>'
+            f"{caption}</figure>"
+        )
+
+    def _formula_html(self, formula: Formula) -> str:
+        from keiyaku.build import resolve_strings
+        from keiyaku.render.formula import formula_html
+
+        derived = self.source.derived.formulas.get(formula.id)
+        labels = derived.resolved_labels if derived else {}
+        return formula_html(resolve_strings(formula, labels))
+
+
+#: ラベル欄の最小幅（em）。これより狭いと 1 文字ラベルでも本文に近づきすぎる
+_MIN_LABEL_EM = 1.4
+#: ラベルと本文のあいだに置く余白（em）
+_LABEL_GAP_EM = 0.6
+
+
+def _label_em(text: str) -> float:
+    """ラベルの表示幅を em で見積もる（全角 1.0・半角 0.5）。"""
+    return sum(0.5 if ord(ch) < 0x2E80 else 1.0 for ch in text)
+
+
+def label_widths(source: Source) -> dict[str, float]:
+    """kind ごとのラベル欄の幅（em）を、**その文書に実際に出るラベル**から決める。
+
+    固定幅は両方向に壊れる（狭いと本文に食い込み、広いと間延びする。
+    docs/rendering.md §2「ラベル欄の固定幅は使わない」）。
+    保険の「（１）」を想定した 3.6em を契約書の「２」に当てると大きく間延びした
+    （2026-09-26 に目視で発覚）。
+    """
+    widest: dict[str, float] = {}
+    for info in source.derived.labels.values():
+        label = info.run_in_label or info.label
+        if not label:
+            continue
+        kind = info.kind if getattr(info, "kind", None) else None
+        if kind is None:
+            continue
+        widest[kind] = max(widest.get(kind, 0.0), _label_em(label))
+    return {kind: round(max(width + _LABEL_GAP_EM, _MIN_LABEL_EM), 2) for kind, width in widest.items()}
+
+
+def build_css(style: Style, source: Source) -> str:
+    env = Environment(loader=FileSystemLoader(str(CSS_DIR)), undefined=StrictUndefined, autoescape=False)
+    template = env.get_template(f"{style.style_id}.css.j2")
+    fallbacks = ", ".join(f"'{f}'" for f in style.fonts.symbol_fallback)
+    sizes = dict(style.sizes)
+    sizes.setdefault("cover_pt", 20.0)
+    return template.render(
+        style=style,
+        m=style.page.margin_mm,
+        s=sizes,
+        p=style.palette,
+        font_faces=font_face_css(),
+        fallbacks=fallbacks,
+        form_code=source.meta.form_code,
+        contract_number=source.meta.contract_number,
+        digit_style=source.meta.digit_style,
+        doc_title=source.meta.title,
+        has_cover=source.front_matter.cover is not None,
+        table_border=style.table.border,
+        label_w=label_widths(source),
+    )
+
+
+def build_html(
+    source: Source, style: Style, toc_pages: dict[str, int] | None = None
+) -> tuple[str, list[str], dict]:
+    """HTML・注意メッセージ・図の viewBox 内ノード bbox を返す。
+
+    `toc_pages` を渡すと、目次のページ番号を `target-counter` ではなく**文字として**埋める
+    （2 パス描画。docs/gotchas.md「目次のページ番号が収束しない」）。
+    """
+    numbering = NumberingContext(
+        source.meta.numbering_scheme,
+        source.meta.digit_style,
+        article_heading=source.meta.article_heading,
+        footnote_style=source.meta.footnote_style,
+    )
+    from keiyaku.build import assign_caption_labels
+    from keiyaku.numbering import DocumentIndex
+
+    ctx = BuildContext(
+        draft=source,
+        index=DocumentIndex(numbering, source.body, source.appendices, source.back_matter.signature),
+        numbering=numbering,
+        caption_labels=assign_caption_labels(source, numbering),
+        terms={t.id: t.term for t in source.defined_terms},
+    )
+    builder = HtmlBuilder(source=source, style=style, ctx=ctx)
+
+    body_html = "\n".join(builder.node_html(node) for node in source.body)
+    appendices_html = "\n".join(builder.node_html(node) for node in source.appendices)
+    colophon_html = "\n".join(builder.block_html(b) for b in source.back_matter.colophon)
+    signature_html = "\n".join(builder.signature_html(node) for node in source.back_matter.signature)
+    # 前付け（§3.1 A2/A3/A5）。lint は source を見るので、ここで描かないと
+    # 「JSON にはあるが PDF に出ない」要素ができてしまう（verify V05/V10 が検出する）
+    front = source.front_matter
+    preface_html = "\n".join(builder.block_html(b) for b in front.preface)
+    cover = front.cover
+    note_html = (
+        [builder.inline(note, f"cover_note{i}") for i, note in enumerate(cover.notes)] if cover else []
+    )
+
+    env = Environment(
+        loader=FileSystemLoader(str(TEMPLATES_DIR)), undefined=StrictUndefined, autoescape=False
+    )
+    template = env.get_template("document.html.j2")
+    html = template.render(
+        source=source,
+        # 目次の見出し語は style の宣言（契約書は「目次」、保険約款は「もくじ」）
+        style=style,
+        cover=cover,
+        note_html=note_html,
+        toc=source.derived.toc if (front.toc and front.toc.enabled) else [],
+        body_html=body_html,
+        appendices_html=appendices_html,
+        colophon_html=colophon_html,
+        signature_html=signature_html,
+        preface_html=preface_html,
+        css=build_css(style, source),
+        toc_pages=toc_pages or {},
+    )
+    return html, builder.notes, builder.figure_nodes

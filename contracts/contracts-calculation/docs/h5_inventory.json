@@ -1,0 +1,880 @@
+[
+ {
+  "cid": "con-0001",
+  "qid": "qa_auth_009",
+  "verdict": "一致",
+  "computed": 10,
+  "expected": 10,
+  "answer_raw": "１割",
+  "steps": {
+   "cap_percent": 10,
+   "borne": 10
+  },
+  "problems": [],
+  "flags": [],
+  "derived_params": []
+ },
+ {
+  "cid": "con-0001",
+  "qid": "qa_auth_010",
+  "verdict": "読み幅あり（計算は一致）",
+  "computed": 90,
+  "expected": 90,
+  "answer_raw": "９割",
+  "steps": {
+   "advance_pct": 30,
+   "each_pct": 20,
+   "total": 90
+  },
+  "problems": [],
+  "flags": [
+   {
+    "kind": "reading",
+    "text": "第十六条第4項「9割を超えることはできない」の読み（9割ちょうどは可、の読みでよいか）"
+   }
+  ],
+  "derived_params": []
+ },
+ {
+  "cid": "con-0002",
+  "qid": "qa_auth_008",
+  "verdict": "一致",
+  "computed": 54700000,
+  "expected": 54700000,
+  "answer_raw": "5470万円",
+  "steps": {
+   "advance": 54700000
+  },
+  "problems": [],
+  "flags": [],
+  "derived_params": []
+ },
+ {
+  "cid": "con-0002",
+  "qid": "qa_auth_009",
+  "verdict": "一致",
+  "computed": 10,
+  "expected": 10,
+  "answer_raw": "10パーセント",
+  "steps": {
+   "advance_pct": 20,
+   "paid": 90,
+   "remaining": 10
+  },
+  "problems": [],
+  "flags": [
+   {
+    "kind": "note",
+    "text": "別紙2 の累計の割合（90パーセント）とも一致することを確認済み（前払金は部分払の割合に含まれない読み）"
+   }
+  ],
+  "derived_params": []
+ },
+ {
+  "cid": "con-0002",
+  "qid": "qa_auth_010",
+  "verdict": "一致",
+  "computed": "2032-06-09",
+  "expected": "2032-06-09",
+  "answer_raw": "2032年6月9日",
+  "steps": {
+   "deadline": "2032-06-09"
+  },
+  "problems": [],
+  "flags": [
+   {
+    "kind": "note",
+    "text": "「受けた日から20日以内」の満了を通知日＋20日とした（初日不算入の慣行）"
+   }
+  ],
+  "derived_params": []
+ },
+ {
+  "cid": "csl-0001",
+  "qid": "qa_auth_009",
+  "verdict": "読み幅あり（計算は一致）",
+  "computed": "2027-09-14",
+  "expected": "2027-09-14",
+  "answer_raw": "２０２７年９月１４日",
+  "steps": {
+   "expiry": "2027-12-14",
+   "notify_by": "2027-09-14"
+  },
+  "problems": [],
+  "flags": [
+   {
+    "kind": "reading",
+    "text": "「締結した日から１年」の満了日を応当日（12/14）と読んだ（前日 12/13 と読む流儀もある）"
+   },
+   {
+    "kind": "reading",
+    "text": "「満了する３か月前まで」の期限を 9/14 当日を含む読みにした（9/13 と読む流儀もある）"
+   }
+  ],
+  "derived_params": []
+ },
+ {
+  "cid": "csl-0001",
+  "qid": "qa_auth_010",
+  "verdict": "一致",
+  "computed": 358000,
+  "expected": 358000,
+  "answer_raw": "３５万８０００円",
+  "steps": {
+   "over_hours": 6,
+   "total": 358000
+  },
+  "problems": [],
+  "flags": [],
+  "derived_params": []
+ },
+ {
+  "cid": "csl-0002",
+  "qid": "qa_auth_008",
+  "verdict": "一致",
+  "computed": 500000,
+  "expected": 500000,
+  "answer_raw": "50万円",
+  "steps": {
+   "over_hours": 5,
+   "total": 500000
+  },
+  "problems": [],
+  "flags": [
+   {
+    "kind": "note",
+    "text": "移動の時間を算入しない前提は本文に根拠がある（第5条「移動に要した時間は、前項の時間に算入しない」）"
+   }
+  ],
+  "derived_params": []
+ },
+ {
+  "cid": "csl-0002",
+  "qid": "qa_auth_009",
+  "verdict": "一致",
+  "computed": "2031-08-01",
+  "expected": "2031-08-01",
+  "answer_raw": "2031年8月1日",
+  "steps": {
+   "notify_by": "2031-08-01"
+  },
+  "problems": [],
+  "flags": [
+   {
+    "kind": "note",
+    "text": "「2か月前まで」は応当日（8/1）当日を含む読み（csl-0001 と同じ数え方）"
+   }
+  ],
+  "derived_params": []
+ },
+ {
+  "cid": "csl-0002",
+  "qid": "qa_auth_010",
+  "verdict": "一致",
+  "computed": 122581,
+  "expected": 122581,
+  "answer_raw": "12万2581円",
+  "steps": {
+   "fee": 122581
+  },
+  "problems": [],
+  "flags": [
+   {
+    "kind": "note",
+    "text": "切り上げは本文に根拠がある（a5_p5「円未満の端数は切り上げる」）"
+   }
+  ],
+  "derived_params": []
+ },
+ {
+  "cid": "dlg-0001",
+  "qid": "qa_auth_009",
+  "verdict": "読み幅あり（計算は一致）",
+  "computed": "2027-02-03",
+  "expected": "2027-02-03",
+  "answer_raw": "２０２７年２月３日",
+  "steps": {
+   "deadline": "2027-02-03"
+  },
+  "problems": [],
+  "flags": [
+   {
+    "kind": "reading",
+    "text": "「締めの日から３日以内」の起算を締めの日の翌日とする読み（当日起算なら 2/2 になる）"
+   }
+  ],
+  "derived_params": []
+ },
+ {
+  "cid": "dlg-0001",
+  "qid": "qa_auth_010",
+  "verdict": "一致",
+  "computed": 1100000,
+  "expected": 1100000,
+  "answer_raw": "１１０万円",
+  "steps": {
+   "over_hours": 20,
+   "total": 1100000
+  },
+  "problems": [],
+  "flags": [],
+  "derived_params": []
+ },
+ {
+  "cid": "dlg-0002",
+  "qid": "qa_auth_008",
+  "verdict": "一致",
+  "computed": "2029-05-05",
+  "expected": "2029-05-05",
+  "answer_raw": "２０２９年５月５日",
+  "steps": {
+   "deadline": "2029-05-05"
+  },
+  "problems": [],
+  "flags": [
+   {
+    "kind": "note",
+    "text": "起算の数え方は dlg-0001 qa_auth_009 と同じ（締めの日の翌日から）"
+   }
+  ],
+  "derived_params": []
+ },
+ {
+  "cid": "dlg-0002",
+  "qid": "qa_auth_009",
+  "verdict": "一致",
+  "computed": 459200,
+  "expected": 459200,
+  "answer_raw": "４５万９２００円",
+  "steps": {
+   "over_hours": 14,
+   "total": 459200
+  },
+  "problems": [],
+  "flags": [],
+  "derived_params": []
+ },
+ {
+  "cid": "dlg-0002",
+  "qid": "qa_auth_010",
+  "verdict": "一致",
+  "computed": 252000,
+  "expected": 252000,
+  "answer_raw": "２５万２０００円",
+  "steps": {
+   "fee": 252000
+  },
+  "problems": [],
+  "flags": [
+   {
+    "kind": "note",
+    "text": "切り捨ては本文に根拠がある（a6_p5「円未満の端数は切り捨てる」）"
+   }
+  ],
+  "derived_params": []
+ },
+ {
+  "cid": "emp-0001",
+  "qid": "qa_auth_009",
+  "verdict": "読み幅あり（計算は一致）",
+  "computed": 127,
+  "expected": 127,
+  "answer_raw": "１．２７倍",
+  "steps": {
+   "premium_pct": 27,
+   "multiplier": 127
+  },
+  "problems": [],
+  "flags": [
+   {
+    "kind": "reading",
+    "text": "「割増率」を基本に上乗せする率と読んだ（割増賃金の率そのものが 1.27 と読む流儀もある）"
+   }
+  ],
+  "derived_params": []
+ },
+ {
+  "cid": "emp-0001",
+  "qid": "qa_auth_010",
+  "verdict": "読み幅あり（計算は一致）",
+  "computed": "2027-08-01",
+  "expected": "2027-08-01",
+  "answer_raw": "２０２７年８月１日",
+  "steps": {
+   "vest_date": "2027-08-01"
+  },
+  "problems": [],
+  "flags": [
+   {
+    "kind": "reading",
+    "text": "「６か月を継続して勤務し」た時点を 8/1（応当日）と読んだ（7/31 の経過後と読む流儀もある）"
+   }
+  ],
+  "derived_params": []
+ },
+ {
+  "cid": "emp-0002",
+  "qid": "qa_auth_008",
+  "verdict": "一致",
+  "computed": 70800,
+  "expected": 70800,
+  "answer_raw": "7万800円",
+  "steps": {
+   "wage": 70800
+  },
+  "problems": [],
+  "flags": [
+   {
+    "kind": "note",
+    "text": "早番 6 時間は表3の始終業時刻（7:00〜13:00・休憩なし）から導出した（時刻の差引は演算語彙の外）"
+   }
+  ],
+  "derived_params": [
+   "shift_hours"
+  ]
+ },
+ {
+  "cid": "emp-0002",
+  "qid": "qa_auth_009",
+  "verdict": "読み幅あり（計算は一致）",
+  "computed": 20300,
+  "expected": 20300,
+  "answer_raw": "2万300円",
+  "steps": {
+   "total": 20300
+  },
+  "problems": [],
+  "flags": [
+   {
+    "kind": "reading",
+    "text": "深夜の割増（33パーセント）を設問の文で明示的に除く、という除き方が妥当か"
+   },
+   {
+    "kind": "note",
+    "text": "実働 15 時間は表3の時刻（16:30〜翌9:30＝17時間、休憩120分）から導出した"
+   }
+  ],
+  "derived_params": [
+   "worked_hours"
+  ]
+ },
+ {
+  "cid": "emp-0002",
+  "qid": "qa_auth_010",
+  "verdict": "一致",
+  "computed": "2030-09-05",
+  "expected": "2030-09-05",
+  "answer_raw": "2030年9月5日",
+  "steps": {
+   "payday": "2030-09-05"
+  },
+  "problems": [],
+  "flags": [
+   {
+    "kind": "note",
+    "text": "締切は表4「毎月15日」。設問の期間（7/16〜8/15）の締めは 8/15 で、これと整合する"
+   }
+  ],
+  "derived_params": []
+ },
+ {
+  "cid": "lea-0001",
+  "qid": "qa_auth_009",
+  "verdict": "読み幅あり（計算は一致）",
+  "computed": "2029-09-30",
+  "expected": "2029-09-30",
+  "answer_raw": "２０２９年９月３０日",
+  "steps": {
+   "notify_by": "2029-09-30"
+  },
+  "problems": [],
+  "flags": [
+   {
+    "kind": "reading",
+    "text": "「６か月前まで」を応当日（9/30）当日を含む読みにした（10/1 と読む流儀もある）"
+   }
+  ],
+  "derived_params": []
+ },
+ {
+  "cid": "lea-0001",
+  "qid": "qa_auth_010",
+  "verdict": "一致",
+  "computed": 317000,
+  "expected": 317000,
+  "answer_raw": "３１万７０００円",
+  "steps": {
+   "total": 317000
+  },
+  "problems": [],
+  "flags": [],
+  "derived_params": []
+ },
+ {
+  "cid": "lea-0002",
+  "qid": "qa_auth_007",
+  "verdict": "一致",
+  "computed": 71666,
+  "expected": 71666,
+  "answer_raw": "7万1666円",
+  "steps": {
+   "monthly": 215000,
+   "fee": 71666
+  },
+  "problems": [],
+  "flags": [
+   {
+    "kind": "note",
+    "text": "切り捨ては本文に根拠がある（a3_p2「円未満の端数は切り捨てる」）。6/10 終了＝10日分・6月は30日"
+   }
+  ],
+  "derived_params": []
+ },
+ {
+  "cid": "lea-0002",
+  "qid": "qa_auth_008",
+  "verdict": "一致",
+  "computed": 381000,
+  "expected": 381000,
+  "answer_raw": "38万1000円",
+  "steps": {
+   "unpaid": 215000,
+   "refund": 381000
+  },
+  "problems": [],
+  "flags": [
+   {
+    "kind": "note",
+    "text": "未払の賃料等1か月分は賃料＋共益費の合計と読んだ（a4_p4「未払の賃料等および原状回復に要した費用を差し引いた額」）"
+   }
+  ],
+  "derived_params": []
+ },
+ {
+  "cid": "lea-0002",
+  "qid": "qa_auth_009",
+  "verdict": "一致",
+  "computed": "2032-10-17",
+  "expected": "2032-10-17",
+  "answer_raw": "2032年10月17日",
+  "steps": {
+   "deadline": "2032-10-17"
+  },
+  "problems": [],
+  "flags": [
+   {
+    "kind": "note",
+    "text": "「14日前まで」＝明渡しの日の14日前（10/17）当日を含む読み"
+   }
+  ],
+  "derived_params": []
+ },
+ {
+  "cid": "lic-0001",
+  "qid": "qa_auth_009",
+  "verdict": "一致",
+  "computed": 3900000,
+  "expected": 3900000,
+  "answer_raw": "３９０万円",
+  "steps": {
+   "t1_base": 50000000,
+   "t1": 2000000,
+   "t2_base": 50000000,
+   "t2": 1500000,
+   "t3_base": 20000000,
+   "t3": 400000,
+   "running": 3900000
+  },
+  "problems": [],
+  "flags": [
+   {
+    "kind": "note",
+    "text": "区分ごとに分けて計算する方式は本文に根拠がある（a3_p4「区分ごとに分けて計算した額の合計」）"
+   }
+  ],
+  "derived_params": []
+ },
+ {
+  "cid": "lic-0001",
+  "qid": "qa_auth_010",
+  "verdict": "一致",
+  "computed": 1200000,
+  "expected": 1200000,
+  "answer_raw": "１２０万円",
+  "steps": {
+   "t1_base": 20000000,
+   "t1": 800000,
+   "t2_base": 0,
+   "t2": 0,
+   "t3_base": 0,
+   "t3": 0,
+   "running": 800000,
+   "payable": 1200000
+  },
+  "problems": [],
+  "flags": [
+   {
+    "kind": "note",
+    "text": "「差額を最低実施料として支払う」＝合計で最低実施料額になる読み（設問の答えもこの読み）"
+   }
+  ],
+  "derived_params": []
+ },
+ {
+  "cid": "lic-0002",
+  "qid": "qa_auth_009",
+  "verdict": "一致",
+  "computed": 300000,
+  "expected": 300000,
+  "answer_raw": "30万円",
+  "steps": {
+   "base": 200000,
+   "payable": 300000
+  },
+  "problems": [],
+  "flags": [],
+  "derived_params": []
+ },
+ {
+  "cid": "lic-0002",
+  "qid": "qa_auth_010",
+  "verdict": "一致",
+  "computed": 500000,
+  "expected": 500000,
+  "answer_raw": "50万円",
+  "steps": {
+   "base": 500000,
+   "payable": 500000
+  },
+  "problems": [],
+  "flags": [],
+  "derived_params": []
+ },
+ {
+  "cid": "nda-0001",
+  "qid": "qa_auth_008",
+  "verdict": "読み幅あり（計算は一致）",
+  "computed": "2033-05-18",
+  "expected": "2033-05-18",
+  "answer_raw": "２０３３年５月１８日",
+  "steps": {
+   "end_date": "2028-05-18",
+   "survive_until": "2033-05-18"
+  },
+  "problems": [],
+  "flags": [
+   {
+    "kind": "reading",
+    "text": "第7条に自動更新の定めがあり、設問は「期間の満了により終了した場合」と固定している。この前提の書きぶりで曖昧さが残らないか"
+   },
+   {
+    "kind": "reading",
+    "text": "「締結した日から２年」の満了を応当日（5/18）と読んだ（前日と読む流儀もある）"
+   }
+  ],
+  "derived_params": []
+ },
+ {
+  "cid": "nda-0001",
+  "qid": "qa_auth_009",
+  "verdict": "読み幅あり（計算は一致）",
+  "computed": 17,
+  "expected": 17,
+  "answer_raw": "１７日目",
+  "steps": {
+   "total_days": 17
+  },
+  "problems": [],
+  "flags": [
+   {
+    "kind": "reading",
+    "text": "「期限どおりに廃棄した場合」という最悪ケースを答えにしている点の是非"
+   }
+  ],
+  "derived_params": []
+ },
+ {
+  "cid": "nda-0002",
+  "qid": "qa_auth_009",
+  "verdict": "一致",
+  "computed": "2036-02-05",
+  "expected": "2036-02-05",
+  "answer_raw": "２０３６年２月５日",
+  "steps": {
+   "end_date": "2029-02-05",
+   "survive_until": "2036-02-05"
+  },
+  "problems": [],
+  "flags": [
+   {
+    "kind": "note",
+    "text": "満了＝応当日の読みは nda-0001 と同じ"
+   }
+  ],
+  "derived_params": []
+ },
+ {
+  "cid": "nda-0002",
+  "qid": "qa_auth_010",
+  "verdict": "読み幅あり（計算は一致）",
+  "computed": 31,
+  "expected": 31,
+  "answer_raw": "３１日目",
+  "steps": {
+   "total_days": 31
+  },
+  "problems": [],
+  "flags": [
+   {
+    "kind": "reading",
+    "text": "「期限どおりに廃棄した」最悪ケースを答えにしている点の是非（nda-0001 と同じ考え方）"
+   }
+  ],
+  "derived_params": []
+ },
+ {
+  "cid": "ots-0001",
+  "qid": "qa_auth_009",
+  "verdict": "読み幅あり（計算は一致）",
+  "computed": 10,
+  "expected": 10,
+  "answer_raw": "10日目",
+  "steps": {
+   "deemed_day": 10
+  },
+  "problems": [],
+  "flags": [
+   {
+    "kind": "reading",
+    "text": "「10日以内」の期間の満了を「10日目」と数えてよいか（a4_p3「その期間の満了の時に検査に合格したものとみなす」）"
+   }
+  ],
+  "derived_params": []
+ },
+ {
+  "cid": "ots-0001",
+  "qid": "qa_auth_010",
+  "verdict": "読み幅あり（計算は一致）",
+  "computed": 14,
+  "expected": 14,
+  "answer_raw": "14日目",
+  "steps": {
+   "redeliver_day": 14
+  },
+  "problems": [],
+  "flags": [
+   {
+    "kind": "reading",
+    "text": "「引渡しの当日に補正を求め」という条件の固定が設問文で十分に明示できているか（検査に10日かけると24日目になる）"
+   }
+  ],
+  "derived_params": []
+ },
+ {
+  "cid": "ots-0002",
+  "qid": "qa_auth_009",
+  "verdict": "一致",
+  "computed": "2029-02-04",
+  "expected": "2029-02-04",
+  "answer_raw": "２０２９年２月４日",
+  "steps": {
+   "deadline": "2029-02-04"
+  },
+  "problems": [],
+  "flags": [
+   {
+    "kind": "note",
+    "text": "2029年2月は28日（うるう年でない）。暦の引き算で機械的に確かめた"
+   }
+  ],
+  "derived_params": []
+ },
+ {
+  "cid": "ots-0002",
+  "qid": "qa_auth_010",
+  "verdict": "一致",
+  "computed": 1680000,
+  "expected": 1680000,
+  "answer_raw": "１６８万円",
+  "steps": {
+   "advance": 1680000
+  },
+  "problems": [],
+  "flags": [],
+  "derived_params": []
+ },
+ {
+  "cid": "pur-0001",
+  "qid": "qa_auth_009",
+  "verdict": "読み幅あり（計算は一致）",
+  "computed": "2027-03-12",
+  "expected": "2027-03-12",
+  "answer_raw": "２０２７年３月１２日",
+  "steps": {
+   "deemed_date": "2027-03-12"
+  },
+  "problems": [],
+  "flags": [
+   {
+    "kind": "reading",
+    "text": "起算を納入日の翌日とする読みを採った（当日起算なら 3/11 になる）"
+   }
+  ],
+  "derived_params": []
+ },
+ {
+  "cid": "pur-0001",
+  "qid": "qa_auth_010",
+  "verdict": "一致",
+  "computed": 7865000,
+  "expected": 7865000,
+  "answer_raw": "７，８６５，０００",
+  "steps": {
+   "total": 7865000
+  },
+  "problems": [],
+  "flags": [
+   {
+    "kind": "note",
+    "text": "合計が頭書の契約金額（786万5000円）と一致することは verify が突合する（L11 は表の中の加算を見ない）"
+   }
+  ],
+  "derived_params": []
+ },
+ {
+  "cid": "pur-0002",
+  "qid": "qa_auth_008",
+  "verdict": "一致",
+  "computed": "2029-03-12",
+  "expected": "2029-03-12",
+  "answer_raw": "2029年3月12日",
+  "steps": {
+   "deadline": "2029-03-12"
+  },
+  "problems": [],
+  "flags": [],
+  "derived_params": []
+ },
+ {
+  "cid": "pur-0002",
+  "qid": "qa_auth_009",
+  "verdict": "一致",
+  "computed": 11383200,
+  "expected": 11383200,
+  "answer_raw": "1138万3200円",
+  "steps": {
+   "retention": 1264800,
+   "payment": 11383200
+  },
+  "problems": [],
+  "flags": [],
+  "derived_params": []
+ },
+ {
+  "cid": "pur-0002",
+  "qid": "qa_auth_010",
+  "verdict": "一致",
+  "computed": "2030-09-30",
+  "expected": "2030-09-30",
+  "answer_raw": "2030年9月30日",
+  "steps": {
+   "period_end_date": "2030-09-20",
+   "payday": "2030-09-30"
+  },
+  "problems": [],
+  "flags": [
+   {
+    "kind": "note",
+    "text": "「満了した日の属する月の末日」は本文に根拠がある（a6_p3）。満了＝応当日（2030/9/20）の読み"
+   }
+  ],
+  "derived_params": []
+ },
+ {
+  "cid": "sys-0001",
+  "qid": "qa_auth_009",
+  "verdict": "読み幅あり（計算は一致）",
+  "computed": 20,
+  "expected": 20,
+  "answer_raw": "２０日目",
+  "steps": {
+   "deemed_day": 20
+  },
+  "problems": [],
+  "flags": [
+   {
+    "kind": "reading",
+    "text": "検収の期限（14日）とみなし検収（20日）が別の数である関係が、読み手に伝わる書きぶりになっているか"
+   }
+  ],
+  "derived_params": []
+ },
+ {
+  "cid": "sys-0001",
+  "qid": "qa_auth_010",
+  "verdict": "読み幅あり（計算は一致）",
+  "computed": 7,
+  "expected": 7,
+  "answer_raw": "７日目",
+  "steps": {
+   "deemed_day": 7
+  },
+  "problems": [],
+  "flags": [
+   {
+    "kind": "reading",
+    "text": "条文の起算は「受け取った日」だが設問は「発した日」を起点にしている。発送と受領が同日という前提に本文上の根拠がない"
+   }
+  ],
+  "derived_params": []
+ },
+ {
+  "cid": "sys-0002",
+  "qid": "qa_auth_008",
+  "verdict": "一致",
+  "computed": "2033-05-22",
+  "expected": "2033-05-22",
+  "answer_raw": "2033年5月22日",
+  "steps": {
+   "deemed_date": "2033-05-22"
+  },
+  "problems": [],
+  "flags": [
+   {
+    "kind": "note",
+    "text": "通知の期限（4日）とは別の日数であることを確認済み（ch2_a2_p3）"
+   }
+  ],
+  "derived_params": []
+ },
+ {
+  "cid": "sys-0002",
+  "qid": "qa_auth_009",
+  "verdict": "一致",
+  "computed": 4800000,
+  "expected": 4800000,
+  "answer_raw": "480万円",
+  "steps": {
+   "price": 4800000
+  },
+  "problems": [],
+  "flags": [],
+  "derived_params": []
+ },
+ {
+  "cid": "sys-0002",
+  "qid": "qa_auth_010",
+  "verdict": "一致",
+  "computed": 51400000,
+  "expected": 51400000,
+  "answer_raw": "5140万円",
+  "steps": {
+   "base_total": 50160000,
+   "release_total": 1240000,
+   "total": 51400000
+  },
+  "problems": [],
+  "flags": [],
+  "derived_params": []
+ }
+]

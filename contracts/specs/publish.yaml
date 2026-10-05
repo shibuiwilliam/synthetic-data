@@ -1,0 +1,95 @@
+# 公開（配布）の宣言 — 仕様は docs/publishing.md
+#
+# `keiyaku publish` はこのファイルだけを「決定」の出所として読み、dataset/ に公開用の面
+# （README.md のカード・views/・.gitattributes・licenses/・SHA256SUMS）を作る。
+#
+# **ライセンスと公開可否は人間の決定事項**（CLAUDE.md §0.2-1・HITL_TODO.md H13）。
+# AI は license.id を勝手に埋めない。未決のままでも publish update は通るが、
+# scripts/upload_hf.py はアップロードを拒否する。
+
+target: huggingface
+
+hub:
+  # 2026-10-05 に人間が指定したアカウント: https://huggingface.co/cvusk
+  # 名前は「日本語の文書（契約書）の構造的な読み取り」が伝わるものにする、という指示に沿う。
+  repo_id: cvusk/japanese-contract-document-understanding
+  repo_type: dataset
+  # 最初は private で上げ、人が Hub 上で中身を見てから public にする（docs/publishing.md §7）
+  private: true
+  # 上げ先のリビジョン（空なら main）
+  revision: ""
+
+# Hub のカードに出す表示名
+pretty_name: "Japanese Contract Document Understanding (synthetic, with full ground truth)"
+pretty_name_ja: "日本語契約書の構造読み取り評価セット（合成・完全な正解つき）"
+
+license:
+  # ---- 人間の判断待ち（HITL_TODO.md H13）----------------------------------
+  # 決まったら Hub の license タグ（SPDX 風の識別子）を入れる。候補：
+  #   cc-by-4.0 / cc0-1.0 / cc-by-sa-4.0 / cc-by-nc-4.0 / apache-2.0 / other
+  # `undecided` のあいだは frontmatter に license キーを出さず、カード本文に「未決」と書く。
+  id: undecided
+  # 著作権表示（CC BY 系では必須）。親リポジトリの LICENSE（MIT）の表記に合わせてある
+  #   ../LICENSE: "Copyright (c) 2026 shibuiwilliam"
+  holder: "shibuiwilliam"
+  year: "2026"
+  # 生成物とコードでライセンスが違う場合の補足（カードに出す）
+  note: ""
+
+# 生成コードの置き場（カードから案内する。公開リポジトリであることの確認は人間の判断）
+code_repo: "https://github.com/shibuiwilliam/synthetic-data/tree/main/contracts"
+
+language:
+  - ja
+multilinguality: monolingual
+annotations_creators:
+  - machine-generated
+source_datasets:
+  - original
+
+# Hub のタスク分類（https://huggingface.co/tasks の識別子）
+task_categories:
+  - question-answering
+  - visual-question-answering
+  - image-to-text
+  - text-retrieval
+  - table-question-answering
+task_ids:
+  - extractive-qa
+  - document-question-answering
+
+tags:
+  - japanese
+  - contracts
+  - legal
+  - synthetic
+  - document-understanding
+  - document-ai
+  - ocr
+  - layout-analysis
+  - table-extraction
+  - information-extraction
+  - retrieval
+  - rag-evaluation
+  - pdf
+
+# 配布しないもの（.gitignore と upload の ignore_patterns と SHA256SUMS の除外に使う。
+# render.html は「デバッグ用・配布対象外」＝ CLAUDE.md §1.1）
+exclude:
+  - "render.html"
+  - ".DS_Store"
+  - "*.log"
+  - ".gitignore"
+
+# Git LFS に入れる対象（docs/publishing.md §5）
+lfs:
+  - "*.pdf"
+  - "*.png"
+
+citation:
+  # **要確認（HITL_TODO.md H14）**：公開時の著者名の表記。親リポジトリの LICENSE と同じ
+  # ハンドル名を置いてある（本名表記にするかは人間の判断）。
+  authors:
+    - "shibuiwilliam"
+  title: "Japanese Contract Document Understanding: a fully synthetic Japanese business-contract dataset with complete ground truth"
+  year: 2026

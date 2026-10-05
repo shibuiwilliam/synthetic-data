@@ -1,0 +1,380 @@
+/* _base.css.j2 — 全スタイル共通の土台
+   各スタイルの css.j2 がこれを include し、差分だけを後から上書きする。
+   生成元は styles/<style_id>.yaml。直接編集せずテンプレートを直す（CLAUDE.md §0.4-3）。 */
+{{ font_faces }}
+
+/* body の既定マージン 8px を必ず消す（docs/gotchas.md：本文幅が左右 6pt ずつ削られる） */
+body { margin: 0; }
+
+{%- if digit_style == 'fullwidth' %}
+/* 全角の算用数字でページ番号を振るための counter-style（WeasyPrint で使えることを probe で確認）。 */
+@counter-style zenkaku {
+  system: numeric;
+  symbols: "０" "１" "２" "３" "４" "５" "６" "７" "８" "９";
+}
+{%- endif %}
+
+@page {
+  /* CSS の B5 は ISO B5（176×250mm）で JIS B5（182×257mm）と違うため、寸法を mm で明示する */
+  size: {{ style.page.width_mm }}mm {{ style.page.height_mm }}mm;
+  margin: {{ m.top }}mm {{ m.right }}mm {{ m.bottom }}mm {{ m.left }}mm;
+{%- if style.header != 'none' %}
+  @top-left {
+    /* first: ページ先頭時点の値。既定（last）だとページ末に始まる章名が
+       そのページのヘッダに出て、1ページ先行して見える（実測 first 87.6% / start 53.7%）。
+       契約書は無ヘッダが既定なので、`style.header` で出し分ける（docs/rendering.md §5）。 */
+{%- if style.header == 'title_chapter' %}
+    content: "{{ doc_title }}" " " string(chapter, first);
+{%- elif style.header == 'chapter' %}
+    content: string(chapter, first);
+{%- else %}
+    content: "{{ doc_title }}";
+{%- endif %}
+    font-family: '{{ style.fonts.heading }}'; font-size: 8pt; color: {{ p.rule }};
+  }
+{%- endif %}
+  @bottom-center {
+    /* ページ番号は文書の `digit_style` に合わせる。全角の文書で `counter(page)` を
+       そのまま使うと、本文が全角なのにページ番号だけ半角になって表記が割れる。
+       （様式番号は執筆物の文字列なので、そちらの表記は content の判断に従う。） */
+{%- if style.page_number == 'dashed' %}
+    /* ダッシュ囲み（§3.1 E7）。参考 #3・#11〜#14 の体裁。 */
+    content: "\2212\2005" counter(page{% if digit_style == 'fullwidth' %}, zenkaku{% endif %}) "\2005\2212";
+{%- else %}
+    content: counter(page{% if digit_style == 'fullwidth' %}, zenkaku{% endif %});
+{%- endif %}
+    font-family: '{{ style.fonts.heading }}'; font-size: 8pt; color: {{ p.text }};
+  }
+{%- if form_code or contract_number %}
+  @bottom-right {
+    /* 様式番号・契約書番号。契約書では持たないことが多いので、あるときだけ出す。 */
+    content: "{{ form_code or contract_number }}";
+    font-family: '{{ style.fonts.heading }}'; font-size: 7pt; color: {{ p.rule }};
+  }
+{%- endif %}
+}
+
+{%- if has_cover %}
+/* 表紙にはヘッダ・ページ番号・様式番号を出さない。実物の冊子の表紙には入らない。
+   `layout.json` の `pages[0].header/footer` も null になるので、正解としても正確になる。
+   **契約書は表紙を持たないのが普通**なので、表紙があるときだけこの規則を出す
+   （無条件に書くと 1 ページ目のページ番号が消えて、実物と違う紙面になる）。 */
+@page :first {
+  @top-left { content: none; }
+  @bottom-center { content: none; }
+  @bottom-right { content: none; }
+}
+{%- endif %}
+
+html {
+  font-family: '{{ style.fonts.body }}', {{ fallbacks }}, serif;
+  font-size: {{ s.body_pt }}pt;
+  line-height: {{ s.line_height }};
+  color: {{ p.text }};
+  line-break: strict;
+  word-break: normal;
+}
+
+/* --- 段組（本文）。段またぎは column-span: all。<table> には直接効かないので
+       figure でくるむ（docs/decisions.md 2026-09-21） --- */
+.cols { column-count: {{ style.columns.count }}; column-gap: {{ style.columns.gap_mm }}mm; column-fill: auto; }
+.span-all { column-span: all; }
+
+/* --- 見出し：ラベル span と文言 span を分離する（docs/rendering.md §6.3） --- */
+h1, h2, h3, h4 { font-family: '{{ style.fonts.heading }}', {{ fallbacks }}, sans-serif; font-weight: 700; }
+h1 { font-size: {{ s.h1_pt }}pt; margin: 0 0 4mm; padding-bottom: 1.5mm;
+     border-bottom: 1.2pt solid {{ p.text }}; column-span: all; }
+h2 { font-size: {{ s.h2_pt }}pt; margin: 0 0 2.6mm;
+     column-span: none; break-after: avoid;
+{%- if style.headings.band %}
+     padding: 1.1mm 2mm; background: {{ p.band }}; border-left: 2.4pt solid {{ p.accent }};
+{%- else %}
+     padding-bottom: 0.8mm; border-bottom: 1pt solid {{ p.text }};
+{%- endif %} }
+/* 別表の見出しは改ページで始める。段組の残り高さに span-all の表が収まらないと
+   h3 以降がまとめて次ページへ送られ、見出しだけがページ末に孤立するため。 */
+/* @page ヘッダ用の string。**経路を 1 本の文字列として** テンプレートから受け取る
+   （`data-headerpath`）。編と章を別々の string に立てると、編の境界がページ途中に来たとき
+   別々の編の値を拾って噛み合わなくなる（「第２編…第６章（実は第１編）」が出た）。
+   `derived.labels[].path` から組むので、ヘッダの文字列と header_path の正解が必ず一致する。 */
+h2[data-headerpath] { string-set: chapter attr(data-headerpath); }
+h2[data-kind="appendix"], h2[data-kind="rider"] { column-span: none; }
+h3 { font-size: {{ s.h3_pt }}pt; margin: 2.6mm 0 1.6mm; break-after: avoid;
+{%- if style.headings.band %}
+     color: {{ p.accent }}; border-bottom: 0.5pt solid {{ p.accent }};
+{%- endif %} }
+h4 { font-size: {{ s.h4_pt }}pt; margin: 2.4mm 0 1.2mm; break-after: avoid; }
+/* ラベルと文言の間隔は U+3000 の文字で空ける（テキスト層を heading_text と一致させるため） */
+
+/* --- 項・号：CSS grid のぶら下げインデント。float は使わない ---
+   `break-inside: avoid` は必須。無いと段またぎで grid が壊れ、
+   **本文がヘッダ帯に食い込む**（docs/gotchas.md）。
+   ラベルだけが前の段に取り残される問題も同時に解消する。
+   項が段の高さを超えると配置できなくなるので、1 項は長くても段の半分までに収める。 */
+.para { display: grid; grid-template-columns: var(--label-w) 1fr; margin: 0 0 1.8mm;
+        break-inside: avoid; }
+.para > .label { grid-column: 1; }
+.para > .text  { grid-column: 2; text-align: justify; }
+.para.no-label { display: block; text-align: justify; }
+/* ラベル欄は**その文書に実際に出るラベル**の幅で決める（`label_widths()` が算出）。
+   固定幅は両方向に壊れる：狭いと本文に食い込み（verify V08 が検出）、
+   広いと間延びする（保険の「（１）」用の 3.6em を契約書の「２」に当てて実際に間延びした）。
+   docs/rendering.md §2「ラベル欄の固定幅は使わない」。 */
+.para[data-kind="paragraph"] { --label-w: {{ label_w.get('paragraph', 3.6) }}em; }
+.para[data-kind="item"]      { --label-w: {{ label_w.get('item', 1.6) }}em;
+                               margin-left: {{ label_w.get('paragraph', 3.6) }}em; }
+.para[data-kind="subitem"]   { --label-w: {{ label_w.get('subitem', 1.8) }}em;
+                               margin-left: {{ label_w.get('paragraph', 3.6) + label_w.get('item', 1.6) }}em; }
+.para[data-kind="subsubitem"]{ --label-w: {{ label_w.get('subsubitem', 2.2) }}em;
+                               margin-left: {{ label_w.get('paragraph', 3.6) + label_w.get('item', 1.6) + label_w.get('subitem', 1.8) }}em; }
+/* 号・細目の**下に置いた説明段落**は、親より深く下げる。
+   HTML は親子を入れ子にせず兄弟で並べるので、`data-kind` だけでは深さが出ない
+   （`_under_class()` が付けるクラスで補う。docs/rendering.md §2）。 */
+.para.under-item       { margin-left: {{ label_w.get('paragraph', 3.6) + label_w.get('item', 1.6) }}em; }
+.para.under-subitem    { margin-left: {{ label_w.get('paragraph', 3.6) + label_w.get('item', 1.6) + label_w.get('subitem', 1.8) }}em; }
+.para.under-subsubitem { margin-left: {{ label_w.get('paragraph', 3.6) + label_w.get('item', 1.6) + label_w.get('subitem', 1.8) + label_w.get('subsubitem', 2.2) }}em; }
+
+/* 見出しの分類ラベル（重要事項説明書の「契約概要」「注意喚起情報」）。
+   docs/reference_structures.md #9。見出しの右に小さな角丸の札として置く。 */
+/* `display: inline-block` にすると中に独立した LineBox ができ、box ツリーの行抽出で
+   同じ文字を 2 回拾う（V03 で「契約概要契約概要」になった）。inline のまま組む。 */
+.badge { display: inline; margin-left: 1.6mm; padding: 0.2mm 1.2mm;
+         font-family: '{{ style.fonts.heading }}', sans-serif; font-size: {{ s.note_pt }}pt;
+         font-weight: 400; color: {{ p.band }}; background: {{ p.accent }};
+         border-radius: 0.6mm; }
+
+/* --- 表 --- */
+figure.table-wrap { margin: 1.6mm 0 2.4mm; break-inside: auto; }
+figure.table-wrap.span-all { column-span: all; }
+figcaption, table > caption {
+             font-family: '{{ style.fonts.heading }}', sans-serif; font-size: {{ s.note_pt }}pt;
+             font-weight: 700; margin-bottom: 1mm; text-align: left; }
+/* 表題は表の中に置く（B1）。ただし**表の中にあっても離れる**ことが実測で分かった——
+   表がページ境界で割れると、caption だけが前のページに残る
+   （2026-09-26：caption が p2・全行が p3。docs/gotchas.md）。
+   `break-after: avoid` を **caption にだけ**当てて、表頭と一緒に送る。
+   本文ブロックに break-avoid を当てると内容欠落を招くが、caption は小さな box なので安全。
+   内容が落ちていないことは render の欠落検出と verify V03 が見張る。 */
+table > caption { caption-side: top; padding-bottom: 1mm; break-after: avoid; }
+table { border-collapse: collapse; width: 100%; font-size: {{ s.table_pt }}pt; }
+{%- if style.table.border == 'grid' %}
+th, td { border: 0.5pt solid {{ p.rule }}; padding: 0.9mm 1.4mm; vertical-align: top; text-align: left; }
+{%- elif style.table.border == 'horizontal' %}
+th, td { border: none; border-bottom: 0.4pt solid {{ p.rule }}; padding: 0.9mm 1.4mm;
+         vertical-align: top; text-align: left; }
+thead th { border-top: 0.8pt solid {{ p.rule }}; border-bottom: 0.8pt solid {{ p.rule }}; }
+{%- else %}
+th, td { border: none; padding: 0.7mm 1.2mm; vertical-align: top; text-align: left; }
+thead th { border-bottom: 0.5pt solid {{ p.rule }}; }
+{%- endif %}
+thead { display: table-header-group; }
+thead th { {% if style.table.border != 'minimal' %}background: {{ p.band }};{% endif %}
+           font-family: '{{ style.fonts.heading }}', sans-serif; text-align: center; }
+tr { break-inside: avoid; }
+td.stub, th.stub { text-align: center; }
+td.align-center { text-align: center; }
+td.align-right  { text-align: right; }
+table.enumeration td.stub { width: 2.2em; }
+table.enumeration td { border: none; padding: 0.4mm 0.8mm; }
+.table-note { font-size: {{ s.note_pt }}pt; margin-top: 0.8mm; }
+
+/* --- 図・算式 --- */
+figure.figure-wrap { margin: 1.6mm 0 2.4mm; break-inside: avoid; }
+figure.figure-wrap.span-all { column-span: all; }
+svg { display: block; max-width: 100%; }
+.formula { display: flex; flex-wrap: wrap; align-items: center; gap: 0.4em;
+           margin: 1.4mm 0; break-inside: avoid; }
+.formula .fbox { border: 0.5pt solid {{ p.rule }}; padding: 0.6mm 1.6mm; }
+.formula .fop { font-family: '{{ style.fonts.heading }}', sans-serif; }
+.formula .ffrac { display: inline-flex; flex-direction: column; text-align: center; vertical-align: middle; }
+.formula .ffrac .num { padding: 0 1.2mm 0.3mm; border-bottom: 0.5pt solid {{ p.rule }}; }
+.formula .ffrac .den { padding: 0.3mm 1.2mm 0; }
+
+/* --- 囲み・欄外注・脚注 --- */
+.box { border: 0.5pt solid {{ p.rule }}; background: {{ p.note_bg }};
+       padding: 1.2mm 1.8mm; margin: 1.6mm 0; font-size: {{ s.note_pt }}pt; break-inside: avoid; }
+.box .box-title { font-family: '{{ style.fonts.heading }}', sans-serif; font-weight: 700; display: block;
+                  margin-bottom: 0.6mm; }
+.box[data-style="margin_note"] { border-left: 2pt solid {{ p.accent }}; }
+.footnotes { font-size: {{ s.note_pt }}pt; margin: 1.4mm 0 2mm; padding-top: 0.8mm;
+             border-top: 0.5pt solid {{ p.rule }}; }
+/* 脚注のマーカー欄は内容に合わせる（max-content）。
+   固定幅だと `（*1）` が「（*」「1）」で 2 行に割れたり（狭い）、
+   逆に広げすぎて別の崩れを招いたりする（どちらも実際に起きた） */
+.footnotes .fn-line { display: grid; grid-template-columns: max-content 1fr; column-gap: 0.6em; }
+.footnotes .fn-line > .label { white-space: nowrap; }
+/* 団体保険の「第N条　備考」欄（docs/reference_structures.md #13）。
+   罫線の上に並べる脚注ではなく、細い枠で囲んだ箱として置く。 */
+/* 枠が段またぎで割れると、続きが版面の外（上マージン）に置かれて描かれない
+   （grp-a4land で実測）。備考は数行の短い箱なので、割らずに次の段へ送る。 */
+.footnotes.remarks { border: 0.5pt solid {{ p.rule }}; border-top-width: 0.5pt;
+                     padding: 1mm 1.6mm; margin: 1.6mm 0 2.2mm;
+                     break-inside: avoid; }
+.footnotes.remarks .remarks-head { font-family: '{{ style.fonts.heading }}', sans-serif;
+                                   font-weight: 700; margin-bottom: 0.6mm; }
+
+/* --- 目次 --- */
+/* 前付けは段組の外に置く（目次と同じ理由） */
+.preface { margin-bottom: 4mm; }
+.preface .para { margin-bottom: 2.4mm; }
+
+/* 目次は段組コンテナの外に置くので column-span は不要（docs/gotchas.md） */
+nav.toc { margin-bottom: 4mm; font-size: {{ s.toc_pt }}pt; }
+/* リーダー罫は**点線の罫**で引く。`leader('.')` は WeasyPrint が本物の「.」を描くので、
+   PDF のテキスト層に数千字の点が入り、`answer.pages[].text` もそれを含んでしまう。
+   文字単位で完璧に読んだページが CER 0.775 になった（docs/remaining_issues.md W6）。
+   `scripts/probe_toc_leader.py` で 4 案を実測し、これを採った
+   （float 案は同じ見た目だが CLAUDE.md §2-6 が本文での float を禁じている）。 */
+/* リーダーは **box に触らない下線**で描く。`border-bottom` だと行が 0.4pt 高くなり、
+   ページ送りがずれて WeasyPrint が段またぎの内容を黙って落とした
+   （golf-0001 の 2 スタイルで条末脚注が消え V03 が落ちた。CLAUDE.md §14）。
+   余白で相殺しても直らなかったので、高さを 1 ミリも変えない下線にした。 */
+nav.toc .toc-line { display: block; margin: 0 0 0.9mm; }
+nav.toc .toc-line a { text-decoration: none; color: inherit; }
+nav.toc .toc-line a::after { content: leader(' ') target-counter(attr(href), page);
+                             text-decoration: underline dotted; }
+/* 2 パス目：ページ番号を文字として埋めた場合は target-counter を使わない
+   （WeasyPrint の target-counter は長い目次で収束せず、印字と実ページがずれる。
+     docs/gotchas.md「目次のページ番号が収束しない」） */
+nav.toc .toc-line a.fixed::after { content: leader(' '); text-decoration: underline dotted; }
+nav.toc .d0 { font-family: '{{ style.fonts.heading }}', sans-serif; font-weight: 700; margin-top: 1.6mm; }
+nav.toc .d1 { margin-left: 1.6em; }
+nav.toc .d2 { margin-left: 3.2em; }
+nav.toc .toc-summary { display: block; margin-left: 1.6em; font-size: {{ s.note_pt }}pt; color: {{ p.rule }}; }
+
+/* --- 表紙・奥付 --- */
+/* 明示の改ページ。**段組コンテナの外**に置かれる（`html.py` が `.cols` を閉じて開き直す）。
+   `break-before: page` は multicol の中では効かないので、この形でしか実現できない。 */
+.page-break { break-after: page; height: 0; margin: 0; }
+
+.cover { break-after: page; text-align: center; padding-top: 42mm; }
+.cover .cover-petname { font-family: '{{ style.fonts.heading }}', sans-serif;
+                        font-size: 13pt; color: {{ p.accent }}; margin-bottom: 3mm; }
+.cover .cover-title { font-family: '{{ style.fonts.heading }}', sans-serif; font-size: {{ s.cover_pt }}pt;
+                      font-weight: 700; margin-bottom: 6mm; }
+.cover .cover-subtitle { font-size: 11pt; margin-bottom: 30mm; }
+.cover .cover-issuer { font-size: 12pt; margin-bottom: 2mm; }
+.cover .cover-form { font-size: 8pt; color: {{ p.rule }}; margin-top: 14mm; }
+.cover .cover-note { font-size: 9pt; margin: 0 18mm; text-align: left; }
+.colophon { column-span: all; margin-top: 6mm; padding-top: 2mm;
+            border-top: 0.5pt solid {{ p.rule }}; font-size: {{ s.note_pt }}pt; }
+
+/* 条項間参照は地の文と同じ見た目にする。実物の約款は参照だけ色や下線を変えない
+   （PDF の内部リンクとしては生きている） */
+a.ref, a { color: inherit; text-decoration: none; }
+
+/* --- 定義語・強調・ルビ（<ruby> は WeasyPrint 70.0 非対応なので inline-block で積む） --- */
+.term { font-weight: 700; }
+.u { text-decoration: underline; }
+.ruby { display: inline-block; text-align: center; line-height: 1; vertical-align: baseline; }
+.ruby .rt { display: block; font-size: 50%; line-height: 1; margin-bottom: -0.1em; }
+.ruby .rb { display: block; line-height: 1; }
+
+/* 長い欧文だけ折り返す（docs/rendering.md §6.3） */
+.latin { overflow-wrap: break-word; }
+
+
+/* --- 契約書固有のブロック（docs/rendering.md §4）---------------------------- */
+
+/* 前文。字下げは 1 字。条文と同じ体裁にする（前文だけ別扱いにしない） */
+.preamble { margin: 0 0 {{ s.body_pt * 0.6 }}pt; }
+.preamble p { text-indent: 1em; margin: 0 0 {{ s.body_pt * 0.4 }}pt; }
+
+/* 当事者表示。`parties_style: table | lines` で style が選ぶ。
+   文字列はすべて meta.parties から build が導出したものを描く（手書き文字列なし） */
+.parties { margin: 0 0 {{ s.body_pt * 0.8 }}pt; }
+.parties-table { width: 100%; border-collapse: collapse; }
+.parties-table th,
+.parties-table td {
+  border: {{ 0.4 if table_border != 'none' else 0 }}pt solid {{ p.rule }};
+  padding: {{ s.body_pt * 0.3 }}pt {{ s.body_pt * 0.5 }}pt;
+  font-size: {{ s.table_pt }}pt;
+  vertical-align: top;
+}
+.parties-table th { width: 22%; text-align: left; font-weight: 400; background: {{ p.band }}; }
+.parties-lines p { margin: 0 0 {{ s.body_pt * 0.3 }}pt; }
+
+/* 頭書。冒頭の大型表。行数が多くページをまたぐので表頭を繰り返す（docs/rendering.md §4.3） */
+.head-matter { margin: 0 0 {{ s.body_pt }}pt; }
+.head-matter > .heading { font-weight: 700; margin: 0 0 {{ s.body_pt * 0.4 }}pt; }
+
+/* 後文・契約日・記名押印欄（docs/rendering.md §4.4）。
+   後文と日付は同じ wrapper に入れて分離を禁じる。記名ブロックは割らない。 */
+/* 後文・契約日・収入印紙欄・記名押印欄は**まとめて 1 ページに**置く。
+   実物は「署名するページ」が 1 枚なので、甲と乙が別ページに分かれるのは不自然
+   （2026-09-27 に dlg-0001 で実際に分かれた）。当事者が多くて 1 ページに収まらないときは
+   WeasyPrint が avoid を諦めて分割する（保証ではなく指示）。内容が落ちていないことは
+   verify の描画漏れ検査（全要素 ≥1 fragment）が見る。 */
+/* 記名押印欄の当事者ブロックは `.sig-block` の `break-inside: avoid` で割らない。
+   **`.signature` 全体に `break-inside: avoid` を付けてはいけない**——WeasyPrint 70.0 の
+   AssertionError を安定して踏み、本文を増減させても外れない（2026-09-27 に実測。
+   `docs/gotchas.md`）。甲と乙が別ページに分かれるのは避けられないので、
+   分けたくない文書は最終条の後に `page_break` ブロックを置いて署名面を独立させる。 */
+.signature { margin: {{ s.body_pt * 1.6 }}pt 0 0; }
+.signature-intro { break-inside: avoid; break-after: avoid; }
+.signature-intro p { margin: 0 0 {{ s.body_pt * 0.5 }}pt; }
+.signature-date { margin: {{ s.body_pt }}pt 0; }
+.sig-block { break-inside: avoid; margin: 0 0 {{ s.body_pt * 1.2 }}pt; }
+.sig-line { margin: 0 0 {{ s.body_pt * 0.45 }}pt; }
+{%- if style.signature_layout == 'horizontal' %}
+/* 横並び。probe 済み：読み順は DOM 順（左→右）と一致する（docs/decisions.md 42） */
+.sig-row { display: flex; gap: {{ s.body_pt }}pt; }
+.sig-row > .sig-block { flex: 1 1 0; }
+{%- endif %}
+
+/* 「印」の丸枠。**画像は使わない**（CLAUDE.md §15）。
+   probe 済み：inline-block ＋ border-radius で 1 断片・正方形・行の内側に収まる
+   （docs/decisions.md 41・docs/gotchas.md「inline-block は 1 つの id に 3 box を作る」） */
+.seal {
+  display: inline-block;
+  width: {{ s.body_pt * 3.2 }}pt;
+  height: {{ s.body_pt * 3.2 }}pt;
+  margin-left: {{ s.body_pt * 0.6 }}pt;
+  border: 0.4pt solid {{ p.rule }};
+  border-radius: 50%;
+  text-align: center;
+  line-height: {{ s.body_pt * 3.2 }}pt;
+  font-size: {{ s.note_pt }}pt;
+  color: {{ p.rule }};
+}
+
+/* 収入印紙欄。枠と文字だけ（印影は作らない）。
+   実物の貼付欄は 30×35mm 前後。`padding-top` で文字を落とすと箱の高さに加算されて
+   実物の 1.5 倍の大きさになり、記名欄が次ページへ押し出される（2026-09-26 に目視で発覚）。
+   `box-sizing: border-box` ＋ `line-height` で中に収める。 */
+.stamp-duty {
+  box-sizing: border-box;
+  width: 30mm;
+  height: 35mm;
+  border: 0.4pt solid {{ p.rule }};
+  text-align: center;
+  font-size: {{ s.note_pt }}pt;
+  line-height: 35mm;
+  color: {{ p.rule }};
+  margin: 0 0 {{ s.body_pt }}pt;
+}
+
+/* 改定履歴。semantic_type: history の表として描く（docs/rendering.md §4.3） */
+.revision-history { margin: {{ s.body_pt }}pt 0; }
+
+/* 逐条解説（P5）。本文と**地色とサイズ**で区別する。
+   **ページ境界をまたいでも壊れない**ことを probe で実測済み（2026-09-27・decisions 100）。
+   `break-inside: avoid` は 1 ページに収まらない長さでは自然に諦められ、罫線も両ページに引かれる。
+   2 段組の style を足すときは `scripts/probe_commentary.py` で測り直すこと。 */
+.commentary {
+  margin: {{ s.body_pt * 0.5 }}pt 0 {{ s.body_pt }}pt;
+  padding: {{ s.body_pt * 0.6 }}pt {{ s.body_pt * 0.8 }}pt;
+  border-left: 1.2pt solid {{ p.rule }};
+  background: {{ p.note_bg }};
+  font-size: {{ s.note_pt }}pt;
+  break-inside: avoid;
+}
+.commentary > .heading { font-weight: 700; margin: 0 0 {{ s.body_pt * 0.3 }}pt; }
+.commentary p { margin: 0 0 {{ s.body_pt * 0.3 }}pt; }
+
+/* 様式型の記入欄（form_fields）。罫線を太めにして帳票らしくする（docs/rendering.md §4.5） */
+{%- if style.table.border == 'form' %}
+table.form-fields th,
+table.form-fields td { border: 0.6pt solid {{ p.rule }}; }
+table.form-fields th { background: {{ p.band }}; font-weight: 400; text-align: left; }
+{%- endif %}

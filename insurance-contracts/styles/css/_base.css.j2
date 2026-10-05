@@ -169,7 +169,14 @@ svg { display: block; max-width: 100%; }
 /* 脚注のマーカー欄は内容に合わせる（max-content）。
    固定幅だと `（*1）` が「（*」「1）」で 2 行に割れたり（狭い）、
    逆に広げすぎて別の崩れを招いたりする（どちらも実際に起きた） */
-.footnotes .fn-line { display: grid; grid-template-columns: max-content 1fr; column-gap: 0.6em; }
+/* 脚注 1 本が段・ページの境目で割れると、**先頭の断片が PDF のテキスト層に出ない**
+   （WeasyPrint 70.0。insurance-contracts-calculation/docs/base_rendering_note.md で実測。
+   box ツリーには出るので verify V03 が往復不一致として検出する）。
+   下の `.footnotes.remarks` が同じ理由で `break-inside: avoid` を使っているのと同じ対処。
+   脚注 1 本は数行なので、割らずに次の段へ送っても版面への影響は小さい
+   （docs/decisions.md 2026-10-03）。 */
+.footnotes .fn-line { display: grid; grid-template-columns: max-content 1fr; column-gap: 0.6em;
+                      break-inside: avoid; }
 .footnotes .fn-line > .label { white-space: nowrap; }
 /* 団体保険の「第N条　備考」欄（docs/reference_structures.md #13）。
    罫線の上に並べる脚注ではなく、細い枠で囲んだ箱として置く。 */

@@ -57,8 +57,15 @@ class DocumentEntry(Model):
     errors: list[str] = Field(default_factory=list)
 
 
+#: 配布するデータセットの版。**タグではなくここが版の所在**
+#: （`TASK.md` T1 でコミット・タグ付けを AI の担当外としたため。T8 の (c)）
+DATASET_VERSION = "v7"
+
+
 class Manifest(Model):
     schema_version: Literal["1.0"] = "1.0"
+    #: 配布版。`dataset-v*` のタグは人間が打つので、版の所在はここにする（`TASK.md` T8）
+    dataset_version: str = DATASET_VERSION
     #: コーパス全体の成果物（検索評価セット）。docs/evaluation.md §2
     corpus_artifacts: list[str] = Field(default_factory=list)
     documents: list[DocumentEntry] = Field(default_factory=list)
@@ -139,8 +146,23 @@ def build(dataset_dir: Path | None = None, *, verify: bool = True) -> tuple[Mani
             entries.append(entry)
     corpus = [
         f"search/{name}"
-        for name in ("passages.jsonl", "queries.jsonl", "qrels.jsonl")
+        for name in ("passages.jsonl", "queries.jsonl", "qrels.jsonl", "id_map.json")
         if (base / "search" / name).is_file()
+    ]
+    # コーパス直下の成果物。`README.md` は **Hugging Face のデータセットカード**でもある
+    # （HF は直下の README.md だけをカードとして読むので、旧 `DATASET_CARD.md` は廃止した。
+    # docs/distribution.md・docs/decisions.md 2026-10-05）
+    corpus += [
+        name
+        for name in (
+            "README.md",
+            "data-card.md",
+            "LICENSE",
+            ".gitattributes",
+            "documents.jsonl",
+            "qa.jsonl",
+        )
+        if (base / name).is_file()
     ]
     return Manifest(corpus_artifacts=corpus, documents=entries), base / MANIFEST_NAME
 

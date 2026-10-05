@@ -1,0 +1,141 @@
+# 業務委託契約書（docs/doctypes.md §3.2）。
+# 参考：samples/outsourcing/（厚労省在宅ワーク参考例・公取委フリーランス法ひな型・法律事務所サンプル 2 件）。
+# **構造だけを参考にし、文章はすべて書き下ろす**（CLAUDE.md §0.4-1）。
+#
+# 骨格：条文型＋別紙。**業務の内容と委託料を別紙に追い出し、本文が別紙を指す**のが nda との違い。
+# P1（docs/reference_structures.md §4 の #2）で確かめた実物の特徴：
+#   - 「基本契約＋個別契約（発注書）」の 2 文書構成が実在する（CT14）。別紙 2 をその様式に充てる。
+#   - 条文型の本体に**表も図も無い**のが普通。本文の表は 0 とし、表は別紙に置く（decisions 64）。
+#   - 号が「小見出し＋改行して説明段落」を持つ形が目立つ。深い列挙の題材にする。
+doctype: outsourcing
+family: contract
+description: 成果物の完成を約する業務委託契約書。条文型＋別紙 2 点
+target_pages: [5, 10]
+page_limit: 12
+numbering_scheme: contract-standard
+default_style: ct-a4-1col-mincho
+skeleton_kind: articles
+front_matter: { cover: false, toc: false }
+
+parties:
+  count: [2, 2]
+  presets:
+    - - { key: client,      alias: 甲, role_label: 委託者 }
+      - { key: contractor,  alias: 乙, role_label: 受託者 }
+    - - { key: orderer,     alias: 甲, role_label: 発注者 }
+      - { key: supplier,    alias: 乙, role_label: 受注者 }
+
+# **構造で縛り、題材（semantic_type）で縛らない**。
+required:
+  - { kind: node, subtype: preamble,  min_count: 1, note: "前文（当事者と委託の枠組みの導入）" }
+  - { kind: node, subtype: signature, min_count: 1, note: "後文＋記名押印欄" }
+  - { kind: node, subtype: appendix,  min_count: 2, note: "別紙 2 点（業務の内容・委託料）" }
+  - { kind: table, min_count: 2, min_rows: 3, note: "別紙の表（型は執筆者が決める）" }
+  - { kind: enumeration, min_count: 2, note: "再委託の条件・禁止行為などの列挙" }
+  - { kind: figure, min_count: 1, note: "検収の流れか月次のサイクル（種別は執筆者が決める）" }
+  - { kind: ref, min_count: 8, note: "条項間参照＋**別紙への参照**" }
+  - { kind: term, min_count: 5, note: "定義語" }
+
+skeleton:
+  - id: pre
+    kind: preamble
+    chars: 200
+    todo: "{party:...|full} で両当事者を導入し、何の委託かを 1 文で述べる。当事者表示も置く"
+  - id: a1
+    kind: article
+    title_options: ["目的", "委託"]
+    chars: 300
+    todo: "委託する業務を {ref:sch1}（別紙1）に委ねる形で書く。**本文に業務の一覧を書かない**"
+  - id: a2
+    kind: article
+    title_options: ["個別契約", "個別の委託"]
+    chars: 600
+    todo: "個別契約の成立要件（注文書と請書・みなし承諾の期間）。基本契約との優先順位を明記する"
+  - id: a3
+    kind: article
+    title_options: ["委託料および支払", "委託料"]
+    chars: 600
+    todo: "金額は {ref:sch2}（別紙2）に委ね、本文は**支払の期日と方法**を書く。振込手数料の負担も"
+  - id: a4
+    kind: article
+    title_options: ["成果物の納入", "納入および検査"]
+    chars: 700
+    todo: "納入 → 検査 → 合格／不合格 → 再納入の手続きと期限（{const:} で書く）。図でも示す"
+    required: [{ kind: figure, min_count: 1 }]
+  - id: a5
+    kind: article
+    title_options: ["再委託"]
+    chars: 500
+    todo: "承諾の方式と、再委託先に同等の義務を負わせること。条件を列挙にする"
+  - id: a6
+    kind: article
+    title_options: ["知的財産権の帰属", "成果物の権利"]
+    chars: 500
+    todo: "移転の時期を支払と結びつける。**受託者が元から持つ権利**の扱いも書き分ける"
+  - id: a7
+    kind: article
+    title_options: ["秘密保持"]
+    chars: 400
+    todo: "nda と同じ文言にしない（L15）。存続期間を持たせるなら nda と違う年数にする"
+  - id: a8
+    kind: article
+    title_options: ["個人情報の取扱い"]
+    chars: 400
+    todo: "取り扱う情報の範囲と、目的外利用の禁止。**実在の法令の条番号は書かない**"
+  - id: a9
+    kind: article
+    title_options: ["反社会的勢力の排除"]
+    chars: 400
+    todo: "表明保証と、違反時の無催告解除。列挙にする"
+  - id: a10
+    kind: article
+    title_options: ["解除", "解除および中途解約"]
+    chars: 600
+    todo: "無催告解除の事由を列挙し、中途解約の予告期間と既履行分の精算を書く"
+  - id: a11
+    kind: article
+    title_options: ["損害賠償"]
+    chars: 350
+    todo: "上限額を {const:} で書く（別紙2 の金額と噛み合わせる）"
+  - id: a12
+    kind: article
+    title_options: ["協議"]
+    chars: 250
+    clause: consultation
+  - id: a13
+    kind: article
+    title_options: ["合意管轄"]
+    chars: 250
+    clause: jurisdiction
+
+appendices:
+  - id: sch1
+    title_options: ["委託業務の内容", "業務の内容"]
+    kind_label: 別紙
+    min_rows: 4
+    todo: "業務 × 内容・期限・成果物の表。**本文の条と噛み合わせる**（L11）"
+  - id: sch2
+    title_options: ["委託料および支払期日", "委託料"]
+    kind_label: 別紙
+    min_rows: 3
+    todo: "区分 × 金額・支払時期の表。合計行を置くなら本文の上限額と一致させる"
+
+riders: { count: [0, 0], pool: [] }
+
+authored_qa: { count: 15, table_min: 3, figure_min: 2, apply_min: 2 }
+
+closing_options:
+  - "本契約の成立を証するため、本書{copies}通を作成し、{parties}が記名押印のうえ、各１通を保有する。"
+  - "本契約の成立を証するため、本書{copies}通を作成し、{parties}が署名または記名押印のうえ、各自１通を保有する。"
+
+variants:
+  digit_style: { fullwidth: 0.6, halfwidth: 0.4 }
+  era: { seireki: 0.85, wareki: 0.15 }
+  parties_preset: [0, 1]
+  copies: { "2": 0.9, "1": 0.1 }
+  stamp_duty: { "false": 0.6, "true": 0.4 }
+  # **2 style 目は版面が最も遠いものを選ぶ**（docs/doctypes.md §7）。
+  # `gothic` は mincho と同系（A4 1 段・無装飾）なので組にしない。
+  styles: [ct-a4-1col-mincho, ct-a4-1col-form]
+
+budget: { chars_min: 5000, chars_max: 11000, footnotes_min: 0 }

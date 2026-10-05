@@ -1,0 +1,19 @@
+style_id: ct-a4-1col-mincho
+description: A4・1段組・明朝10.5pt。契約書の既定（無ヘッダ・中央に「− N −」のフッタ）
+page: { size: A4, width_mm: 210, height_mm: 297, margin_mm: { top: 25, right: 22, bottom: 25, left: 22 } }
+columns: { count: 1, gap_mm: 0 }
+fonts: { body: "Noto Serif JP", heading: "Noto Serif JP", symbol_fallback: ["Noto Sans Symbols", "Noto Sans Symbols 2"] }
+sizes: { body_pt: 10.5, line_height: 1.8, h1_pt: 13, h2_pt: 11.5, h3_pt: 11, h4_pt: 10.5,
+         table_pt: 10, note_pt: 9, toc_pt: 10.5, cover_pt: 16 }
+palette: { text: "#000000", rule: "#000000", accent: "#000000", band: "#ffffff", note_bg: "#ffffff" }
+headings: { band: false }
+table: { border: grid }
+margin_note: article_end
+# 契約書は無ヘッダが既定（docs/rendering.md §5）。フッタは「− 1 −」型。
+header: none
+page_number: dashed
+parties_style: lines
+signature_layout: vertical
+# `nda-0001`（5 ページ）から較正（2026-09-26）。**1 文書ぶんなので暫定**——
+# P6 でコーパスが増えたら `scripts/calibrate_styles.py --write` を回し直す。
+chars_per_page_estimate: 742

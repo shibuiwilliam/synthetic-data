@@ -1,0 +1,120 @@
+# システム開発（基本）契約書（docs/doctypes.md §5.3）。
+# 参考：samples/system_development/（経産省モデル取引契約書・IPA アジャイル版・JISA モデル契約）。
+# **構造だけを参考にし、文章はすべて書き下ろす**（CLAUDE.md §0.4-1）。
+#
+# 骨格：**章立ての長文**。P1（docs/reference_structures.md §4 の #10）で確かめた実物の特徴：
+#   - **章 → 節 → 条**の 3 階層で、条は**全編通し番号**（章ごとに振り直さない）。
+#   - **目次を持つが、ページ番号は無い**（見出しの一覧だけ）。本プロジェクトは
+#     ページ番号つきの目次だけを作る（decisions 62。ページ番号無しの目次は検査の価値が低い）。
+#   - 枝番の条（「第2条の2」）と、同一条番号の A 案 / B 案の併記がある。
+#     **A 案 / B 案は再現対象にしない**（CT25・decisions 62）。枝番は P8。
+#   - 基本契約＋個別契約の二層。個別契約は `kind: appendix`（`kind_label: 様式`）で表す
+#     （docs/schema.md §11.4。**入れ子の契約という機構は作らない**）。
+doctype: sysdev
+family: contract
+description: ソフトウェア開発の基本契約書。章立て・目次あり・個別契約は様式で表す
+target_pages: [8, 16]
+page_limit: 18
+numbering_scheme: contract-standard
+default_style: ct-a4-1col-mincho
+skeleton_kind: chaptered
+caption_numbering: chapter
+signature: required
+front_matter: { cover: false, toc: true, toc_depth: 2 }
+
+parties:
+  count: [2, 2]
+  presets:
+    - - { key: user,   alias: 甲, role_label: 委託者 }
+      - { key: vendor, alias: 乙, role_label: 受託者 }
+
+required:
+  - { kind: node, subtype: preamble,  min_count: 1 }
+  - { kind: node, subtype: signature, min_count: 1 }
+  - { kind: node, subtype: chapter,   min_count: 4, note: "章 4 つ以上" }
+  - { kind: node, subtype: appendix,  min_count: 2, note: "様式（個別契約書）＋別紙（作業分担表）" }
+  - { kind: table, min_count: 2, min_rows: 5, note: "工程と成果物の一覧／作業分担表（型は執筆者が決める）" }
+  - { kind: enumeration, min_count: 3, min_items: 3 }
+  - { kind: figure, min_count: 1, note: "工程と検収の流れ（種別は執筆者が決める）" }
+  - { kind: ref, min_count: 12, note: "条項間参照＋**様式への参照**" }
+  - { kind: term, min_count: 6 }
+
+skeleton:
+  - id: pre
+    kind: preamble
+    chars: 220
+    todo: "{party:...|full} で両当事者を導入し、何の開発を委託するかを 1 文で述べる"
+  - id: ch1
+    kind: chapter
+    title_options: ["総則"]
+    children:
+      - { id: ch1_a1, kind: article, title_options: ["目的"], chars: 300 }
+      - { id: ch1_a2, kind: article, title_options: ["定義"], chars: 700 }
+      - { id: ch1_a3, kind: article, title_options: ["個別契約"], chars: 700,
+          todo: "成立要件（注文書と請書・みなし承諾）と、基本契約との**優先順位**を明記する" }
+      - { id: ch1_a4, kind: article, title_options: ["体制および責任者"], chars: 500 }
+  - id: ch2
+    kind: chapter
+    title_options: ["業務の遂行"]
+    children:
+      - { id: ch2_a1, kind: article, title_options: ["工程および成果物"], chars: 600,
+          todo: "工程 × 成果物 × 期限の表を置く（5 行以上）",
+          required: [{ kind: table, min_count: 1, min_rows: 5 }] }
+      - { id: ch2_a2, kind: article, title_options: ["納入および検収"], chars: 800,
+          todo: "検収の期限と**みなし検収**。図でも示す",
+          required: [{ kind: figure, min_count: 1 }] }
+      - { id: ch2_a3, kind: article, title_options: ["変更の管理"], chars: 600 }
+      - { id: ch2_a4, kind: article, title_options: ["再委託"], chars: 500 }
+  - id: ch3
+    kind: chapter
+    title_options: ["権利および義務"]
+    children:
+      - { id: ch3_a1, kind: article, title_options: ["知的財産権"], chars: 800,
+          todo: "著作権・特許・**既存の成果物と OSS** の扱いを書き分ける" }
+      - { id: ch3_a2, kind: article, title_options: ["秘密保持"], chars: 500 }
+      - { id: ch3_a3, kind: article, title_options: ["個人情報の取扱い"], chars: 500 }
+      - { id: ch3_a4, kind: article, title_options: ["契約不適合責任"], chars: 600 }
+  - id: ch4
+    kind: chapter
+    title_options: ["一般条項"]
+    children:
+      - { id: ch4_a1, kind: article, title_options: ["責任の制限"], chars: 500,
+          todo: "上限額を {const:} で書く" }
+      - { id: ch4_a2, kind: article, title_options: ["解除"], chars: 600 }
+      - { id: ch4_a3, kind: article, title_options: ["有効期間"], chars: 400 }
+      - { id: ch4_a4, kind: article, title_options: ["協議"], chars: 220, clause: consultation }
+      - { id: ch4_a5, kind: article, title_options: ["合意管轄"], chars: 220, clause: jurisdiction }
+
+appendices:
+  - id: sch1
+    title_options: ["個別契約書"]
+    kind_label: 様式
+    min_rows: 5
+    min_cols: 2
+    todo: "個別契約の記入欄。本文の {ref:sch1} から指される（CT14）"
+  - id: sch2
+    title_options: ["作業の分担"]
+    kind_label: 別紙
+    min_rows: 5
+    min_cols: 3
+    todo: "工程 × 甲/乙 の分担。凡例を置く"
+
+riders: { count: [0, 0], pool: [] }
+
+authored_qa: { count: 15, table_min: 3, figure_min: 2, apply_min: 2 }
+
+closing_options:
+  - "本契約の成立を証するため、本書{copies}通を作成し、{parties}が記名押印のうえ、各１通を保有する。"
+
+variants:
+  digit_style: { fullwidth: 0.5, halfwidth: 0.5 }
+  era: { seireki: 0.95, wareki: 0.05 }
+  parties_preset: [0]
+  copies: { "2": 1.0 }
+  stamp_duty: { "true": 0.5, "false": 0.5 }
+  caption_numbering: { chapter: 1.0 }
+  # **2 style 目は版面が最も遠いものを選ぶ**（docs/doctypes.md §7）。
+  # `gothic` は mincho と同系（A4 1 段・無装飾）なので組にしない。
+  styles: [ct-a4-1col-mincho, ct-a4-1col-form]
+
+budget: { chars_min: 7000, chars_max: 15000, footnotes_min: 0 }

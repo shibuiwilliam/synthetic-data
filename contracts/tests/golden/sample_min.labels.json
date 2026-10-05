@@ -1,0 +1,290 @@
+{
+  "pre": {
+    "label": "",
+    "title": "",
+    "heading_text": "",
+    "path": [],
+    "depth": 0
+  },
+  "pre_p1": {
+    "label": "",
+    "title": "",
+    "heading_text": "",
+    "path": [
+      ""
+    ],
+    "depth": 1
+  },
+  "ch1": {
+    "label": "第１章",
+    "title": "秘密保持",
+    "heading_text": "第１章　秘密保持",
+    "path": [],
+    "depth": 0
+  },
+  "ch1_a0": {
+    "label": "第１条",
+    "title": "定義",
+    "heading_text": "第１条（定義）",
+    "path": [
+      "第１章　秘密保持"
+    ],
+    "depth": 1
+  },
+  "ch1_a0_p1": {
+    "label": "",
+    "title": "",
+    "heading_text": "",
+    "path": [
+      "第１章　秘密保持",
+      "第１条（定義）"
+    ],
+    "depth": 2
+  },
+  "ch1_a0_p2": {
+    "label": "（１）",
+    "title": "",
+    "heading_text": "（１）",
+    "path": [
+      "第１章　秘密保持",
+      "第１条（定義）"
+    ],
+    "depth": 2
+  },
+  "ch1_a0_p3": {
+    "label": "（２）",
+    "title": "",
+    "heading_text": "（２）",
+    "path": [
+      "第１章　秘密保持",
+      "第１条（定義）"
+    ],
+    "depth": 2
+  },
+  "ch1_a0_p4": {
+    "label": "（３）",
+    "title": "",
+    "heading_text": "（３）",
+    "path": [
+      "第１章　秘密保持",
+      "第１条（定義）"
+    ],
+    "depth": 2
+  },
+  "ch1_a1": {
+    "label": "第２条",
+    "title": "秘密保持義務",
+    "heading_text": "第２条（秘密保持義務）",
+    "path": [
+      "第１章　秘密保持"
+    ],
+    "depth": 1
+  },
+  "ch1_a1_p1": {
+    "label": "",
+    "title": "",
+    "heading_text": "",
+    "path": [
+      "第１章　秘密保持",
+      "第２条（秘密保持義務）"
+    ],
+    "depth": 2
+  },
+  "ch1_a1_p2": {
+    "label": "２",
+    "title": "",
+    "heading_text": "２",
+    "path": [
+      "第１章　秘密保持",
+      "第２条（秘密保持義務）"
+    ],
+    "depth": 2
+  },
+  "ch1_a2": {
+    "label": "第３条",
+    "title": "秘密情報の例外",
+    "heading_text": "第３条（秘密情報の例外）",
+    "path": [
+      "第１章　秘密保持"
+    ],
+    "depth": 1
+  },
+  "ch1_a2_p1": {
+    "label": "",
+    "title": "",
+    "heading_text": "",
+    "path": [
+      "第１章　秘密保持",
+      "第３条（秘密情報の例外）"
+    ],
+    "depth": 2
+  },
+  "ch4": {
+    "label": "第２章",
+    "title": "一般条項",
+    "heading_text": "第２章　一般条項",
+    "path": [],
+    "depth": 0
+  },
+  "ch4_s1": {
+    "label": "第１節",
+    "title": "契約期間と終了",
+    "heading_text": "第１節　契約期間と終了",
+    "path": [
+      "第２章　一般条項"
+    ],
+    "depth": 1
+  },
+  "ch4_s1_a1": {
+    "label": "第４条",
+    "title": "契約期間",
+    "heading_text": "第４条（契約期間）",
+    "path": [
+      "第２章　一般条項",
+      "第１節　契約期間と終了"
+    ],
+    "depth": 2
+  },
+  "ch4_s1_a1_p1": {
+    "label": "",
+    "title": "",
+    "heading_text": "",
+    "path": [
+      "第２章　一般条項",
+      "第１節　契約期間と終了",
+      "第４条（契約期間）"
+    ],
+    "depth": 3
+  },
+  "ch4_s1_a1_p2": {
+    "label": "２",
+    "title": "",
+    "heading_text": "２",
+    "path": [
+      "第２章　一般条項",
+      "第１節　契約期間と終了",
+      "第４条（契約期間）"
+    ],
+    "depth": 3
+  },
+  "ch4_s1_a2": {
+    "label": "第５条",
+    "title": "記録媒体の返還",
+    "heading_text": "第５条（記録媒体の返還）",
+    "path": [
+      "第２章　一般条項",
+      "第１節　契約期間と終了"
+    ],
+    "depth": 2
+  },
+  "ch4_s1_a2_p1": {
+    "label": "",
+    "title": "",
+    "heading_text": "",
+    "path": [
+      "第２章　一般条項",
+      "第１節　契約期間と終了",
+      "第５条（記録媒体の返還）"
+    ],
+    "depth": 3
+  },
+  "ch4_s1_a2_p2": {
+    "label": "２",
+    "title": "",
+    "heading_text": "２",
+    "path": [
+      "第２章　一般条項",
+      "第１節　契約期間と終了",
+      "第５条（記録媒体の返還）"
+    ],
+    "depth": 3
+  },
+  "ch4_s2": {
+    "label": "第２節",
+    "title": "雑則",
+    "heading_text": "第２節　雑則",
+    "path": [
+      "第２章　一般条項"
+    ],
+    "depth": 1
+  },
+  "ch4_s2_a1": {
+    "label": "第６条",
+    "title": "返還手続の流れ",
+    "heading_text": "第６条（返還手続の流れ）",
+    "path": [
+      "第２章　一般条項",
+      "第２節　雑則"
+    ],
+    "depth": 2
+  },
+  "ch4_s2_a1_p1": {
+    "label": "",
+    "title": "",
+    "heading_text": "",
+    "path": [
+      "第２章　一般条項",
+      "第２節　雑則",
+      "第６条（返還手続の流れ）"
+    ],
+    "depth": 3
+  },
+  "ch4_s2_a1_p2": {
+    "label": "２",
+    "title": "",
+    "heading_text": "２",
+    "path": [
+      "第２章　一般条項",
+      "第２節　雑則",
+      "第６条（返還手続の流れ）"
+    ],
+    "depth": 3
+  },
+  "ch4_s2_a2": {
+    "label": "第７条",
+    "title": "協議",
+    "heading_text": "第７条（協議）",
+    "path": [
+      "第２章　一般条項",
+      "第２節　雑則"
+    ],
+    "depth": 2
+  },
+  "ch4_s2_a2_p1": {
+    "label": "",
+    "title": "",
+    "heading_text": "",
+    "path": [
+      "第２章　一般条項",
+      "第２節　雑則",
+      "第７条（協議）"
+    ],
+    "depth": 3
+  },
+  "app1": {
+    "label": "別紙１",
+    "title": "開示する情報の範囲",
+    "heading_text": "別紙１　開示する情報の範囲",
+    "path": [],
+    "depth": 0
+  },
+  "app1_s1": {
+    "label": "",
+    "title": "情報の区分と取扱い",
+    "heading_text": "情報の区分と取扱い",
+    "path": [
+      "別紙１　開示する情報の範囲"
+    ],
+    "depth": 1
+  },
+  "app1_s1_p1": {
+    "label": "１",
+    "title": "",
+    "heading_text": "１",
+    "path": [
+      "別紙１　開示する情報の範囲",
+      "情報の区分と取扱い"
+    ],
+    "depth": 2
+  }
+}

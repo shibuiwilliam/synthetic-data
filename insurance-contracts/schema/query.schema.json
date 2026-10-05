@@ -39,6 +39,30 @@
       "default": false,
       "title": "Related Truncated",
       "type": "boolean"
+    },
+    "relevance_rule": {
+      "default": "",
+      "title": "Relevance Rule",
+      "type": "string"
+    },
+    "filters": {
+      "additionalProperties": {
+        "type": "string"
+      },
+      "title": "Filters",
+      "type": "object"
+    },
+    "facet_in_text": {
+      "default": false,
+      "title": "Facet In Text",
+      "type": "boolean"
+    },
+    "hard_negatives": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Hard Negatives",
+      "type": "array"
     }
   },
   "required": [

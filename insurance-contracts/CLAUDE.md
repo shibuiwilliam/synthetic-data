@@ -10,7 +10,7 @@
 「本物そっくりだが完全に架空の日本語保険約款」を **正解JSON → PDF** の順で生成し、ドキュメント読み取り（テキスト／章節項構造／表／図の構造と意味）の開発検証用データセットを作る。1文書 **20ページ以下**。JSON が唯一の真実（single source of truth）であり、PDF はその決定論的な描画結果である。
 
 ### 0.2 セッション開始時の手順
-1. 本ファイルを読む。次に `docs/decisions.md`（設計変更履歴）と `docs/progress.md`（進捗・次の一手）を読む。存在しなければ §12 の P0 から着手する。**`HITL_TODO.md` に人間待ちの項目がある場合、そこに挙がった判断を AI が代わりに下さない**（push・公開・架空性や転載の最終確認など）。
+1. 本ファイルを読む。次に `TASK.md`（判断待ちの一覧）・`docs/decisions.md`（設計変更履歴）・`docs/progress.md`（進捗・次の一手）を読む。存在しなければ §12 の P0 から着手する。**`TASK.md` / `HITL_TODO.md` に人間待ちの項目がある場合、そこに挙がった判断を AI が代わりに下さない**（push・公開・コミット範囲・評価仕様の変更・架空性や転載の最終確認など）。判断待ちでも `TASK.md` §2 の作業は進めてよい。
 2. `uv run yakkan doctor` で環境（Python・WeasyPrint・フォント・poppler）を確認する（P0 完了後）。
 3. 作業は §12 のフェーズ順。フェーズをまたぐ設計変更は `docs/decisions.md` に「日付／変更／理由／影響」を追記してから行う。
 4. 終了前に `make check`（lint + pytest）を通し、`docs/progress.md` を更新する。
@@ -28,7 +28,10 @@
   | 構造分析・参考URL の扱い | `docs/reference_structures.md` |
   | ファイル新規作成・配置 | `docs/repo_layout.md` |
   | 評価ハーネス・予測 JSON の形 | `docs/evaluation.md` ＋ `docs/eval_dataset_plan.md` |
+  | `yakkan/search_set.py`・検索クエリと qrels の生成 | `docs/search_query_plan.md`（実施計画）＋ `docs/search_query_design.md`（設計）＋ `docs/evaluation.md` §2 |
   | lint ルールの詳細・検査ロジック | `docs/lint_rules.md` |
+  | `yakkan/datacard.py`・`dataset/data-card.md` の節と測り方 | `docs/data_card.md` |
+  | `dataset/` の配布（Hugging Face・GitHub）・カード・LICENSE | `docs/distribution.md` |
   | 設計変更／進捗／環境の癖 | `docs/decisions.md` `docs/progress.md` `docs/gotchas.md` |
 
 - **`@docs/...` の import は使わない。** import されたファイルは launch 時に全文がコンテキストへ展開され、分割の目的（毎セッションのコンテキスト削減）が失われる（Claude Code memory 仕様、2026-09-21 に公式ドキュメントで確認）。参照は必ずバッククォート付きのパス表記で書く。
@@ -51,7 +54,7 @@
 
 ドキュメント読み取りシステム（OCR/レイアウト解析/VLM/構造化抽出）の開発では、実在の約款は著作権・正解データ不在・ページ数過多の問題がある。そこで実在約款の **構造的特徴を忠実に再現した合成文書** と **完全な正解データ** を対で生成し、テキスト／章節項構造／表／図／参照関係／質問応答の6観点を検証可能にする（観点ごとの正解表は `docs/schema.md` 冒頭）。
 
-成果物（1文書あたり、`dataset/<doc_id>/` 配下）：`source.json`（執筆内容＋構造＋意味。derivedはbuildが付与）／`layout.json`（bbox・読み順・ヘッダ/フッタ文字列）／`answer.json`（ページ別テキスト＋アウトライン）／`qa.json`（評価用問答）／`doc.pdf`（テキスト層あり）／`pages/page-*.png`（150dpi）／`render.html`（デバッグ用・配布対象外）。全文書の一覧は `dataset/manifest.json`。
+成果物（1文書あたり、`dataset/<doc_id>/` 配下）：`source.json`（執筆内容＋構造＋意味。derivedはbuildが付与）／`layout.json`（bbox・読み順・ヘッダ/フッタ文字列）／`answer.json`（ページ別テキスト＋アウトライン）／`qa.json`（評価用問答）／`doc.pdf`（テキスト層あり）／`pages/page-*.png`（150dpi）／`render.html`（デバッグ用・配布対象外）。全文書の一覧は `dataset/manifest.json`、読み方は `dataset/README.md`、**データの素性（規模・内訳・検証結果・制限と偏り）は `dataset/data-card.md`**（`docs/data_card.md`）。
 
 制約：1文書20ページ以下（§0.4-5）。日本語横書きのみ（縦書きはv1対象外、§14）。生成はClaude Codeセッション内で完結（外部LLM APIは使わない）。
 非目標（v1）：スキャン劣化画像の生成（P6任意）、実在商品の再現・比較、読み取りモデル自体の実装。
@@ -153,15 +156,16 @@
 ## 9. 評価用QAと評価ハーネス → 詳細は `docs/evaluation.md`
 
 **評価データとしての充足性のレビューと改修の経緯は `docs/eval_dataset_plan.md`。**
+**検索クエリは 10 種（`term`／`heading`／`scoped`／`filtered`／`enumeration`／`qa`／`definition_masked`／`multi_hop`／`situational`／`no_answer`）。設計の経緯は `docs/search_query_design.md`、実施の記録と実測値は `docs/search_query_plan.md`（2026-10-04 完了）。**
 
 - `yakkan eval dataset/<doc_id> --pred pred.json`：読み取りの採点。予測 JSON の形は `schema/prediction.schema.json`。突合は中身で行う（予測に内部 id は無い前提）。
 - 指標：ページ別 CER、outline の F1、構造位置 citation の正解率、表 TEDS・セル F1、図のノード/エッジ/経路 F1、読み順の Kendall τ、QA の完全/部分一致。
-- `yakkan eval --search-run run.json`：検索の採点（nDCG@k・Recall@k・MRR）。`--oracle` で自己評価。
-- `yakkan export`：評価向けの派生成果物を書き出す（`elements.jsonl`・`passages.jsonl`・`dataset/search/*`）。
+- `yakkan eval --search-run run.json`：検索の採点（nDCG@k・Recall@k・`exact_recall@k`・`r_precision`・MRR・`doc@1`・`confusion@k`・`false_positive_rate`）。`--oracle` で自己評価。**クエリの `filters` はクエリの一部**で、何を索引したかは `index_setting` で申告する。
+- `yakkan export`：評価向けの派生成果物を書き出す（`elements.jsonl`・`passages.jsonl`・`dataset/search/*`）。**配布物**（`dataset/README.md` ＝ HF のデータセットカード・`LICENSE`・`.gitattributes`・`qa.jsonl`・`documents.jsonl`）も同じコマンドが書く。手順は `docs/distribution.md`。
 
 ## 10. リポジトリ構成 → 詳細は `docs/repo_layout.md`
 
-**ファイルを新規作成・移動する作業では、着手前に必ず読む。** 要点だけ：仕様は `CLAUDE.md` ＋ `docs/`、宣言は `blueprints/` `styles/` `library/clauses/`、実装は `yakkan/`。執筆成果 `content/<content_id>/` は**コミットする**。生成物 `dataset/<doc_id>/` はコミットせず `specs/` から再生成する。Claude Code 用設定は `.claude/`。
+**ファイルを新規作成・移動する作業では、着手前に必ず読む。** 要点だけ：仕様は `CLAUDE.md` ＋ `docs/`、宣言は `blueprints/` `styles/` `library/clauses/`、実装は `yakkan/`。**執筆成果 `content/<content_id>/`・バッチ定義 `specs/batch_*.yaml`・生成物 `dataset/<doc_id>/` はいずれもコミットしない**（2026-10-05 決定、`docs/decisions.md`）。公開後の第三者は `blueprints/` ＋ `yakkan/` ＋ `library/clauses/` から `scaffold`→執筆→`batch` を自分で実行し、`content/`・`specs/`・`dataset/` を独自に再生成する前提。Claude Code 用設定は `.claude/`。
 
 ## 11. コマンドとワークフロー
 ```
@@ -172,20 +176,21 @@ uv run yakkan scaffold --genre <g> --content-id <cid> --seed <n>
 uv run yakkan lint content/<cid> [--similarity]
 uv run yakkan build content/<cid>
 uv run yakkan render content/<cid> --style <sid> [--report]   # → dataset/<cid>--<sid>/
-uv run yakkan verify dataset/<doc_id>
-uv run yakkan review dataset/<doc_id>     # pages/*.png 出力（Claude が画像を開いて確認）
+uv run yakkan verify dataset/<doc_id>      # PNG は render が既定で出す（--no-png で止める）
 uv run yakkan qa dataset/<doc_id> [--validate]
 uv run yakkan batch specs/batch_v1.yaml   # 上記を一括（失敗文書は manifest に failed として記録）
-uv run yakkan export                      # elements.jsonl / passages.jsonl / dataset/search/*
+uv run yakkan export                      # elements.jsonl / passages.jsonl / dataset/search/* / README / 各カード
 uv run yakkan eval dataset/<doc_id> --pred pred.json   # 読み取りの採点（--oracle で自己評価）
 uv run yakkan eval --search-run run.json  # 検索の採点
 uv run yakkan manifest update
 uv run yakkan manifest check          # manifest が実ファイルと合っているか（make check にも入っている）
+uv run yakkan datacard update         # dataset/data-card.md（利用者向けデータカード。docs/data_card.md）
+uv run yakkan datacard check          # カードが現在の dataset/ と合っているか（make check にも入っている）
 uv run pytest -q ; uv run ruff check . ; make check
 ```
 - スラッシュコマンド `/author <content_id>`：§7 の執筆プロトコルを対話的に進める。`/review <doc_id>`：PNG を開き `docs/authoring_checklist.md` で採点、修正案を parts に反映。`/batch <spec>`：バッチ生成と失敗の切り分け。
 - subagent：`author`（part 執筆、文体ガイドと blueprint を読み込む）、`reviewer`（本物らしさ・整合性を採点、写し疑いを指摘）、`render-debugger`（WeasyPrint の崩れを最小再現 HTML で切り分け）。
-- hooks（`.claude/settings.json`）：`*.json` 保存後に `yakkan lint --quick`、`rm -rf dataset` 等の破壊操作は確認、`dataset/` の手編集を禁止する PreToolUse。
+- hooks（`.claude/settings.json`）：`dataset/` 配下への Edit/Write を拒否する PreToolUse（`.claude/hooks/deny-dataset-write.py`）のみ。Bash 経由の `rm` は止まらないので、生成物の削除は `yakkan clean` を使う。
 
 ## 12. マイルストーンと完了条件（DoD）
 | フェーズ | 内容 | DoD |
@@ -194,8 +199,8 @@ uv run pytest -q ; uv run ruff check . ; make check
 | **P1 モデル** | pydantic モデル、JSON Schema、numbering、richtext、lint L01–L03/L07/L08/L13 | 単体テスト。サンプルが lint を通り、ラベル解決の golden テストあり |
 | **P2 レンダラ** | テンプレート・CSS、表（結合・表頭繰返し）、目次（target-counter）、ヘッダ/フッタ、脚注、bbox 抽出、verify | 手書きの小サンプル（3ページ）で往復一致・目次ページ一致・決定論を確認。`docs/decisions.md` に renderer 確定を記録 |
 | **P3 図** | 6種の Diagram → SVG、figure_layout、最小複雑度 lint | 各種 1 点ずつのサンプル図が PNG で崩れなく描ける |
-| **P4 コンテンツ** | blueprints 7 種、条文ライブラリ、scaffold/compose、`docs/reference_structures.md`、**各ジャンル 1 文書**を執筆 | 7 文書が verify/review を通り manifest に ready |
-| **P5 QA・バッチ** | 自動 QA、執筆 QA、manifest、`specs/batch_v1.yaml`（7 genre × 3 content × 1–2 style ≈ 30 文書） | 全文書 ready。失敗率と原因を `docs/progress.md` に記録 |
+| **P4 コンテンツ** | blueprints、条文ライブラリ、scaffold/compose、`docs/reference_structures.md`、**各ジャンル 1 文書**を執筆 | 各ジャンル 1 文書が verify／目視を通り manifest に ready |
+| **P5 QA・バッチ** | 自動 QA、執筆 QA、manifest、`specs/batch_*.yaml`（genre × content × 1–2 style） | 全文書 ready。失敗率と原因を `docs/progress.md` に記録 |
 | **P6 拡張** | style 追加、ルビ・縦書きセル・欄外注ページ下配置、スキャン風画像（任意）、eval ハーネス | 各機能に verify とテスト。データセット v1 を tag |
 
 各フェーズの終了時に `docs/progress.md` を更新し、次フェーズの最初の 3 タスクを書いておく。
@@ -203,7 +208,7 @@ uv run pytest -q ; uv run ruff check . ; make check
 ## 13. コーディング規約・テスト
 - Python 3.12、`ruff`（format + lint）、型ヒント必須、`pydantic` モデル外で dict を裸で回さない。乱数は `random.Random(seed)` を明示的に受け渡す。`datetime.now()` を生成物に入れない。
 - テスト：`tests/unit`（numbering・richtext・lint・header_path・diagram layout）、`tests/golden`（許容誤差 0.5pt で比較、PDF テキスト層の一致）、`tests/render_smoke`（各 style で 1 ページ）。golden 更新は `--update-golden` を明示し、差分理由をコミットメッセージに書く。
-- コミット単位：フェーズ内の機能単位。生成物 `dataset/` はコミット対象外（`specs/` から再生成可能にする）。`content/` はコミットする。
+- コミット単位：フェーズ内の機能単位。`content/`・`specs/`・`dataset/` はいずれもコミット対象外（§10、2026-10-05 決定）。
 
 ## 14. 既知の落とし穴（Gotchas）— 発見したら `docs/gotchas.md` へ追記
 - WeasyPrint の box ツリー（`_page_box`、`box.element`）は私的 API。版を固定し、`scripts/probe_weasy.py` で `element id → bbox` が取れることを確認してから設計を確定する。
@@ -221,7 +226,7 @@ uv run pytest -q ; uv run ruff check . ; make check
 
 ## 15. 決定事項（確定）
 
-- データセット規模（v1）：約30文書。7ジャンル × 3 content、うち各ジャンル1 contentは2スタイルで描画
+- データセット規模：**10ジャンル × 10 content = 100 content**を 13 スタイルで描き 114 文書（ready 113 / failed 1・1,458ページ・QA 5,085問・`dataset_version: v7`）。一部の content を複数スタイルで描いてレイアウト頑健性の対を作る。当初の計画値は「7ジャンル × 3 content ≈ 30 文書」で、P5 以降に段階的に拡張した（`docs/progress.md` のセッション記録）。実測は `dataset/data-card.md`
 - `travel` の題材：海外旅行保険（参考URL #5 の実物で確認済み）
 - 縦書き：v1対象外。P6で表見出しの回転のみ
 - ルビ：作らない（`scripts/probe_ruby.py` で実測。ルビとして組まれず読みがテキスト層に混ざる）
@@ -229,7 +234,7 @@ uv run pytest -q ; uv run ruff check . ; make check
 - PDFのタグ付け（tagged PDF）：作らない
 - QAの言語・件数：日本語、自動生成30問＋執筆15問／文書
 - 正解bboxの座標系：pt・原点左上を主とし、正規化[0,1]を併記
-- 配布形式：`dataset/` ディレクトリ ＋ `manifest.json`
+- 配布形式：`dataset/` ディレクトリ ＋ `manifest.json`。**配布先は Hugging Face Datasets `cvusk/synthetic-japanese-insurance-documents`（控えを GitHub Releases）。ライセンスは CC BY 4.0**（`TASK.md` T7・T11・2026-10-05 決定）。手順は `docs/distribution.md`
 - 実在法令：法令名のみ引用し、条番号は書かない
 - Python／パッケージ管理：Python 3.12／uv
 

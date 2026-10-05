@@ -1,0 +1,526 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "calc_spec.schema.json",
+  "title": "CalcSpec — 契約書の計算仕様（唯一の正）",
+  "description": "実行時の検査は spec/validate.py（標準ライブラリのみ）が行う。本ファイルは機械可読の文書。",
+  "type": "object",
+  "required": [
+    "spec_version",
+    "document",
+    "rules"
+  ],
+  "properties": {
+    "spec_version": {
+      "const": "0.1"
+    },
+    "document": {
+      "type": "object",
+      "properties": {
+        "content_id": {
+          "type": "string"
+        },
+        "doctype": {
+          "type": "string"
+        },
+        "calc_seed": {
+          "type": "integer"
+        }
+      }
+    },
+    "calendar": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "properties": {
+        "weekend": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "SAT",
+              "SUN"
+            ]
+          }
+        },
+        "closed": {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "prefixItems": [
+              {
+                "type": "string",
+                "pattern": "^[0-9]{2}-[0-9]{2}$"
+              },
+              {
+                "type": "string",
+                "pattern": "^[0-9]{2}-[0-9]{2}$"
+              }
+            ]
+          }
+        },
+        "holidays": {
+          "const": "input"
+        },
+        "source": {
+          "$ref": "#/$defs/source"
+        }
+      }
+    },
+    "params": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": [
+          "type",
+          "source"
+        ],
+        "properties": {
+          "type": {
+            "enum": [
+              "int",
+              "ratio",
+              "date",
+              "enum"
+            ]
+          },
+          "value": {
+            "type": [
+              "integer",
+              "string"
+            ]
+          },
+          "num": {
+            "type": "integer"
+          },
+          "den": {
+            "type": "integer",
+            "exclusiveMinimum": 0
+          },
+          "unit": {
+            "type": "string"
+          },
+          "surface": {
+            "type": "string"
+          },
+          "source": {
+            "$ref": "#/$defs/source"
+          }
+        }
+      }
+    },
+    "tables": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": [
+          "kind",
+          "rows",
+          "source"
+        ],
+        "properties": {
+          "kind": {
+            "enum": [
+              "tiers",
+              "map"
+            ]
+          },
+          "unit": {
+            "type": "string"
+          },
+          "rows": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "required": [
+                "value"
+              ],
+              "properties": {
+                "upto": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ]
+                },
+                "value": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "source": {
+            "$ref": "#/$defs/source"
+          }
+        }
+      }
+    },
+    "rules": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "title",
+          "kind",
+          "interface",
+          "steps",
+          "output"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "calculation",
+              "determination"
+            ]
+          },
+          "origin": {
+            "enum": [
+              "added",
+              "bound"
+            ]
+          },
+          "parties": {
+            "type": "object",
+            "required": [
+              "payer",
+              "payee"
+            ],
+            "properties": {
+              "payer": {
+                "type": "string"
+              },
+              "payee": {
+                "type": "string"
+              }
+            }
+          },
+          "interface": {
+            "type": "object",
+            "required": [
+              "function"
+            ],
+            "properties": {
+              "function": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9_]*$"
+              }
+            }
+          },
+          "inputs": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object",
+              "required": [
+                "type",
+                "origin"
+              ],
+              "properties": {
+                "type": {
+                  "enum": [
+                    "int",
+                    "ratio",
+                    "bool",
+                    "enum",
+                    "date",
+                    "list"
+                  ]
+                },
+                "unit": {
+                  "type": "string"
+                },
+                "origin": {
+                  "enum": [
+                    "order",
+                    "fact",
+                    "notice",
+                    "judgment",
+                    "external"
+                  ]
+                },
+                "desc": {
+                  "type": "string"
+                },
+                "optional": {
+                  "type": "boolean"
+                },
+                "min": {
+                  "type": [
+                    "integer",
+                    "string"
+                  ]
+                },
+                "max": {
+                  "type": [
+                    "integer",
+                    "string"
+                  ]
+                },
+                "values": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "item_unit": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "steps": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "required": [
+                "name",
+                "expr"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "label": {
+                  "type": "string"
+                },
+                "expr": {
+                  "$ref": "#/$defs/expr"
+                }
+              }
+            }
+          },
+          "output": {
+            "type": "object",
+            "required": [
+              "step",
+              "type"
+            ],
+            "properties": {
+              "step": {
+                "type": "string"
+              },
+              "type": {
+                "enum": [
+                  "int",
+                  "bool",
+                  "date",
+                  "enum"
+                ]
+              },
+              "unit": {
+                "type": "string"
+              }
+            }
+          },
+          "obligations": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[a-z_]+(:.+)?$"
+            }
+          },
+          "presentation": {
+            "type": "object"
+          },
+          "sources": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/source"
+            }
+          },
+          "properties": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "examples": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "inputs",
+                "expect"
+              ],
+              "properties": {
+                "oracle": {
+                  "enum": [
+                    "manual"
+                  ]
+                },
+                "inputs": {
+                  "type": "object"
+                },
+                "expect": {},
+                "holidays": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "format": "date"
+                  }
+                }
+              }
+            }
+          },
+          "difficulty": {
+            "type": "object"
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "source": {
+      "type": "object",
+      "required": [
+        "unit",
+        "quote"
+      ],
+      "properties": {
+        "unit": {
+          "type": "string"
+        },
+        "quote": {
+          "type": "string"
+        }
+      }
+    },
+    "expr": {
+      "type": "object",
+      "oneOf": [
+        {
+          "required": [
+            "lit"
+          ]
+        },
+        {
+          "required": [
+            "var"
+          ]
+        },
+        {
+          "required": [
+            "param"
+          ]
+        },
+        {
+          "required": [
+            "step"
+          ]
+        },
+        {
+          "required": [
+            "item"
+          ]
+        },
+        {
+          "required": [
+            "op"
+          ],
+          "properties": {
+            "op": {
+              "enum": [
+                "add",
+                "sub",
+                "mul",
+                "muldiv",
+                "round_to",
+                "min",
+                "max",
+                "lt",
+                "le",
+                "gt",
+                "ge",
+                "eq",
+                "ne",
+                "and",
+                "or",
+                "not",
+                "if",
+                "case",
+                "coalesce",
+                "lookup",
+                "tiered",
+                "agg",
+                "add_days",
+                "add_months",
+                "end_of_month",
+                "set_day",
+                "period_end",
+                "days_between",
+                "days_in_month",
+                "is_business_day",
+                "next_business_day",
+                "prev_business_day",
+                "add_business_days"
+              ]
+            },
+            "args": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/expr"
+              }
+            },
+            "rounding": {
+              "enum": [
+                "floor",
+                "ceil",
+                "half_up"
+              ]
+            },
+            "unit_value": {
+              "type": "integer",
+              "exclusiveMinimum": 0
+            },
+            "unit": {
+              "enum": [
+                "day",
+                "month",
+                "year"
+              ]
+            },
+            "include_start": {
+              "type": "boolean"
+            },
+            "table": {
+              "type": "string"
+            },
+            "method": {
+              "enum": [
+                "all_units",
+                "marginal"
+              ]
+            },
+            "mode": {
+              "enum": [
+                "exact",
+                "step",
+                "sum",
+                "max",
+                "min",
+                "count",
+                "any",
+                "all"
+              ]
+            },
+            "over": {
+              "type": "string"
+            },
+            "filter": {
+              "$ref": "#/$defs/expr"
+            },
+            "map": {
+              "$ref": "#/$defs/expr"
+            }
+          }
+        }
+      ]
+    }
+  }
+}

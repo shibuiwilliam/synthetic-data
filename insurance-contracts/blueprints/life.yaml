@@ -18,6 +18,12 @@ front_matter:
   rider_index: false
 
 required:
+  # しおり部の用語集。**8/10 ジャンルが宣言しているのに life だけ漏れていた**ため、
+  # defined_terms の過半が紙面に出ず、検索コーパスの `definition` が 17 件しか無かった
+  # （docs/search_query_plan.md 段 5）。min_rows は L04 で「defined_terms の語数」も
+  # 検査するので、life の 12〜17 語を下回る 10 にしてある
+  - { kind: table, subtype: definitions, min_rows: 10,
+      note: "しおり冒頭の用語集（この冊子でよく使う用語）。平易な敬体で書く" }
   - { kind: table, subtype: benefit_schedule, min_rows: 4, min_cols: 4,
       note: "名称／支払事由／支払額／受取人の表（C2）" }
   - { kind: table, subtype: procedure, min_rows: 3, min_cols: 2, note: "保険料払込方法と猶予期間の表" }
@@ -35,7 +41,8 @@ skeleton:
     todo: "条番号を使わない解説部。テーマ見出し＋箇条書き＋囲み"
     children:
       - { id: pt1_ch1, kind: chapter, title_options: ["このしおりの読み方"], chars: 700,
-          todo: "冊子の構成（Ⅰ部・Ⅱ部の役割）を説明する" }
+          todo: "冊子の構成（Ⅰ部・Ⅱ部の役割）を説明し、末尾に用語集を置く",
+          required: [ { kind: table, subtype: definitions, min_rows: 10 } ] }
       - { id: pt1_ch2, kind: chapter, title_options: ["ご契約の手続き"], chars: 1100,
           todo: "申込から責任開始までの流れ図を添える",
           required: [ { kind: figure, subtype: steps } ] }

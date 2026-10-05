@@ -150,8 +150,10 @@ def test_L07_フォントに無い文字(content: Path) -> None:
     [
         "東京海上日動火災保険株式会社",
         "ニッセイのご案内",
-        "詳しくは https://www.aoba-minato.co.jp/ をご覧ください。",
-        "お問い合わせは info@aoba-minato.jp まで",
+        # 許可ドメイン（example 系）以外は落ちる。架空であることを保証するため、
+        # 実在しうる綴りは使わず RFC 2606 の予約 TLD `.invalid` を使う。
+        "詳しくは https://www.yakkan-synth-test.invalid/ をご覧ください。",
+        "お問い合わせは info@yakkan-synth-test.invalid まで",
         "電話 0120-123-456",
         "電話 ０１２０－１２３－４５６",
     ],
@@ -197,6 +199,30 @@ def test_L12_未定義の用語はwarn(content: Path) -> None:
     findings = lint_content(content, quick=True, exclude=DOCUMENT_RULES)
     assert "L12" in codes(findings, "warn")
     assert summarize(findings)[0] == 0
+
+
+def test_L10_groupの常体をwarnにする(content: Path) -> None:
+    edit(content / "doc.json", lambda d: d["meta"].__setitem__("numbering_scheme", "group"))
+
+    def make_plain(data: dict) -> None:
+        paragraph = first_paragraph(data)
+        paragraph["text"] = "当会社は、保険金を支払う{fn:1}。" * 24
+
+    edit(content / "parts" / "20_ch1.json", make_plain)
+    findings = lint_content(content, quick=True, exclude=DOCUMENT_RULES)
+    assert "L10" in codes(findings, "warn")
+
+
+def test_L10_groupの敬体は通る(content: Path) -> None:
+    edit(content / "doc.json", lambda d: d["meta"].__setitem__("numbering_scheme", "group"))
+
+    def make_polite(data: dict) -> None:
+        paragraph = first_paragraph(data)
+        paragraph["text"] = "当会社は、保険金を支払います{fn:1}。" * 24
+
+    edit(content / "parts" / "20_ch1.json", make_polite)
+    findings = lint_content(content, quick=True, exclude=DOCUMENT_RULES)
+    assert "L10" not in codes(findings, "warn")
 
 
 def test_onlyで絞り込める(content: Path) -> None:

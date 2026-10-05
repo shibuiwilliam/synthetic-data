@@ -31,6 +31,16 @@
       },
       "title": "Runs",
       "type": "array"
+    },
+    "index_setting": {
+      "default": "text_only",
+      "enum": [
+        "text_only",
+        "with_context_header",
+        "with_metadata"
+      ],
+      "title": "Index Setting",
+      "type": "string"
     }
   },
   "title": "SearchRun",

@@ -1,0 +1,191 @@
+# 地震保険（genre: quake）の計算パック。
+genre: quake
+
+chapters:
+  cover: ["補償条項", "保険金を支払う場合"]
+  basic: ["基本条項"]
+
+term_aliases:
+  quake: [quake, earthquake_etc]
+  insured: [insured]
+  policyholder: [policyholder]
+  building: [building, target_building, insured_object, insured_property, dwelling]
+  goods: [household_goods, household, goods, belongings, interior_goods, household_a]
+  damage_ratio: [damage_ratio, ratio]
+  survey: [survey, joint_survey]
+  fire_policy: [fire_policy, fire_contract, base_policy, base_contract]
+  insured_amount: [insured_amount, sum_insured, insurance_value, amount, actual_value]
+fallbacks:
+  quake: 地震等
+  insured: 被保険者
+  policyholder: 保険契約者
+  building: 建物
+  goods: 家財
+  damage_ratio: 損害割合
+  survey: 損害の調査
+  fire_policy: 火災保険契約
+  insured_amount: 保険金額
+
+vocab:
+  rate_name: 支払割合
+  grade_name: 損害の程度の区分
+  months_name: 経過月数
+  days_name: 日数
+  amount_name: 損害の額
+  payable_days_name: 支払の対象となる日数
+  years_name: 経過年数
+  deadline_effect: 保険金を支払います。
+  waiting_start: 責任の開始する日
+  sub_benefit: 付随する費用
+  period_end: 保険期間の末日
+  waiting_span: 支払の対象とならない期間
+  payable_span: 支払の対象となる期間
+  waiting_event: 責任の開始
+  mark_pay: ○
+  mark_nopay: ×
+  legend_pay: 支払います
+  legend_nopay: 支払いません
+  matrix_row_title: 競技中かどうか
+  matrix_col_title: 書面による請求
+  matrix_row1: 競技または競技の練習中
+  matrix_row2: 試運転または曲技の最中
+  matrix_row3: 通常の使用の最中
+  matrix_row4: その他の場合
+  matrix_col1: 書面による請求があった
+  matrix_col2: 口頭での連絡のみ
+  matrix_col3: 請求がない
+  payable_event: 支払の対象となる期間の開始
+  enum_value_header: 取扱い
+  enum_value: 支払いません
+  exclusion_competition: "{t:quake}の発生の日からその日を含めて10日を経過した後に生じた損害"
+  exclusion_no_claim: 損害の発生後、遅滞なく書面による請求が行われなかった場合
+  q_immobile: "{t:building}に損害が生じたか"
+  q_min_days: 片づけに{days}以上を要するか
+  q_other_cover: 他の保険契約から同じ費用の保険金が支払われるか
+  flow_start: "{t:quake}の発生"
+
+param_ranges:
+  deductible: {choices: [10000, 15000, 20000, 25000, 30000, 40000, 50000], unit: JPY}
+  limit: {choices: [200000, 300000, 400000, 500000, 600000, 800000, 1000000], unit: JPY}
+  sub_limit: {choices: [30000, 50000, 60000, 80000, 100000, 150000, 200000], unit: JPY}
+  aggregate_limit: {choices: [1000000, 3000000, 5000000], unit: JPY}
+  daily: {choices: [2000, 3000, 4000, 5000, 6000, 8000, 10000], unit: JPY}
+  min_days: {choices: [2, 3, 4, 5, 6, 7], unit: DAY}
+  max_days: {choices: [10, 15, 20, 25, 30, 40, 50], unit: DAY}
+  round_unit: {choices: [100, 500, 1000, 5000, 10000], unit: JPY}
+  max_months: {choices: [24, 30, 36, 42, 48, 54, 60], unit: MONTH}
+  rate_top: {choices: [30, 40, 50], unit: PERCENT}
+  rate_step: {choices: [5, 10], unit: PERCENT}
+  threshold_amount: {choices: [100000, 150000, 200000, 300000, 500000, 800000, 1000000], unit: JPY}
+  notice_days: {choices: [30, 60], unit: DAY}
+  payment_days: {choices: [30, 45], unit: DAY}
+  waiting_days: {choices: [7, 10], unit: DAY}
+  max_count: {choices: [2, 3], unit: COUNT}
+
+subjects:
+  - key: grade_payment
+    benefit: 損害区分別保険金
+    anchor: cover
+    requires: [damage_ratio]
+    trigger: "{t:quake}によって{t:building}に損害が生じ、{t:survey}により損害の程度が確定した場合"
+    patterns: [P04]
+    inputs:
+      amount: {concept: insured_amount, desc: 保険証券記載の保険金額}
+      grade: {concept: damage_grade, min: 1, max: 4, desc: 損害の程度の区分}
+    vocab:
+      example_title: 損害の程度に応じた支払の例
+      grade_name: 損害の程度の区分
+
+  - key: clearing
+    benefit: 片づけ費用保険金
+    anchor: cover
+    requires: [building]
+    trigger: "{t:quake}による損害を受けた{t:building}の残存物を片づけるために費用を支出した場合"
+    patterns: [P02, P01, P13]
+    inputs:
+      policy_limit:
+        concept: policy_limit
+        desc: 保険証券に記載された片づけ費用保険金の限度額
+      amount: {concept: actual_cost, desc: 片づけに要した費用の額}
+    vocab:
+      example_title: 片づけ費用の計算例
+
+  - key: lodging
+    benefit: 仮すまい費用保険金
+    anchor: cover
+    requires: [building]
+    trigger: "{t:quake}による損害により{t:insured}が{t:building}に居住できなくなり、仮の住居に移った場合"
+    patterns: [P03, P14]
+    inputs:
+      days: {concept: stay_days, desc: 仮の住居に滞在した日数}
+      immobile: {concept: inhabited, desc: "{t:building}に居住できない状態にあるかどうか"}
+      other_cover: {concept: rentacar_paid, desc: 他の保険契約から同じ費用の保険金が支払われるかどうか}
+    vocab:
+      example_title: 仮すまい費用の計算例
+
+  - key: survey_fee
+    benefit: 調査協力費用保険金
+    anchor: cover
+    requires: [survey]
+    trigger: "{t:insured}が{t:survey}に協力するために費用を支出した場合"
+    patterns: [P07, P01]
+    inputs:
+      amount: {concept: actual_cost, desc: 調査への協力のために支出した費用の額}
+    vocab:
+      example_title: 調査協力費用の支払の例
+
+  - key: contents
+    benefit: 家財特別費用保険金
+    anchor: cover
+    requires: [goods]
+    trigger: "{t:quake}によって{t:goods}に損害が生じた場合"
+    patterns: [P05, P17]
+    inputs:
+      years:
+        concept: elapsed_years
+        desc: 取得の時からの経過年数
+      amount: {concept: contents_value, desc: 家財の保険金額}
+      months: {concept: elapsed_full_months, desc: 保険契約の締結の日から損害の発生の日までの経過月数}
+      extra: {concept: extra_days}
+    vocab:
+      example_title: 家財特別費用の計算例
+      months_name: 経過月数
+
+  - key: proration
+    benefit: 比例てん補保険金
+    anchor: cover
+    requires: [insured_amount]
+    trigger: "{t:quake}による損害について、同じ目的物に対する他の保険契約がある場合"
+    patterns: [P06]
+    inputs:
+      amount: {concept: loss_amount, desc: 損害の額}
+      share_num: {concept: insured_amount, desc: この保険契約の保険金額}
+      share_den: {concept: building_value, desc: 他の保険契約を含めた保険金額の合計額}
+    vocab:
+      example_title: 比例てん補の計算例
+
+  - key: notice
+    benefit: 保険金の支払の期限
+    anchor: basic
+    requires: []
+    trigger: "{t:insured}から保険金の請求に必要な書類の提出を受けた場合"
+    patterns: [P10]
+    inputs:
+      base_date: {concept: document_date}
+    vocab:
+      example_title: 支払期限の数え方
+      deadline_effect: 保険金を支払います。
+
+  - key: removal
+    benefit: 残存物取片づけ費用保険金
+    anchor: cover
+    requires: [building]
+    trigger: "{t:quake}による損害を受けた{t:building}の残存物の取片づけに費用を支出した場合"
+    patterns: [P15, P08, P16]
+    inputs:
+      amount: {concept: actual_cost, desc: 取片づけに要した費用の額}
+      sub_amount: {concept: treatment_cost, desc: 残存物の運搬に要した費用の額}
+      paid: {concept: paid_amount, desc: この保険契約についてすでに支払った取片づけ費用保険金の額}
+    vocab:
+      example_title: 取片づけ費用の計算例
+      sub_benefit: 運搬に要した費用

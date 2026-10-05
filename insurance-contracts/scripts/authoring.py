@@ -233,3 +233,117 @@ def write(path: str | Path, obj: object) -> None:
     """UTF-8・indent 2・末尾改行で書く（リポジトリの JSON の体裁にそろえる）。"""
     Path(path).write_text(json.dumps(obj, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print("書いた", path)
+
+
+def h2table(
+    tid: str,
+    caption: str,
+    semantic: str,
+    *,
+    spine: str,
+    groups: list[tuple[str, list[str]]],
+    tail: list[str],
+    rows: list[list[str]],
+    widths: list[int],
+    notes: list[str] | None = None,
+) -> Block:
+    """2 段ヘッダの表（特約一覧・プラン比較マトリクスなど。docs/reference_structures.md C6）。
+
+    1 列目（`spine`）と末尾の列（`tail`）は 2 行を結合し、`groups` の
+    (まとめの見出し, [下位の見出し, ...]) だけが 2 段になる。`rows` の列の並びは
+    spine ＋ groups の下位見出し ＋ tail と一致させる。
+    """
+    sub: list[str] = []
+    for _g, subs in groups:
+        sub += subs
+    header_labels = [spine] + sub + tail
+    r0: list[Cell] = [C(f"{tid}__r0c0", spine, "header", align="center", rowspan=2)]
+    r1: list[Cell] = [merged(f"{tid}__r0c0")]
+    col = 1
+    for g, subs in groups:
+        r0.append(C(f"{tid}__r0c{col}", g, "header", align="center", colspan=len(subs)))
+        for n, s in enumerate(subs):
+            if n > 0:
+                r0.append(merged(f"{tid}__r0c{col}"))
+            r1.append(C(f"{tid}__r1c{col + n}", s, "header", align="center"))
+        col += len(subs)
+    for t in tail:
+        r0.append(C(f"{tid}__r0c{col}", t, "header", align="center", rowspan=2))
+        r1.append(merged(f"{tid}__r0c{col}"))
+        col += 1
+    grid: list[list[Cell]] = [r0, r1]
+    records: list[dict[str, str]] = []
+    for r, row in enumerate(rows, start=2):
+        cells: list[Cell] = []
+        for i, value in enumerate(row):
+            cells.append(
+                C(
+                    f"{tid}__r{r}c{i}",
+                    value,
+                    "stub" if i == 0 else "body",
+                    align=None if i == 0 or len(value) > 6 else "center",
+                )
+            )
+        grid.append(cells)
+        records.append(dict(zip(header_labels, row, strict=True)))
+    block: Block = {
+        "type": "table",
+        "id": tid,
+        "caption": caption,
+        "semantic_type": semantic,
+        "layout": {
+            "header_rows": 2,
+            "header_cols": 1,
+            "col_widths": list(widths),
+            "repeat_header": True,
+            "style": "grid",
+            "span_columns": False,
+        },
+        "grid": grid,
+        "records": records,
+    }
+    if notes:
+        block["notes"] = notes
+    return block
+
+
+def par(pid: str, text: str) -> Block:
+    """前付け・奥付・しおりの章で使う段落ブロック。"""
+    return {"type": "paragraph", "id": pid, "text": text}
+
+
+def box(bid: str, style: str, title: str, texts: list[str], anchor: str | None = None) -> Block:
+    """囲み（`margin_note` の欄外解説、`caution` の注意喚起、`note`）。"""
+    block: Block = {
+        "type": "box",
+        "id": bid,
+        "style": style,
+        "title": title,
+        "blocks": [par(f"{bid}_p{i + 1}", t) for i, t in enumerate(texts)],
+    }
+    if anchor:
+        block["anchor"] = anchor
+    return block
+
+
+def formula(fid: str, alt: str, terms_: list[dict[str, str]]) -> Block:
+    """算式（`inline_boxes`）。`terms_` は {"box": ...} と {"op": ...} の並び。"""
+    return {"type": "formula", "id": fid, "alt": alt, "layout": "inline_boxes", "terms": terms_}
+
+
+def defined_terms(
+    entries: list[tuple[str, str, str, str]],
+) -> tuple[list[dict[str, Any]], dict[str, str], dict[str, str], list[tuple[str, list[str]]]]:
+    """(id, 語, 定義, 索引かな) の並びから `defined_terms` と `kana_table` の材料を作る。
+
+    戻り値は (defined_terms, label, defs, kana_rows)。索引かなに使えるのは
+    `ア カ サ タ ナ ハ マ ヤ ラ ワ` の 10 行だけ（他は L00 で落ちる）。
+    """
+    order = ["ア", "カ", "サ", "タ", "ナ", "ハ", "マ", "ヤ", "ラ", "ワ"]
+    terms = [{"id": i, "term": t, "definition": d, "index_kana": k} for i, t, d, k in entries]
+    label = {i: t for i, t, _d, _k in entries}
+    defs = {i: d for i, _t, d, _k in entries}
+    buckets: dict[str, list[str]] = {}
+    for i, _t, _d, k in entries:
+        buckets.setdefault(k, []).append(i)
+    return terms, label, defs, [(k, buckets[k]) for k in order if k in buckets]

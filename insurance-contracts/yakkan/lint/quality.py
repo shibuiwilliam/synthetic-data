@@ -9,11 +9,16 @@ from yakkan.lint.base import Finding, LintContext, rule
 from yakkan.lint.walk import iter_texts
 from yakkan.richtext import RichTextError, Term, iter_tokens, parse, raw_text
 
-#: 敬体・常体の文末形
-POLITE = re.compile(r"(ます|ません|です|ましょう)[。、）]")
-PLAIN = re.compile(r"(する|とする|できる|ある|ない|よる|する。)。")
+#: 敬体・常体の文末形。文の終止形だけを数え、連体修飾や読点前は数えない。
+_SENTENCE_END = r"(?=(?:\{fn:\d+\})?[。！？])"
+POLITE = re.compile(rf"(?:ます|ません|です|でしょう|ましょう){_SENTENCE_END}")
+PLAIN = re.compile(
+    r"(?:する|しない|とする|できる|である|ある|ない|よる|いう|なる|"
+    r"行う|定める|支払う|含む|除く|扱う|負う|求める|認める|異なる|"
+    rf"限る|要する){_SENTENCE_END}"
+)
 #: genre ごとの期待文体
-POLITE_SCHEMES = {"nonlife", "life"}
+POLITE_SCHEMES = {"nonlife", "life", "group", "jyusetsu"}
 #: 文体判定の最小サンプル
 MIN_SENTENCES = 20
 #: 逸脱を許す割合

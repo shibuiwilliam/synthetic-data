@@ -5,7 +5,7 @@
 # ユーザーの回答待ち。回答があるまで以下は確定させない（decisions.md 2026-09-21）。
 # 実物に寄せる提案（未適用）：節を使わないフラット階層／小型判 style／全角括弧の項番号。
 genre: travel
-description: 海外旅行保険の約款（仮案）。治療・救援、賠償責任、携行品などの補償を持つ
+description: 海外旅行保険の約款。治療・救援、賠償責任、携行品などの補償を持つ
 target_pages: [10, 16]
 numbering_scheme: nonlife
 default_style: travel-a4-1col-gothic

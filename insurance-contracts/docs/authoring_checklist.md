@@ -188,6 +188,9 @@ parts の JSON を手で書くと、セルの id・`rowspan`・`records` を取�
 |---|---|
 | `C` / `merged` | セル 1 つ／結合セルに飲み込まれた位置 |
 | `table` | 見出し行 1 行の表（`records` も一緒に作るので `header_path` が取れる） |
+| `h2table` | **2 段ヘッダ**の表（特約一覧・プラン比較マトリクス。結合と `records` を自動で組む） |
+| `box` / `formula` / `par` | 囲み（`margin_note` / `caution` / `note`）／算式（`inline_boxes`）／段落ブロック |
+| `defined_terms` | (id, 語, 定義, 索引かな) の並びから `defined_terms` と `kana_table` の材料を作る |
 | `enum_table` | 文と一体の列挙表（番号欄は `{auto_label}`。**キャプションを付けない**） |
 | `kana_table` | 五十音の索引列を持つ定義表（索引列は行を結合） |
 | `art` / `jart` | 条（項・号・条末脚注・ブロック）／重要事項説明書のバッジつき大見出し |

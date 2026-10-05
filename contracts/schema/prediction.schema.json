@@ -1,0 +1,553 @@
+{
+  "$defs": {
+    "PredictionCell": {
+      "additionalProperties": false,
+      "description": "表のセルの意味座標。`grid`（見た目）とは**別に**採点する。",
+      "properties": {
+        "row_headers": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Row Headers",
+          "type": "array"
+        },
+        "col_headers": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Col Headers",
+          "type": "array"
+        },
+        "value": {
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "value"
+      ],
+      "title": "PredictionCell",
+      "type": "object"
+    },
+    "PredictionEdge": {
+      "additionalProperties": false,
+      "properties": {
+        "from": {
+          "title": "From",
+          "type": "string"
+        },
+        "to": {
+          "title": "To",
+          "type": "string"
+        },
+        "relation": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Relation"
+        },
+        "label": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Label"
+        }
+      },
+      "required": [
+        "from",
+        "to"
+      ],
+      "title": "PredictionEdge",
+      "type": "object"
+    },
+    "PredictionElement": {
+      "additionalProperties": false,
+      "description": "本文の要素。**読み順に**並べる（読み順の τ はこの並びで測る）。",
+      "properties": {
+        "text": {
+          "title": "Text",
+          "type": "string"
+        },
+        "page": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Page"
+        },
+        "kind": {
+          "anyOf": [
+            {
+              "enum": [
+                "part",
+                "chapter",
+                "preamble",
+                "head_matter",
+                "signature",
+                "supplement",
+                "rider",
+                "section",
+                "article",
+                "paragraph",
+                "item",
+                "subitem",
+                "subsubitem",
+                "appendix",
+                "appendix_section",
+                "commentary"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Kind"
+        },
+        "citation": {
+          "default": "",
+          "title": "Citation",
+          "type": "string"
+        },
+        "bbox": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "number"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Bbox"
+        }
+      },
+      "required": [
+        "text"
+      ],
+      "title": "PredictionElement",
+      "type": "object"
+    },
+    "PredictionEnumeration": {
+      "additionalProperties": false,
+      "properties": {
+        "citation": {
+          "default": "",
+          "title": "Citation",
+          "type": "string"
+        },
+        "items": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Items",
+          "type": "array"
+        }
+      },
+      "title": "PredictionEnumeration",
+      "type": "object"
+    },
+    "PredictionFigure": {
+      "additionalProperties": false,
+      "properties": {
+        "caption_label": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Caption Label"
+        },
+        "caption": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Caption"
+        },
+        "page": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Page"
+        },
+        "bbox": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "number"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Bbox"
+        },
+        "kind": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Kind"
+        },
+        "nodes": {
+          "items": {
+            "$ref": "#/$defs/PredictionNode"
+          },
+          "title": "Nodes",
+          "type": "array"
+        },
+        "edges": {
+          "items": {
+            "$ref": "#/$defs/PredictionEdge"
+          },
+          "title": "Edges",
+          "type": "array"
+        },
+        "paths": {
+          "items": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "title": "Paths",
+          "type": "array"
+        }
+      },
+      "title": "PredictionFigure",
+      "type": "object"
+    },
+    "PredictionNode": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Id"
+        },
+        "label": {
+          "default": "",
+          "title": "Label",
+          "type": "string"
+        },
+        "role": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Role"
+        }
+      },
+      "title": "PredictionNode",
+      "type": "object"
+    },
+    "PredictionOutline": {
+      "additionalProperties": false,
+      "description": "見出し 1 件。`kind` の語彙は docs/evaluation.md §3。迷ったら null。",
+      "properties": {
+        "label": {
+          "default": "",
+          "title": "Label",
+          "type": "string"
+        },
+        "title": {
+          "default": "",
+          "title": "Title",
+          "type": "string"
+        },
+        "heading_text": {
+          "default": "",
+          "title": "Heading Text",
+          "type": "string"
+        },
+        "kind": {
+          "anyOf": [
+            {
+              "enum": [
+                "part",
+                "chapter",
+                "preamble",
+                "head_matter",
+                "signature",
+                "supplement",
+                "rider",
+                "section",
+                "article",
+                "paragraph",
+                "item",
+                "subitem",
+                "subsubitem",
+                "appendix",
+                "appendix_section",
+                "commentary"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Kind"
+        },
+        "page": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Page"
+        },
+        "citation": {
+          "default": "",
+          "title": "Citation",
+          "type": "string"
+        }
+      },
+      "title": "PredictionOutline",
+      "type": "object"
+    },
+    "PredictionPage": {
+      "additionalProperties": false,
+      "description": "ページ本文。ヘッダ・フッタ・図中の文字は含めない。",
+      "properties": {
+        "number": {
+          "title": "Number",
+          "type": "integer"
+        },
+        "text": {
+          "default": "",
+          "title": "Text",
+          "type": "string"
+        }
+      },
+      "required": [
+        "number"
+      ],
+      "title": "PredictionPage",
+      "type": "object"
+    },
+    "PredictionQA": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "answer": {
+          "default": null,
+          "title": "Answer"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "title": "PredictionQA",
+      "type": "object"
+    },
+    "PredictionTable": {
+      "additionalProperties": false,
+      "properties": {
+        "caption_label": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Caption Label"
+        },
+        "caption": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Caption"
+        },
+        "page": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Page"
+        },
+        "bbox": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "number"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Bbox"
+        },
+        "grid": {
+          "items": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "title": "Grid",
+          "type": "array"
+        },
+        "cells": {
+          "items": {
+            "$ref": "#/$defs/PredictionCell"
+          },
+          "title": "Cells",
+          "type": "array"
+        }
+      },
+      "title": "PredictionTable",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "読み取りの予測 JSON（docs/evaluation.md §1）。\n\n**すべてのキーが任意。** 出さない観点はその指標が 0 になるだけで、他は採点される。\n突合は中身で行う（予測に我々の内部 id は無い前提）。",
+  "properties": {
+    "doc_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Doc Id"
+    },
+    "pages": {
+      "items": {
+        "$ref": "#/$defs/PredictionPage"
+      },
+      "title": "Pages",
+      "type": "array"
+    },
+    "outline": {
+      "items": {
+        "$ref": "#/$defs/PredictionOutline"
+      },
+      "title": "Outline",
+      "type": "array"
+    },
+    "elements": {
+      "items": {
+        "$ref": "#/$defs/PredictionElement"
+      },
+      "title": "Elements",
+      "type": "array"
+    },
+    "tables": {
+      "items": {
+        "$ref": "#/$defs/PredictionTable"
+      },
+      "title": "Tables",
+      "type": "array"
+    },
+    "figures": {
+      "items": {
+        "$ref": "#/$defs/PredictionFigure"
+      },
+      "title": "Figures",
+      "type": "array"
+    },
+    "enumerations": {
+      "items": {
+        "$ref": "#/$defs/PredictionEnumeration"
+      },
+      "title": "Enumerations",
+      "type": "array"
+    },
+    "qa": {
+      "items": {
+        "$ref": "#/$defs/PredictionQA"
+      },
+      "title": "Qa",
+      "type": "array"
+    }
+  },
+  "title": "Prediction",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

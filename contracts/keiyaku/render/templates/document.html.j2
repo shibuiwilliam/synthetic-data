@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>{{ source.meta.title }}</title>
+<style>
+{{ css }}
+</style>
+</head>
+<body>
+{# 表紙は任意。契約書は表紙を持たないのが普通（docs/schema.md §2）。 #}
+{%- if cover %}
+<section class="cover" id="cover" data-kind="cover">
+  <div class="cover-title" id="cover_title" data-kind="cover_title">{{ cover.title }}</div>
+  {%- if cover.subtitle %}
+  <div class="cover-subtitle" id="cover_subtitle" data-kind="cover_subtitle">{{ cover.subtitle }}</div>
+  {%- endif %}
+  {%- if cover.issuer_name %}
+  <div class="cover-issuer" id="cover_issuer" data-kind="cover_issuer">{{ cover.issuer_name }}</div>
+  {%- endif %}
+  {%- for note in cover.notes %}
+  <div class="cover-note" id="cover_note{{ loop.index0 }}" data-kind="cover_note">{{ note_html[loop.index0] }}</div>
+  {%- endfor %}
+  {%- if cover.contract_number %}
+  <div class="cover-number" id="cover_number" data-kind="cover_number">{{ cover.contract_number }}</div>
+  {%- endif %}
+  {%- if cover.form_code %}
+  <div class="cover-form" id="cover_form" data-kind="cover_form">{{ cover.form_code }}</div>
+  {%- endif %}
+</section>
+{%- endif %}
+
+{# 前付けも段組の外に置く（長い表が段組内にあると以降の内容が消えるため） #}
+{%- if preface_html %}
+<div class="preface" id="preface" data-kind="preface">
+{{ preface_html }}
+</div>
+{%- endif %}
+
+{# 目次は段組コンテナの **外** に置く。1 ページを超える column-span: all 要素が
+   段組の中にあると、WeasyPrint 70.0 はそれ以降の内容を黙って捨てる
+   （docs/gotchas.md「段組内の長い段またぎ要素」）。 #}
+{%- if toc %}
+  <nav class="toc" id="toc" data-kind="toc">
+    <h1 id="toc_heading" data-kind="toc_heading">{{ style.toc_heading }}</h1>
+    {%- for entry in toc %}
+    <span class="toc-line d{{ entry.depth }}" id="toc_{{ entry.id }}" data-kind="toc_line">
+      <a href="#{{ entry.id }}" id="toc_link_{{ entry.id }}" data-kind="toc_link"
+         {%- if toc_pages %} class="fixed"{% endif %}>{{ entry.heading_text }}</a>
+      {%- if toc_pages %}<span class="toc-page" id="toc_page_{{ entry.id }}" data-kind="toc_page">{{ toc_pages.get(entry.id, "") }}</span>{% endif %}
+    </span>
+    {%- if entry.summary %}
+    <span class="toc-summary" id="toc_sum_{{ entry.id }}" data-kind="toc_summary">{{ entry.summary }}</span>
+    {%- endif %}
+    {%- endfor %}
+  </nav>
+{%- endif %}
+
+<div class="cols" id="doc_body" data-kind="body">
+{{ body_html }}
+
+{# 後文＋契約日＋記名押印欄。**最終条の直後・別紙の前**に置く。
+   P1（2026-09-27）で実物を確認：特許庁モデル契約は最終条 → 記名押印欄 → 参考様式の順で、
+   別紙・様式は記名欄の**あと**に付く。欄の文字列はすべて meta から導出したもの
+   （docs/rendering.md §4.4）。 #}
+{%- if signature_html %}
+{{ signature_html }}
+{%- endif %}
+
+{{ appendices_html }}
+
+{%- if colophon_html %}
+  <div class="colophon" id="colophon" data-kind="colophon">
+{{ colophon_html }}
+  </div>
+{%- endif %}
+</div>
+</body>
+</html>

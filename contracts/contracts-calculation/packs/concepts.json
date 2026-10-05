@@ -1,0 +1,271 @@
+{
+  "note": "入力概念の語彙。同じ概念には文書をまたいで同じ引数名を使う（DESIGN.md §8.5）。",
+  "concepts": {
+    "unit_price": {
+      "ja": "個別契約に定める単価",
+      "type": "int",
+      "unit": "JPY",
+      "origin": "order"
+    },
+    "qty": {
+      "ja": "当月の数量",
+      "type": "int",
+      "unit": "COUNT",
+      "origin": "fact",
+      "min": 0,
+      "max": 100000
+    },
+    "usage_qty": {
+      "ja": "当月の利用量",
+      "type": "int",
+      "unit": "COUNT",
+      "origin": "fact",
+      "min": 0,
+      "max": 100000
+    },
+    "case_count": {
+      "ja": "当月の処理件数",
+      "type": "int",
+      "unit": "COUNT",
+      "origin": "fact",
+      "min": 0,
+      "max": 100000
+    },
+    "work_hours": {
+      "ja": "当月の稼働時間",
+      "type": "int",
+      "unit": "HOUR",
+      "origin": "fact",
+      "min": 0,
+      "max": 400
+    },
+    "usage_days": {
+      "ja": "当該月の利用日数",
+      "type": "int",
+      "unit": "DAY",
+      "origin": "fact",
+      "min": 0,
+      "max": 31
+    },
+    "month_days": {
+      "ja": "当該月の日数",
+      "type": "int",
+      "unit": "DAY",
+      "origin": "fact",
+      "min": 28,
+      "max": 31
+    },
+    "base_amount": {
+      "ja": "税抜の対価の額",
+      "type": "int",
+      "unit": "JPY",
+      "origin": "fact",
+      "min": 0,
+      "max": 100000000
+    },
+    "contract_amount": {
+      "ja": "個別契約に定める契約金額",
+      "type": "int",
+      "unit": "JPY",
+      "origin": "order",
+      "min": 0,
+      "max": 1000000000
+    },
+    "closing_date": {
+      "ja": "締日",
+      "type": "date",
+      "origin": "fact",
+      "min": "2026-01-01",
+      "max": "2032-12-31"
+    },
+    "delivery_date": {
+      "ja": "納入の日",
+      "type": "date",
+      "origin": "fact",
+      "min": "2026-01-01",
+      "max": "2032-12-31"
+    },
+    "expiry_date": {
+      "ja": "期間の満了日",
+      "type": "date",
+      "origin": "fact",
+      "min": "2026-01-01",
+      "max": "2033-12-31"
+    },
+    "unpaid_amount": {
+      "ja": "支払期日までに支払われなかった金額",
+      "type": "int",
+      "unit": "JPY",
+      "origin": "fact",
+      "min": 0,
+      "max": 100000000
+    },
+    "due_date": {
+      "ja": "支払期日",
+      "type": "date",
+      "origin": "fact",
+      "min": "2026-01-01",
+      "max": "2032-12-31"
+    },
+    "paid_date": {
+      "ja": "実際に支払った日",
+      "type": "date",
+      "origin": "fact",
+      "min": "2026-01-01",
+      "max": "2033-12-31"
+    },
+    "delay_days": {
+      "ja": "遅延日数",
+      "type": "int",
+      "unit": "DAY",
+      "origin": "fact",
+      "min": 0,
+      "max": 365
+    },
+    "damage_amount": {
+      "ja": "損害の額",
+      "type": "int",
+      "unit": "JPY",
+      "origin": "judgment",
+      "min": 0,
+      "max": 100000000
+    },
+    "paid_fees_recent": {
+      "ja": "基準日までの対象期間に支払われた対価の合計額",
+      "type": "int",
+      "unit": "JPY",
+      "origin": "fact",
+      "min": 0,
+      "max": 1000000000
+    },
+    "willful": {
+      "ja": "故意または重過失があるか",
+      "type": "bool",
+      "origin": "judgment"
+    },
+    "breach_amount": {
+      "ja": "違約の対象となった金額",
+      "type": "int",
+      "unit": "JPY",
+      "origin": "judgment",
+      "min": 0,
+      "max": 100000000
+    },
+    "sales_amount": {
+      "ja": "対象期間の売上高",
+      "type": "int",
+      "unit": "JPY",
+      "origin": "fact",
+      "min": 0,
+      "max": 1000000000
+    },
+    "annual_amount": {
+      "ja": "年間の取引額",
+      "type": "int",
+      "unit": "JPY",
+      "origin": "fact",
+      "min": 0,
+      "max": 2000000000
+    },
+    "acceptance_date": {
+      "ja": "検収の日",
+      "type": "date",
+      "origin": "fact",
+      "min": "2026-01-01",
+      "max": "2032-12-31"
+    },
+    "end_date": {
+      "ja": "契約の終了日",
+      "type": "date",
+      "origin": "fact",
+      "min": "2026-01-01",
+      "max": "2033-12-31"
+    },
+    "remaining_months": {
+      "ja": "解約日から期間満了までの残存月数",
+      "type": "int",
+      "unit": "MONTH",
+      "origin": "fact",
+      "min": 0,
+      "max": 60
+    },
+    "damages": {
+      "ja": "対象となる損害の一覧（1件ごとの額）",
+      "type": "list",
+      "item_unit": "JPY",
+      "origin": "judgment"
+    },
+    "month_minutes": {
+      "ja": "当月の総時間（分）",
+      "type": "int",
+      "unit": "MIN",
+      "origin": "fact",
+      "min": 40320,
+      "max": 44640
+    },
+    "planned_stop": {
+      "ja": "計画停止の時間（分）",
+      "type": "int",
+      "unit": "MIN",
+      "origin": "fact",
+      "min": 0,
+      "max": 10000
+    },
+    "downtime": {
+      "ja": "障害による停止の時間（分）",
+      "type": "int",
+      "unit": "MIN",
+      "origin": "fact",
+      "min": 0,
+      "max": 40000
+    },
+    "actual_qty": {
+      "ja": "対象期間に購入した数量",
+      "type": "int",
+      "unit": "COUNT",
+      "origin": "fact",
+      "min": 0,
+      "max": 100000
+    },
+    "subtotal_amount": {
+      "ja": "個別契約に基づく当月の対価の小計（税抜）",
+      "type": "int",
+      "unit": "JPY",
+      "origin": "order",
+      "min": 0,
+      "max": 100000000
+    },
+    "index_old": {
+      "ja": "改定の基準となる指数（直前の改定時）",
+      "type": "int",
+      "unit": "INDEX",
+      "origin": "external",
+      "min": 500,
+      "max": 2000
+    },
+    "index_new": {
+      "ja": "改定時点の指数",
+      "type": "int",
+      "unit": "INDEX",
+      "origin": "external",
+      "min": 500,
+      "max": 2000
+    },
+    "unpaid_fees": {
+      "ja": "未払の対価の合計",
+      "type": "int",
+      "unit": "JPY",
+      "origin": "fact",
+      "min": 0,
+      "max": 10000000
+    },
+    "repair_cost": {
+      "ja": "原状回復に要した費用",
+      "type": "int",
+      "unit": "JPY",
+      "origin": "fact",
+      "min": 0,
+      "max": 10000000
+    }
+  }
+}

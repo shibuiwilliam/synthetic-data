@@ -1,0 +1,146 @@
+# 賠償責任保険の約款集（genre: golf。ゴルファー・自転車・ペットなど）の計算パック。
+genre: golf
+
+chapters:
+  injury: ["傷害および用具の補償条項", "傷害の補償条項", "傷害および費用の補償条項", "費用の補償条項", "費用および受託物の補償条項"]
+  liability: ["賠償責任条項"]
+  basic: ["基本条項"]
+
+term_aliases:
+  insured: [insured]
+  policyholder: [policyholder]
+  accident: [accident, bite_accident, accident_report]
+  injury: [bodily_injury, injury, bodily_harm]
+  hospitalization: [hospitalization]
+  outpatient: [outpatient, clinic_visit, clinic]
+  residual_disability: [residual_disability, residual]
+  deductible: [deductible]
+  equipment: [golf_equipment, equipment, gear, own_bicycle, hull]
+  desk: [hotline, desk, rescue_service]
+  liability: [liability, liability_damage, property_harm]
+fallbacks:
+  insured: 被保険者
+  policyholder: 保険契約者
+  accident: 事故
+  injury: 傷害
+  hospitalization: 入院
+  outpatient: 通院
+  residual_disability: 後遺障害
+  deductible: 免責金額
+  equipment: 用具
+  desk: 事故受付窓口
+  liability: 賠償責任
+
+vocab:
+  rate_name: 支払割合
+  grade_name: 後遺障害の等級
+  months_name: 経過月数
+  days_name: 日数
+  amount_name: 損害の額
+  payable_days_name: 支払の対象となる日数
+  years_name: 経過年数
+  deadline_effect: 保険金を支払います。
+  waiting_start: 責任の開始する日
+  sub_benefit: 付随する費用
+  period_end: 保険期間の末日
+  waiting_span: 支払の対象とならない期間
+  payable_span: 支払の対象となる期間
+  waiting_event: 責任の開始
+  mark_pay: ○
+  mark_nopay: ×
+  legend_pay: 支払います
+  legend_nopay: 支払いません
+  matrix_row_title: 競技中かどうか
+  matrix_col_title: 書面による請求
+  matrix_row1: 競技または競技の練習中
+  matrix_row2: 試運転または曲技の最中
+  matrix_row3: 通常の使用の最中
+  matrix_row4: その他の場合
+  matrix_col1: 書面による請求があった
+  matrix_col2: 口頭での連絡のみ
+  matrix_col3: 請求がない
+  payable_event: 支払の対象となる期間の開始
+  enum_value_header: 取扱い
+  enum_value: 支払いません
+  exclusion_competition: 職業として競技を行っている間に生じた{t:accident}
+  exclusion_no_claim: 事故の発生後、遅滞なく書面による請求が行われなかった場合
+  q_immobile: 医師の治療を受けたか
+  q_min_days: 治療に{days}以上を要するか
+  q_other_cover: 他の保険契約から同じ費用の保険金が支払われるか
+  flow_start: "{t:accident}の発生"
+
+param_ranges:
+  deductible: {choices: [3000, 5000, 8000, 10000, 15000, 20000], unit: JPY}
+  limit: {choices: [50000, 80000, 100000, 150000, 200000, 300000, 400000], unit: JPY}
+  sub_limit: {choices: [10000, 20000, 30000, 50000, 60000, 80000], unit: JPY}
+  aggregate_limit: {choices: [500000, 1000000, 2000000], unit: JPY}
+  daily: {choices: [2000, 3000, 4000, 5000, 6000, 8000], unit: JPY}
+  min_days: {choices: [2, 3, 4, 5, 7], unit: DAY}
+  max_days: {choices: [30, 40, 60, 90, 120], unit: DAY}
+  round_unit: {choices: [100, 500, 1000, 5000], unit: JPY}
+  max_months: {choices: [12, 18, 24, 36, 48], unit: MONTH}
+  rate_top: {choices: [30, 40, 50], unit: PERCENT}
+  rate_step: {choices: [5, 10], unit: PERCENT}
+  threshold_amount: {choices: [20000, 30000, 50000, 80000, 100000, 150000], unit: JPY}
+  payment_days: {choices: [30, 45], unit: DAY}
+  waiting_days: {choices: [3, 7, 14], unit: DAY}
+  max_count: {choices: [2, 3], unit: COUNT}
+
+subjects:
+  - key: kit
+    benefit: 用具損害保険金
+    anchor: injury
+    requires: [equipment]
+    trigger: "{t:insured}が所有する{t:equipment}に{t:accident}によって損害が生じた場合"
+    patterns: [P02, P01, P09]
+    inputs:
+      items:
+        concept: item_loss
+        desc: 明細に記載された用具1件ごとの損害の額
+      amount: {concept: equipment_value, desc: 用具の損害の額}
+    vocab:
+      example_title: 用具が壊れたとき
+
+  - key: clinicvisit
+    benefit: 通院見舞金
+    anchor: injury
+    requires: [outpatient]
+    trigger: "{t:insured}が{t:injury}により{t:outpatient}をした場合"
+    patterns: [P03, P14, P11]
+    inputs:
+      count:
+        concept: visit_count
+        desc: 通院の回数
+      days: {concept: outpatient_days, desc: 通院した日数}
+      immobile: {concept: doctor_order}
+      other_cover: {concept: rentacar_paid, desc: 他の保険契約から同じ給付が行われるかどうか}
+    vocab:
+      example_title: 通院見舞金の計算例
+
+  - key: aftereffect
+    benefit: 後遺障害見舞金
+    anchor: injury
+    requires: [residual_disability]
+    trigger: "{t:insured}が{t:accident}により{t:residual_disability}が生じた場合"
+    patterns: [P04]
+    inputs:
+      amount: {concept: insured_amount, desc: 保険証券記載の保険金額}
+      grade: {concept: disability_grade, min: 1, max: 5}
+    vocab:
+      example_title: 等級に応じた支払の例
+
+  - key: mediation
+    benefit: 示談交渉費用保険金
+    anchor: liability
+    requires: [liability]
+    trigger: "{t:insured}が負う{t:liability}について示談のために費用を支出した場合"
+    patterns: [P07, P06, P15]
+    inputs:
+      sub_amount:
+        concept: treatment_cost
+        desc: 訴訟に要した費用の額
+      amount: {concept: actual_cost, desc: 示談のために支出した費用の額}
+      share_num: {concept: insured_amount, desc: 保険証券記載の賠償責任の保険金額}
+      share_den: {concept: liability_amount}
+    vocab:
+      example_title: 示談交渉費用の支払の例

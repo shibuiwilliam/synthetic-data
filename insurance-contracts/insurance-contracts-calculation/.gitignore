@@ -1,0 +1,34 @@
+# 生成物の既定の出力先（回帰基準は examples/ だけをコミットする。TASK.md §2.5）
+out/
+# 生成物の出力先（out/ と同じ扱いでコミットしない）。書き込みを禁じるのは**本体の** dataset/ だけで、
+# そちらは export/layout.py の check_out_dir がプログラム側で止める
+dataset/
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+*.pyc
+
+# 回帰基準（examples/）に描画結果は入れない。正解の比較には policy.json と calc/ だけを使う。
+# 必要なら `make examples` で作り直す（PDF・PNG・layout.json は 12MB 以上になる）
+examples/*/*--*/
+# 本体の状態の基準（T12。機械ごとの作業状態なのでコミットしない）
+scripts/.base_state.json
+
+# ---- 環境・OS・エディタ（親の .gitignore と重複してよい。この階層だけで完結させる） ----
+.DS_Store
+.venv/
+scratch/
+
+# 人間の判断・レビュー待ちの詳細と経緯。内部向けの残件リストなので公開しない
+HITL.md
+
+# 作業指示用のプロンプト。内部向けなので公開しない
+PROMPT.md
+
+# ある時点の現況報告。内部向けのスナップショットなので公開しない
+CURRENT_STATUS.md
+
+# 公開用リポジトリの組み立て先（dataset/ から作り直せる生成物。2GB 超）
+dist/
+
+examples/

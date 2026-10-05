@@ -1,0 +1,2079 @@
+{
+  "schema_version": "2.0",
+  "content_id": "sample-min",
+  "family": "contract",
+  "doctype": "nda",
+  "seed": 1,
+  "meta": {
+    "title": "秘密保持契約書（検証用最小サンプル）",
+    "subtitle": null,
+    "parties": [
+      {
+        "key": "discloser",
+        "alias": "甲",
+        "name": "株式会社青葉システムズ",
+        "address": "東京都千代田区丸窓町一丁目１番１号",
+        "representative": "代表取締役　相馬　和之",
+        "role_label": "開示者"
+      },
+      {
+        "key": "receiver",
+        "alias": "乙",
+        "name": "みなと技研株式会社",
+        "address": "神奈川県横浜市西区帆影町二丁目２番２号",
+        "representative": "代表取締役　都筑　祥子",
+        "role_label": "受領者"
+      }
+    ],
+    "issuer": null,
+    "contract_date": "2026-04-01",
+    "effective_date": null,
+    "contract_number": "ＡＯ－２６－０００１",
+    "form_code": null,
+    "copies": 2,
+    "stamp_duty": false,
+    "numbering_scheme": "contract-standard",
+    "digit_style": "fullwidth",
+    "article_heading": "inline",
+    "caption_numbering": "flat",
+    "footnote_style": "inline",
+    "disclaimer": "本書は、文書読取技術の検証のために生成された架空の契約書です。記載の当事者・住所・連絡先は実在せず、法的効力を有しません。",
+    "constants": {
+      "survival_years": "３年",
+      "notice_days": "３０日"
+    }
+  },
+  "front_matter": {
+    "cover": null,
+    "preface": [],
+    "toc": null
+  },
+  "defined_terms": [
+    {
+      "id": "confidential",
+      "term": "秘密情報",
+      "definition": "本目的のために一方の当事者が他方の当事者に開示した技術上または営業上の情報であって、開示の際に秘密である旨を明示したものをいう。",
+      "index_kana": "ハ",
+      "notes": []
+    },
+    {
+      "id": "purpose",
+      "term": "本目的",
+      "definition": "物流倉庫向け在庫管理システムの共同開発の可否を検討することをいう。",
+      "index_kana": "ハ",
+      "notes": []
+    },
+    {
+      "id": "deliver_medium",
+      "term": "記録媒体",
+      "definition": "秘密情報が記録された書面、電磁的記録媒体その他の有体物をいい、その複製物を含む。",
+      "index_kana": "カ",
+      "notes": [
+        "電磁的記録媒体には、当事者が指定したクラウド上の保管領域を含む。"
+      ]
+    }
+  ],
+  "body": [
+    {
+      "id": "pre",
+      "kind": "preamble",
+      "title": null,
+      "text": null,
+      "summary": null,
+      "blocks": [
+        {
+          "type": "parties",
+          "id": "parties_top",
+          "keys": [
+            "discloser",
+            "receiver"
+          ]
+        }
+      ],
+      "children": [
+        {
+          "id": "pre_p1",
+          "kind": "paragraph",
+          "title": null,
+          "text": "{party:discloser|full}と{party:receiver|full}とは、{term:purpose}のために相互に開示する情報の取扱いについて、次のとおり契約を締結する。",
+          "summary": null,
+          "blocks": [],
+          "children": [],
+          "badges": [],
+          "kind_label": null,
+          "parties": [],
+          "number_override": null,
+          "number_override_reason": null
+        }
+      ],
+      "badges": [],
+      "kind_label": null,
+      "parties": [],
+      "number_override": null,
+      "number_override_reason": null
+    },
+    {
+      "id": "ch1",
+      "kind": "chapter",
+      "title": "秘密保持",
+      "text": null,
+      "summary": "秘密情報の取扱いと、秘密として扱わない情報の範囲を定める。",
+      "blocks": [],
+      "children": [
+        {
+          "id": "ch1_a1",
+          "kind": "article",
+          "title": "秘密保持義務",
+          "text": null,
+          "summary": null,
+          "blocks": [],
+          "children": [
+            {
+              "id": "ch1_a1_p1",
+              "kind": "paragraph",
+              "title": null,
+              "text": "{party:receiver}は、{party:discloser}から開示された{term:confidential}を{term:purpose}のためにのみ使用し、{party:discloser}の書面による事前の承諾を得ないで第三者に開示または漏えいしてはならない。",
+              "summary": null,
+              "blocks": [],
+              "children": [],
+              "badges": [],
+              "kind_label": null,
+              "parties": [],
+              "number_override": null,
+              "number_override_reason": null
+            },
+            {
+              "id": "ch1_a1_p2",
+              "kind": "paragraph",
+              "title": null,
+              "text": "{ref:ch1_a1_p1}の義務は、本契約の終了後も{const:survival_years}存続する。",
+              "summary": null,
+              "blocks": [],
+              "children": [],
+              "badges": [],
+              "kind_label": null,
+              "parties": [],
+              "number_override": null,
+              "number_override_reason": null
+            }
+          ],
+          "badges": [],
+          "kind_label": null,
+          "parties": [],
+          "number_override": null,
+          "number_override_reason": null
+        },
+        {
+          "id": "ch1_a2",
+          "kind": "article",
+          "title": "秘密情報の例外",
+          "text": null,
+          "summary": null,
+          "blocks": [
+            {
+              "type": "footnotes",
+              "id": "fn_ch1_a2",
+              "notes": [
+                {
+                  "n": 1,
+                  "text": "正当な権限を有することの立証は、これを主張する当事者が行うものとする。"
+                }
+              ]
+            }
+          ],
+          "children": [
+            {
+              "id": "ch1_a2_p1",
+              "kind": "paragraph",
+              "title": null,
+              "text": "次に掲げる情報は、{term:confidential}に含まれないものとする。",
+              "summary": null,
+              "blocks": [
+                {
+                  "type": "table",
+                  "id": "tbl_exclusions",
+                  "caption": null,
+                  "semantic_type": "enumeration",
+                  "layout": {
+                    "header_rows": 0,
+                    "header_cols": 1,
+                    "col_widths": null,
+                    "repeat_header": false,
+                    "style": "grid",
+                    "span_columns": false,
+                    "blocks_side_by_side": null
+                  },
+                  "grid": [
+                    [
+                      {
+                        "id": "tbl_exclusions__r0c0",
+                        "text": "{auto_label}",
+                        "rowspan": 1,
+                        "colspan": 1,
+                        "role": "stub",
+                        "align": null,
+                        "vertical_text": false
+                      },
+                      {
+                        "id": "tbl_exclusions__r0c1",
+                        "text": "開示を受けた時点で既に公知であった情報",
+                        "rowspan": 1,
+                        "colspan": 1,
+                        "role": "body",
+                        "align": null,
+                        "vertical_text": false
+                      }
+                    ],
+                    [
+                      {
+                        "id": "tbl_exclusions__r1c0",
+                        "text": "{auto_label}",
+                        "rowspan": 1,
+                        "colspan": 1,
+                        "role": "stub",
+                        "align": null,
+                        "vertical_text": false
+                      },
+                      {
+                        "id": "tbl_exclusions__r1c1",
+                        "text": "{party:receiver}が独自に開発し、または正当な権限を有する第三者から取得した情報{fn:1}",
+                        "rowspan": 1,
+                        "colspan": 1,
+                        "role": "body",
+                        "align": null,
+                        "vertical_text": false
+                      }
+                    ]
+                  ],
+                  "records": null,
+                  "notes": []
+                }
+              ],
+              "children": [],
+              "badges": [],
+              "kind_label": null,
+              "parties": [],
+              "number_override": null,
+              "number_override_reason": null
+            }
+          ],
+          "badges": [],
+          "kind_label": null,
+          "parties": [],
+          "number_override": null,
+          "number_override_reason": null
+        }
+      ],
+      "badges": [],
+      "kind_label": null,
+      "parties": [],
+      "number_override": null,
+      "number_override_reason": null
+    },
+    {
+      "id": "ch4",
+      "kind": "chapter",
+      "title": "一般条項",
+      "text": null,
+      "summary": "契約期間、記録媒体の返還、協議による解決など、全条項に共通する事柄を定める。",
+      "blocks": [],
+      "children": [
+        {
+          "id": "ch4_s1",
+          "kind": "section",
+          "title": "契約期間と終了",
+          "text": null,
+          "summary": null,
+          "blocks": [],
+          "children": [
+            {
+              "id": "ch4_s1_a1",
+              "kind": "article",
+              "title": "契約期間",
+              "text": null,
+              "summary": null,
+              "blocks": [],
+              "children": [
+                {
+                  "id": "ch4_s1_a1_p1",
+                  "kind": "paragraph",
+                  "title": null,
+                  "text": "本契約の有効期間は、契約締結の日から１年間とする。",
+                  "summary": null,
+                  "blocks": [],
+                  "children": [],
+                  "badges": [],
+                  "kind_label": null,
+                  "parties": [],
+                  "number_override": null,
+                  "number_override_reason": null
+                },
+                {
+                  "id": "ch4_s1_a1_p2",
+                  "kind": "paragraph",
+                  "title": null,
+                  "text": "いずれの当事者も、{const:notice_days}前までに書面により相手方に通知することにより、{ref:ch4_s1_a1_p1}の期間中であっても本契約を解約することができる。",
+                  "summary": null,
+                  "blocks": [],
+                  "children": [],
+                  "badges": [],
+                  "kind_label": null,
+                  "parties": [],
+                  "number_override": null,
+                  "number_override_reason": null
+                }
+              ],
+              "badges": [],
+              "kind_label": null,
+              "parties": [],
+              "number_override": null,
+              "number_override_reason": null
+            },
+            {
+              "id": "ch4_s1_a2",
+              "kind": "article",
+              "title": "記録媒体の返還",
+              "text": null,
+              "summary": null,
+              "blocks": [
+                {
+                  "type": "footnotes",
+                  "id": "fn_ch4_s1_a2",
+                  "notes": [
+                    {
+                      "n": 1,
+                      "text": "書面による報告には、電子メールに電磁的記録を添付する方法を含む。"
+                    }
+                  ]
+                },
+                {
+                  "type": "box",
+                  "id": "box_return_hint",
+                  "style": "margin_note",
+                  "title": "返還と廃棄の使い分け",
+                  "anchor": "ch4_s1_a2",
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "id": "box_return_hint_p1",
+                      "text": "原本の交付を受けたものは返還し、自分で作った複製物は廃棄する。どちらにあたるか判断できないときは、開示者に確認してください。"
+                    }
+                  ]
+                }
+              ],
+              "children": [
+                {
+                  "id": "ch4_s1_a2_p1",
+                  "kind": "paragraph",
+                  "title": null,
+                  "text": "{party:receiver}は、本契約が終了したとき、または{party:discloser}から請求を受けたときは、遅滞なく、下表に掲げる区分に従い{fn:1}{term:deliver_medium}を返還または廃棄しなければならない。",
+                  "summary": null,
+                  "blocks": [
+                    {
+                      "type": "table",
+                      "id": "tbl_return",
+                      "caption": null,
+                      "semantic_type": "enumeration",
+                      "layout": {
+                        "header_rows": 0,
+                        "header_cols": 1,
+                        "col_widths": null,
+                        "repeat_header": false,
+                        "style": "grid",
+                        "span_columns": false,
+                        "blocks_side_by_side": null
+                      },
+                      "grid": [
+                        [
+                          {
+                            "id": "tbl_return__r0c0",
+                            "text": "{auto_label}",
+                            "rowspan": 1,
+                            "colspan": 1,
+                            "role": "stub",
+                            "align": null,
+                            "vertical_text": false
+                          },
+                          {
+                            "id": "tbl_return__r0c1",
+                            "text": "{party:discloser}から交付を受けた{term:deliver_medium}は、原本とともにすべて返還する。",
+                            "rowspan": 1,
+                            "colspan": 1,
+                            "role": "body",
+                            "align": null,
+                            "vertical_text": false
+                          }
+                        ],
+                        [
+                          {
+                            "id": "tbl_return__r1c0",
+                            "text": "{auto_label}",
+                            "rowspan": 1,
+                            "colspan": 1,
+                            "role": "stub",
+                            "align": null,
+                            "vertical_text": false
+                          },
+                          {
+                            "id": "tbl_return__r1c1",
+                            "text": "{party:receiver}が自ら作成した複製物は、廃棄したうえでその旨を書面により報告する。",
+                            "rowspan": 1,
+                            "colspan": 1,
+                            "role": "body",
+                            "align": null,
+                            "vertical_text": false
+                          }
+                        ]
+                      ],
+                      "records": null,
+                      "notes": []
+                    }
+                  ],
+                  "children": [],
+                  "badges": [],
+                  "kind_label": null,
+                  "parties": [],
+                  "number_override": null,
+                  "number_override_reason": null
+                },
+                {
+                  "id": "ch4_s1_a2_p2",
+                  "kind": "paragraph",
+                  "title": null,
+                  "text": "{party:discloser}は、{ref:ch4_s1_a2_p1}の報告を受けたときは、その内容について説明を求めることができる。",
+                  "summary": null,
+                  "blocks": [],
+                  "children": [],
+                  "badges": [],
+                  "kind_label": null,
+                  "parties": [],
+                  "number_override": null,
+                  "number_override_reason": null
+                }
+              ],
+              "badges": [],
+              "kind_label": null,
+              "parties": [],
+              "number_override": null,
+              "number_override_reason": null
+            }
+          ],
+          "badges": [],
+          "kind_label": null,
+          "parties": [],
+          "number_override": null,
+          "number_override_reason": null
+        },
+        {
+          "id": "ch4_s2",
+          "kind": "section",
+          "title": "雑則",
+          "text": null,
+          "summary": null,
+          "blocks": [],
+          "children": [
+            {
+              "id": "ch4_s2_a1",
+              "kind": "article",
+              "title": "返還手続の流れ",
+              "text": null,
+              "summary": null,
+              "blocks": [
+                {
+                  "type": "figure",
+                  "id": "fig_return_flow",
+                  "caption": "記録媒体の返還・廃棄の流れ",
+                  "alt": "本契約の終了から、返還または廃棄の報告までの手続きを 5 つの段階で示した流れ図。区分の判断で返還と廃棄の 2 経路に分かれ、いずれも書面による報告に合流する。",
+                  "facts": [
+                    "本契約の終了が起点である。",
+                    "区分の判断で返還と廃棄の 2 つに分かれる。",
+                    "返還と廃棄のどちらを経ても、最後は書面による報告に至る。"
+                  ],
+                  "diagram": {
+                    "kind": "flowchart",
+                    "direction": "TB",
+                    "nodes": [
+                      {
+                        "id": "n1",
+                        "label": "本契約の終了",
+                        "shape": "start",
+                        "col": 1,
+                        "row": 0
+                      },
+                      {
+                        "id": "n2",
+                        "label": "区分の判断",
+                        "shape": "decision",
+                        "col": 1,
+                        "row": 1
+                      },
+                      {
+                        "id": "n3",
+                        "label": "原本を返還",
+                        "shape": "process",
+                        "col": 0,
+                        "row": 2
+                      },
+                      {
+                        "id": "n4",
+                        "label": "複製物を廃棄",
+                        "shape": "process",
+                        "col": 2,
+                        "row": 2
+                      },
+                      {
+                        "id": "n5",
+                        "label": "書面による報告",
+                        "shape": "end",
+                        "col": 1,
+                        "row": 3
+                      }
+                    ],
+                    "edges": [
+                      {
+                        "from": "n1",
+                        "to": "n2",
+                        "label": null,
+                        "style": "solid"
+                      },
+                      {
+                        "from": "n2",
+                        "to": "n3",
+                        "label": "交付を受けたもの",
+                        "style": "solid"
+                      },
+                      {
+                        "from": "n2",
+                        "to": "n4",
+                        "label": "自ら作成したもの",
+                        "style": "solid"
+                      },
+                      {
+                        "from": "n3",
+                        "to": "n5",
+                        "label": null,
+                        "style": "solid"
+                      },
+                      {
+                        "from": "n4",
+                        "to": "n5",
+                        "label": null,
+                        "style": "solid"
+                      }
+                    ]
+                  },
+                  "size": "column"
+                }
+              ],
+              "children": [
+                {
+                  "id": "ch4_s2_a1_p1",
+                  "kind": "paragraph",
+                  "title": null,
+                  "text": "{party:receiver}が行う手続きの期限は、下表のとおりとする。",
+                  "summary": null,
+                  "blocks": [
+                    {
+                      "type": "table",
+                      "id": "tbl_duties",
+                      "caption": "返還手続の期限",
+                      "semantic_type": "procedure",
+                      "layout": {
+                        "header_rows": 1,
+                        "header_cols": 1,
+                        "col_widths": null,
+                        "repeat_header": true,
+                        "style": "grid",
+                        "span_columns": false,
+                        "blocks_side_by_side": null
+                      },
+                      "grid": [
+                        [
+                          {
+                            "id": "tbl_duties__r0c0",
+                            "text": "手続き",
+                            "rowspan": 1,
+                            "colspan": 1,
+                            "role": "header",
+                            "align": "center",
+                            "vertical_text": false
+                          },
+                          {
+                            "id": "tbl_duties__r0c1",
+                            "text": "期限",
+                            "rowspan": 1,
+                            "colspan": 1,
+                            "role": "header",
+                            "align": "center",
+                            "vertical_text": false
+                          }
+                        ],
+                        [
+                          {
+                            "id": "tbl_duties__r1c0",
+                            "text": "記録媒体の返還",
+                            "rowspan": 1,
+                            "colspan": 1,
+                            "role": "stub",
+                            "align": null,
+                            "vertical_text": false
+                          },
+                          {
+                            "id": "tbl_duties__r1c1",
+                            "text": "本契約の終了の日から１４日以内",
+                            "rowspan": 1,
+                            "colspan": 1,
+                            "role": "body",
+                            "align": null,
+                            "vertical_text": false
+                          }
+                        ],
+                        [
+                          {
+                            "id": "tbl_duties__r2c0",
+                            "text": "廃棄の報告",
+                            "rowspan": 1,
+                            "colspan": 1,
+                            "role": "stub",
+                            "align": null,
+                            "vertical_text": false
+                          },
+                          {
+                            "id": "tbl_duties__r2c1",
+                            "text": "廃棄を完了した日から７日以内",
+                            "rowspan": 1,
+                            "colspan": 1,
+                            "role": "body",
+                            "align": null,
+                            "vertical_text": false
+                          }
+                        ]
+                      ],
+                      "records": [
+                        {
+                          "手続き": "記録媒体の返還",
+                          "期限": "本契約の終了の日から１４日以内"
+                        },
+                        {
+                          "手続き": "廃棄の報告",
+                          "期限": "廃棄を完了した日から７日以内"
+                        }
+                      ],
+                      "notes": []
+                    }
+                  ],
+                  "children": [],
+                  "badges": [],
+                  "kind_label": null,
+                  "parties": [],
+                  "number_override": null,
+                  "number_override_reason": null
+                },
+                {
+                  "id": "ch4_s2_a1_p2",
+                  "kind": "paragraph",
+                  "title": null,
+                  "text": "{party:discloser}は、{ref:ch4_s2_a1_p1}の期限を、あらかじめ書面により延長することができる。",
+                  "summary": null,
+                  "blocks": [],
+                  "children": [],
+                  "badges": [],
+                  "kind_label": null,
+                  "parties": [],
+                  "number_override": null,
+                  "number_override_reason": null
+                }
+              ],
+              "badges": [],
+              "kind_label": null,
+              "parties": [],
+              "number_override": null,
+              "number_override_reason": null
+            },
+            {
+              "id": "ch4_s2_a2",
+              "kind": "article",
+              "title": "協議",
+              "text": null,
+              "summary": null,
+              "blocks": [],
+              "children": [
+                {
+                  "id": "ch4_s2_a2_p1",
+                  "kind": "paragraph",
+                  "title": null,
+                  "text": "本契約に定めのない事項または本契約の条項の解釈に疑義が生じた事項については、{party:discloser}および{party:receiver}が誠意をもって協議し、これを解決する。",
+                  "summary": null,
+                  "blocks": [],
+                  "children": [],
+                  "badges": [],
+                  "kind_label": null,
+                  "parties": [],
+                  "number_override": null,
+                  "number_override_reason": null
+                }
+              ],
+              "badges": [],
+              "kind_label": null,
+              "parties": [],
+              "number_override": null,
+              "number_override_reason": null
+            }
+          ],
+          "badges": [],
+          "kind_label": null,
+          "parties": [],
+          "number_override": null,
+          "number_override_reason": null
+        }
+      ],
+      "badges": [],
+      "kind_label": null,
+      "parties": [],
+      "number_override": null,
+      "number_override_reason": null
+    }
+  ],
+  "appendices": [
+    {
+      "id": "app1",
+      "kind": "appendix",
+      "title": "開示する情報の範囲",
+      "text": null,
+      "summary": null,
+      "blocks": [],
+      "children": [
+        {
+          "id": "app1_s1",
+          "kind": "appendix_section",
+          "title": "情報の区分と取扱い",
+          "text": null,
+          "summary": null,
+          "blocks": [],
+          "children": [
+            {
+              "id": "app1_s1_p1",
+              "kind": "paragraph",
+              "title": null,
+              "text": "{term:purpose}のために開示する情報の区分と、その取扱いは次表のとおりとする。",
+              "summary": null,
+              "blocks": [
+                {
+                  "type": "table",
+                  "id": "tbl_scope",
+                  "caption": "開示する情報の区分と取扱い",
+                  "semantic_type": "allocation",
+                  "layout": {
+                    "header_rows": 1,
+                    "header_cols": 1,
+                    "col_widths": null,
+                    "repeat_header": true,
+                    "style": "grid",
+                    "span_columns": false,
+                    "blocks_side_by_side": null
+                  },
+                  "grid": [
+                    [
+                      {
+                        "id": "tbl_scope__r0c0",
+                        "text": "区分",
+                        "rowspan": 1,
+                        "colspan": 1,
+                        "role": "header",
+                        "align": "center",
+                        "vertical_text": false
+                      },
+                      {
+                        "id": "tbl_scope__r0c1",
+                        "text": "情報の内容",
+                        "rowspan": 1,
+                        "colspan": 1,
+                        "role": "header",
+                        "align": "center",
+                        "vertical_text": false
+                      },
+                      {
+                        "id": "tbl_scope__r0c2",
+                        "text": "複製の可否",
+                        "rowspan": 1,
+                        "colspan": 1,
+                        "role": "header",
+                        "align": "center",
+                        "vertical_text": false
+                      }
+                    ],
+                    [
+                      {
+                        "id": "tbl_scope__r1c0",
+                        "text": "第一種",
+                        "rowspan": 1,
+                        "colspan": 1,
+                        "role": "stub",
+                        "align": "center",
+                        "vertical_text": false
+                      },
+                      {
+                        "id": "tbl_scope__r1c1",
+                        "text": "在庫管理の設計思想および画面遷移の考え方",
+                        "rowspan": 1,
+                        "colspan": 1,
+                        "role": "body",
+                        "align": null,
+                        "vertical_text": false
+                      },
+                      {
+                        "id": "tbl_scope__r1c2",
+                        "text": "検討に必要な範囲で可",
+                        "rowspan": 1,
+                        "colspan": 1,
+                        "role": "body",
+                        "align": null,
+                        "vertical_text": false
+                      }
+                    ],
+                    [
+                      {
+                        "id": "tbl_scope__r2c0",
+                        "text": "第二種",
+                        "rowspan": 1,
+                        "colspan": 1,
+                        "role": "stub",
+                        "align": "center",
+                        "vertical_text": false
+                      },
+                      {
+                        "id": "tbl_scope__r2c1",
+                        "text": "取引先の名称を含む運用実績の数値",
+                        "rowspan": 1,
+                        "colspan": 1,
+                        "role": "body",
+                        "align": null,
+                        "vertical_text": false
+                      },
+                      {
+                        "id": "tbl_scope__r2c2",
+                        "text": "不可",
+                        "rowspan": 1,
+                        "colspan": 1,
+                        "role": "body",
+                        "align": null,
+                        "vertical_text": false
+                      }
+                    ]
+                  ],
+                  "records": [
+                    {
+                      "区分": "第一種",
+                      "情報の内容": "在庫管理の設計思想および画面遷移の考え方",
+                      "複製の可否": "検討に必要な範囲で可"
+                    },
+                    {
+                      "区分": "第二種",
+                      "情報の内容": "取引先の名称を含む運用実績の数値",
+                      "複製の可否": "不可"
+                    }
+                  ],
+                  "notes": []
+                }
+              ],
+              "children": [],
+              "badges": [],
+              "kind_label": null,
+              "parties": [],
+              "number_override": null,
+              "number_override_reason": null
+            }
+          ],
+          "badges": [],
+          "kind_label": null,
+          "parties": [],
+          "number_override": null,
+          "number_override_reason": null
+        }
+      ],
+      "badges": [],
+      "kind_label": null,
+      "parties": [],
+      "number_override": null,
+      "number_override_reason": null
+    }
+  ],
+  "back_matter": {
+    "signature": [
+      {
+        "id": "sig",
+        "kind": "signature",
+        "title": null,
+        "text": null,
+        "summary": null,
+        "blocks": [],
+        "children": [
+          {
+            "id": "sig_p1",
+            "kind": "paragraph",
+            "title": null,
+            "text": "本契約の成立を証するため、本書２通を作成し、{party:discloser}および{party:receiver}が記名押印のうえ、各１通を保有する。",
+            "summary": null,
+            "blocks": [],
+            "children": [],
+            "badges": [],
+            "kind_label": null,
+            "parties": [],
+            "number_override": null,
+            "number_override_reason": null
+          }
+        ],
+        "badges": [],
+        "kind_label": null,
+        "parties": [
+          "discloser",
+          "receiver"
+        ],
+        "number_override": null,
+        "number_override_reason": null
+      }
+    ],
+    "colophon": [
+      {
+        "type": "paragraph",
+        "id": "par_colophon_1",
+        "text": "秘密保持契約書　契約書番号　ＡＯ－２６－０００１"
+      },
+      {
+        "type": "paragraph",
+        "id": "par_colophon_2",
+        "text": "株式会社青葉システムズ　法務窓口　０３-００００-００００（受付時間　午前９時から午後５時まで）　example.co.jp"
+      },
+      {
+        "type": "paragraph",
+        "id": "par_colophon_3",
+        "text": "本書は、文書読取技術の検証のために生成された架空の契約書です。記載の当事者・住所・連絡先は実在せず、法的効力を有しません。"
+      }
+    ],
+    "contact": []
+  },
+  "derived": {
+    "labels": {
+      "pre": {
+        "label": "",
+        "title": "",
+        "heading_text": "",
+        "path": [],
+        "path_ids": [],
+        "parent_id": null,
+        "kind": "preamble",
+        "citation": "",
+        "depth": 0,
+        "run_in_label": null
+      },
+      "pre_p1": {
+        "label": "",
+        "title": "",
+        "heading_text": "",
+        "path": [
+          ""
+        ],
+        "path_ids": [
+          "pre"
+        ],
+        "parent_id": "pre",
+        "kind": "paragraph",
+        "citation": "",
+        "depth": 1,
+        "run_in_label": null
+      },
+      "ch1": {
+        "label": "第１章",
+        "title": "秘密保持",
+        "heading_text": "第１章　秘密保持",
+        "path": [],
+        "path_ids": [],
+        "parent_id": null,
+        "kind": "chapter",
+        "citation": "第１章",
+        "depth": 0,
+        "run_in_label": null
+      },
+      "ch1_a1": {
+        "label": "第１条",
+        "title": "秘密保持義務",
+        "heading_text": "第１条（秘密保持義務）",
+        "path": [
+          "第１章　秘密保持"
+        ],
+        "path_ids": [
+          "ch1"
+        ],
+        "parent_id": "ch1",
+        "kind": "article",
+        "citation": "第１章 第１条",
+        "depth": 1,
+        "run_in_label": null
+      },
+      "ch1_a1_p1": {
+        "label": "",
+        "title": "",
+        "heading_text": "",
+        "path": [
+          "第１章　秘密保持",
+          "第１条（秘密保持義務）"
+        ],
+        "path_ids": [
+          "ch1",
+          "ch1_a1"
+        ],
+        "parent_id": "ch1_a1",
+        "kind": "paragraph",
+        "citation": "第１章 第１条",
+        "depth": 2,
+        "run_in_label": null
+      },
+      "ch1_a1_p2": {
+        "label": "２",
+        "title": "",
+        "heading_text": "２",
+        "path": [
+          "第１章　秘密保持",
+          "第１条（秘密保持義務）"
+        ],
+        "path_ids": [
+          "ch1",
+          "ch1_a1"
+        ],
+        "parent_id": "ch1_a1",
+        "kind": "paragraph",
+        "citation": "第１章 第１条 ２",
+        "depth": 2,
+        "run_in_label": null
+      },
+      "ch1_a2": {
+        "label": "第２条",
+        "title": "秘密情報の例外",
+        "heading_text": "第２条（秘密情報の例外）",
+        "path": [
+          "第１章　秘密保持"
+        ],
+        "path_ids": [
+          "ch1"
+        ],
+        "parent_id": "ch1",
+        "kind": "article",
+        "citation": "第１章 第２条",
+        "depth": 1,
+        "run_in_label": null
+      },
+      "ch1_a2_p1": {
+        "label": "",
+        "title": "",
+        "heading_text": "",
+        "path": [
+          "第１章　秘密保持",
+          "第２条（秘密情報の例外）"
+        ],
+        "path_ids": [
+          "ch1",
+          "ch1_a2"
+        ],
+        "parent_id": "ch1_a2",
+        "kind": "paragraph",
+        "citation": "第１章 第２条",
+        "depth": 2,
+        "run_in_label": null
+      },
+      "ch4": {
+        "label": "第２章",
+        "title": "一般条項",
+        "heading_text": "第２章　一般条項",
+        "path": [],
+        "path_ids": [],
+        "parent_id": null,
+        "kind": "chapter",
+        "citation": "第２章",
+        "depth": 0,
+        "run_in_label": null
+      },
+      "ch4_s1": {
+        "label": "第１節",
+        "title": "契約期間と終了",
+        "heading_text": "第１節　契約期間と終了",
+        "path": [
+          "第２章　一般条項"
+        ],
+        "path_ids": [
+          "ch4"
+        ],
+        "parent_id": "ch4",
+        "kind": "section",
+        "citation": "第２章 第１節",
+        "depth": 1,
+        "run_in_label": null
+      },
+      "ch4_s1_a1": {
+        "label": "第３条",
+        "title": "契約期間",
+        "heading_text": "第３条（契約期間）",
+        "path": [
+          "第２章　一般条項",
+          "第１節　契約期間と終了"
+        ],
+        "path_ids": [
+          "ch4",
+          "ch4_s1"
+        ],
+        "parent_id": "ch4_s1",
+        "kind": "article",
+        "citation": "第２章 第１節 第３条",
+        "depth": 2,
+        "run_in_label": null
+      },
+      "ch4_s1_a1_p1": {
+        "label": "",
+        "title": "",
+        "heading_text": "",
+        "path": [
+          "第２章　一般条項",
+          "第１節　契約期間と終了",
+          "第３条（契約期間）"
+        ],
+        "path_ids": [
+          "ch4",
+          "ch4_s1",
+          "ch4_s1_a1"
+        ],
+        "parent_id": "ch4_s1_a1",
+        "kind": "paragraph",
+        "citation": "第２章 第１節 第３条",
+        "depth": 3,
+        "run_in_label": null
+      },
+      "ch4_s1_a1_p2": {
+        "label": "２",
+        "title": "",
+        "heading_text": "２",
+        "path": [
+          "第２章　一般条項",
+          "第１節　契約期間と終了",
+          "第３条（契約期間）"
+        ],
+        "path_ids": [
+          "ch4",
+          "ch4_s1",
+          "ch4_s1_a1"
+        ],
+        "parent_id": "ch4_s1_a1",
+        "kind": "paragraph",
+        "citation": "第２章 第１節 第３条 ２",
+        "depth": 3,
+        "run_in_label": null
+      },
+      "ch4_s1_a2": {
+        "label": "第４条",
+        "title": "記録媒体の返還",
+        "heading_text": "第４条（記録媒体の返還）",
+        "path": [
+          "第２章　一般条項",
+          "第１節　契約期間と終了"
+        ],
+        "path_ids": [
+          "ch4",
+          "ch4_s1"
+        ],
+        "parent_id": "ch4_s1",
+        "kind": "article",
+        "citation": "第２章 第１節 第４条",
+        "depth": 2,
+        "run_in_label": null
+      },
+      "ch4_s1_a2_p1": {
+        "label": "",
+        "title": "",
+        "heading_text": "",
+        "path": [
+          "第２章　一般条項",
+          "第１節　契約期間と終了",
+          "第４条（記録媒体の返還）"
+        ],
+        "path_ids": [
+          "ch4",
+          "ch4_s1",
+          "ch4_s1_a2"
+        ],
+        "parent_id": "ch4_s1_a2",
+        "kind": "paragraph",
+        "citation": "第２章 第１節 第４条",
+        "depth": 3,
+        "run_in_label": null
+      },
+      "ch4_s1_a2_p2": {
+        "label": "２",
+        "title": "",
+        "heading_text": "２",
+        "path": [
+          "第２章　一般条項",
+          "第１節　契約期間と終了",
+          "第４条（記録媒体の返還）"
+        ],
+        "path_ids": [
+          "ch4",
+          "ch4_s1",
+          "ch4_s1_a2"
+        ],
+        "parent_id": "ch4_s1_a2",
+        "kind": "paragraph",
+        "citation": "第２章 第１節 第４条 ２",
+        "depth": 3,
+        "run_in_label": null
+      },
+      "ch4_s2": {
+        "label": "第２節",
+        "title": "雑則",
+        "heading_text": "第２節　雑則",
+        "path": [
+          "第２章　一般条項"
+        ],
+        "path_ids": [
+          "ch4"
+        ],
+        "parent_id": "ch4",
+        "kind": "section",
+        "citation": "第２章 第２節",
+        "depth": 1,
+        "run_in_label": null
+      },
+      "ch4_s2_a1": {
+        "label": "第５条",
+        "title": "返還手続の流れ",
+        "heading_text": "第５条（返還手続の流れ）",
+        "path": [
+          "第２章　一般条項",
+          "第２節　雑則"
+        ],
+        "path_ids": [
+          "ch4",
+          "ch4_s2"
+        ],
+        "parent_id": "ch4_s2",
+        "kind": "article",
+        "citation": "第２章 第２節 第５条",
+        "depth": 2,
+        "run_in_label": null
+      },
+      "ch4_s2_a1_p1": {
+        "label": "",
+        "title": "",
+        "heading_text": "",
+        "path": [
+          "第２章　一般条項",
+          "第２節　雑則",
+          "第５条（返還手続の流れ）"
+        ],
+        "path_ids": [
+          "ch4",
+          "ch4_s2",
+          "ch4_s2_a1"
+        ],
+        "parent_id": "ch4_s2_a1",
+        "kind": "paragraph",
+        "citation": "第２章 第２節 第５条",
+        "depth": 3,
+        "run_in_label": null
+      },
+      "ch4_s2_a1_p2": {
+        "label": "２",
+        "title": "",
+        "heading_text": "２",
+        "path": [
+          "第２章　一般条項",
+          "第２節　雑則",
+          "第５条（返還手続の流れ）"
+        ],
+        "path_ids": [
+          "ch4",
+          "ch4_s2",
+          "ch4_s2_a1"
+        ],
+        "parent_id": "ch4_s2_a1",
+        "kind": "paragraph",
+        "citation": "第２章 第２節 第５条 ２",
+        "depth": 3,
+        "run_in_label": null
+      },
+      "ch4_s2_a2": {
+        "label": "第６条",
+        "title": "協議",
+        "heading_text": "第６条（協議）",
+        "path": [
+          "第２章　一般条項",
+          "第２節　雑則"
+        ],
+        "path_ids": [
+          "ch4",
+          "ch4_s2"
+        ],
+        "parent_id": "ch4_s2",
+        "kind": "article",
+        "citation": "第２章 第２節 第６条",
+        "depth": 2,
+        "run_in_label": null
+      },
+      "ch4_s2_a2_p1": {
+        "label": "",
+        "title": "",
+        "heading_text": "",
+        "path": [
+          "第２章　一般条項",
+          "第２節　雑則",
+          "第６条（協議）"
+        ],
+        "path_ids": [
+          "ch4",
+          "ch4_s2",
+          "ch4_s2_a2"
+        ],
+        "parent_id": "ch4_s2_a2",
+        "kind": "paragraph",
+        "citation": "第２章 第２節 第６条",
+        "depth": 3,
+        "run_in_label": null
+      },
+      "app1": {
+        "label": "別紙１",
+        "title": "開示する情報の範囲",
+        "heading_text": "別紙１　開示する情報の範囲",
+        "path": [],
+        "path_ids": [],
+        "parent_id": null,
+        "kind": "appendix",
+        "citation": "別紙１",
+        "depth": 0,
+        "run_in_label": null
+      },
+      "app1_s1": {
+        "label": "第１",
+        "title": "情報の区分と取扱い",
+        "heading_text": "第１　情報の区分と取扱い",
+        "path": [
+          "別紙１　開示する情報の範囲"
+        ],
+        "path_ids": [
+          "app1"
+        ],
+        "parent_id": "app1",
+        "kind": "appendix_section",
+        "citation": "別紙１ 第１",
+        "depth": 1,
+        "run_in_label": null
+      },
+      "app1_s1_p1": {
+        "label": "１",
+        "title": "",
+        "heading_text": "１",
+        "path": [
+          "別紙１　開示する情報の範囲",
+          "第１　情報の区分と取扱い"
+        ],
+        "path_ids": [
+          "app1",
+          "app1_s1"
+        ],
+        "parent_id": "app1_s1",
+        "kind": "paragraph",
+        "citation": "別紙１ 第１ １",
+        "depth": 2,
+        "run_in_label": null
+      },
+      "sig": {
+        "label": "",
+        "title": "",
+        "heading_text": "",
+        "path": [],
+        "path_ids": [],
+        "parent_id": null,
+        "kind": "signature",
+        "citation": "",
+        "depth": 0,
+        "run_in_label": null
+      },
+      "sig_p1": {
+        "label": "",
+        "title": "",
+        "heading_text": "",
+        "path": [
+          ""
+        ],
+        "path_ids": [
+          "sig"
+        ],
+        "parent_id": "sig",
+        "kind": "paragraph",
+        "citation": "",
+        "depth": 1,
+        "run_in_label": null
+      }
+    },
+    "refs": [
+      {
+        "from_id": "ch1_a1_p2",
+        "to_id": "ch1_a1_p1",
+        "mode": "relative",
+        "rendered": "第１項"
+      },
+      {
+        "from_id": "ch4_s1_a1_p2",
+        "to_id": "ch4_s1_a1_p1",
+        "mode": "relative",
+        "rendered": "第１項"
+      },
+      {
+        "from_id": "ch4_s1_a2_p2",
+        "to_id": "ch4_s1_a2_p1",
+        "mode": "relative",
+        "rendered": "第１項"
+      },
+      {
+        "from_id": "ch4_s2_a1_p2",
+        "to_id": "ch4_s2_a1_p1",
+        "mode": "relative",
+        "rendered": "第１項"
+      }
+    ],
+    "term_uses": [
+      {
+        "term_id": "purpose",
+        "in_id": "pre_p1"
+      },
+      {
+        "term_id": "confidential",
+        "in_id": "ch1_a1_p1"
+      },
+      {
+        "term_id": "purpose",
+        "in_id": "ch1_a1_p1"
+      },
+      {
+        "term_id": "confidential",
+        "in_id": "ch1_a2_p1"
+      },
+      {
+        "term_id": "deliver_medium",
+        "in_id": "ch4_s1_a2_p1"
+      },
+      {
+        "term_id": "purpose",
+        "in_id": "app1_s1_p1"
+      },
+      {
+        "term_id": "deliver_medium",
+        "in_id": "tbl_return__r0c1"
+      }
+    ],
+    "party_uses": [
+      {
+        "key": "discloser",
+        "mode": "full",
+        "rendered": "株式会社青葉システムズ（以下「甲」という。）",
+        "in_id": "pre_p1"
+      },
+      {
+        "key": "receiver",
+        "mode": "full",
+        "rendered": "みなと技研株式会社（以下「乙」という。）",
+        "in_id": "pre_p1"
+      },
+      {
+        "key": "receiver",
+        "mode": "alias",
+        "rendered": "乙",
+        "in_id": "ch1_a1_p1"
+      },
+      {
+        "key": "discloser",
+        "mode": "alias",
+        "rendered": "甲",
+        "in_id": "ch1_a1_p1"
+      },
+      {
+        "key": "discloser",
+        "mode": "alias",
+        "rendered": "甲",
+        "in_id": "ch1_a1_p1"
+      },
+      {
+        "key": "receiver",
+        "mode": "alias",
+        "rendered": "乙",
+        "in_id": "ch4_s1_a2_p1"
+      },
+      {
+        "key": "discloser",
+        "mode": "alias",
+        "rendered": "甲",
+        "in_id": "ch4_s1_a2_p1"
+      },
+      {
+        "key": "discloser",
+        "mode": "alias",
+        "rendered": "甲",
+        "in_id": "ch4_s1_a2_p2"
+      },
+      {
+        "key": "receiver",
+        "mode": "alias",
+        "rendered": "乙",
+        "in_id": "ch4_s2_a1_p1"
+      },
+      {
+        "key": "discloser",
+        "mode": "alias",
+        "rendered": "甲",
+        "in_id": "ch4_s2_a1_p2"
+      },
+      {
+        "key": "discloser",
+        "mode": "alias",
+        "rendered": "甲",
+        "in_id": "ch4_s2_a2_p1"
+      },
+      {
+        "key": "receiver",
+        "mode": "alias",
+        "rendered": "乙",
+        "in_id": "ch4_s2_a2_p1"
+      },
+      {
+        "key": "discloser",
+        "mode": "alias",
+        "rendered": "甲",
+        "in_id": "sig_p1"
+      },
+      {
+        "key": "receiver",
+        "mode": "alias",
+        "rendered": "乙",
+        "in_id": "sig_p1"
+      },
+      {
+        "key": "receiver",
+        "mode": "alias",
+        "rendered": "乙",
+        "in_id": "tbl_exclusions__r1c1"
+      },
+      {
+        "key": "discloser",
+        "mode": "alias",
+        "rendered": "甲",
+        "in_id": "tbl_return__r0c1"
+      },
+      {
+        "key": "receiver",
+        "mode": "alias",
+        "rendered": "乙",
+        "in_id": "tbl_return__r1c1"
+      }
+    ],
+    "footnote_index": [
+      {
+        "article_id": "ch1_a2",
+        "n": 1,
+        "marker": "（*１）",
+        "text": "正当な権限を有することの立証は、これを主張する当事者が行うものとする。"
+      },
+      {
+        "article_id": "ch4_s1_a2",
+        "n": 1,
+        "marker": "（*１）",
+        "text": "書面による報告には、電子メールに電磁的記録を添付する方法を含む。"
+      }
+    ],
+    "plain_text": {
+      "pre": {
+        "with_label": "",
+        "without_label": ""
+      },
+      "pre_p1": {
+        "with_label": "株式会社青葉システムズ（以下「甲」という。）とみなと技研株式会社（以下「乙」という。）とは、本目的のために相互に開示する情報の取扱いについて、次のとおり契約を締結する。",
+        "without_label": "株式会社青葉システムズ（以下「甲」という。）とみなと技研株式会社（以下「乙」という。）とは、本目的のために相互に開示する情報の取扱いについて、次のとおり契約を締結する。"
+      },
+      "ch1": {
+        "with_label": "第１章　秘密保持",
+        "without_label": "秘密保持"
+      },
+      "ch1_a1": {
+        "with_label": "第１条（秘密保持義務）",
+        "without_label": "秘密保持義務"
+      },
+      "ch1_a1_p1": {
+        "with_label": "乙は、甲から開示された秘密情報を本目的のためにのみ使用し、甲の書面による事前の承諾を得ないで第三者に開示または漏えいしてはならない。",
+        "without_label": "乙は、甲から開示された秘密情報を本目的のためにのみ使用し、甲の書面による事前の承諾を得ないで第三者に開示または漏えいしてはならない。"
+      },
+      "ch1_a1_p2": {
+        "with_label": "２第１項の義務は、本契約の終了後も３年存続する。",
+        "without_label": "第１項の義務は、本契約の終了後も３年存続する。"
+      },
+      "ch1_a2": {
+        "with_label": "第２条（秘密情報の例外）",
+        "without_label": "秘密情報の例外"
+      },
+      "ch1_a2_p1": {
+        "with_label": "次に掲げる情報は、秘密情報に含まれないものとする。",
+        "without_label": "次に掲げる情報は、秘密情報に含まれないものとする。"
+      },
+      "ch4": {
+        "with_label": "第２章　一般条項",
+        "without_label": "一般条項"
+      },
+      "ch4_s1": {
+        "with_label": "第１節　契約期間と終了",
+        "without_label": "契約期間と終了"
+      },
+      "ch4_s1_a1": {
+        "with_label": "第３条（契約期間）",
+        "without_label": "契約期間"
+      },
+      "ch4_s1_a1_p1": {
+        "with_label": "本契約の有効期間は、契約締結の日から１年間とする。",
+        "without_label": "本契約の有効期間は、契約締結の日から１年間とする。"
+      },
+      "ch4_s1_a1_p2": {
+        "with_label": "２いずれの当事者も、３０日前までに書面により相手方に通知することにより、第１項の期間中であっても本契約を解約することができる。",
+        "without_label": "いずれの当事者も、３０日前までに書面により相手方に通知することにより、第１項の期間中であっても本契約を解約することができる。"
+      },
+      "ch4_s1_a2": {
+        "with_label": "第４条（記録媒体の返還）",
+        "without_label": "記録媒体の返還"
+      },
+      "ch4_s1_a2_p1": {
+        "with_label": "乙は、本契約が終了したとき、または甲から請求を受けたときは、遅滞なく、下表に掲げる区分に従い（*１）記録媒体を返還または廃棄しなければならない。",
+        "without_label": "乙は、本契約が終了したとき、または甲から請求を受けたときは、遅滞なく、下表に掲げる区分に従い（*１）記録媒体を返還または廃棄しなければならない。"
+      },
+      "ch4_s1_a2_p2": {
+        "with_label": "２甲は、第１項の報告を受けたときは、その内容について説明を求めることができる。",
+        "without_label": "甲は、第１項の報告を受けたときは、その内容について説明を求めることができる。"
+      },
+      "ch4_s2": {
+        "with_label": "第２節　雑則",
+        "without_label": "雑則"
+      },
+      "ch4_s2_a1": {
+        "with_label": "第５条（返還手続の流れ）",
+        "without_label": "返還手続の流れ"
+      },
+      "ch4_s2_a1_p1": {
+        "with_label": "乙が行う手続きの期限は、下表のとおりとする。",
+        "without_label": "乙が行う手続きの期限は、下表のとおりとする。"
+      },
+      "ch4_s2_a1_p2": {
+        "with_label": "２甲は、第１項の期限を、あらかじめ書面により延長することができる。",
+        "without_label": "甲は、第１項の期限を、あらかじめ書面により延長することができる。"
+      },
+      "ch4_s2_a2": {
+        "with_label": "第６条（協議）",
+        "without_label": "協議"
+      },
+      "ch4_s2_a2_p1": {
+        "with_label": "本契約に定めのない事項または本契約の条項の解釈に疑義が生じた事項については、甲および乙が誠意をもって協議し、これを解決する。",
+        "without_label": "本契約に定めのない事項または本契約の条項の解釈に疑義が生じた事項については、甲および乙が誠意をもって協議し、これを解決する。"
+      },
+      "app1": {
+        "with_label": "別紙１　開示する情報の範囲",
+        "without_label": "開示する情報の範囲"
+      },
+      "app1_s1": {
+        "with_label": "第１　情報の区分と取扱い",
+        "without_label": "情報の区分と取扱い"
+      },
+      "app1_s1_p1": {
+        "with_label": "１本目的のために開示する情報の区分と、その取扱いは次表のとおりとする。",
+        "without_label": "本目的のために開示する情報の区分と、その取扱いは次表のとおりとする。"
+      },
+      "sig": {
+        "with_label": "",
+        "without_label": ""
+      },
+      "sig_p1": {
+        "with_label": "本契約の成立を証するため、本書２通を作成し、甲および乙が記名押印のうえ、各１通を保有する。",
+        "without_label": "本契約の成立を証するため、本書２通を作成し、甲および乙が記名押印のうえ、各１通を保有する。"
+      },
+      "term_confidential": {
+        "with_label": "秘密情報　本目的のために一方の当事者が他方の当事者に開示した技術上または営業上の情報であって、開示の際に秘密である旨を明示したものをいう。",
+        "without_label": "本目的のために一方の当事者が他方の当事者に開示した技術上または営業上の情報であって、開示の際に秘密である旨を明示したものをいう。"
+      },
+      "term_purpose": {
+        "with_label": "本目的　物流倉庫向け在庫管理システムの共同開発の可否を検討することをいう。",
+        "without_label": "物流倉庫向け在庫管理システムの共同開発の可否を検討することをいう。"
+      },
+      "term_deliver_medium": {
+        "with_label": "記録媒体　秘密情報が記録された書面、電磁的記録媒体その他の有体物をいい、その複製物を含む。",
+        "without_label": "秘密情報が記録された書面、電磁的記録媒体その他の有体物をいい、その複製物を含む。"
+      },
+      "fn_ch1_a2__n1": {
+        "with_label": "（*１）　正当な権限を有することの立証は、これを主張する当事者が行うものとする。",
+        "without_label": "正当な権限を有することの立証は、これを主張する当事者が行うものとする。"
+      },
+      "tbl_exclusions__r0c0": {
+        "with_label": "（１）",
+        "without_label": "（１）"
+      },
+      "tbl_exclusions__r0c1": {
+        "with_label": "開示を受けた時点で既に公知であった情報",
+        "without_label": "開示を受けた時点で既に公知であった情報"
+      },
+      "tbl_exclusions__r1c0": {
+        "with_label": "（２）",
+        "without_label": "（２）"
+      },
+      "tbl_exclusions__r1c1": {
+        "with_label": "乙が独自に開発し、または正当な権限を有する第三者から取得した情報（*１）",
+        "without_label": "乙が独自に開発し、または正当な権限を有する第三者から取得した情報（*１）"
+      },
+      "fn_ch4_s1_a2__n1": {
+        "with_label": "（*１）　書面による報告には、電子メールに電磁的記録を添付する方法を含む。",
+        "without_label": "書面による報告には、電子メールに電磁的記録を添付する方法を含む。"
+      },
+      "box_return_hint__title": {
+        "with_label": "返還と廃棄の使い分け",
+        "without_label": "返還と廃棄の使い分け"
+      },
+      "box_return_hint_p1": {
+        "with_label": "原本の交付を受けたものは返還し、自分で作った複製物は廃棄する。どちらにあたるか判断できないときは、開示者に確認してください。",
+        "without_label": "原本の交付を受けたものは返還し、自分で作った複製物は廃棄する。どちらにあたるか判断できないときは、開示者に確認してください。"
+      },
+      "tbl_return__r0c0": {
+        "with_label": "（１）",
+        "without_label": "（１）"
+      },
+      "tbl_return__r0c1": {
+        "with_label": "甲から交付を受けた記録媒体は、原本とともにすべて返還する。",
+        "without_label": "甲から交付を受けた記録媒体は、原本とともにすべて返還する。"
+      },
+      "tbl_return__r1c0": {
+        "with_label": "（２）",
+        "without_label": "（２）"
+      },
+      "tbl_return__r1c1": {
+        "with_label": "乙が自ら作成した複製物は、廃棄したうえでその旨を書面により報告する。",
+        "without_label": "乙が自ら作成した複製物は、廃棄したうえでその旨を書面により報告する。"
+      },
+      "fig_return_flow__caption": {
+        "with_label": "図１　記録媒体の返還・廃棄の流れ",
+        "without_label": "記録媒体の返還・廃棄の流れ"
+      },
+      "tbl_duties__caption": {
+        "with_label": "表１　返還手続の期限",
+        "without_label": "返還手続の期限"
+      },
+      "tbl_duties__r0c0": {
+        "with_label": "手続き",
+        "without_label": "手続き"
+      },
+      "tbl_duties__r0c1": {
+        "with_label": "期限",
+        "without_label": "期限"
+      },
+      "tbl_duties__r1c0": {
+        "with_label": "記録媒体の返還",
+        "without_label": "記録媒体の返還"
+      },
+      "tbl_duties__r1c1": {
+        "with_label": "本契約の終了の日から１４日以内",
+        "without_label": "本契約の終了の日から１４日以内"
+      },
+      "tbl_duties__r2c0": {
+        "with_label": "廃棄の報告",
+        "without_label": "廃棄の報告"
+      },
+      "tbl_duties__r2c1": {
+        "with_label": "廃棄を完了した日から７日以内",
+        "without_label": "廃棄を完了した日から７日以内"
+      },
+      "tbl_scope__caption": {
+        "with_label": "表２　開示する情報の区分と取扱い",
+        "without_label": "開示する情報の区分と取扱い"
+      },
+      "tbl_scope__r0c0": {
+        "with_label": "区分",
+        "without_label": "区分"
+      },
+      "tbl_scope__r0c1": {
+        "with_label": "情報の内容",
+        "without_label": "情報の内容"
+      },
+      "tbl_scope__r0c2": {
+        "with_label": "複製の可否",
+        "without_label": "複製の可否"
+      },
+      "tbl_scope__r1c0": {
+        "with_label": "第一種",
+        "without_label": "第一種"
+      },
+      "tbl_scope__r1c1": {
+        "with_label": "在庫管理の設計思想および画面遷移の考え方",
+        "without_label": "在庫管理の設計思想および画面遷移の考え方"
+      },
+      "tbl_scope__r1c2": {
+        "with_label": "検討に必要な範囲で可",
+        "without_label": "検討に必要な範囲で可"
+      },
+      "tbl_scope__r2c0": {
+        "with_label": "第二種",
+        "without_label": "第二種"
+      },
+      "tbl_scope__r2c1": {
+        "with_label": "取引先の名称を含む運用実績の数値",
+        "without_label": "取引先の名称を含む運用実績の数値"
+      },
+      "tbl_scope__r2c2": {
+        "with_label": "不可",
+        "without_label": "不可"
+      },
+      "par_colophon_1": {
+        "with_label": "秘密保持契約書　契約書番号　ＡＯ－２６－０００１",
+        "without_label": "秘密保持契約書　契約書番号　ＡＯ－２６－０００１"
+      },
+      "par_colophon_2": {
+        "with_label": "株式会社青葉システムズ　法務窓口　０３-００００-００００（受付時間　午前９時から午後５時まで）　example.co.jp",
+        "without_label": "株式会社青葉システムズ　法務窓口　０３-００００-００００（受付時間　午前９時から午後５時まで）　example.co.jp"
+      },
+      "par_colophon_3": {
+        "with_label": "本書は、文書読取技術の検証のために生成された架空の契約書です。記載の当事者・住所・連絡先は実在せず、法的効力を有しません。",
+        "without_label": "本書は、文書読取技術の検証のために生成された架空の契約書です。記載の当事者・住所・連絡先は実在せず、法的効力を有しません。"
+      }
+    },
+    "tables": {
+      "tbl_exclusions": {
+        "caption_label": null,
+        "header_path": {
+          "tbl_exclusions__r0c1": {
+            "row_headers": [
+              ""
+            ],
+            "col_headers": []
+          },
+          "tbl_exclusions__r1c1": {
+            "row_headers": [
+              ""
+            ],
+            "col_headers": []
+          }
+        },
+        "auto_labels": {
+          "tbl_exclusions__r0c0": "（１）",
+          "tbl_exclusions__r1c0": "（２）"
+        }
+      },
+      "tbl_return": {
+        "caption_label": null,
+        "header_path": {
+          "tbl_return__r0c1": {
+            "row_headers": [
+              ""
+            ],
+            "col_headers": []
+          },
+          "tbl_return__r1c1": {
+            "row_headers": [
+              ""
+            ],
+            "col_headers": []
+          }
+        },
+        "auto_labels": {
+          "tbl_return__r0c0": "（１）",
+          "tbl_return__r1c0": "（２）"
+        }
+      },
+      "tbl_duties": {
+        "caption_label": "表１",
+        "header_path": {
+          "tbl_duties__r1c1": {
+            "row_headers": [
+              "記録媒体の返還"
+            ],
+            "col_headers": [
+              "期限"
+            ]
+          },
+          "tbl_duties__r2c1": {
+            "row_headers": [
+              "廃棄の報告"
+            ],
+            "col_headers": [
+              "期限"
+            ]
+          }
+        },
+        "auto_labels": {}
+      },
+      "tbl_scope": {
+        "caption_label": "表２",
+        "header_path": {
+          "tbl_scope__r1c1": {
+            "row_headers": [
+              "第一種"
+            ],
+            "col_headers": [
+              "情報の内容"
+            ]
+          },
+          "tbl_scope__r1c2": {
+            "row_headers": [
+              "第一種"
+            ],
+            "col_headers": [
+              "複製の可否"
+            ]
+          },
+          "tbl_scope__r2c1": {
+            "row_headers": [
+              "第二種"
+            ],
+            "col_headers": [
+              "情報の内容"
+            ]
+          },
+          "tbl_scope__r2c2": {
+            "row_headers": [
+              "第二種"
+            ],
+            "col_headers": [
+              "複製の可否"
+            ]
+          }
+        },
+        "auto_labels": {}
+      }
+    },
+    "figures": {
+      "fig_return_flow": {
+        "caption_label": "図１",
+        "node_order": [
+          "n1",
+          "n2",
+          "n3",
+          "n4",
+          "n5"
+        ],
+        "paths": [
+          [
+            "本契約の終了",
+            "区分の判断",
+            "原本を返還",
+            "書面による報告"
+          ],
+          [
+            "本契約の終了",
+            "区分の判断",
+            "複製物を廃棄",
+            "書面による報告"
+          ]
+        ],
+        "graph": {
+          "nodes": [
+            {
+              "id": "n1",
+              "label": "本契約の終了",
+              "role": "start"
+            },
+            {
+              "id": "n2",
+              "label": "区分の判断",
+              "role": "decision"
+            },
+            {
+              "id": "n3",
+              "label": "原本を返還",
+              "role": "process"
+            },
+            {
+              "id": "n4",
+              "label": "複製物を廃棄",
+              "role": "process"
+            },
+            {
+              "id": "n5",
+              "label": "書面による報告",
+              "role": "end"
+            }
+          ],
+          "edges": [
+            {
+              "from": "n1",
+              "to": "n2",
+              "relation": "flow",
+              "label": null
+            },
+            {
+              "from": "n2",
+              "to": "n3",
+              "relation": "flow",
+              "label": "交付を受けたもの"
+            },
+            {
+              "from": "n2",
+              "to": "n4",
+              "relation": "flow",
+              "label": "自ら作成したもの"
+            },
+            {
+              "from": "n3",
+              "to": "n5",
+              "relation": "flow",
+              "label": null
+            },
+            {
+              "from": "n4",
+              "to": "n5",
+              "relation": "flow",
+              "label": null
+            }
+          ]
+        },
+        "resolved_labels": {}
+      }
+    },
+    "formulas": {},
+    "enumerations": [
+      {
+        "id": "tbl_exclusions",
+        "source": "table",
+        "owner_id": "ch1_a2_p1",
+        "citation": "第１章 第２条",
+        "items": [
+          {
+            "id": "tbl_exclusions__r0c1",
+            "index": 1,
+            "label": "（１）",
+            "text": "開示を受けた時点で既に公知であった情報"
+          },
+          {
+            "id": "tbl_exclusions__r1c1",
+            "index": 2,
+            "label": "（２）",
+            "text": "乙が独自に開発し、または正当な権限を有する第三者から取得した情報（*１）"
+          }
+        ]
+      },
+      {
+        "id": "tbl_return",
+        "source": "table",
+        "owner_id": "ch4_s1_a2_p1",
+        "citation": "第２章 第１節 第４条",
+        "items": [
+          {
+            "id": "tbl_return__r0c1",
+            "index": 1,
+            "label": "（１）",
+            "text": "甲から交付を受けた記録媒体は、原本とともにすべて返還する。"
+          },
+          {
+            "id": "tbl_return__r1c1",
+            "index": 2,
+            "label": "（２）",
+            "text": "乙が自ら作成した複製物は、廃棄したうえでその旨を書面により報告する。"
+          }
+        ]
+      }
+    ],
+    "toc": []
+  }
+}

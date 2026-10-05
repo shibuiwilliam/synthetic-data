@@ -1,0 +1,23 @@
+# 生命保険のしおり＋約款（yakkan の `_label_life`）。項＝「１．」・号＝（１）・細目＝丸数字。
+# **P2-2 の表現力検証専用の fixture**であり、契約書の生成には使わない（docs/schema.md §7）。
+scheme: life
+levels:
+  part:       { format: "第{n}編", counter: arabic }
+  chapter:    { format: "第{n}章", counter: arabic }
+  section:    { format: "第{n}節", counter: arabic }
+  article:    { format: "第{n}条", counter: arabic }
+  paragraph:  { format: "{n}．",  counter: arabic, skip_when_single: true }
+  item:       { format: "({n})",  counter: arabic }
+  subitem:    { format: "{n}",    counter: circled }
+  subsubitem: { format: "{n}",    counter: katakana }
+appendix: { kind_label: 別表 }
+appendix_levels:
+  appendix_section: { format: "第{n}",  counter: arabic }
+  paragraph:        { format: "{n}．",  counter: arabic }
+  item:             { format: "{n}",    counter: circled }
+  subitem:          { format: "{n}.",   counter: katakana }
+  subsubitem:       { format: "({n})",  counter: roman }
+footnote: { inline: "（注{n}）" }
+continuous_articles: false
+paragraph_ref_style: printed
+ref: { article_with_title: true, no_chapter_prefix: false }

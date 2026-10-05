@@ -1,0 +1,31 @@
+{
+  "clause_id": "consultation",
+  "scheme": "contract-standard",
+  "title_options": [
+    "協議",
+    "協議解決"
+  ],
+  "variants": [
+    {
+      "id": "v1",
+      "tone": "standard",
+      "paragraphs": [
+        {
+          "text": "本契約に定めのない事項または本契約の条項の解釈に疑義が生じた事項については、{party:$a}および{party:$b}が誠意をもって協議し、これを解決する。"
+        }
+      ]
+    },
+    {
+      "id": "v2",
+      "tone": "detailed",
+      "paragraphs": [
+        {
+          "text": "本契約に定めのない事項が生じたときは、{party:$a}および{party:$b}は、本契約の趣旨に照らして必要な事項を協議のうえ定める。"
+        },
+        {
+          "text": "本契約の条項の解釈について当事者間に相違が生じたときも、前項と同様とする。"
+        }
+      ]
+    }
+  ]
+}

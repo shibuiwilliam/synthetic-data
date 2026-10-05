@@ -1,0 +1,143 @@
+# 海外旅行保険（genre: travel）の計算パック。
+genre: travel
+
+chapters:
+  cover: ["補償条項"]
+  basic: ["基本条項"]
+
+term_aliases:
+  insured: [insured]
+  policyholder: [policyholder]
+  baggage: [baggage, business_baggage, gear]
+  injury: [injury]
+  illness: [illness, hospitalization]
+  treatment_cost: [treatment_cost, medical_cost]
+  rescue_cost: [rescue_cost, search_cost, crisis_cost]
+  liability: [liability, liability_damage]
+  residence: [residence]
+  trip: [trip, tour, business_trip, study_trip, itinerary]
+  deductible: [deductible]
+  assist: [assist, assistance_desk, support_desk, accident_desk, desk]
+fallbacks:
+  insured: 被保険者
+  policyholder: 保険契約者
+  baggage: 携行品
+  injury: 傷害
+  illness: 疾病
+  treatment_cost: 治療費用
+  rescue_cost: 救援者費用
+  liability: 賠償責任
+  residence: 住居
+  trip: 旅行
+  deductible: 免責金額
+  assist: サポートデスク
+
+vocab:
+  rate_name: 支払割合
+  grade_name: 後遺障害の等級
+  months_name: 経過月数
+  days_name: 日数
+  amount_name: 損害の額
+  payable_days_name: 支払の対象となる日数
+  years_name: 経過年数
+  deadline_effect: 保険金を支払います。
+  waiting_start: 責任の開始する日
+  sub_benefit: 付随する費用
+  period_end: 保険期間の末日
+  waiting_span: 支払の対象とならない期間
+  payable_span: 支払の対象となる期間
+  waiting_event: 責任の開始
+  mark_pay: ○
+  mark_nopay: ×
+  legend_pay: 支払います
+  legend_nopay: 支払いません
+  matrix_row_title: 競技中かどうか
+  matrix_col_title: 書面による請求
+  matrix_row1: 競技または競技の練習中
+  matrix_row2: 試運転または曲技の最中
+  matrix_row3: 通常の使用の最中
+  matrix_row4: その他の場合
+  matrix_col1: 書面による請求があった
+  matrix_col2: 口頭での連絡のみ
+  matrix_col3: 請求がない
+  payable_event: 支払の対象となる期間の開始
+  enum_value_header: 取扱い
+  enum_value: 支払いません
+  exclusion_competition: 山岳登はん、スカイダイビングその他これらに類する危険な運動を行っている間に生じた損害
+  exclusion_no_claim: 帰国後、遅滞なく書面による請求が行われなかった場合
+  q_immobile: 旅行の行程を続けられない状態にあるか
+  q_min_days: 治療に{days}以上を要するか
+  q_other_cover: 他の保険契約から同じ費用の保険金が支払われるか
+  flow_start: 事故または発病
+
+param_ranges:
+  deductible: {choices: [3000, 5000, 8000, 10000, 15000, 20000], unit: JPY}
+  limit: {choices: [80000, 100000, 150000, 200000, 300000, 400000, 500000], unit: JPY}
+  sub_limit: {choices: [20000, 30000, 50000, 60000, 80000, 100000], unit: JPY}
+  aggregate_limit: {choices: [1000000, 2000000, 3000000], unit: JPY}
+  daily: {choices: [3000, 4000, 5000, 6000, 8000, 10000], unit: JPY}
+  min_days: {choices: [2, 3, 4, 5], unit: DAY}
+  max_days: {choices: [10, 15, 20, 30, 40], unit: DAY}
+  round_unit: {choices: [100, 500, 1000, 5000], unit: JPY}
+  max_months: {choices: [12, 18, 24, 36], unit: MONTH}
+  rate_top: {choices: [30, 40, 50], unit: PERCENT}
+  rate_step: {choices: [5, 10], unit: PERCENT}
+  threshold_amount: {choices: [30000, 50000, 80000, 100000, 150000], unit: JPY}
+  payment_days: {choices: [30, 45], unit: DAY}
+  waiting_days: {choices: [3, 7], unit: DAY}
+  max_count: {choices: [2, 3], unit: COUNT}
+
+subjects:
+  - key: carryon
+    benefit: 携行品損害保険金
+    anchor: cover
+    requires: [baggage]
+    trigger: "{t:insured}が{t:trip}中に携行する物に損害が生じた場合"
+    patterns: [P02, P01, P13]
+    inputs:
+      policy_limit:
+        concept: policy_limit
+        desc: 保険証券に記載された携行品損害保険金の限度額
+      amount: {concept: baggage_value, desc: 携行する物の損害の額}
+    vocab:
+      example_title: 携行品の支払の例
+
+  - key: cure
+    benefit: 治療費用保険金
+    anchor: cover
+    requires: [treatment_cost]
+    trigger: "{t:insured}が{t:trip}中に負った{t:injury}について治療を受けた場合"
+    patterns: [P14, P03]
+    inputs:
+      immobile: {concept: hospitalized, desc: 入院を伴うものであるかどうか}
+      days: {concept: hospital_days, desc: 治療のために入院した日数}
+      other_cover: {concept: rentacar_paid, desc: 他の保険契約から同じ費用の保険金が支払われるかどうか}
+    vocab:
+      example_title: 治療費用の計算例
+
+  - key: transitdelay
+    benefit: 渡航遅延費用保険金
+    anchor: cover
+    requires: []
+    trigger: "{t:insured}の搭乗する航空機が遅延し、{t:insured}が宿泊その他の費用を支出した場合"
+    patterns: [P07, P01]
+    inputs:
+      amount: {concept: actual_cost, desc: 遅延により支出した費用の額}
+    vocab:
+      example_title: 渡航遅延費用の支払の例
+
+  - key: assistfee
+    benefit: 救援者費用保険金
+    anchor: cover
+    requires: [rescue_cost]
+    trigger: "{t:insured}の捜索や救援のために親族が費用を支出した場合"
+    patterns: [P06, P02, P16]
+    inputs:
+      paid:
+        concept: paid_amount
+        desc: 既に支払った救援者費用保険金の合計額
+      amount: {concept: rescue_cost, desc: 救援のために支出した費用の額}
+      share_num: {concept: insured_amount, desc: 保険証券記載の救援者費用の保険金額}
+      share_den: {concept: liability_amount, desc: 救援に要した費用の全体の額}
+    vocab:
+      example_title: 救援者費用の計算例

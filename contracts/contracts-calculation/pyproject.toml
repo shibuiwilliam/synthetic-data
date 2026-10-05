@@ -1,0 +1,13 @@
+[project]
+name = "contracts-calculation"
+version = "0.1.0"
+description = "契約書合成データ生成 contracts の拡張：計算・判定条項と正解プログラム・評価データの同時生成"
+requires-python = ">=3.10"
+dependencies = []
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 110

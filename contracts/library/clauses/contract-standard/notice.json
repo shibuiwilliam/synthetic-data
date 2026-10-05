@@ -1,0 +1,34 @@
+{
+  "clause_id": "notice",
+  "scheme": "contract-standard",
+  "title_options": [
+    "通知",
+    "通知の方法"
+  ],
+  "constants": {
+    "notice_reach_days": "３日"
+  },
+  "variants": [
+    {
+      "id": "v1",
+      "tone": "standard",
+      "paragraphs": [
+        {
+          "text": "本契約に基づく通知は、書面の交付、郵送または電子メールの送信により行う。"
+        },
+        {
+          "text": "{ref:$p1}の通知は、相手方に到達した時に効力を生じる。ただし、電子メールによる場合は、送信の日から{const:notice_reach_days}を経過した時に到達したものとみなす。"
+        }
+      ]
+    },
+    {
+      "id": "v2",
+      "tone": "concise",
+      "paragraphs": [
+        {
+          "text": "本契約に基づく通知は、あらかじめ相手方が指定した連絡先に対し、書面または電子メールにより行う。通知は、相手方に到達した時に効力を生じる。"
+        }
+      ]
+    }
+  ]
+}

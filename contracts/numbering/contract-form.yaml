@@ -1,0 +1,31 @@
+# 様式型の番号方式（docs/schema.md §7.2・docs/doctypes.md §5.1）。
+#
+# 労働条件通知書のような**条を持たない**文書。項目番号 → (1) → ① の 3 階層で、
+# 本体は記入欄の表。yakkan の `jyusetsu`（重要事項説明書）と同じ骨格。
+#
+#   1 労働契約の期間      ← chapter（いちばん外の区分）
+#     (1) 始業・終業の時刻 ← article（本文を持つ単位）
+#       ① …               ← paragraph
+#
+# **`kind` は紙面の記号ではなく構造の深さ**（docs/evaluation.md §4.1）。
+# 条が無いので `continuous_articles` は意味を持たない（false）。
+scheme: contract-form
+description: 様式型（条を持たない。項目番号→(1)→丸数字の 3 階層）
+levels:
+  part:       { format: "{n}",    counter: arabic }
+  chapter:    { format: "{n}",    counter: arabic }
+  section:    { format: "({n})",  counter: arabic }
+  article:    { format: "({n})",  counter: arabic }
+  paragraph:  { format: "{n}",    counter: circled }
+  item:       { format: "{n}",    counter: katakana }
+  subitem:    { format: "({n})",  counter: katakana }
+  subsubitem: { unsupported: "様式型に細々目の階層は置かない（記入欄の表で表す）" }
+appendix: { kind_label: 別紙 }
+appendix_levels:
+  appendix_section: { format: "第{n}",  counter: arabic, skip_when_single: true }
+  paragraph:        { format: "{n}",    counter: arabic }
+  item:             { format: "({n})",  counter: arabic }
+footnote: { inline: "（*{n}）" }
+continuous_articles: false
+paragraph_ref_style: printed
+ref: { article_with_title: true, no_chapter_prefix: false }

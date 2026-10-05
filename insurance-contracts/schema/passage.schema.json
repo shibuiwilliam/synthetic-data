@@ -69,6 +69,11 @@
       },
       "title": "Refs To",
       "type": "array"
+    },
+    "context_header": {
+      "default": "",
+      "title": "Context Header",
+      "type": "string"
     }
   },
   "required": [

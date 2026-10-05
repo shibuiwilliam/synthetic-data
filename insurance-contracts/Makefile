@@ -7,7 +7,7 @@ UV    ?= uv
 DYLD_FALLBACK_LIBRARY_PATH ?= /opt/homebrew/lib
 export DYLD_FALLBACK_LIBRARY_PATH
 
-.PHONY: help setup check fmt lint test manifest-check doctor smoke probe doc batch clean
+.PHONY: help setup check fmt lint test manifest-check datacard-check doctor smoke probe doc batch clean
 
 help:                ## ターゲット一覧
 	@grep -E '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | awk -F':.*?## ' '{printf "  %-10s %s\n", $$1, $$2}'
@@ -15,7 +15,7 @@ help:                ## ターゲット一覧
 setup:               ## 依存を導入する（uv sync）
 	$(UV) sync
 
-check: lint test manifest-check  ## lint + テスト + manifest の鮮度（コミット前に必ず通す）
+check: lint test manifest-check datacard-check  ## lint + テスト + manifest とデータカードの鮮度（コミット前に必ず通す）
 
 fmt:                 ## ruff format を適用する
 	$(UV) run ruff format .
@@ -33,6 +33,13 @@ manifest-check:      ## dataset/manifest.json が実ファイルと合ってい�
 		$(UV) run yakkan manifest check --no-verify; \
 	else \
 		echo "dataset/ が無いので manifest の検査は飛ばす"; \
+	fi
+
+datacard-check:      ## dataset/data-card.md が実ファイルと合っているか（docs/data_card.md §5）
+	@if [ -f dataset/manifest.json ]; then \
+		$(UV) run yakkan datacard check; \
+	else \
+		echo "dataset/ が無いのでデータカードの検査は飛ばす"; \
 	fi
 
 doctor:              ## 実行環境の検査
@@ -64,6 +71,7 @@ endif
 	$(UV) run yakkan batch $(SPEC)
 	$(UV) run yakkan manifest update
 	$(UV) run yakkan manifest check
+	$(UV) run yakkan datacard update
 
 clean:               ## 一時生成物を消す（dataset/ は消さない）
 	rm -rf scratch .pytest_cache .ruff_cache

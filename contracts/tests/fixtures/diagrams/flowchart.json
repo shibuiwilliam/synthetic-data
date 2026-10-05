@@ -1,0 +1,31 @@
+{
+  "type": "figure", "id": "fig_claim_flow",
+  "caption": "事故発生から保険金のお支払いまで",
+  "alt": "事故の発生から当会社への連絡、損害の調査を経て、支払いの可否を判断し、支払える場合は保険金のお支払い、支払えない場合は理由のご説明に進む流れ図。損害の調査の前に必要書類のご提出がある。",
+  "facts": [
+    "「事故の発生」の次の段階は「当会社へご連絡」である。",
+    "「損害の調査」の前に「必要書類のご提出」がある。",
+    "「お支払いの可否」で「いいえ」の場合は「理由のご説明」に進む。"
+  ],
+  "size": "column",
+  "diagram": {
+    "kind": "flowchart", "direction": "TB",
+    "nodes": [
+      { "id": "n1", "label": "事故の発生", "shape": "start", "col": 0, "row": 0 },
+      { "id": "n2", "label": "当会社へご連絡", "shape": "process", "col": 0, "row": 1 },
+      { "id": "n3", "label": "必要書類のご提出", "shape": "document", "col": 0, "row": 2 },
+      { "id": "n4", "label": "損害の調査", "shape": "process", "col": 0, "row": 3 },
+      { "id": "n5", "label": "お支払いの可否", "shape": "decision", "col": 0, "row": 4 },
+      { "id": "n6", "label": "保険金のお支払い", "shape": "end", "col": 0, "row": 5 },
+      { "id": "n7", "label": "理由のご説明", "shape": "end", "col": 1, "row": 5 }
+    ],
+    "edges": [
+      { "from": "n1", "to": "n2" },
+      { "from": "n2", "to": "n3" },
+      { "from": "n3", "to": "n4" },
+      { "from": "n4", "to": "n5" },
+      { "from": "n5", "to": "n6", "label": "はい" },
+      { "from": "n5", "to": "n7", "label": "いいえ", "style": "dashed" }
+    ]
+  }
+}

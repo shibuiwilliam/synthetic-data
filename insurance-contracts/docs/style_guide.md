@@ -24,7 +24,7 @@
 4. uv run yakkan build content/auto-0001     # parts を結合し derived を付与 → content/auto-0001/source.json
 5. uv run yakkan render content/auto-0001 --style nl-a4-2col-mincho   # → dataset/auto-0001--nl-a4-2col-mincho/
 6. uv run yakkan verify dataset/auto-0001--nl-a4-2col-mincho          # §6.9
-7. uv run yakkan review dataset/auto-0001--nl-a4-2col-mincho          # PNG を出力。Claude が全ページを開いて §7.8 チェックリストで確認
+7. open dataset/auto-0001--nl-a4-2col-mincho/pages/*.png              # render が既定で出す PNG を全ページ開いて §7.8 チェックリストで確認（/review <doc_id>）
 8. uv run yakkan qa dataset/auto-0001--nl-a4-2col-mincho              # 自動QA生成 → Claude が執筆QAを追記 → 再度 qa --validate
 9. uv run yakkan manifest update                                     # status: ready
 ```

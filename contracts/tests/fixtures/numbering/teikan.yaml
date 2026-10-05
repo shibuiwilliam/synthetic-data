@@ -1,0 +1,23 @@
+# 保険会社の定款（yakkan の `_label_teikan`）。条は全編通し番号。第1項は無番号。
+# **P2-2 の表現力検証専用の fixture**（docs/schema.md §7）。
+scheme: teikan
+levels:
+  part:       { format: "第{n}編", counter: arabic }
+  chapter:    { format: "第{n}章", counter: arabic }
+  section:    { unsupported: "teikan では節を使わない" }
+  article:    { format: "第{n}条", counter: arabic }
+  paragraph:  { format: "{n}",    counter: arabic, skip_first: true }
+  item:       { format: "({n})",  counter: arabic }
+  subitem:    { format: "{n}",    counter: circled }
+  subsubitem: { unsupported: "teikan に細々目の番号方式は無い" }
+appendix: { kind_label: 附則, bare_when_first: true }
+appendix_levels:
+  appendix_section: { format: "第{n}", counter: arabic }
+  paragraph:        { format: "{n}",   counter: arabic }
+  item:             { format: "({n})", counter: arabic }
+  subitem:          { format: "{n}.",  counter: katakana }
+  subsubitem:       { format: "({n})", counter: roman }
+footnote: { inline: "（*{n}）" }
+continuous_articles: true
+paragraph_ref_style: written
+ref: { article_with_title: true, no_chapter_prefix: true }

@@ -1,0 +1,48 @@
+# contracts（keiyaku-synth）固有の .gitignore
+# 親リポジトリ ../.gitignore（Python 汎用テンプレート）の補正と、生成物・参考文書の除外を行う。
+# 方針は CLAUDE.md §10 / docs/repo_layout.md を参照。
+#
+# 注意：.gitignore は行末コメントを解釈しない（`foo/  # 説明` は "foo/  # 説明" という
+# パターンになる）。説明は必ず独立した行に書く。
+#
+# ここに **書いていない** もの：
+#   - contracts-calculation/ → 独立したサブプロジェクト。本体とは別にコミットするので
+#     意図的に除外しない（TASK.md §0.3）。本体のコミットには含めないこと。
+
+samples/*
+samples/SOURCES.md
+
+# ---- 執筆成果・バッチ定義・生成物（コミットしない） ------------------------
+# 2026-10-05 決定（docs/decisions.md 152）：公開後の第三者は、コードと宣言
+# （keiyaku/ blueprints/ numbering/ styles/ library/）から content/・specs/・dataset/ を
+# 自分で再生成する前提にする。親の `parts/`（setuptools 由来）が content/<cid>/parts/ を
+# 無言で除外する件も、content/ を丸ごと除外する以上は打ち消す必要がない。
+content/
+# specs/ はディレクトリ単位で除外すると配下を再包含できない（`!specs/publish.yaml` が効かない）。
+# 公開（Hugging Face）の宣言だけは**決定の記録**なので追跡する（docs/publishing.md）。
+specs/*
+!specs/publish.yaml
+dataset/
+# 作業前バックアップ。再生成できる
+dataset_bkup/
+*.log
+
+# ---- 環境 -----------------------------------------------------------------
+.venv/
+.DS_Store
+CLAUDE.local.md
+# probe と smoke の出力先（make clean で消える）
+scratch/
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+
+# 人間の判断・レビュー待ちの詳細と経緯。内部向けの残件リストなので公開しない
+HITL_TODO.md
+HITL_apply_review.md
+
+# 作業指示用のプロンプト。内部向けなので公開しない
+PROMPT.md
+
+# ある時点の現況報告。内部向けのスナップショットなので公開しない（正本は TASK.md / docs/progress.md）
+CURRENT_STATUS.md

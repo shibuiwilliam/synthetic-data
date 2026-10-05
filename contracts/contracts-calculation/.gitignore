@@ -1,0 +1,40 @@
+# contracts-calculation 固有の .gitignore
+# 親（`../.gitignore`）とリポジトリ直下の除外に重なるが、このサブツリー単体で正しく動くよう自己完結させる。
+# 方針は CLAUDE.md（規則 2・12）／DESIGN.md §7 を参照。
+
+# ---- 生成物（決定的に再生成できる。コミットしない） ----------------------
+# data/      … v1 データセット（HITL HC-2 の 4 プロファイル × 20 基準契約）
+# data_bind/ … 付与モードだけの出力
+# dataset/   … ユーザー指示の 100 件セット
+# dist/      … Hugging Face 公開形（`publish` が dataset/ から組み立てる。docs/hf_publish.md）
+# いずれも `generate` / `bind` / `datasheet` / `publish` で作り直せる。説明書とデータカードも実測から再生成する。
+data/
+data_bind/
+dataset/
+dist/
+
+# 回帰基準の examples/ は生成物だが、差分で出力の変化を見るためコミットする（CLAUDE.md「変更したら必ず確かめること」3）。
+
+# ---- 環境・キャッシュ -----------------------------------------------------
+.venv/
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+*.py[cod]
+
+# ---- 作業用・OS -----------------------------------------------------------
+scratch/
+.DS_Store
+CLAUDE.local.md
+
+# 人間の判断・レビュー待ちの詳細と経緯。内部向けの残件リストなので公開しない
+HITL.md
+
+# 作業指示用のプロンプト。内部向けなので公開しない
+PROMPT.md
+
+# ある時点の現況報告。内部向けのスナップショットなので公開しない
+CURRENT_STATUS.md
+
+examples/

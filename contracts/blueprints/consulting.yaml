@@ -1,0 +1,120 @@
+# コンサルティング・顧問契約書（docs/doctypes.md §3.4）。
+# 参考：samples/consulting/（中小機構・法律事務所の経営顧問契約・不動産コンサル）。
+# **構造だけを参考にし、文章はすべて書き下ろす**（CLAUDE.md §0.4-1）。
+#
+# 骨格：条文型。P1（§4 の #4）で確かめた実物の特徴：
+#   - **報酬が月額・時間外・成功報酬の 3 段**になり、本文の表として置かれる（別紙ではない）。
+#     ここが outsourcing / delegation と違う——**この doctype だけは本文に表を持つ**。
+#   - 自動更新と更新拒絶の通知期限があり、**期限の逆算**が読み取り課題になる（apply QA）。
+#   - 記名押印欄が**横並び 2 列**の実物がある（CT2）。style の variant で持つ。
+#   - 条を 1 つも持たない「項目名 × 内容」の 2 列表が本体の実物もある（CT19）。
+#     これは **v1 では作らない**——`contract-form` の骨格が要り、`employment`（P5）と同じ機構になるため。
+doctype: consulting
+family: contract
+description: 月額報酬と成功報酬を持つコンサルティング・顧問契約書。条文型
+target_pages: [4, 8]
+page_limit: 10
+numbering_scheme: contract-standard
+default_style: ct-a4-1col-mincho
+skeleton_kind: articles
+front_matter: { cover: false, toc: false }
+
+parties:
+  count: [2, 2]
+  presets:
+    - - { key: client,     alias: 甲, role_label: 委託者 }
+      - { key: consultant, alias: 乙, role_label: 受託者 }
+    - - { key: company,  alias: 甲, role_label: 甲 }
+      - { key: advisor,  alias: 乙, role_label: 乙 }
+
+required:
+  - { kind: node, subtype: preamble,  min_count: 1, note: "前文" }
+  - { kind: node, subtype: signature, min_count: 1, note: "後文＋記名押印欄" }
+  - { kind: table, min_count: 2, min_rows: 3, note: "報酬の段構成の表と、もう 1 つ（型は執筆者が決める）" }
+  - { kind: enumeration, min_count: 2, min_items: 5, note: "助言事項の列挙・解除事由" }
+  - { kind: figure, min_count: 1, note: "契約期間と更新拒絶の通知期限（種別は執筆者が決める）" }
+  - { kind: ref, min_count: 6 }
+  - { kind: term, min_count: 4 }
+
+skeleton:
+  - id: pre
+    kind: preamble
+    chars: 200
+    todo: "{party:...|full} で両当事者を導入する。当事者表示も置く"
+  - id: a1
+    kind: article
+    title_options: ["目的"]
+    chars: 300
+  - id: a2
+    kind: article
+    title_options: ["業務の範囲", "助言業務の範囲"]
+    chars: 800
+    todo: "助言事項を号で 5 項目以上。**何をしないか**（代理・名義貸しをしない等）も書くと実物らしい"
+  - id: a3
+    kind: article
+    title_options: ["報酬", "報酬および支払"]
+    chars: 800
+    todo: "**月額・時間外・成功報酬の 3 段の表**を置く。表の値と本文の数値を {const:} で揃える（L11）"
+    required: [{ kind: table, min_count: 1, min_rows: 3 }]
+  - id: a4
+    kind: article
+    title_options: ["成果の非保証", "助言の性質"]
+    chars: 400
+    todo: "結果を保証しないこと・最終判断は委託者が行うこと。**この doctype 固有の条**"
+  - id: a5
+    kind: article
+    title_options: ["資料の提供および返還", "資料の取扱い"]
+    chars: 500
+    todo: "提供・保管・返還の期限を {const:} で書く"
+  - id: a6
+    kind: article
+    title_options: ["利益相反および競業の制限", "競業の制限"]
+    chars: 600
+    todo: "制限の範囲（業種・地域・期間）を具体的に。例外の申出手続きも"
+  - id: a7
+    kind: article
+    title_options: ["秘密保持"]
+    chars: 400
+    todo: "nda・outsourcing・delegation と同じ文言にしない（L15）"
+  - id: a8
+    kind: article
+    title_options: ["契約期間および更新", "契約期間"]
+    chars: 600
+    todo: "**自動更新と更新拒絶の通知期限**（apply QA の題材）。図でも示す"
+    required: [{ kind: figure, min_count: 1 }]
+  - id: a9
+    kind: article
+    title_options: ["解除"]
+    chars: 500
+    todo: "解除事由を列挙する"
+  - id: a10
+    kind: article
+    title_options: ["協議"]
+    chars: 250
+    clause: consultation
+  - id: a11
+    kind: article
+    title_options: ["合意管轄"]
+    chars: 250
+    clause: jurisdiction
+
+appendices: []
+riders: { count: [0, 0], pool: [] }
+
+authored_qa: { count: 15, table_min: 3, figure_min: 2, apply_min: 2 }
+
+closing_options:
+  - "本契約の成立を証するため、本書{copies}通を作成し、{parties}が記名押印のうえ、各１通を保有する。"
+  - "本契約の成立を証するため、本書{copies}通を作成し、{parties}が署名または記名押印のうえ、各自１通を保有する。"
+
+variants:
+  digit_style: { fullwidth: 0.6, halfwidth: 0.4 }
+  era: { seireki: 0.85, wareki: 0.15 }
+  parties_preset: [0, 1]
+  copies: { "2": 0.9, "1": 0.1 }
+  stamp_duty: { "false": 0.8, "true": 0.2 }
+  # **2 style 目は版面が最も遠いものを選ぶ**（docs/doctypes.md §7）。
+  # `gothic` は mincho と同系（A4 1 段・無装飾）なので組にしない。
+  styles: [ct-a4-1col-mincho, ct-a4-1col-form]
+
+budget: { chars_min: 4000, chars_max: 9000, footnotes_min: 0 }

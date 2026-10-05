@@ -1,0 +1,23 @@
+# 団体保険（yakkan の `_label_group`）。項＝丸数字（第1項は無番号）・号＝「１．」・細目＝(ｱ)。
+# **P2-2 の表現力検証専用の fixture**（docs/schema.md §7）。
+scheme: group
+levels:
+  part:       { format: "第{n}編", counter: arabic }
+  chapter:    { format: "第{n}章", counter: arabic }
+  section:    { format: "第{n}節", counter: arabic }
+  article:    { format: "第{n}条", counter: arabic }
+  paragraph:  { format: "{n}",    counter: circled, skip_first: true }
+  item:       { format: "{n}．",  counter: arabic }
+  subitem:    { format: "({n})",  counter: katakana }
+  subsubitem: { unsupported: "団体保険に細々目の番号方式は無い" }
+appendix: { kind_label: 別表 }
+appendix_levels:
+  appendix_section: { format: "第{n}",  counter: arabic }
+  paragraph:        { format: "{n}．",  counter: arabic }
+  item:             { format: "{n}",    counter: circled }
+  subitem:          { format: "{n}.",   counter: katakana }
+  subsubitem:       { format: "({n})",  counter: roman }
+footnote: { inline: "（*{n}）" }
+continuous_articles: false
+paragraph_ref_style: written
+ref: { article_with_title: true, no_chapter_prefix: false }

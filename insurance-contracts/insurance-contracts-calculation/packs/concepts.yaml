@@ -1,0 +1,339 @@
+# 入力概念の語彙（DESIGN.md §7.4）。
+# 同じ概念には、文書をまたいで**同じ引数名**を使う。評価対象システムに渡すタスクカードの
+# 引数名はここで決まるので、名前を変えると既存の提出が動かなくなる。
+#
+# 欄: arg=引数名 / desc=文中の呼び方（体言） / type / unit / origin / min / max
+# origin: claim_fact=事故の事実 / policy=契約の内容 / assessment=当会社の認定 / computed=他の規定の結果
+
+# ---- 金額 -------------------------------------------------------------------
+repair_cost:
+  arg: repair_cost
+  desc: 修理に要した費用の額
+  type: int
+  unit: JPY
+  origin: claim_fact
+  min: 0
+  max: 2000000
+actual_cost:
+  arg: actual_cost
+  desc: 実際に支出した費用の額
+  type: int
+  unit: JPY
+  origin: claim_fact
+  min: 0
+  max: 3000000
+loss_amount:
+  arg: loss_amount
+  desc: 損害の額
+  type: int
+  unit: JPY
+  origin: assessment
+  min: 0
+  max: 5000000
+agreed_value:
+  arg: agreed_value
+  desc: 協定保険価額
+  type: int
+  unit: JPY
+  origin: policy
+  min: 100000
+  max: 10000000
+insured_amount:
+  arg: insured_amount
+  desc: 保険金額
+  type: int
+  unit: JPY
+  origin: policy
+  min: 100000
+  max: 30000000
+liability_amount:
+  arg: liability_amount
+  desc: 法律上の損害賠償責任の額
+  type: int
+  unit: JPY
+  origin: assessment
+  min: 0
+  max: 50000000
+treatment_cost:
+  arg: treatment_cost
+  desc: 治療に要した費用の額
+  type: int
+  unit: JPY
+  origin: claim_fact
+  min: 0
+  max: 3000000
+rescue_cost:
+  arg: rescue_cost
+  desc: 救援者の費用として支出した額
+  type: int
+  unit: JPY
+  origin: claim_fact
+  min: 0
+  max: 3000000
+baggage_value:
+  arg: baggage_value
+  desc: 携行品の損害の額
+  type: int
+  unit: JPY
+  origin: assessment
+  min: 0
+  max: 1000000
+equipment_value:
+  arg: equipment_value
+  desc: ゴルフ用具の損害の額
+  type: int
+  unit: JPY
+  origin: assessment
+  min: 0
+  max: 800000
+building_value:
+  arg: building_value
+  desc: 建物の保険金額
+  type: int
+  unit: JPY
+  origin: policy
+  min: 1000000
+  max: 50000000
+contents_value:
+  arg: contents_value
+  desc: 家財の保険金額
+  type: int
+  unit: JPY
+  origin: policy
+  min: 500000
+  max: 20000000
+paid_amount:
+  arg: paid_amount
+  desc: すでに支払った保険金の額
+  type: int
+  unit: JPY
+  origin: computed
+  min: 0
+  max: 10000000
+other_payment:
+  arg: other_payment
+  desc: 他の保険契約から支払われる保険金の額
+  type: int
+  unit: JPY
+  origin: assessment
+  min: 0
+  max: 5000000
+
+policy_limit:
+  arg: policy_limit
+  desc: 保険証券に記載された限度額
+  type: int
+  unit: JPY
+  origin: policy
+  min: 0
+  max: 5000000
+  optional: true
+item_loss:
+  arg: item_loss
+  desc: 明細に記載された1件ごとの損害の額
+  type: int
+  unit: JPY
+  origin: assessment
+  min: 0
+  max: 500000
+
+# ---- 日数・月数・回数 -------------------------------------------------------
+repair_days:
+  arg: repair_days
+  desc: 修理に要した日数
+  type: int
+  unit: DAY
+  origin: claim_fact
+  min: 0
+  max: 90
+hospital_days:
+  arg: hospital_days
+  desc: 入院した日数
+  type: int
+  unit: DAY
+  origin: claim_fact
+  min: 0
+  max: 400
+outpatient_days:
+  arg: outpatient_days
+  desc: 通院した日数
+  type: int
+  unit: DAY
+  origin: claim_fact
+  min: 0
+  max: 200
+stay_days:
+  arg: stay_days
+  desc: 滞在した日数
+  type: int
+  unit: DAY
+  origin: claim_fact
+  min: 0
+  max: 120
+elapsed_full_months:
+  arg: elapsed_full_months
+  desc: 初度登録の日から事故の発生の日までの経過月数
+  type: int
+  unit: MONTH
+  origin: claim_fact
+  min: 0
+  max: 120
+extra_days:
+  arg: extra_days
+  desc: 経過月数の満月数を除いた端日数
+  type: int
+  unit: DAY
+  origin: claim_fact
+  min: 0
+  max: 30
+elapsed_years:
+  arg: elapsed_years
+  desc: 保険契約の締結の日からの経過年数
+  type: int
+  unit: YEAR
+  origin: claim_fact
+  min: 0
+  max: 20
+visit_count:
+  arg: visit_count
+  desc: 支払の請求を受けた回数
+  type: int
+  unit: COUNT
+  origin: claim_fact
+  min: 0
+  max: 20
+
+# ---- 等級・区分 -------------------------------------------------------------
+disability_grade:
+  arg: disability_grade
+  desc: 後遺障害の等級
+  type: int
+  unit: GRADE
+  origin: assessment
+  min: 1
+  max: 14
+damage_grade:
+  arg: damage_grade
+  desc: 損害の程度の区分
+  type: int
+  unit: GRADE
+  origin: assessment
+  min: 1
+  max: 4
+surgery_kind:
+  arg: surgery_kind
+  desc: 受けた手術の種類
+  type: int
+  unit: GRADE
+  origin: assessment
+  min: 1
+  max: 5
+plan_grade:
+  arg: plan_grade
+  desc: 保険証券に記載されたプランの区分
+  type: int
+  unit: GRADE
+  origin: policy
+  min: 1
+  max: 3
+
+# ---- 真偽（認定） -----------------------------------------------------------
+immobile:
+  arg: immobile
+  desc: 被保険自動車が自力で走行できない状態にあるかどうか
+  type: bool
+  origin: assessment
+total_loss:
+  arg: total_loss
+  desc: 全損に該当するかどうか
+  type: bool
+  origin: assessment
+rentacar_paid:
+  arg: rentacar_paid
+  desc: 代替車両の費用について保険金が支払われるかどうか
+  type: bool
+  origin: assessment
+doctor_order:
+  arg: doctor_order
+  desc: 医師の指示によるものであるかどうか
+  type: bool
+  origin: assessment
+hospitalized:
+  arg: hospitalized
+  desc: 入院を伴うものであるかどうか
+  type: bool
+  origin: assessment
+quake_origin:
+  arg: quake_origin
+  desc: 損害が地震等によって生じたものであるかどうか
+  type: bool
+  origin: assessment
+inhabited:
+  arg: inhabited
+  desc: 居住の用に供されているかどうか
+  type: bool
+  origin: assessment
+duty_breach:
+  arg: duty_breach
+  desc: 通知の義務に違反があったかどうか
+  type: bool
+  origin: assessment
+competition:
+  arg: competition
+  desc: 競技または競技の練習中に生じたものであるかどうか
+  type: bool
+  origin: assessment
+abroad:
+  arg: abroad
+  desc: 日本国外で生じたものであるかどうか
+  type: bool
+  origin: assessment
+written_claim:
+  arg: written_claim
+  desc: 書面による請求があったかどうか
+  type: bool
+  origin: claim_fact
+
+# ---- 日付 -------------------------------------------------------------------
+accident_date:
+  arg: accident_date
+  desc: 事故の発生の日
+  type: date
+  origin: claim_fact
+  min: "2024-01-01"
+  max: "2027-12-31"
+claim_date:
+  arg: claim_date
+  desc: 保険金の請求を受けた日
+  type: date
+  origin: claim_fact
+  min: "2024-01-01"
+  max: "2027-12-31"
+notice_date:
+  arg: notice_date
+  desc: 事故の通知を受けた日
+  type: date
+  origin: claim_fact
+  min: "2024-01-01"
+  max: "2027-12-31"
+document_date:
+  arg: document_date
+  desc: 必要な書類の提出を受けた日
+  type: date
+  origin: claim_fact
+  min: "2024-01-01"
+  max: "2027-12-31"
+start_date:
+  arg: start_date
+  desc: 保険期間の初日
+  type: date
+  origin: policy
+  min: "2024-01-01"
+  max: "2027-12-31"
+treatment_start:
+  arg: treatment_start
+  desc: 治療を開始した日
+  type: date
+  origin: claim_fact
+  min: "2024-01-01"
+  max: "2027-12-31"

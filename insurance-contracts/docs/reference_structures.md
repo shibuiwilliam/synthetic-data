@@ -56,24 +56,11 @@
 - E4 見本（SAMPLE）の透かし、囲み注意書き、色分け見出し帯。
 
 ### 3.2 参考URL（構造分析のみ・転載禁止）
-以下は実在の公開約款。**WebFetch で読んでよいのは構造把握のためだけ**。文章はメモにも残さない。分析結果は `docs/reference_structures.md` に「見出し階層・要素種別・表の列構成・図の種別」だけを書く。
-
-| # | URL | 想定ジャンル | メモ |
-|---|---|---|---|
-| 1 | https://www.tokiomarine-nichido.co.jp/service/pdf/total_assist_yakkan_260101.pdf | 総合自動車保険 しおり＋約款 | §3.1 の A〜E ほぼ全要素を含む代表例（分析済み） |
-| 2 | https://www.tokiomarine-nichido.co.jp/service/pdf/ichinichi_yakkan_261001.pdf | 1日型自動車保険 | 小型、プラン表・申込手続き |
-| 3 | https://www.tokiomarine-nichido.co.jp/service/pdf/jishin_yakkan_221001.pdf | 地震保険 | 損害認定基準表 |
-| 4 | https://www.tokiomarine-nichido.co.jp/service/pdf/karada_yakkan_D14419804.pdf | 傷害・疾病（からだ）系 | 給付倍率表・別表 |
-| 5 | https://www.tokiomarine-nichido.co.jp/service/pdf/marinepass_yakkan_260701.pdf | 要確認（旅行・レジャー系か） | **商品種別を実物で確認し §4 の travel を調整** |
-| 6 | https://www.nissay.co.jp/kojin/shohin/seiho/kyoutuuban/shiori/01.pdf | 生保 しおり（共通版） | Q&A・手続き図・税制表 |
-| 7 | https://www.nissay.co.jp/kojin/shohin/seiho/mirainokatachi/shiori/01.pdf | 生保 商品別 約款 | 給付表・別表 |
-| 8 | https://www.nissay.co.jp/kaisha/annai/gaiyo/pdf/teikan.pdf | 定款（相互会社） | 短い章立て・常体 |
-| 9 | https://www.sompo-japan.co.jp/-/media/SJNK/files/kinsurance/automobile/jyusetsu202601.pdf | **重要事項等説明書**（自動車保険） | 2026-09-22 追加。条を持たない説明書。契約概要／注意喚起情報バッジ（分析済み） |
-| 10 | https://www.sompo-japan.co.jp/-/media/SJNK/files/kinsurance/automobile/norupita/jyusetsu202607.pdf | **重要事項等説明書**（時間単位型自動車保険） | 2026-09-22 追加。#9 の小型版（分析済み） |
-| 11 | https://www.sompo-japan.co.jp/-/media/SJNK/files/kinsurance/yakkan/golf2510_yakkan.pdf | **賠償責任保険 約款集**（ゴルファー等） | 2026-09-22 追加。横長小型判・2 段組・脚注（注N）主体（分析済み） |
-| 12 | https://www.meijiyasuda.co.jp/corporation/product/demand/contract/content_01.pdf | **団体保険 普通保険約款**（法人向け） | 2026-09-22 追加。条見出しを条の上に括弧書き・項＝丸数字（分析済み） |
-| 13 | https://www.meijiyasuda.co.jp/corporation/product/demand/contract/pdf/content_11.pdf | **団体保険 特約条項** | 2026-09-22 追加。横向き A4・2 段組・条末「備考」ボックス（分析済み） |
-| 14 | https://www.meijiyasuda.co.jp/corporation/product/demand/contract/pdf/content_10.pdf | **団体保険 加入のしおり** | 2026-09-22 追加。横向き A4・2 段組・階層つき表番号（表N-N）（分析済み） |
+参考URLの一覧（#1〜#14・想定ジャンル・一言メモ）は 2026-10-05 に `docs/reference_urls.md` へ分離した
+（実在保険会社の公開PDFへの直接URLをGitHubにコミットしないため。経緯は `docs/decisions.md`）。
+**同ファイルは `.gitignore` 対象でローカルのみ**。本ファイル中の「#1」「#9」等の番号は、そのローカルファイルの
+番号を指す。転載禁止の運用（CLAUDE.md §0.4-1）は変わらない：WebFetch で読んでよいのは構造把握のためだけで、
+文章はメモにも残さない。分析結果（見出し階層・要素種別・表の列構成・図の種別）は本ファイルに書く。
 
 #1〜#8 の分析は P4 着手前に完了済み。#9〜#14 は 2026-09-22 に追加し、同日分析した（下の「分析ログ #9〜#14」）。
 

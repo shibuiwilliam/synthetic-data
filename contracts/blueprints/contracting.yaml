@@ -1,0 +1,151 @@
+# 工事・製造請負契約書（docs/doctypes.md §5.2）。
+# 参考：samples/contracting/（公共工事標準請負契約約款・建設工事標準下請契約約款ほか）。
+# **構造だけを参考にし、文章はすべて書き下ろす**（CLAUDE.md §0.4-1）。
+#
+# 骨格：**約款型**。P1（docs/reference_structures.md §4 の #9）で確かめた実物の特徴：
+#   - **章を持たない。** 条が章を挟まず通し番号で並ぶ（章立ては sysdev だけ）。
+#   - **条番号が漢数字**（「第一条」）。`numbering: contract-kanji`（CT23）。
+#   - 条見出しは**条番号の上**に括弧書き（`article_heading: above`）。
+#   - 項は算用数字で、1 つの条に 12 項まで付く。第1項は無番号。
+#   - 目次・ヘッダ・フッタを持たない（ページ番号のみ）。
+#   - 法令の題名と条番号を本文に書くが、**本プロジェクトでは書かない**（docs/decisions.md 19）。
+#     代わりに「別紙の仕様書」への参照で約款らしさを出す。
+doctype: contracting
+family: contract
+description: 工事請負契約の約款。章を持たない長文・条番号は漢数字
+target_pages: [10, 18]
+page_limit: 20
+numbering_scheme: contract-kanji
+default_style: ct-a4-1col-mincho
+skeleton_kind: articles
+article_heading: above
+signature: required
+front_matter: { cover: false, toc: false }
+
+parties:
+  count: [2, 2]
+  presets:
+    - - { key: orderer,   alias: 発注者, role_label: 発注者 }
+      - { key: builder,   alias: 受注者, role_label: 受注者 }
+    - - { key: principal, alias: 甲, role_label: 注文者 }
+      - { key: builder2,  alias: 乙, role_label: 請負者 }
+
+required:
+  - { kind: node, subtype: preamble,  min_count: 1 }
+  - { kind: node, subtype: signature, min_count: 1 }
+  - { kind: node, subtype: appendix,  min_count: 2, note: "別紙 2 点（仕様書の概要・部分払の割合）" }
+  - { kind: table, min_count: 2, min_rows: 4, note: "部分払の割合表ほか（型は執筆者が決める）" }
+  - { kind: enumeration, min_count: 3, min_items: 3, note: "監督の事項・解除事由・不可抗力の列挙" }
+  - { kind: figure, min_count: 1, note: "工期と部分払のタイムラインか検査のフロー" }
+  - { kind: ref, min_count: 14, note: "条項間参照が多いのが約款型の特徴" }
+  - { kind: term, min_count: 5 }
+
+skeleton:
+  - id: pre
+    kind: preamble
+    chars: 250
+    todo: "{party:...|full} で両当事者を導入し、工事の名称・場所・工期・請負代金額を述べる"
+  - id: a1
+    kind: article
+    title_options: ["総則"]
+    chars: 700
+    todo: "約款と設計図書の関係、優先順位、言語・通貨・単位を定める。**項を多く（6 項以上）**"
+  - id: a2
+    kind: article
+    title_options: ["定義"]
+    chars: 600
+  - id: a3
+    kind: article
+    title_options: ["権利義務の譲渡の禁止"]
+    chars: 350
+  - id: a4
+    kind: article
+    title_options: ["一括下請の禁止", "下請の制限"]
+    chars: 450
+    todo: "一括して他人に請け負わせることの禁止と、下請の通知義務"
+  - id: a5
+    kind: article
+    title_options: ["監督員"]
+    chars: 600
+    todo: "監督員の権限を号で列挙する。通知の方式も"
+  - id: a6
+    kind: article
+    title_options: ["工事材料の検査"]
+    chars: 500
+  - id: a7
+    kind: article
+    title_options: ["設計図書の変更"]
+    chars: 600
+    todo: "変更の手続きと、工期・代金の増減の協議"
+  - id: a8
+    kind: article
+    title_options: ["工期の延長"]
+    chars: 500
+    todo: "延長を求められる事由を列挙し、協議の期限を定める"
+  - id: a9
+    kind: article
+    title_options: ["不可抗力による損害"]
+    chars: 600
+    todo: "不可抗力に当たる事由を列挙し、損害の負担の割合を定める"
+  - id: a10
+    kind: article
+    title_options: ["請負代金の支払", "部分払"]
+    chars: 700
+    todo: "前払・部分払・精算の 3 段を表で示す。図でも示す"
+    required: [{ kind: figure, min_count: 1 }]
+  - id: a11
+    kind: article
+    title_options: ["完成検査および引渡し"]
+    chars: 700
+  - id: a12
+    kind: article
+    title_options: ["契約不適合責任"]
+    chars: 600
+  - id: a13
+    kind: article
+    title_options: ["発注者の解除権", "解除"]
+    chars: 700
+  - id: a14
+    kind: article
+    title_options: ["受注者の解除権"]
+    chars: 500
+  - id: a15
+    kind: article
+    title_options: ["遅延違約金"]
+    chars: 450
+  - id: a16
+    kind: article
+    title_options: ["紛争の解決"]
+    chars: 450
+    todo: "協議・あっせんの手続きを定める。**裁判所の名称は書かない**（架空の機関も作らない）"
+
+appendices:
+  - id: sch1
+    title_options: ["工事の概要", "仕様書の概要"]
+    kind_label: 別紙
+    min_rows: 4
+    min_cols: 2
+  - id: sch2
+    title_options: ["部分払の割合", "出来高と部分払"]
+    kind_label: 別紙
+    min_rows: 4
+    min_cols: 3
+
+riders: { count: [0, 0], pool: [] }
+
+authored_qa: { count: 15, table_min: 3, figure_min: 2, apply_min: 2 }
+
+closing_options:
+  - "本契約の成立を証するため、本書{copies}通を作成し、{parties}が記名押印のうえ、各１通を保有する。"
+
+variants:
+  digit_style: { fullwidth: 0.8, halfwidth: 0.2 }
+  era: { seireki: 0.7, wareki: 0.3 }
+  parties_preset: [0, 1]
+  copies: { "2": 1.0 }
+  stamp_duty: { "true": 0.8, "false": 0.2 }
+  # **2 style 目は版面が最も遠いものを選ぶ**（docs/doctypes.md §7）。
+  # `gothic` は mincho と同系（A4 1 段・無装飾）なので組にしない。
+  styles: [ct-a4-1col-mincho, ct-a4-1col-form]
+
+budget: { chars_min: 9000, chars_max: 18000, footnotes_min: 0 }

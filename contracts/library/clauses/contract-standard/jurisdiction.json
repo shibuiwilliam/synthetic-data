@@ -1,0 +1,40 @@
+{
+  "clause_id": "jurisdiction",
+  "scheme": "contract-standard",
+  "title_options": [
+    "合意管轄",
+    "管轄裁判所"
+  ],
+  "variants": [
+    {
+      "id": "v1",
+      "tone": "standard",
+      "paragraphs": [
+        {
+          "text": "本契約に関して生じた紛争については、{party:$a}の本店の所在地を管轄する地方裁判所を第一審の専属的合意管轄裁判所とする。"
+        }
+      ]
+    },
+    {
+      "id": "v2",
+      "tone": "concise",
+      "paragraphs": [
+        {
+          "text": "本契約に関する訴訟は、{party:$a}の本店の所在地を管轄する地方裁判所を専属的合意管轄裁判所とする。"
+        }
+      ]
+    },
+    {
+      "id": "v3",
+      "tone": "detailed",
+      "paragraphs": [
+        {
+          "text": "本契約の準拠法は日本法とする。"
+        },
+        {
+          "text": "本契約に関して生じた紛争については、{party:$a}の本店の所在地を管轄する地方裁判所を第一審の専属的合意管轄裁判所とする。"
+        }
+      ]
+    }
+  ]
+}

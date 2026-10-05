@@ -158,3 +158,14 @@ def mrr(ranked_grades: list[int]) -> float:
         if grade > 0:
             return round(1 / i, 4)
     return 0.0
+
+
+def r_precision(ranked_grades: list[int], n_relevant: int) -> float:
+    """上位 R 件（R = 適合数）の適合率。網羅を測る `enumeration` の主指標。
+
+    打ち切り位置を適合数に合わせるので、`Recall@k` のように「k が足りなくて
+    上限に届かない」ことが起きない（docs/search_query_plan.md W7）。
+    """
+    if not n_relevant:
+        return 0.0
+    return round(sum(1 for g in ranked_grades[:n_relevant] if g > 0) / n_relevant, 4)

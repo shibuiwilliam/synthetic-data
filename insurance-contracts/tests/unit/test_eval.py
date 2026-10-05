@@ -174,9 +174,17 @@ def test_どのクエリ種別にも部分適合がある() -> None:
         grades[kinds[row["query_id"]]][int(row["grade"])] += 1
         per_query[row["query_id"]] += 1
 
-    for kind in ("term", "heading", "scoped", "qa"):
+    # 10 kind（docs/evaluation.md §2）。grade 1 の有無は kind ごとに違う
+    for kind in ("term", "heading", "scoped", "filtered", "qa", "definition_masked", "multi_hop"):
         assert grades[kind][2] > 0, f"{kind} に grade 2 が無い"
         assert grades[kind][1] > 0, f"{kind} に grade 1 が無い（部分適合が作れていない）"
+    # `enumeration` は網羅を測る kind で、grade 1 を**作らない**
+    # （字面一致で作ると 1 語あたり平均 115 件に膨れる。docs/search_query_plan.md W7）
+    assert grades["enumeration"][2] > 0, "enumeration に grade 2 が無い"
+    assert grades["enumeration"][1] == 0, "enumeration に grade 1 がある（打ち切りが起きる）"
+    # `no_answer` は gold が空集合なので qrels に 1 行も出ない
+    assert grades["no_answer"][2] == 0 and grades["no_answer"][1] == 0
+    assert any(k == "no_answer" for k in kinds.values()), "no_answer のクエリが無い"
     single = sum(1 for v in per_query.values() if v == 1)
     assert single / len(per_query) < 0.5, "適合が 1 件だけのクエリが半数を超えている"
 
@@ -392,3 +400,46 @@ def test_キャプションは正規化して突き合わせる() -> None:
     finally:
         harness._gold_tables = original  # type: ignore[assignment]
     assert result["teds_macro"] == 1.0
+
+
+# --- no_answer と confusion@k（docs/search_query_plan.md W9・W15） -------------
+
+
+def test_no_answerは何も返さないのが満点() -> None:
+    """gold が空のクエリを**飛ばさず**採点すること（飛ばすと「黙れるか」が測れない）。"""
+    qrels: dict[str, dict[str, int]] = {}
+    queries = [{"query_id": "q_no_answer_x", "kind": "no_answer", "n_relevant": 0}]
+    silent = evaluate_run(qrels, [{"query_id": "q_no_answer_x", "passages": []}], queries=queries)
+    noisy = evaluate_run(qrels, [{"query_id": "q_no_answer_x", "passages": ["doc::ch1_a1"]}], queries=queries)
+    assert silent["queries_scored"] == 1, "gold が空のクエリが採点されていない"
+    assert silent["by_kind"]["no_answer"]["false_positive_rate"] == 0.0
+    assert noisy["by_kind"]["no_answer"]["false_positive_rate"] == 1.0
+
+
+def test_confusionはハードネガティブを上位に出すと悪化する() -> None:
+    qrels = {"q1": {"doc::good": 2}}
+    queries = [{"query_id": "q1", "kind": "term", "n_relevant": 1, "hard_negatives": ["doc::trap"]}]
+    clean = evaluate_run(qrels, [{"query_id": "q1", "passages": ["doc::good"]}], queries=queries)
+    trapped = evaluate_run(
+        qrels, [{"query_id": "q1", "passages": ["doc::trap", "doc::good"]}], queries=queries
+    )
+    assert clean["by_kind"]["term"]["confusion@5"] == 0.0
+    assert trapped["by_kind"]["term"]["confusion@5"] > 0.0
+    assert trapped["by_kind"]["term"]["ndcg@1"] < clean["by_kind"]["term"]["ndcg@1"]
+
+
+def test_exact_recallはgrade2だけを見る() -> None:
+    """grade 1 が字面で簡単に取れる kind では、recall@k から「答えそのもの」が読めない。"""
+    qrels = {"q1": {"doc::answer": 2, "doc::quoted": 1}}
+    queries = [{"query_id": "q1", "kind": "definition_masked", "n_relevant": 2}]
+    only_related = evaluate_run(qrels, [{"query_id": "q1", "passages": ["doc::quoted"]}], queries=queries)
+    assert only_related["by_kind"]["definition_masked"]["recall@10"] > 0.0
+    assert only_related["by_kind"]["definition_masked"]["exact_recall@10"] == 0.0
+
+
+def test_r_precisionは適合数で打ち切る() -> None:
+    from yakkan.eval.metrics import r_precision
+
+    assert r_precision([2, 2, 0, 0], 2) == 1.0
+    assert r_precision([0, 2, 2, 0], 2) == 0.5
+    assert r_precision([], 0) == 0.0

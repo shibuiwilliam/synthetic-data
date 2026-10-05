@@ -1,0 +1,21 @@
+style_id: ct-a3-landscape-form
+description: A3 横・2 段組・ゴシック9pt。官公庁の 1 枚物の様式（purchase の頭書型。左右 2 面に分けて使う）
+# 実物（国交省の物品購入契約書様式）は **A3 横 1191×842pt** の 1 枚物で、
+# 左面に頭書（番号付きの条件）、右面に条文を置く（docs/reference_structures.md §4.1 の #5）。
+# 2 面を段組で表す。**段またぎ要素を置かない**こと（WeasyPrint が以降の内容を黙って捨てる。
+# CLAUDE.md §14・docs/gotchas.md）。render の内容欠落検出で必ず確かめる。
+page: { size: A3, width_mm: 420, height_mm: 297, margin_mm: { top: 14, right: 14, bottom: 14, left: 14 } }
+columns: { count: 2, gap_mm: 10 }
+fonts: { body: "Noto Sans JP", heading: "Noto Sans JP", symbol_fallback: ["Noto Sans Symbols", "Noto Sans Symbols 2"] }
+sizes: { body_pt: 9, line_height: 1.5, h1_pt: 11.5, h2_pt: 10, h3_pt: 9.5, h4_pt: 9,
+         table_pt: 8.5, note_pt: 8, toc_pt: 9, cover_pt: 14 }
+palette: { text: "#000000", rule: "#000000", accent: "#000000", band: "#eeeeee", note_bg: "#ffffff" }
+headings: { band: false }
+table: { border: form }
+margin_note: article_end
+header: none
+page_number: plain
+parties_style: table
+signature_layout: horizontal
+# 暫定値。**この style で 1 本描いてから実測で較正する**（PROMPT.md P8-1）。
+chars_per_page_estimate: 2638

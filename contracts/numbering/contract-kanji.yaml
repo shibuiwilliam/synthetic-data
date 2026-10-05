@@ -1,0 +1,38 @@
+# 約款型の番号方式（docs/doctypes.md §5.2・docs/reference_structures.md §4 の #9）。
+#
+# P1 の実測（公共工事標準請負契約約款ほか 3 件）：
+#   - **条番号が漢数字**（「第一条」「第二百三十三条」）。CT23。
+#   - **章を持たない。** 38 ページ・233 条が章を挟まず通し番号で並ぶ。
+#   - 条見出しは条番号の**上**に括弧書き（`article_heading: above`）。
+#   - 項は算用数字で、1 つの条に 12 項まで付く。第1項は無番号。
+#   - 号は括弧数字。
+#
+# 漢数字は全角・半角の別を持たないので、`digit_style` を変えても条番号は変わらない
+# （項・号は `digit_style` に従う）。
+scheme: contract-kanji
+description: 約款型（条番号が漢数字・章を持たない・条見出しは条の上）
+levels:
+  part:       { unsupported: "約款型に編は置かない" }
+  chapter:    { unsupported: "約款型は章を持たない（P1 の実測。章立ては sysdev だけ）" }
+  section:    { unsupported: "約款型は節を持たない" }
+  article:    { format: "第{n}条", counter: kanji }
+  paragraph:  { format: "{n}",     counter: arabic, skip_first: true }
+  item:       { format: "({n})",   counter: arabic }
+  subitem:    { format: "{n}",     counter: katakana }
+  subsubitem: { format: "({n})",   counter: katakana }
+appendix: { kind_label: 別紙 }
+appendix_levels:
+  appendix_section: { format: "第{n}",  counter: arabic, skip_when_single: true }
+  paragraph:        { format: "{n}",    counter: arabic }
+  item:             { format: "({n})",  counter: arabic }
+head_matter_levels:
+  item:    { format: "{n}",   counter: arabic }
+  subitem: { format: "({n})", counter: arabic }
+  # 頭書の項目の中身は**項ではなく説明の行**なので番号を振らない。
+  # 本文の規則に落ちると 2 行目以降に「2」が付き、注記（※ …）まで採番されていた。
+  paragraph: { format: "", counter: none }
+footnote: { inline: "（*{n}）" }
+# 章を持たないので「通し」かどうかは意味を持たないが、宣言としては通し。
+continuous_articles: true
+paragraph_ref_style: written
+ref: { article_with_title: true, no_chapter_prefix: true }

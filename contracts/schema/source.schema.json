@@ -1,0 +1,3070 @@
+{
+  "$defs": {
+    "AnnotatedMock": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "annotated_mock",
+          "default": "annotated_mock",
+          "title": "Kind",
+          "type": "string"
+        },
+        "subject": {
+          "enum": [
+            "order_form",
+            "invoice",
+            "app_screen"
+          ],
+          "title": "Subject",
+          "type": "string"
+        },
+        "fields": {
+          "items": {
+            "$ref": "#/$defs/MockField"
+          },
+          "title": "Fields",
+          "type": "array"
+        },
+        "legend": {
+          "items": {
+            "$ref": "#/$defs/MockLegend"
+          },
+          "title": "Legend",
+          "type": "array"
+        }
+      },
+      "required": [
+        "subject",
+        "fields",
+        "legend"
+      ],
+      "title": "AnnotatedMock",
+      "type": "object"
+    },
+    "BackMatter": {
+      "additionalProperties": false,
+      "description": "後付け。契約書は**後文＋契約日＋記名押印欄**を持つ（docs/schema.md §5）。",
+      "properties": {
+        "signature": {
+          "items": {
+            "$ref": "#/$defs/Node"
+          },
+          "title": "Signature",
+          "type": "array"
+        },
+        "colophon": {
+          "items": {
+            "discriminator": {
+              "mapping": {
+                "box": "#/$defs/BoxBlock",
+                "commentary": "#/$defs/CommentaryBlock",
+                "figure": "#/$defs/Figure",
+                "footnotes": "#/$defs/FootnotesBlock",
+                "formula": "#/$defs/Formula",
+                "list": "#/$defs/ListBlock",
+                "page_break": "#/$defs/PageBreakBlock",
+                "paragraph": "#/$defs/ParagraphBlock",
+                "parties": "#/$defs/PartiesBlock",
+                "qa_heading": "#/$defs/QaHeadingBlock",
+                "revision_history": "#/$defs/RevisionHistoryBlock",
+                "table": "#/$defs/Table"
+              },
+              "propertyName": "type"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/$defs/ParagraphBlock"
+              },
+              {
+                "$ref": "#/$defs/ListBlock"
+              },
+              {
+                "$ref": "#/$defs/Table"
+              },
+              {
+                "$ref": "#/$defs/Figure"
+              },
+              {
+                "$ref": "#/$defs/Formula"
+              },
+              {
+                "$ref": "#/$defs/BoxBlock"
+              },
+              {
+                "$ref": "#/$defs/FootnotesBlock"
+              },
+              {
+                "$ref": "#/$defs/QaHeadingBlock"
+              },
+              {
+                "$ref": "#/$defs/PartiesBlock"
+              },
+              {
+                "$ref": "#/$defs/RevisionHistoryBlock"
+              },
+              {
+                "$ref": "#/$defs/CommentaryBlock"
+              },
+              {
+                "$ref": "#/$defs/PageBreakBlock"
+              }
+            ]
+          },
+          "title": "Colophon",
+          "type": "array"
+        },
+        "contact": {
+          "items": {
+            "discriminator": {
+              "mapping": {
+                "box": "#/$defs/BoxBlock",
+                "commentary": "#/$defs/CommentaryBlock",
+                "figure": "#/$defs/Figure",
+                "footnotes": "#/$defs/FootnotesBlock",
+                "formula": "#/$defs/Formula",
+                "list": "#/$defs/ListBlock",
+                "page_break": "#/$defs/PageBreakBlock",
+                "paragraph": "#/$defs/ParagraphBlock",
+                "parties": "#/$defs/PartiesBlock",
+                "qa_heading": "#/$defs/QaHeadingBlock",
+                "revision_history": "#/$defs/RevisionHistoryBlock",
+                "table": "#/$defs/Table"
+              },
+              "propertyName": "type"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/$defs/ParagraphBlock"
+              },
+              {
+                "$ref": "#/$defs/ListBlock"
+              },
+              {
+                "$ref": "#/$defs/Table"
+              },
+              {
+                "$ref": "#/$defs/Figure"
+              },
+              {
+                "$ref": "#/$defs/Formula"
+              },
+              {
+                "$ref": "#/$defs/BoxBlock"
+              },
+              {
+                "$ref": "#/$defs/FootnotesBlock"
+              },
+              {
+                "$ref": "#/$defs/QaHeadingBlock"
+              },
+              {
+                "$ref": "#/$defs/PartiesBlock"
+              },
+              {
+                "$ref": "#/$defs/RevisionHistoryBlock"
+              },
+              {
+                "$ref": "#/$defs/CommentaryBlock"
+              },
+              {
+                "$ref": "#/$defs/PageBreakBlock"
+              }
+            ]
+          },
+          "title": "Contact",
+          "type": "array"
+        }
+      },
+      "title": "BackMatter",
+      "type": "object"
+    },
+    "BoxBlock": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "box",
+          "default": "box",
+          "title": "Type",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "style": {
+          "enum": [
+            "note",
+            "caution",
+            "example",
+            "margin_note"
+          ],
+          "title": "Style",
+          "type": "string"
+        },
+        "title": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Title"
+        },
+        "anchor": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Anchor"
+        },
+        "blocks": {
+          "items": {
+            "discriminator": {
+              "mapping": {
+                "box": "#/$defs/BoxBlock",
+                "commentary": "#/$defs/CommentaryBlock",
+                "figure": "#/$defs/Figure",
+                "footnotes": "#/$defs/FootnotesBlock",
+                "formula": "#/$defs/Formula",
+                "list": "#/$defs/ListBlock",
+                "page_break": "#/$defs/PageBreakBlock",
+                "paragraph": "#/$defs/ParagraphBlock",
+                "parties": "#/$defs/PartiesBlock",
+                "qa_heading": "#/$defs/QaHeadingBlock",
+                "revision_history": "#/$defs/RevisionHistoryBlock",
+                "table": "#/$defs/Table"
+              },
+              "propertyName": "type"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/$defs/ParagraphBlock"
+              },
+              {
+                "$ref": "#/$defs/ListBlock"
+              },
+              {
+                "$ref": "#/$defs/Table"
+              },
+              {
+                "$ref": "#/$defs/Figure"
+              },
+              {
+                "$ref": "#/$defs/Formula"
+              },
+              {
+                "$ref": "#/$defs/BoxBlock"
+              },
+              {
+                "$ref": "#/$defs/FootnotesBlock"
+              },
+              {
+                "$ref": "#/$defs/QaHeadingBlock"
+              },
+              {
+                "$ref": "#/$defs/PartiesBlock"
+              },
+              {
+                "$ref": "#/$defs/RevisionHistoryBlock"
+              },
+              {
+                "$ref": "#/$defs/CommentaryBlock"
+              },
+              {
+                "$ref": "#/$defs/PageBreakBlock"
+              }
+            ]
+          },
+          "title": "Blocks",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "style",
+        "blocks"
+      ],
+      "title": "BoxBlock",
+      "type": "object"
+    },
+    "Cell": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "text": {
+          "title": "Text",
+          "type": "string"
+        },
+        "rowspan": {
+          "default": 1,
+          "title": "Rowspan",
+          "type": "integer"
+        },
+        "colspan": {
+          "default": 1,
+          "title": "Colspan",
+          "type": "integer"
+        },
+        "role": {
+          "default": "body",
+          "enum": [
+            "header",
+            "stub",
+            "body",
+            "note"
+          ],
+          "title": "Role",
+          "type": "string"
+        },
+        "align": {
+          "anyOf": [
+            {
+              "enum": [
+                "left",
+                "center",
+                "right"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Align"
+        },
+        "vertical_text": {
+          "default": false,
+          "title": "Vertical Text",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "id",
+        "text"
+      ],
+      "title": "Cell",
+      "type": "object"
+    },
+    "CommentaryBlock": {
+      "additionalProperties": false,
+      "description": "逐条解説（モデル契約書の解説枠。docs/schema.md §11.3）。\n\n対象の条の直後に枠つきで描く。`answer.pages[].text` には**含める**（紙面にあるものは\n正解テキストに入れる原則）が、`layout.text_lines[].region` は `commentary` として\n本文と区別する。読み取り側には「本文と解説の分離」を求める。",
+      "properties": {
+        "type": {
+          "const": "commentary",
+          "default": "commentary",
+          "title": "Type",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "anchor": {
+          "title": "Anchor",
+          "type": "string"
+        },
+        "title": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Title"
+        },
+        "text": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Text",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "anchor"
+      ],
+      "title": "CommentaryBlock",
+      "type": "object"
+    },
+    "Cover": {
+      "additionalProperties": false,
+      "description": "表紙（docs/schema.md §3.1 A1）。JSON から機械的に導出できる要素だけを持つ。",
+      "properties": {
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "subtitle": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Subtitle"
+        },
+        "issuer_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Issuer Name"
+        },
+        "contract_number": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Contract Number"
+        },
+        "form_code": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Form Code"
+        },
+        "notes": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Notes",
+          "type": "array"
+        }
+      },
+      "required": [
+        "title"
+      ],
+      "title": "Cover",
+      "type": "object"
+    },
+    "Derived": {
+      "additionalProperties": false,
+      "properties": {
+        "labels": {
+          "additionalProperties": {
+            "$ref": "#/$defs/LabelInfo"
+          },
+          "title": "Labels",
+          "type": "object"
+        },
+        "refs": {
+          "items": {
+            "$ref": "#/$defs/RefInfo"
+          },
+          "title": "Refs",
+          "type": "array"
+        },
+        "term_uses": {
+          "items": {
+            "$ref": "#/$defs/TermUse"
+          },
+          "title": "Term Uses",
+          "type": "array"
+        },
+        "party_uses": {
+          "items": {
+            "$ref": "#/$defs/PartyUse"
+          },
+          "title": "Party Uses",
+          "type": "array"
+        },
+        "footnote_index": {
+          "items": {
+            "$ref": "#/$defs/FootnoteIndex"
+          },
+          "title": "Footnote Index",
+          "type": "array"
+        },
+        "plain_text": {
+          "additionalProperties": {
+            "$ref": "#/$defs/PlainText"
+          },
+          "title": "Plain Text",
+          "type": "object"
+        },
+        "tables": {
+          "additionalProperties": {
+            "$ref": "#/$defs/TableDerived"
+          },
+          "title": "Tables",
+          "type": "object"
+        },
+        "figures": {
+          "additionalProperties": {
+            "$ref": "#/$defs/FigureDerived"
+          },
+          "title": "Figures",
+          "type": "object"
+        },
+        "formulas": {
+          "additionalProperties": {
+            "$ref": "#/$defs/FormulaDerived"
+          },
+          "title": "Formulas",
+          "type": "object"
+        },
+        "enumerations": {
+          "items": {
+            "$ref": "#/$defs/Enumeration"
+          },
+          "title": "Enumerations",
+          "type": "array"
+        },
+        "toc": {
+          "items": {
+            "$ref": "#/$defs/TocEntry"
+          },
+          "title": "Toc",
+          "type": "array"
+        }
+      },
+      "title": "Derived",
+      "type": "object"
+    },
+    "Enumeration": {
+      "additionalProperties": false,
+      "description": "「列挙された項目の一つ」を機械可読にするための、列挙のまとまり。\n\n表の列挙（`{auto_label}` を持つ表）・号のノード・箇条書きの 3 系統をまとめて扱う。",
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "source": {
+          "enum": [
+            "table",
+            "nodes",
+            "list"
+          ],
+          "title": "Source",
+          "type": "string"
+        },
+        "owner_id": {
+          "title": "Owner Id",
+          "type": "string"
+        },
+        "citation": {
+          "title": "Citation",
+          "type": "string"
+        },
+        "items": {
+          "items": {
+            "$ref": "#/$defs/EnumerationItem"
+          },
+          "title": "Items",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "source",
+        "owner_id",
+        "citation"
+      ],
+      "title": "Enumeration",
+      "type": "object"
+    },
+    "EnumerationItem": {
+      "additionalProperties": false,
+      "description": "列挙の 1 項目（docs/eval_dataset_plan.md P4）。",
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "index": {
+          "title": "Index",
+          "type": "integer"
+        },
+        "label": {
+          "title": "Label",
+          "type": "string"
+        },
+        "text": {
+          "title": "Text",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "index",
+        "label",
+        "text"
+      ],
+      "title": "EnumerationItem",
+      "type": "object"
+    },
+    "Figure": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "figure",
+          "default": "figure",
+          "title": "Type",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "caption": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Caption"
+        },
+        "alt": {
+          "title": "Alt",
+          "type": "string"
+        },
+        "facts": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Facts",
+          "type": "array"
+        },
+        "diagram": {
+          "discriminator": {
+            "mapping": {
+              "annotated_mock": "#/$defs/AnnotatedMock",
+              "flowchart": "#/$defs/Flowchart",
+              "matrix": "#/$defs/Matrix",
+              "steps": "#/$defs/Steps",
+              "timeline": "#/$defs/Timeline",
+              "tree": "#/$defs/Tree"
+            },
+            "propertyName": "kind"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/Flowchart"
+            },
+            {
+              "$ref": "#/$defs/Tree"
+            },
+            {
+              "$ref": "#/$defs/Steps"
+            },
+            {
+              "$ref": "#/$defs/Timeline"
+            },
+            {
+              "$ref": "#/$defs/AnnotatedMock"
+            },
+            {
+              "$ref": "#/$defs/Matrix"
+            }
+          ],
+          "title": "Diagram"
+        },
+        "size": {
+          "default": "column",
+          "enum": [
+            "column",
+            "full"
+          ],
+          "title": "Size",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "alt",
+        "facts",
+        "diagram"
+      ],
+      "title": "Figure",
+      "type": "object"
+    },
+    "FigureDerived": {
+      "additionalProperties": false,
+      "properties": {
+        "caption_label": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Caption Label"
+        },
+        "node_order": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Node Order",
+          "type": "array"
+        },
+        "paths": {
+          "items": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "title": "Paths",
+          "type": "array"
+        },
+        "graph": {
+          "$ref": "#/$defs/FigureGraph"
+        },
+        "resolved_labels": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Resolved Labels",
+          "type": "object"
+        }
+      },
+      "title": "FigureDerived",
+      "type": "object"
+    },
+    "FigureEdge": {
+      "additionalProperties": false,
+      "description": "正規化した図の辺。`relation` が `flow`/`child`/`next`/`cell` のものだけが経路に数えられる。",
+      "properties": {
+        "from": {
+          "title": "From",
+          "type": "string"
+        },
+        "to": {
+          "title": "To",
+          "type": "string"
+        },
+        "relation": {
+          "title": "Relation",
+          "type": "string"
+        },
+        "label": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Label"
+        }
+      },
+      "required": [
+        "from",
+        "to",
+        "relation"
+      ],
+      "title": "FigureEdge",
+      "type": "object"
+    },
+    "FigureGraph": {
+      "additionalProperties": false,
+      "description": "6 種の図を 1 つの形に正規化したもの。読み取り側の予測と直接突き合わせる。",
+      "properties": {
+        "nodes": {
+          "items": {
+            "$ref": "#/$defs/FigureNode"
+          },
+          "title": "Nodes",
+          "type": "array"
+        },
+        "edges": {
+          "items": {
+            "$ref": "#/$defs/FigureEdge"
+          },
+          "title": "Edges",
+          "type": "array"
+        }
+      },
+      "title": "FigureGraph",
+      "type": "object"
+    },
+    "FigureNode": {
+      "additionalProperties": false,
+      "description": "正規化した図のノード（docs/eval_dataset_plan.md P1）。",
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "label": {
+          "title": "Label",
+          "type": "string"
+        },
+        "role": {
+          "title": "Role",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "label",
+        "role"
+      ],
+      "title": "FigureNode",
+      "type": "object"
+    },
+    "FlowEdge": {
+      "additionalProperties": false,
+      "properties": {
+        "from": {
+          "title": "From",
+          "type": "string"
+        },
+        "to": {
+          "title": "To",
+          "type": "string"
+        },
+        "label": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Label"
+        },
+        "style": {
+          "default": "solid",
+          "enum": [
+            "solid",
+            "dashed"
+          ],
+          "title": "Style",
+          "type": "string"
+        }
+      },
+      "required": [
+        "from",
+        "to"
+      ],
+      "title": "FlowEdge",
+      "type": "object"
+    },
+    "FlowNode": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "label": {
+          "title": "Label",
+          "type": "string"
+        },
+        "shape": {
+          "enum": [
+            "start",
+            "process",
+            "decision",
+            "end",
+            "document",
+            "note"
+          ],
+          "title": "Shape",
+          "type": "string"
+        },
+        "col": {
+          "title": "Col",
+          "type": "integer"
+        },
+        "row": {
+          "title": "Row",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "id",
+        "label",
+        "shape",
+        "col",
+        "row"
+      ],
+      "title": "FlowNode",
+      "type": "object"
+    },
+    "Flowchart": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "flowchart",
+          "default": "flowchart",
+          "title": "Kind",
+          "type": "string"
+        },
+        "direction": {
+          "default": "TB",
+          "enum": [
+            "TB",
+            "LR"
+          ],
+          "title": "Direction",
+          "type": "string"
+        },
+        "nodes": {
+          "items": {
+            "$ref": "#/$defs/FlowNode"
+          },
+          "title": "Nodes",
+          "type": "array"
+        },
+        "edges": {
+          "items": {
+            "$ref": "#/$defs/FlowEdge"
+          },
+          "title": "Edges",
+          "type": "array"
+        }
+      },
+      "required": [
+        "nodes",
+        "edges"
+      ],
+      "title": "Flowchart",
+      "type": "object"
+    },
+    "Footnote": {
+      "additionalProperties": false,
+      "properties": {
+        "n": {
+          "title": "N",
+          "type": "integer"
+        },
+        "text": {
+          "title": "Text",
+          "type": "string"
+        }
+      },
+      "required": [
+        "n",
+        "text"
+      ],
+      "title": "Footnote",
+      "type": "object"
+    },
+    "FootnoteIndex": {
+      "additionalProperties": false,
+      "properties": {
+        "article_id": {
+          "title": "Article Id",
+          "type": "string"
+        },
+        "n": {
+          "title": "N",
+          "type": "integer"
+        },
+        "marker": {
+          "title": "Marker",
+          "type": "string"
+        },
+        "text": {
+          "title": "Text",
+          "type": "string"
+        }
+      },
+      "required": [
+        "article_id",
+        "n",
+        "marker",
+        "text"
+      ],
+      "title": "FootnoteIndex",
+      "type": "object"
+    },
+    "FootnotesBlock": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "footnotes",
+          "default": "footnotes",
+          "title": "Type",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "notes": {
+          "items": {
+            "$ref": "#/$defs/Footnote"
+          },
+          "title": "Notes",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "notes"
+      ],
+      "title": "FootnotesBlock",
+      "type": "object"
+    },
+    "Formula": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "formula",
+          "default": "formula",
+          "title": "Type",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "alt": {
+          "title": "Alt",
+          "type": "string"
+        },
+        "layout": {
+          "default": "inline_boxes",
+          "enum": [
+            "inline_boxes",
+            "fraction"
+          ],
+          "title": "Layout",
+          "type": "string"
+        },
+        "terms": {
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/FormulaBox"
+              },
+              {
+                "$ref": "#/$defs/FormulaOp"
+              },
+              {
+                "$ref": "#/$defs/FormulaFraction"
+              }
+            ]
+          },
+          "title": "Terms",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "alt",
+        "terms"
+      ],
+      "title": "Formula",
+      "type": "object"
+    },
+    "FormulaBox": {
+      "additionalProperties": false,
+      "properties": {
+        "box": {
+          "title": "Box",
+          "type": "string"
+        }
+      },
+      "required": [
+        "box"
+      ],
+      "title": "FormulaBox",
+      "type": "object"
+    },
+    "FormulaDerived": {
+      "additionalProperties": false,
+      "description": "算式の箱に書かれたトークンの解決結果（`FigureDerived.resolved_labels` と同じ扱い）。",
+      "properties": {
+        "resolved_labels": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Resolved Labels",
+          "type": "object"
+        }
+      },
+      "title": "FormulaDerived",
+      "type": "object"
+    },
+    "FormulaFraction": {
+      "additionalProperties": false,
+      "properties": {
+        "fraction": {
+          "$ref": "#/$defs/FractionBody"
+        }
+      },
+      "required": [
+        "fraction"
+      ],
+      "title": "FormulaFraction",
+      "type": "object"
+    },
+    "FormulaOp": {
+      "additionalProperties": false,
+      "properties": {
+        "op": {
+          "enum": [
+            "＋",
+            "－",
+            "×",
+            "÷",
+            "＝"
+          ],
+          "title": "Op",
+          "type": "string"
+        }
+      },
+      "required": [
+        "op"
+      ],
+      "title": "FormulaOp",
+      "type": "object"
+    },
+    "FractionBody": {
+      "additionalProperties": false,
+      "properties": {
+        "num": {
+          "title": "Num",
+          "type": "string"
+        },
+        "den": {
+          "title": "Den",
+          "type": "string"
+        }
+      },
+      "required": [
+        "num",
+        "den"
+      ],
+      "title": "FractionBody",
+      "type": "object"
+    },
+    "FrontMatter": {
+      "additionalProperties": false,
+      "description": "前付け。**契約書は表紙も目次も持たないのが普通**なので、どちらも任意（docs/schema.md §2）。\n\n目次を持たない文書では verify が目次検査をスキップし、その旨をレポートに明記する（V-P3）。",
+      "properties": {
+        "cover": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Cover"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "preface": {
+          "items": {
+            "discriminator": {
+              "mapping": {
+                "box": "#/$defs/BoxBlock",
+                "commentary": "#/$defs/CommentaryBlock",
+                "figure": "#/$defs/Figure",
+                "footnotes": "#/$defs/FootnotesBlock",
+                "formula": "#/$defs/Formula",
+                "list": "#/$defs/ListBlock",
+                "page_break": "#/$defs/PageBreakBlock",
+                "paragraph": "#/$defs/ParagraphBlock",
+                "parties": "#/$defs/PartiesBlock",
+                "qa_heading": "#/$defs/QaHeadingBlock",
+                "revision_history": "#/$defs/RevisionHistoryBlock",
+                "table": "#/$defs/Table"
+              },
+              "propertyName": "type"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/$defs/ParagraphBlock"
+              },
+              {
+                "$ref": "#/$defs/ListBlock"
+              },
+              {
+                "$ref": "#/$defs/Table"
+              },
+              {
+                "$ref": "#/$defs/Figure"
+              },
+              {
+                "$ref": "#/$defs/Formula"
+              },
+              {
+                "$ref": "#/$defs/BoxBlock"
+              },
+              {
+                "$ref": "#/$defs/FootnotesBlock"
+              },
+              {
+                "$ref": "#/$defs/QaHeadingBlock"
+              },
+              {
+                "$ref": "#/$defs/PartiesBlock"
+              },
+              {
+                "$ref": "#/$defs/RevisionHistoryBlock"
+              },
+              {
+                "$ref": "#/$defs/CommentaryBlock"
+              },
+              {
+                "$ref": "#/$defs/PageBreakBlock"
+              }
+            ]
+          },
+          "title": "Preface",
+          "type": "array"
+        },
+        "toc": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Toc"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "title": "FrontMatter",
+      "type": "object"
+    },
+    "HeaderPath": {
+      "additionalProperties": false,
+      "properties": {
+        "row_headers": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Row Headers",
+          "type": "array"
+        },
+        "col_headers": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Col Headers",
+          "type": "array"
+        }
+      },
+      "title": "HeaderPath",
+      "type": "object"
+    },
+    "Issuer": {
+      "additionalProperties": false,
+      "description": "単独名義の文書の発行者（様式型の交付者など）。契約書では任意（docs/schema.md §3）。",
+      "properties": {
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "short_name": {
+          "title": "Short Name",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "short_name"
+      ],
+      "title": "Issuer",
+      "type": "object"
+    },
+    "LabelInfo": {
+      "additionalProperties": false,
+      "properties": {
+        "label": {
+          "title": "Label",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "heading_text": {
+          "title": "Heading Text",
+          "type": "string"
+        },
+        "path": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Path",
+          "type": "array"
+        },
+        "path_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Path Ids",
+          "type": "array"
+        },
+        "parent_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Parent Id"
+        },
+        "kind": {
+          "anyOf": [
+            {
+              "enum": [
+                "part",
+                "chapter",
+                "preamble",
+                "head_matter",
+                "signature",
+                "supplement",
+                "rider",
+                "section",
+                "article",
+                "paragraph",
+                "item",
+                "subitem",
+                "subsubitem",
+                "appendix",
+                "appendix_section"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Kind"
+        },
+        "citation": {
+          "default": "",
+          "title": "Citation",
+          "type": "string"
+        },
+        "depth": {
+          "title": "Depth",
+          "type": "integer"
+        },
+        "run_in_label": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Run In Label"
+        }
+      },
+      "required": [
+        "label",
+        "title",
+        "heading_text",
+        "path",
+        "depth"
+      ],
+      "title": "LabelInfo",
+      "type": "object"
+    },
+    "ListBlock": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "list",
+          "default": "list",
+          "title": "Type",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "style": {
+          "enum": [
+            "paren_number",
+            "circled",
+            "katakana",
+            "paren_katakana",
+            "roman",
+            "bullet",
+            "none"
+          ],
+          "title": "Style",
+          "type": "string"
+        },
+        "items": {
+          "items": {
+            "$ref": "#/$defs/ListItem"
+          },
+          "title": "Items",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "style",
+        "items"
+      ],
+      "title": "ListBlock",
+      "type": "object"
+    },
+    "ListItem": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "text": {
+          "title": "Text",
+          "type": "string"
+        },
+        "children": {
+          "items": {
+            "$ref": "#/$defs/ListItem"
+          },
+          "title": "Children",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "text"
+      ],
+      "title": "ListItem",
+      "type": "object"
+    },
+    "Matrix": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "matrix",
+          "default": "matrix",
+          "title": "Kind",
+          "type": "string"
+        },
+        "rows": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Rows",
+          "type": "array"
+        },
+        "cols": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Cols",
+          "type": "array"
+        },
+        "marks": {
+          "items": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "title": "Marks",
+          "type": "array"
+        },
+        "legend": {
+          "items": {
+            "$ref": "#/$defs/MatrixLegend"
+          },
+          "title": "Legend",
+          "type": "array"
+        }
+      },
+      "required": [
+        "rows",
+        "cols",
+        "marks"
+      ],
+      "title": "Matrix",
+      "type": "object"
+    },
+    "MatrixLegend": {
+      "additionalProperties": false,
+      "properties": {
+        "mark": {
+          "title": "Mark",
+          "type": "string"
+        },
+        "meaning": {
+          "title": "Meaning",
+          "type": "string"
+        }
+      },
+      "required": [
+        "mark",
+        "meaning"
+      ],
+      "title": "MatrixLegend",
+      "type": "object"
+    },
+    "MergedCell": {
+      "additionalProperties": false,
+      "description": "結合に飲み込まれた格子位置（docs/schema.md §5.4）。内容は持たない。",
+      "properties": {
+        "merged_into": {
+          "title": "Merged Into",
+          "type": "string"
+        }
+      },
+      "required": [
+        "merged_into"
+      ],
+      "title": "MergedCell",
+      "type": "object"
+    },
+    "Meta": {
+      "additionalProperties": false,
+      "properties": {
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "subtitle": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Subtitle"
+        },
+        "parties": {
+          "items": {
+            "$ref": "#/$defs/PartyDef"
+          },
+          "minItems": 1,
+          "title": "Parties",
+          "type": "array"
+        },
+        "issuer": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Issuer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "contract_date": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Contract Date"
+        },
+        "effective_date": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Effective Date"
+        },
+        "contract_number": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Contract Number"
+        },
+        "form_code": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Form Code"
+        },
+        "copies": {
+          "default": 2,
+          "title": "Copies",
+          "type": "integer"
+        },
+        "stamp_duty": {
+          "default": false,
+          "title": "Stamp Duty",
+          "type": "boolean"
+        },
+        "numbering_scheme": {
+          "title": "Numbering Scheme",
+          "type": "string"
+        },
+        "digit_style": {
+          "enum": [
+            "fullwidth",
+            "halfwidth"
+          ],
+          "title": "Digit Style",
+          "type": "string"
+        },
+        "article_heading": {
+          "default": "inline",
+          "enum": [
+            "inline",
+            "above",
+            "plain"
+          ],
+          "title": "Article Heading",
+          "type": "string"
+        },
+        "caption_numbering": {
+          "default": "flat",
+          "enum": [
+            "flat",
+            "chapter"
+          ],
+          "title": "Caption Numbering",
+          "type": "string"
+        },
+        "footnote_style": {
+          "default": "inline",
+          "enum": [
+            "inline",
+            "remarks_box"
+          ],
+          "title": "Footnote Style",
+          "type": "string"
+        },
+        "disclaimer": {
+          "title": "Disclaimer",
+          "type": "string"
+        },
+        "constants": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Constants",
+          "type": "object"
+        }
+      },
+      "required": [
+        "title",
+        "parties",
+        "numbering_scheme",
+        "digit_style",
+        "disclaimer"
+      ],
+      "title": "Meta",
+      "type": "object"
+    },
+    "MockField": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "badge": {
+          "title": "Badge",
+          "type": "integer"
+        },
+        "label": {
+          "title": "Label",
+          "type": "string"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Value"
+        },
+        "x": {
+          "title": "X",
+          "type": "number"
+        },
+        "y": {
+          "title": "Y",
+          "type": "number"
+        },
+        "w": {
+          "title": "W",
+          "type": "number"
+        },
+        "h": {
+          "title": "H",
+          "type": "number"
+        }
+      },
+      "required": [
+        "id",
+        "badge",
+        "label",
+        "x",
+        "y",
+        "w",
+        "h"
+      ],
+      "title": "MockField",
+      "type": "object"
+    },
+    "MockLegend": {
+      "additionalProperties": false,
+      "properties": {
+        "badge": {
+          "title": "Badge",
+          "type": "integer"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "text": {
+          "title": "Text",
+          "type": "string"
+        }
+      },
+      "required": [
+        "badge",
+        "title",
+        "text"
+      ],
+      "title": "MockLegend",
+      "type": "object"
+    },
+    "Node": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "part",
+            "chapter",
+            "preamble",
+            "head_matter",
+            "signature",
+            "supplement",
+            "rider",
+            "section",
+            "article",
+            "paragraph",
+            "item",
+            "subitem",
+            "subsubitem",
+            "appendix",
+            "appendix_section"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "title": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Title"
+        },
+        "text": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Text"
+        },
+        "summary": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Summary"
+        },
+        "blocks": {
+          "items": {
+            "discriminator": {
+              "mapping": {
+                "box": "#/$defs/BoxBlock",
+                "commentary": "#/$defs/CommentaryBlock",
+                "figure": "#/$defs/Figure",
+                "footnotes": "#/$defs/FootnotesBlock",
+                "formula": "#/$defs/Formula",
+                "list": "#/$defs/ListBlock",
+                "page_break": "#/$defs/PageBreakBlock",
+                "paragraph": "#/$defs/ParagraphBlock",
+                "parties": "#/$defs/PartiesBlock",
+                "qa_heading": "#/$defs/QaHeadingBlock",
+                "revision_history": "#/$defs/RevisionHistoryBlock",
+                "table": "#/$defs/Table"
+              },
+              "propertyName": "type"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/$defs/ParagraphBlock"
+              },
+              {
+                "$ref": "#/$defs/ListBlock"
+              },
+              {
+                "$ref": "#/$defs/Table"
+              },
+              {
+                "$ref": "#/$defs/Figure"
+              },
+              {
+                "$ref": "#/$defs/Formula"
+              },
+              {
+                "$ref": "#/$defs/BoxBlock"
+              },
+              {
+                "$ref": "#/$defs/FootnotesBlock"
+              },
+              {
+                "$ref": "#/$defs/QaHeadingBlock"
+              },
+              {
+                "$ref": "#/$defs/PartiesBlock"
+              },
+              {
+                "$ref": "#/$defs/RevisionHistoryBlock"
+              },
+              {
+                "$ref": "#/$defs/CommentaryBlock"
+              },
+              {
+                "$ref": "#/$defs/PageBreakBlock"
+              }
+            ]
+          },
+          "title": "Blocks",
+          "type": "array"
+        },
+        "children": {
+          "items": {
+            "$ref": "#/$defs/Node"
+          },
+          "title": "Children",
+          "type": "array"
+        },
+        "badges": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Badges",
+          "type": "array"
+        },
+        "kind_label": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Kind Label"
+        },
+        "parties": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Parties",
+          "type": "array"
+        },
+        "number_override": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Number Override"
+        },
+        "number_override_reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Number Override Reason"
+        }
+      },
+      "required": [
+        "id",
+        "kind"
+      ],
+      "title": "Node",
+      "type": "object"
+    },
+    "PageBreakBlock": {
+      "additionalProperties": false,
+      "description": "ここで改ページする。別表がページ境界で 1〜2 行だけ残るのを避けるために使う。\n\n描画結果に文字を持たないが、他のブロックと同じく `id` を持たせて\n`layout.elements` で位置を追えるようにする。",
+      "properties": {
+        "type": {
+          "const": "page_break",
+          "default": "page_break",
+          "title": "Type",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "title": "PageBreakBlock",
+      "type": "object"
+    },
+    "ParagraphBlock": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "paragraph",
+          "default": "paragraph",
+          "title": "Type",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "text": {
+          "title": "Text",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "text"
+      ],
+      "title": "ParagraphBlock",
+      "type": "object"
+    },
+    "PartiesBlock": {
+      "additionalProperties": false,
+      "description": "当事者表示（文書冒頭の「委託者：株式会社◯◯／受託者：△△株式会社」）。\n\n**文字列は持たない。** `keys` で `meta.parties` を指し、紙面の文字列は build が導出する\n（docs/schema.md §5・docs/rendering.md §4.1）。",
+      "properties": {
+        "type": {
+          "const": "parties",
+          "default": "parties",
+          "title": "Type",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "keys": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Keys",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "title": "PartiesBlock",
+      "type": "object"
+    },
+    "PartyDef": {
+      "additionalProperties": false,
+      "description": "契約の当事者（docs/schema.md §4）。\n\n本文は `{party:<key>}` で書き、紙面の文字列（呼称・名称・住所・代表者）はここから\nbuild が導出する。`meta.parties` の**順序が「甲・乙・丙」の順序**。",
+      "properties": {
+        "key": {
+          "title": "Key",
+          "type": "string"
+        },
+        "alias": {
+          "title": "Alias",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "address": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Address"
+        },
+        "representative": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Representative"
+        },
+        "role_label": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Role Label"
+        }
+      },
+      "required": [
+        "key",
+        "alias",
+        "name"
+      ],
+      "title": "PartyDef",
+      "type": "object"
+    },
+    "PartyUse": {
+      "additionalProperties": false,
+      "description": "`{party:}` の解決結果（docs/schema.md §4）。lint L19 と verify V-P5 が使う。",
+      "properties": {
+        "key": {
+          "title": "Key",
+          "type": "string"
+        },
+        "mode": {
+          "enum": [
+            "alias",
+            "name",
+            "full",
+            "role"
+          ],
+          "title": "Mode",
+          "type": "string"
+        },
+        "rendered": {
+          "title": "Rendered",
+          "type": "string"
+        },
+        "in_id": {
+          "title": "In Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "key",
+        "mode",
+        "rendered",
+        "in_id"
+      ],
+      "title": "PartyUse",
+      "type": "object"
+    },
+    "PlainText": {
+      "additionalProperties": false,
+      "properties": {
+        "with_label": {
+          "title": "With Label",
+          "type": "string"
+        },
+        "without_label": {
+          "title": "Without Label",
+          "type": "string"
+        }
+      },
+      "required": [
+        "with_label",
+        "without_label"
+      ],
+      "title": "PlainText",
+      "type": "object"
+    },
+    "QaHeadingBlock": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "qa_heading",
+          "default": "qa_heading",
+          "title": "Type",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "question": {
+          "title": "Question",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "question"
+      ],
+      "title": "QaHeadingBlock",
+      "type": "object"
+    },
+    "RefInfo": {
+      "additionalProperties": false,
+      "properties": {
+        "from_id": {
+          "title": "From Id",
+          "type": "string"
+        },
+        "to_id": {
+          "title": "To Id",
+          "type": "string"
+        },
+        "mode": {
+          "enum": [
+            "relative",
+            "short",
+            "full"
+          ],
+          "title": "Mode",
+          "type": "string"
+        },
+        "rendered": {
+          "title": "Rendered",
+          "type": "string"
+        }
+      },
+      "required": [
+        "from_id",
+        "to_id",
+        "mode",
+        "rendered"
+      ],
+      "title": "RefInfo",
+      "type": "object"
+    },
+    "RevisionEntry": {
+      "additionalProperties": false,
+      "properties": {
+        "date": {
+          "title": "Date",
+          "type": "string"
+        },
+        "note": {
+          "title": "Note",
+          "type": "string"
+        }
+      },
+      "required": [
+        "date",
+        "note"
+      ],
+      "title": "RevisionEntry",
+      "type": "object"
+    },
+    "RevisionHistoryBlock": {
+      "additionalProperties": false,
+      "description": "改定履歴。`semantic_type: history` の表として描く（docs/rendering.md §4.3）。",
+      "properties": {
+        "type": {
+          "const": "revision_history",
+          "default": "revision_history",
+          "title": "Type",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "caption": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Caption"
+        },
+        "entries": {
+          "items": {
+            "$ref": "#/$defs/RevisionEntry"
+          },
+          "title": "Entries",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "title": "RevisionHistoryBlock",
+      "type": "object"
+    },
+    "Step": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "detail": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Detail",
+          "type": "array"
+        },
+        "asks": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Asks",
+          "type": "array"
+        },
+        "docs": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Docs",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "title"
+      ],
+      "title": "Step",
+      "type": "object"
+    },
+    "Steps": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "steps",
+          "default": "steps",
+          "title": "Kind",
+          "type": "string"
+        },
+        "direction": {
+          "default": "LR",
+          "enum": [
+            "LR",
+            "TB"
+          ],
+          "title": "Direction",
+          "type": "string"
+        },
+        "steps": {
+          "items": {
+            "$ref": "#/$defs/Step"
+          },
+          "title": "Steps",
+          "type": "array"
+        }
+      },
+      "required": [
+        "steps"
+      ],
+      "title": "Steps",
+      "type": "object"
+    },
+    "Table": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "table",
+          "default": "table",
+          "title": "Type",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "caption": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Caption"
+        },
+        "semantic_type": {
+          "enum": [
+            "definitions",
+            "enumeration",
+            "exclusions",
+            "rate",
+            "plan_matrix",
+            "procedure",
+            "mapping",
+            "history",
+            "generic",
+            "fee_schedule",
+            "deliverables",
+            "inventory",
+            "head_matter",
+            "form_fields",
+            "allocation"
+          ],
+          "title": "Semantic Type",
+          "type": "string"
+        },
+        "layout": {
+          "$ref": "#/$defs/TableLayout"
+        },
+        "grid": {
+          "items": {
+            "items": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/Cell"
+                },
+                {
+                  "$ref": "#/$defs/MergedCell"
+                }
+              ]
+            },
+            "type": "array"
+          },
+          "title": "Grid",
+          "type": "array"
+        },
+        "records": {
+          "anyOf": [
+            {
+              "items": {
+                "additionalProperties": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "number"
+                    }
+                  ]
+                },
+                "type": "object"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Records"
+        },
+        "notes": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Notes",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "semantic_type",
+        "grid"
+      ],
+      "title": "Table",
+      "type": "object"
+    },
+    "TableDerived": {
+      "additionalProperties": false,
+      "properties": {
+        "caption_label": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Caption Label"
+        },
+        "header_path": {
+          "additionalProperties": {
+            "$ref": "#/$defs/HeaderPath"
+          },
+          "title": "Header Path",
+          "type": "object"
+        },
+        "auto_labels": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Auto Labels",
+          "type": "object"
+        }
+      },
+      "title": "TableDerived",
+      "type": "object"
+    },
+    "TableLayout": {
+      "additionalProperties": false,
+      "properties": {
+        "header_rows": {
+          "default": 0,
+          "title": "Header Rows",
+          "type": "integer"
+        },
+        "header_cols": {
+          "default": 0,
+          "title": "Header Cols",
+          "type": "integer"
+        },
+        "col_widths": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "number"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Col Widths"
+        },
+        "repeat_header": {
+          "default": false,
+          "title": "Repeat Header",
+          "type": "boolean"
+        },
+        "style": {
+          "anyOf": [
+            {
+              "enum": [
+                "grid",
+                "horizontal",
+                "minimal"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Style"
+        },
+        "span_columns": {
+          "default": false,
+          "title": "Span Columns",
+          "type": "boolean"
+        },
+        "blocks_side_by_side": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Blocks Side By Side"
+        }
+      },
+      "title": "TableLayout",
+      "type": "object"
+    },
+    "TermDef": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "term": {
+          "title": "Term",
+          "type": "string"
+        },
+        "definition": {
+          "title": "Definition",
+          "type": "string"
+        },
+        "index_kana": {
+          "enum": [
+            "ア",
+            "カ",
+            "サ",
+            "タ",
+            "ナ",
+            "ハ",
+            "マ",
+            "ヤ",
+            "ラ",
+            "ワ"
+          ],
+          "title": "Index Kana",
+          "type": "string"
+        },
+        "notes": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Notes",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "term",
+        "definition",
+        "index_kana"
+      ],
+      "title": "TermDef",
+      "type": "object"
+    },
+    "TermUse": {
+      "additionalProperties": false,
+      "properties": {
+        "term_id": {
+          "title": "Term Id",
+          "type": "string"
+        },
+        "in_id": {
+          "title": "In Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "term_id",
+        "in_id"
+      ],
+      "title": "TermUse",
+      "type": "object"
+    },
+    "Timeline": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "timeline",
+          "default": "timeline",
+          "title": "Kind",
+          "type": "string"
+        },
+        "unit": {
+          "default": "label",
+          "enum": [
+            "day",
+            "month",
+            "year",
+            "label"
+          ],
+          "title": "Unit",
+          "type": "string"
+        },
+        "axis": {
+          "$ref": "#/$defs/TimelineAxis"
+        },
+        "spans": {
+          "items": {
+            "$ref": "#/$defs/TimelineSpan"
+          },
+          "title": "Spans",
+          "type": "array"
+        },
+        "events": {
+          "items": {
+            "$ref": "#/$defs/TimelineEvent"
+          },
+          "title": "Events",
+          "type": "array"
+        }
+      },
+      "required": [
+        "axis"
+      ],
+      "title": "Timeline",
+      "type": "object"
+    },
+    "TimelineAxis": {
+      "additionalProperties": false,
+      "properties": {
+        "start": {
+          "title": "Start",
+          "type": "string"
+        },
+        "end": {
+          "title": "End",
+          "type": "string"
+        },
+        "ticks": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Ticks",
+          "type": "array"
+        }
+      },
+      "required": [
+        "start",
+        "end"
+      ],
+      "title": "TimelineAxis",
+      "type": "object"
+    },
+    "TimelineEvent": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "at": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "title": "At"
+        },
+        "label": {
+          "title": "Label",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "at",
+        "label"
+      ],
+      "title": "TimelineEvent",
+      "type": "object"
+    },
+    "TimelineSpan": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "from": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "title": "From"
+        },
+        "to": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "title": "To"
+        },
+        "label": {
+          "title": "Label",
+          "type": "string"
+        },
+        "lane": {
+          "default": 0,
+          "title": "Lane",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "id",
+        "from",
+        "to",
+        "label"
+      ],
+      "title": "TimelineSpan",
+      "type": "object"
+    },
+    "Toc": {
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {
+          "const": true,
+          "default": true,
+          "title": "Enabled",
+          "type": "boolean"
+        },
+        "with_summaries": {
+          "default": false,
+          "title": "With Summaries",
+          "type": "boolean"
+        },
+        "depth": {
+          "default": 3,
+          "enum": [
+            1,
+            2,
+            3
+          ],
+          "title": "Depth",
+          "type": "integer"
+        }
+      },
+      "title": "Toc",
+      "type": "object"
+    },
+    "TocEntry": {
+      "additionalProperties": false,
+      "description": "目次の 1 行。ページ番号は描画時に `target-counter` が入れる（docs/rendering.md §6.5）。",
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "depth": {
+          "title": "Depth",
+          "type": "integer"
+        },
+        "label": {
+          "title": "Label",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "heading_text": {
+          "title": "Heading Text",
+          "type": "string"
+        },
+        "summary": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Summary"
+        },
+        "kind": {
+          "anyOf": [
+            {
+              "enum": [
+                "part",
+                "chapter",
+                "preamble",
+                "head_matter",
+                "signature",
+                "supplement",
+                "rider",
+                "section",
+                "article",
+                "paragraph",
+                "item",
+                "subitem",
+                "subsubitem",
+                "appendix",
+                "appendix_section"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Kind"
+        },
+        "parent_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Parent Id"
+        },
+        "path_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Path Ids",
+          "type": "array"
+        },
+        "citation": {
+          "default": "",
+          "title": "Citation",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "depth",
+        "label",
+        "title",
+        "heading_text"
+      ],
+      "title": "TocEntry",
+      "type": "object"
+    },
+    "Tree": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "tree",
+          "default": "tree",
+          "title": "Kind",
+          "type": "string"
+        },
+        "style": {
+          "default": "lines",
+          "enum": [
+            "lines",
+            "bracket",
+            "nested"
+          ],
+          "title": "Style",
+          "type": "string"
+        },
+        "root": {
+          "$ref": "#/$defs/TreeNode"
+        }
+      },
+      "required": [
+        "root"
+      ],
+      "title": "Tree",
+      "type": "object"
+    },
+    "TreeNode": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "label": {
+          "title": "Label",
+          "type": "string"
+        },
+        "note": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Note"
+        },
+        "children": {
+          "items": {
+            "$ref": "#/$defs/TreeNode"
+          },
+          "title": "Children",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "label"
+      ],
+      "title": "TreeNode",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "build 後。`derived` が必ず付く。",
+  "properties": {
+    "schema_version": {
+      "const": "2.0",
+      "default": "2.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "content_id": {
+      "title": "Content Id",
+      "type": "string"
+    },
+    "family": {
+      "const": "contract",
+      "default": "contract",
+      "title": "Family",
+      "type": "string"
+    },
+    "doctype": {
+      "title": "Doctype",
+      "type": "string"
+    },
+    "seed": {
+      "title": "Seed",
+      "type": "integer"
+    },
+    "meta": {
+      "$ref": "#/$defs/Meta"
+    },
+    "front_matter": {
+      "$ref": "#/$defs/FrontMatter"
+    },
+    "defined_terms": {
+      "items": {
+        "$ref": "#/$defs/TermDef"
+      },
+      "title": "Defined Terms",
+      "type": "array"
+    },
+    "body": {
+      "items": {
+        "$ref": "#/$defs/Node"
+      },
+      "title": "Body",
+      "type": "array"
+    },
+    "appendices": {
+      "items": {
+        "$ref": "#/$defs/Node"
+      },
+      "title": "Appendices",
+      "type": "array"
+    },
+    "back_matter": {
+      "$ref": "#/$defs/BackMatter"
+    },
+    "derived": {
+      "$ref": "#/$defs/Derived"
+    }
+  },
+  "required": [
+    "content_id",
+    "doctype",
+    "seed",
+    "meta",
+    "front_matter",
+    "derived"
+  ],
+  "title": "Source",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

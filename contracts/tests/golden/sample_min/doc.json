@@ -1,0 +1,49 @@
+{
+  "schema_version": "2.0",
+  "content_id": "sample-min",
+  "family": "contract",
+  "doctype": "nda",
+  "seed": 1,
+  "meta": {
+    "title": "秘密保持契約書（検証用最小サンプル）",
+    "parties": [
+      {
+        "key": "discloser",
+        "alias": "甲",
+        "name": "株式会社青葉システムズ",
+        "address": "東京都千代田区丸窓町一丁目１番１号",
+        "representative": "代表取締役　相馬　和之",
+        "role_label": "開示者"
+      },
+      {
+        "key": "receiver",
+        "alias": "乙",
+        "name": "みなと技研株式会社",
+        "address": "神奈川県横浜市西区帆影町二丁目２番２号",
+        "representative": "代表取締役　都筑　祥子",
+        "role_label": "受領者"
+      }
+    ],
+    "contract_date": "2026-04-01",
+    "contract_number": "ＡＯ－２６－０００１",
+    "copies": 2,
+    "stamp_duty": false,
+    "numbering_scheme": "contract-standard",
+    "digit_style": "fullwidth",
+    "disclaimer": "本書は、文書読取技術の検証のために生成された架空の契約書です。記載の当事者・住所・連絡先は実在せず、法的効力を有しません。",
+    "constants": {
+      "survival_years": "３年",
+      "notice_days": "３０日"
+    }
+  },
+  "front_matter": {},
+  "parts": [
+    "05_preamble.json",
+    "10_terms.json",
+    "20_ch1.json",
+    "30_ch4.json",
+    "80_appendix.json",
+    "95_signature.json",
+    "90_back.json"
+  ]
+}

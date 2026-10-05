@@ -1,0 +1,10 @@
+{% include "_base.css.j2" %}
+
+/* --- ct-a4-1col-form の差分：様式型。見出しは番号太字、記入欄の表が本体 --- */
+h2 { background: {{ p.band }}; border: none; border-left: none; padding: {{ s.body_pt * 0.2 }}pt {{ s.body_pt * 0.4 }}pt; margin: {{ s.body_pt * 1.1 }}pt 0 {{ s.body_pt * 0.4 }}pt; }
+h2 .label, h3 .label, h4 .label { font-weight: 700; }
+h3 { color: inherit; border-bottom: none; }
+h4 { margin: {{ s.body_pt * 0.7 }}pt 0 {{ s.body_pt * 0.25 }}pt; }
+.box { background: none; border: 0.4pt solid {{ p.rule }}; }
+/* 記入欄は行間を詰める（帳票は密度が高い） */
+table th, table td { line-height: 1.35; }

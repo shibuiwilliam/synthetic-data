@@ -1,0 +1,7 @@
+{% include "_base.css.j2" %}
+
+/* --- ct-a4-1col-gothic の差分：見出しに下線、章題は左寄せ --- */
+h2 { background: none; border: none; border-bottom: 0.8pt solid {{ p.rule }}; border-left: none; padding: 0 0 {{ s.body_pt * 0.2 }}pt; margin: {{ s.body_pt * 1.3 }}pt 0 {{ s.body_pt * 0.6 }}pt; }
+h3 { color: inherit; border-bottom: 0.4pt solid {{ p.rule }}; }
+h4 .title { text-decoration: none; }
+.box { background: {{ p.note_bg }}; }

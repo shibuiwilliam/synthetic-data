@@ -150,13 +150,17 @@ class Passage(ExportRow):
     #: qrels の部分適合を導くための関係。**`derived` に実在するものだけ**
     terms_used: list[str] = Field(default_factory=list)
     refs_to: list[str] = Field(default_factory=list)
+    #: 「〈商品名〉／〈発行者〉／〈citation〉」の 1 行。索引に前置するかは利用者の選択で、
+    #: どちらで測ったかは `search_run.json` の `index_setting` に書かせる
+    context_header: str = ""
 
 
 class Query(ExportRow):
     """`queries.jsonl` の 1 行。"""
 
     query_id: str
-    #: term / heading / scoped / qa
+    #: term / heading / scoped / filtered / enumeration / qa /
+    #: definition_masked / multi_hop / situational / no_answer（docs/evaluation.md §2）
     kind: str
     query: str
     note: str = ""
@@ -167,6 +171,16 @@ class Query(ExportRow):
     n_related_total: int
     #: grade 1 を `MAX_RELATED` で打ち切ったか。**打ち切った分は qrels に出ない**
     related_truncated: bool = False
+    #: この gold がどの規則で作られたか（読み取り側が何を返せばよいか分かるように）
+    relevance_rule: str = ""
+    #: 構造化した絞り込み条件。`filtered` / `no_answer` で使う。
+    #: issuer は 90 文書で一意、product_name は `定款` が 9 文書で重複する
+    filters: dict[str, str] = Field(default_factory=dict)
+    #: 絞り込みの手がかりがクエリ文そのものに入っているか
+    facet_in_text: bool = False
+    #: **字面は一致するが非適合**なパッセージ（他商品の同名条・同語の使用箇所）。
+    #: grade は 0 のままで、「紛らわしいと宣言された 0」と「無関係な 0」を区別する
+    hard_negatives: list[str] = Field(default_factory=list)
 
 
 class Qrel(ExportRow):
@@ -286,3 +300,8 @@ class SearchRun(ExportRow):
     """検索結果（docs/evaluation.md §2）。"""
 
     runs: list[SearchRunEntry] = Field(default_factory=list)
+    #: 何を索引したか。`text_only` = パッセージ本文だけ／
+    #: `with_context_header` = `context_header` も前置した／
+    #: `with_metadata` = doc_id・issuer・product_name 等のメタデータも索引した。
+    #: `filtered` kind のスコアはこの設定で意味が変わるので、必ず申告する
+    index_setting: Literal["text_only", "with_context_header", "with_metadata"] = "text_only"

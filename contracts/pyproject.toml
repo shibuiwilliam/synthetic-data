@@ -1,0 +1,60 @@
+[project]
+name = "keiyaku-synth"
+version = "0.1.0"
+description = "日本語ビジネス契約書の合成データ生成基盤（正解JSON→PDF）"
+readme = "README.md"
+requires-python = ">=3.12,<3.13"
+license = { text = "Proprietary" }
+dependencies = [
+    # レンダリング（版を固定する：CLAUDE.md §0.4-4 決定論 / docs/rendering.md §1）
+    "weasyprint==70.0",
+    "jinja2>=3.1.4",
+    # モデル・CLI
+    "pydantic>=2.9",
+    "typer>=0.12",
+    "pyyaml>=6.0.2",
+    # PDF 検証・ラスタライズ（MIT / Apache-BSD。PyMuPDF は AGPL のため不使用）
+    "pdfplumber>=0.11.4",
+    "pypdfium2>=4.30",
+    # フォント検査・画像
+    "fonttools>=4.54",
+    "pillow>=10.4",
+    "apted>=1.0.3",
+]
+
+[project.scripts]
+keiyaku = "keiyaku.cli:app"
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3",
+    "ruff>=0.7",
+]
+# 公開（Hugging Face Hub）のときだけ要る。既定の `uv sync` には入らない。
+#   uv sync --group publish   → scripts/upload_hf.py / scripts/verify_views.py が動く
+# 本体の生成・検証・採点はこの群に依存しない（docs/publishing.md §7）。
+publish = [
+    "huggingface-hub>=0.26",
+    "pyarrow>=18",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["keiyaku"]
+
+[tool.ruff]
+line-length = 110
+target-version = "py312"
+# contracts-calculation は独立したサブプロジェクト（自前の pyproject.toml と CI を持つ）。
+# 本体の `make check` の対象外にする（TASK.md §0.3「サブプロジェクトは本体を読むだけ」）。
+extend-exclude = ["contracts-calculation"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"

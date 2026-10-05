@@ -565,6 +565,56 @@ def manifest(
 
 
 @app.command()
+def datacard(
+    action: Annotated[str, typer.Argument(help="update または check")] = "update",
+    dataset_dir: Annotated[Path, typer.Option("--dataset", help="dataset/ のパス")] = Path("dataset"),
+) -> None:
+    """dataset/data-card.md を書き出す（`check` なら**書き換えずに**鮮度を報告する）。
+
+    仕様は `docs/data_card.md`。**カードの数値はすべて `dataset/` の実ファイルを測った結果**で、
+    固定文字列に焼き込まない。`dataset/manifest.json` が無ければ何もしない。
+    """
+    from yakkan.datacard import CARD_NAME, collect, render_card, write_card
+    from yakkan.datacard import check as run_check
+
+    if action not in ("update", "check"):
+        console.print(f"[red]未知の操作: {action}[/red]（update または check）")
+        raise typer.Exit(code=2)
+    if not (dataset_dir / "manifest.json").is_file():
+        console.print(f"[yellow]{dataset_dir}/manifest.json が無いので {CARD_NAME} は作らない[/yellow]")
+        return
+    if action == "check":
+        problems = run_check(dataset_dir)
+        if problems:
+            console.print(f"[red]{CARD_NAME} が古い（{len(problems)} 件）[/red]")
+            for line in problems:
+                console.print(f"  {line}")
+            console.print("[yellow]`uv run yakkan datacard update` を実行すること[/yellow]")
+            raise typer.Exit(code=1)
+        console.print(f"[green]{CARD_NAME} は現在の dataset/ と一致している[/green]")
+        return
+    stats = collect(dataset_dir)
+    path = write_card(dataset_dir, stats)
+    table = Table(title=str(path), title_justify="left", header_style="bold")
+    for column in ("項目", "実測値"):
+        table.add_column(column, justify="right" if column == "実測値" else "left")
+    scale = stats.scale
+    for label, value in (
+        ("文書", f"{scale.documents}（ready {scale.ready} / failed {scale.failed}）"),
+        ("content", str(scale.contents)),
+        ("genre / style", f"{scale.genres} / {scale.styles}"),
+        ("ページ", f"{scale.pages:,}"),
+        ("本文字数", f"{scale.chars:,}"),
+        ("QA", f"{scale.qa_items:,}"),
+        ("母数が足りない観点", str(len(stats.thin))),
+        ("使用 0 の観点", str(len(stats.unused))),
+        ("行数", f"{len(render_card(stats).splitlines()):,}"),
+    ):
+        table.add_row(label, value)
+    console.print(table)
+
+
+@app.command()
 def export(
     dataset_dir: Annotated[Path, typer.Option("--dataset", help="dataset/ のパス")] = Path("dataset"),
     only: Annotated[str | None, typer.Option("--only", help="doc_id を 1 つだけ処理する")] = None,
@@ -577,8 +627,19 @@ def export(
     import json as _json
 
     from yakkan.answer import load_answer
-    from yakkan.export import export_dataset, write_jsonl, write_readme
-    from yakkan.search_set import build_passages, build_search_set
+    from yakkan.eval.baseline import table as baseline_table
+    from yakkan.export import (
+        export_dataset,
+        remove_retired,
+        write_card,
+        write_documents_jsonl,
+        write_gitattributes,
+        write_id_map,
+        write_jsonl,
+        write_license,
+        write_qa_jsonl,
+    )
+    from yakkan.search_set import build_passages, build_search_set, validate_search_set
 
     dirs = sorted(d for d in dataset_dir.iterdir() if d.is_dir() and (d / "answer.json").exists())
     if only:
@@ -604,18 +665,72 @@ def export(
 
     corpus: list[dict] = []
     qa_by_doc: dict[str, list[dict]] = {}
+    # `term_id` は文書内でしか一意でない（70/502 の id が別の語に使い回されている）。
+    # grade 1 を文書ごとに解決するために `doc_id → {term_id: 語}` を渡す（search_query_plan W3）
+    terms_by_doc: dict[str, dict[str, str]] = {}
     for directory in per_content.values():
         answer = load_answer(directory)
         corpus.extend(build_passages(answer))
+        terms_by_doc[answer.doc_id] = {t.id: t.term for t in answer.source.defined_terms}
         qa_path = directory / "qa.json"
         if qa_path.exists():
             qa_by_doc[answer.doc_id] = _json.loads(qa_path.read_text(encoding="utf-8"))["items"]
-    queries, qrels = build_search_set(corpus, qa_by_doc)
+    queries, qrels = build_search_set(corpus, qa_by_doc, terms_by_doc)
+    problems = validate_search_set(corpus, queries, qrels, terms_by_doc=terms_by_doc)
+    if problems:
+        console.print(f"[red]検索評価セットの自己検査で {len(problems)} 件[/red]")
+        for problem in problems[:20]:
+            console.print(f"  [red]✗[/red] {problem}")
+        raise typer.Exit(code=1)
     search_dir = dataset_dir / "search"
     write_jsonl(corpus, search_dir / "passages.jsonl")
     write_jsonl(queries, search_dir / "queries.jsonl")
     write_jsonl(qrels, search_dir / "qrels.jsonl")
-    write_readme(dataset_dir, queries)
+    # 旧 id（v6 以前）との対応。クエリは通し番号からハッシュに、パッセージは
+    # `::term::<id>` から定義表の行（`::<table>__r<N>`）に変わった（search_query_plan W11）
+    write_id_map(search_dir, corpus, queries)
+    # **素朴な検索器のベースラインを実測して README に埋め込む。**
+    # 評価セットが簡単すぎないかの目安で、固定文字列にしない（search_query_plan W16）
+    rows = [p if isinstance(p, dict) else p.model_dump() for p in corpus]
+    query_rows = [q if isinstance(q, dict) else q.model_dump() for q in queries]
+    relevance: dict[str, dict[str, int]] = {}
+    for qrel in qrels:
+        row = qrel if isinstance(qrel, dict) else qrel.model_dump()
+        relevance.setdefault(row["query_id"], {})[row["passage_id"]] = row["grade"]
+    manifest_path = dataset_dir / "manifest.json"
+    manifest = _json.loads(manifest_path.read_text(encoding="utf-8")) if manifest_path.is_file() else {}
+    documents = manifest.get("documents", [])
+    # **Hugging Face 配布用の成果物**（`docs/distribution.md`）。
+    # HF はリポジトリ直下の `README.md` だけをデータセットカードとして読むので、
+    # 読み方と配布面の要約を 1 枚にまとめてある（旧 `DATASET_CARD.md` は廃止）。
+    # `qa.jsonl` と `documents.jsonl` は、1 個の JSON オブジェクトではビューアが読めない
+    # `qa.json` / `manifest.json` を 1 行 1 レコードに平らにしたもの（正本はそちら）。
+    n_qa_rows = write_qa_jsonl(dataset_dir, documents)
+    n_doc_rows = write_documents_jsonl(dataset_dir, documents)
+    write_license(dataset_dir)
+    write_gitattributes(dataset_dir)
+    for name in remove_retired(dataset_dir):
+        console.print(f"[yellow]廃止した成果物を削除[/yellow] {name}")
+    write_card(
+        dataset_dir,
+        documents=documents,
+        passages=corpus,
+        queries=queries,
+        qrels=qrels,
+        n_corpus_docs=len(per_content),
+        baseline_table=baseline_table(rows, query_rows, relevance),
+        dataset_version=str(manifest.get("dataset_version") or ""),
+    )
+    console.print(
+        "[green]HF 配布物[/green] README.md / LICENSE / .gitattributes / "
+        f"qa.jsonl {n_qa_rows} 行 / documents.jsonl {n_doc_rows} 行"
+    )
+    # 利用者向けのデータカード（規模・内訳・制限の全件）。**`dataset/` を測るだけ**なので安い。
+    # ここで呼ぶことで「文書を足したら export」の既存の流れに自動更新が乗る（docs/data_card.md §5）
+    from yakkan.datacard import write_card as write_data_card
+
+    card_path = write_data_card(dataset_dir)
+    console.print(f"[green]データカード[/green] {card_path}")
     console.print(
         f"[green]検索評価セット[/green] {search_dir} / "
         f"パッセージ {len(corpus)} 件・クエリ {len(queries)} 件・qrels {len(qrels)} 件"
@@ -793,7 +908,7 @@ def eval_command(
             if line.strip()
         ]
         runs = (
-            oracle_run(qrels)
+            oracle_run(qrels, queries)
             if search_run is None
             else _json.loads(search_run.read_text(encoding="utf-8"))["runs"]
         )
@@ -801,7 +916,18 @@ def eval_command(
         console.print(f"[bold]検索[/bold] 採点したクエリ {result['queries_scored']} 件")
         table = Table(title="検索（クエリ種別ごと）", title_justify="left", header_style="bold")
         table.add_column("kind")
-        columns = ["queries", "ndcg@1", "ndcg@5", "ndcg@10", "recall@10", "recall_ceiling@10", "mrr"]
+        # kind ごとに意味のある指標が違う（`enumeration` は網羅、`no_answer` は偽陽性）
+        columns = [
+            "queries",
+            "ndcg@1",
+            "ndcg@10",
+            "recall@10",
+            "recall@100",
+            "r_precision",
+            "mrr",
+            "doc@1",
+            "false_positive_rate",
+        ]
         for column in columns:
             table.add_column(column, justify="right")
         for kind, values in result["by_kind"].items():

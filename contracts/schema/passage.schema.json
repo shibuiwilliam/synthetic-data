@@ -1,0 +1,89 @@
+{
+  "additionalProperties": false,
+  "description": "`passages.jsonl` の 1 行。**検索エンジンに登録する単位**。",
+  "properties": {
+    "passage_id": {
+      "title": "Passage Id",
+      "type": "string"
+    },
+    "doc_id": {
+      "title": "Doc Id",
+      "type": "string"
+    },
+    "content_id": {
+      "title": "Content Id",
+      "type": "string"
+    },
+    "doctype": {
+      "title": "Doctype",
+      "type": "string"
+    },
+    "doc_title": {
+      "title": "Doc Title",
+      "type": "string"
+    },
+    "parties": {
+      "default": "",
+      "title": "Parties",
+      "type": "string"
+    },
+    "kind": {
+      "title": "Kind",
+      "type": "string"
+    },
+    "title": {
+      "title": "Title",
+      "type": "string"
+    },
+    "citation": {
+      "title": "Citation",
+      "type": "string"
+    },
+    "text": {
+      "title": "Text",
+      "type": "string"
+    },
+    "element_ids": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Element Ids",
+      "type": "array"
+    },
+    "pages": {
+      "items": {
+        "type": "integer"
+      },
+      "title": "Pages",
+      "type": "array"
+    },
+    "terms_used": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Terms Used",
+      "type": "array"
+    },
+    "refs_to": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Refs To",
+      "type": "array"
+    }
+  },
+  "required": [
+    "passage_id",
+    "doc_id",
+    "content_id",
+    "doctype",
+    "doc_title",
+    "kind",
+    "title",
+    "citation",
+    "text"
+  ],
+  "title": "Passage",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

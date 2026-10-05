@@ -1,0 +1,107 @@
+# 秘密保持契約書（docs/doctypes.md §3.1）。
+# 参考：samples/nda/（中小企業庁ひな型・経産省ハンドブック参考例・特許庁モデル契約・法律事務所サンプル）。
+# **構造だけを参考にし、文章はすべて書き下ろす**（CLAUDE.md §0.4-1）。
+#
+# 骨格：条文型の最小形。構造が浅く列挙が深い。表紙・目次を持たない。
+# 読み取りの狙い：深い列挙（号→ア イ ウ）と、**契約期間と存続期間という似て非なる 2 つの期間**
+# （`apply` QA の題材。CT10）。
+doctype: nda
+family: contract
+description: 取引検討に伴う秘密保持契約書。条文型の最小形
+target_pages: [3, 6]
+page_limit: 8
+numbering_scheme: contract-standard
+default_style: ct-a4-1col-mincho
+skeleton_kind: articles
+front_matter: { cover: false, toc: false }
+
+parties:
+  count: [2, 2]
+  presets:
+    - - { key: discloser, alias: 甲, role_label: 開示者 }
+      - { key: receiver,  alias: 乙, role_label: 受領者 }
+    - - { key: partyA, alias: 甲, role_label: 甲 }
+      - { key: partyB, alias: 乙, role_label: 乙 }
+
+# **構造で縛り、題材（semantic_type）で縛らない**（docs/doctypes.md §1・yakkan D4）。
+required:
+  - { kind: node, subtype: preamble,  min_count: 1, note: "前文（当事者の導入）" }
+  - { kind: node, subtype: signature, min_count: 1, note: "後文＋記名押印欄" }
+  - { kind: table, min_count: 1, min_rows: 4, note: "定義または例外の表（型は執筆者が決める）" }
+  - { kind: enumeration, min_count: 2, note: "秘密情報の例外・禁止行為の列挙" }
+  - { kind: figure, min_count: 1, note: "有効期間か情報の授受の流れ（種別は執筆者が決める）" }
+  - { kind: ref, min_count: 5, note: "条項間参照" }
+  - { kind: term, min_count: 5, note: "定義語" }
+
+skeleton:
+  - id: pre
+    kind: preamble
+    chars: 200
+    todo: "{party:...|full} で両当事者を導入し、本目的を述べる。当事者表示（parties ブロック）も置く"
+  - id: a1
+    kind: article
+    title_options: ["目的"]
+    chars: 300
+    todo: "何の検討のために情報をやりとりするかを具体的に書く"
+  - id: a2
+    kind: article
+    title_options: ["秘密情報", "秘密情報の定義"]
+    chars: 700
+    todo: "何が秘密情報かを定義する。開示の方法（書面・口頭）で分けると実物らしい"
+    required: [{ kind: table, min_count: 1, min_rows: 4 }]
+  - id: a3
+    kind: article
+    title_options: ["秘密情報の例外"]
+    chars: 500
+    todo: "公知・独自開発・第三者取得 等。**列挙の順序と語彙は参考文書と変える**"
+  - id: a4
+    kind: article
+    title_options: ["秘密保持義務", "取扱いの義務"]
+    chars: 700
+    todo: "目的外使用の禁止・第三者開示の制限・複製の範囲。承諾の方式（書面か）を明記する"
+  - id: a5
+    kind: article
+    title_options: ["記録媒体の返還", "返還および廃棄"]
+    chars: 600
+    todo: "返還と廃棄の使い分け、期限（{const:} で書く）、報告の方法"
+  - id: a6
+    kind: article
+    title_options: ["有効期間", "契約期間"]
+    chars: 500
+    todo: "**契約期間と義務の存続期間を書き分ける**（apply QA の土台。CT10）。図でも示す"
+    required: [{ kind: figure, min_count: 1 }]
+  - id: a7
+    kind: article
+    title_options: ["損害賠償", "差止め"]
+    chars: 400
+  - id: a8
+    kind: article
+    title_options: ["協議"]
+    chars: 250
+    clause: consultation
+  - id: a9
+    kind: article
+    title_options: ["合意管轄"]
+    chars: 250
+    clause: jurisdiction
+
+appendices: []
+riders: { count: [0, 0], pool: [] }
+
+authored_qa: { count: 15, table_min: 3, figure_min: 2, apply_min: 2 }
+
+closing_options:
+  - "本契約の成立を証するため、本書{copies}通を作成し、{parties}が記名押印のうえ、各１通を保有する。"
+  - "本契約の成立を証するため、本書{copies}通を作成し、{parties}が署名または記名押印のうえ、各自１通を保有する。"
+
+variants:
+  digit_style: { fullwidth: 0.6, halfwidth: 0.4 }
+  era: { seireki: 0.8, wareki: 0.2 }
+  parties_preset: [0, 1]
+  copies: { "2": 0.85, "1": 0.15 }
+  stamp_duty: { "false": 0.85, "true": 0.15 }
+  # **2 style 目は版面が最も遠いものを選ぶ**（docs/doctypes.md §7）。
+  # `gothic` は mincho と同系（A4 1 段・無装飾）なので組にしない。
+  styles: [ct-a4-1col-mincho, ct-a4-1col-form]
+
+budget: { chars_min: 3000, chars_max: 7000, footnotes_min: 0 }

@@ -1,0 +1,120 @@
+# 売買・物品購入契約書（docs/doctypes.md §4.1）。
+# 参考：samples/purchase/（国交省 物品購入様式・日本サッシ協会の商取引基本契約・AMED 物品売買・法律事務所）。
+# **構造だけを参考にし、文章はすべて書き下ろす**（CLAUDE.md §0.4-1）。
+#
+# 骨格：**頭書型**（P1・docs/reference_structures.md §4 の #5）。
+#   - 実物（国交省 物品購入契約書様式）は、冒頭に `1`〜`5` の**番号付き項目**で条件をまとめ、
+#     本文の第1条が「頭書の物品購入契約に関し」と**頭書を参照する**。
+#   - `lease` の頭書（表の連なり）とは違い、**表を使わない**頭書の型。
+#     どちらも `kind: head_matter` のノードの中身の違いとして表せる（docs/decisions.md 81）。
+#   - 目的物の目録は本文とは別に、頭書のあとの表として置く（`inventory`）。
+doctype: purchase
+family: contract
+description: 単発の物品売買契約書。頭書型＋目録
+target_pages: [3, 8]
+page_limit: 10
+numbering_scheme: contract-standard
+default_style: ct-a4-1col-mincho
+skeleton_kind: head_matter
+front_matter: { cover: false, toc: false }
+
+parties:
+  count: [2, 2]
+  presets:
+    - - { key: buyer,  alias: 甲, role_label: 発注者 }
+      - { key: seller, alias: 乙, role_label: 受注者 }
+    - - { key: purchaser, alias: 甲, role_label: 買主 }
+      - { key: vendor,    alias: 乙, role_label: 売主 }
+
+required:
+  - { kind: node, subtype: preamble,    min_count: 1, note: "前文" }
+  - { kind: node, subtype: head_matter, min_count: 1, note: "頭書（条件をまとめた箇所）" }
+  - { kind: node, subtype: signature,   min_count: 1, note: "後文＋記名押印欄" }
+  - { kind: table, min_count: 1, min_rows: 5, min_cols: 4, note: "目的物の目録（型は執筆者が決める）" }
+  - { kind: enumeration, min_count: 2, min_items: 3, note: "検査の方法・解除事由などの列挙" }
+  - { kind: figure, min_count: 1, note: "発注から支払までの流れ（種別は執筆者が決める）" }
+  - { kind: ref, min_count: 8, note: "条項間参照＋**頭書への参照**" }
+  - { kind: term, min_count: 4 }
+
+skeleton:
+  - id: pre
+    kind: preamble
+    chars: 180
+    todo: "{party:...|full} で両当事者を導入し、頭書の契約について締結する旨を述べる"
+  - id: head
+    kind: head_matter
+    chars: 400
+    todo: "**番号付きの項目で条件をまとめる**（品名・納入場所・納入期限・契約金額・契約保証金 など）。
+           本文はここを {ref:head} で指す。表にしない（表にするのは lease の型）"
+  - id: a1
+    kind: article
+    title_options: ["総則", "目的"]
+    chars: 300
+    todo: "{ref:head} に記載の売買について、この契約書に定めるところによる旨を書く"
+  - id: a2
+    kind: article
+    title_options: ["目的物", "目的物の表示"]
+    chars: 400
+    todo: "目録の表を置き、合計金額を {ref:head} の契約金額と噛み合わせる（L11）"
+    required: [{ kind: table, min_count: 1, min_rows: 5, min_cols: 4 }]
+  - id: a3
+    kind: article
+    title_options: ["引渡し", "納入"]
+    chars: 500
+    todo: "時期・場所・方法。運送と据付けの費用の負担も書き分ける"
+  - id: a4
+    kind: article
+    title_options: ["検査および引取り", "検査"]
+    chars: 700
+    todo: "検査の期限と方法、不合格品の扱い（引取り・代品・代金の減額）。図でも示す"
+    required: [{ kind: figure, min_count: 1 }]
+  - id: a5
+    kind: article
+    title_options: ["所有権の移転", "所有権および危険負担"]
+    chars: 500
+    todo: "**所有権の移転の時期と危険の移転の時期を別々に定める**（読み取りの狙い）"
+  - id: a6
+    kind: article
+    title_options: ["代金の支払"]
+    chars: 500
+    todo: "支払の期日と方法。遅延損害金の利率を {const:} で書く"
+  - id: a7
+    kind: article
+    title_options: ["契約不適合責任"]
+    chars: 600
+    todo: "通知の期間と、求められる措置（修補・代品・減額・解除）を列挙する"
+  - id: a8
+    kind: article
+    title_options: ["解除"]
+    chars: 500
+  - id: a9
+    kind: article
+    title_options: ["協議"]
+    chars: 220
+    clause: consultation
+  - id: a10
+    kind: article
+    title_options: ["合意管轄"]
+    chars: 220
+    clause: jurisdiction
+
+appendices: []
+riders: { count: [0, 0], pool: [] }
+
+authored_qa: { count: 15, table_min: 3, figure_min: 2, apply_min: 2 }
+
+closing_options:
+  - "本契約の成立を証するため、本書{copies}通を作成し、{parties}が記名押印のうえ、各１通を保有する。"
+  - "この契約書の証として、本書{copies}通を作成し、{parties}が記名押印のうえ、各自１通を保有する。"
+
+variants:
+  digit_style: { fullwidth: 0.7, halfwidth: 0.3 }
+  era: { seireki: 0.8, wareki: 0.2 }
+  parties_preset: [0, 1]
+  copies: { "2": 0.9, "1": 0.1 }
+  stamp_duty: { "true": 0.7, "false": 0.3 }
+  # **2 style 目は版面が最も遠いものを選ぶ**（docs/doctypes.md §7）。
+  # `gothic` は mincho と同系（A4 1 段・無装飾）なので組にしない。
+  styles: [ct-a4-1col-mincho, ct-a4-1col-form]
+
+budget: { chars_min: 3500, chars_max: 8500, footnotes_min: 0 }

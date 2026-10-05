@@ -1,0 +1,131 @@
+# 準委任・作業委任契約書（docs/doctypes.md §3.3）。
+# 参考：samples/work_delegation/（中小機構の委嘱型・法律事務所サンプル。205p の合本は対象外）。
+# **構造だけを参考にし、文章はすべて書き下ろす**（CLAUDE.md §0.4-1）。
+#
+# 骨格：条文型。outsourcing と近いが、骨格上の違いは次の 3 点（P1・§4 の #3 で確認）：
+#   1. **成果物の完成を約さない**ことを第1条級の位置で明記する
+#   2. **指揮命令関係を否定する**条を置く（偽装請負の回避）
+#   3. 業務の範囲・場所・時間を**条の中の号で詳しく刻む**（別紙に追い出さない）
+# 別紙は費用の負担区分 1 点だけ。表は本文に置かず別紙に寄せる。
+doctype: delegation
+family: contract
+description: 業務の遂行を約する準委任契約書。条文型・別紙 1 点
+target_pages: [4, 8]
+page_limit: 10
+numbering_scheme: contract-standard
+default_style: ct-a4-1col-mincho
+skeleton_kind: articles
+front_matter: { cover: false, toc: false }
+
+parties:
+  count: [2, 2]
+  presets:
+    - - { key: mandator, alias: 甲, role_label: 委任者 }
+      - { key: mandatary, alias: 乙, role_label: 受任者 }
+    - - { key: client,     alias: 甲, role_label: 委託者 }
+      - { key: contractor, alias: 乙, role_label: 受託者 }
+
+required:
+  - { kind: node, subtype: preamble,  min_count: 1, note: "前文" }
+  - { kind: node, subtype: signature, min_count: 1, note: "後文＋記名押印欄" }
+  - { kind: node, subtype: appendix,  min_count: 1, note: "別紙 1 点（費用の負担区分）" }
+  - { kind: table, min_count: 1, min_rows: 4, min_cols: 3, note: "項目 × 当事者の負担区分（型は執筆者が決める）" }
+  - { kind: enumeration, min_count: 3, note: "業務の範囲・報告事項・解除事由の列挙" }
+  - { kind: figure, min_count: 1, note: "報告と承認のサイクル（種別は執筆者が決める）" }
+  - { kind: ref, min_count: 6 }
+  - { kind: term, min_count: 4 }
+
+skeleton:
+  - id: pre
+    kind: preamble
+    chars: 200
+    todo: "{party:...|full} で両当事者を導入する。当事者表示も置く"
+  - id: a1
+    kind: article
+    title_options: ["総則", "委任"]
+    chars: 400
+    todo: "**準委任である旨**と、成果物の完成を約さない旨を書く。ここが outsourcing との分かれ目"
+  - id: a2
+    kind: article
+    title_options: ["委任業務の範囲", "業務の範囲"]
+    chars: 800
+    todo: "業務を号で刻む（5 項目以上）。号の下に説明段落を置く形にすると実物らしい"
+  - id: a3
+    kind: article
+    title_options: ["業務の場所および時間", "作業場所"]
+    chars: 500
+    todo: "場所・時間帯・上限時間を {const:} で書く。上限超過時の扱いも"
+  - id: a4
+    kind: article
+    title_options: ["指揮命令関係の不存在", "独立した地位"]
+    chars: 400
+    todo: "雇用関係を形成しないこと・指揮命令に服さないこと。**偽装請負の回避条項**"
+  - id: a5
+    kind: article
+    title_options: ["善管注意義務および報告", "報告"]
+    chars: 600
+    todo: "報告の頻度と期限を {const:} で書き、図でも示す。臨時報告の要件も"
+    required: [{ kind: figure, min_count: 1 }]
+  - id: a6
+    kind: article
+    title_options: ["報酬および費用", "報酬"]
+    chars: 600
+    todo: "報酬の算定と支払期日。費用の負担は {ref:sch1}（別紙）に委ねる"
+  - id: a7
+    kind: article
+    title_options: ["復委任", "再委任"]
+    chars: 400
+    todo: "承諾の方式と、復受任者の行為についての責任"
+  - id: a8
+    kind: article
+    title_options: ["契約期間", "有効期間"]
+    chars: 400
+    todo: "期間と更新。中途解約の予告期間を {const:} で書く"
+  - id: a9
+    kind: article
+    title_options: ["解除"]
+    chars: 500
+    todo: "無催告解除の事由を列挙する"
+  - id: a10
+    kind: article
+    title_options: ["秘密保持"]
+    chars: 350
+    todo: "nda・outsourcing と同じ文言にしない（L15）"
+  - id: a11
+    kind: article
+    title_options: ["協議"]
+    chars: 250
+    clause: consultation
+  - id: a12
+    kind: article
+    title_options: ["合意管轄"]
+    chars: 250
+    clause: jurisdiction
+
+appendices:
+  - id: sch1
+    title_options: ["費用の負担区分", "費用の分担"]
+    kind_label: 別紙
+    min_rows: 5
+    min_cols: 3
+    todo: "項目 × 甲/乙 の負担区分。**凡例を置き、本文の費用の条と噛み合わせる**（L11）"
+
+riders: { count: [0, 0], pool: [] }
+
+authored_qa: { count: 15, table_min: 3, figure_min: 2, apply_min: 2 }
+
+closing_options:
+  - "本契約の成立を証するため、本書{copies}通を作成し、{parties}が記名押印のうえ、各１通を保有する。"
+  - "本契約の成立を証するため、本書{copies}通を作成し、{parties}が署名または記名押印のうえ、各自１通を保有する。"
+
+variants:
+  digit_style: { fullwidth: 0.5, halfwidth: 0.5 }
+  era: { seireki: 0.85, wareki: 0.15 }
+  parties_preset: [0, 1]
+  copies: { "2": 0.9, "1": 0.1 }
+  stamp_duty: { "false": 0.85, "true": 0.15 }
+  # **2 style 目は版面が最も遠いものを選ぶ**（docs/doctypes.md §7）。
+  # `gothic` は mincho と同系（A4 1 段・無装飾）なので組にしない。
+  styles: [ct-a4-1col-mincho, ct-a4-1col-form]
+
+budget: { chars_min: 4000, chars_max: 9000, footnotes_min: 0 }
