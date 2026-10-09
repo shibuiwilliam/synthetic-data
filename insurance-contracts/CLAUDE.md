@@ -161,7 +161,7 @@
 - `yakkan eval dataset/<doc_id> --pred pred.json`：読み取りの採点。予測 JSON の形は `schema/prediction.schema.json`。突合は中身で行う（予測に内部 id は無い前提）。
 - 指標：ページ別 CER、outline の F1、構造位置 citation の正解率、表 TEDS・セル F1、図のノード/エッジ/経路 F1、読み順の Kendall τ、QA の完全/部分一致。
 - `yakkan eval --search-run run.json`：検索の採点（nDCG@k・Recall@k・`exact_recall@k`・`r_precision`・MRR・`doc@1`・`confusion@k`・`false_positive_rate`）。`--oracle` で自己評価。**クエリの `filters` はクエリの一部**で、何を索引したかは `index_setting` で申告する。
-- `yakkan export`：評価向けの派生成果物を書き出す（`elements.jsonl`・`passages.jsonl`・`dataset/search/*`）。**配布物**（`dataset/README.md` ＝ HF のデータセットカード・`LICENSE`・`.gitattributes`・`qa.jsonl`・`documents.jsonl`）も同じコマンドが書く。手順は `docs/distribution.md`。
+- `yakkan export`：評価向けの派生成果物を書き出す（`elements.jsonl`・`passages.jsonl`・`dataset/search/*`）。**配布物**も同じコマンドが書く——文書本体（`dataset/README.md` ＝ HF のデータセットカード・`LICENSE`・`.gitattributes`・`qa.jsonl`・`documents.jsonl`）と、**別データセットとして配る検索評価セット**（`dataset/search/README.md`・`LICENSE`・`SHA256SUMS`）。**2 枚のカードは英語面＋日本語面の二層**（姉妹プロジェクト contracts と同じ設計。2026-10-09）。手順は `docs/distribution.md`。
 
 ## 10. リポジトリ構成 → 詳細は `docs/repo_layout.md`
 
@@ -234,7 +234,8 @@ uv run pytest -q ; uv run ruff check . ; make check
 - PDFのタグ付け（tagged PDF）：作らない
 - QAの言語・件数：日本語、自動生成30問＋執筆15問／文書
 - 正解bboxの座標系：pt・原点左上を主とし、正規化[0,1]を併記
-- 配布形式：`dataset/` ディレクトリ ＋ `manifest.json`。**配布先は Hugging Face Datasets `cvusk/synthetic-japanese-insurance-documents`（控えを GitHub Releases）。ライセンスは CC BY 4.0**（2026-10-05 決定）。手順は `docs/distribution.md`
+- 配布形式：`dataset/` ディレクトリ ＋ `manifest.json`。**配布先は Hugging Face Datasets の 2 つ——文書本体 `cvusk/synthetic-japanese-insurance-documents` と検索評価セット `cvusk/synthetic-japanese-insurance-search`（`dataset/search/` の中身。2026-10-08 に分離）**（控えを GitHub Releases）。**ライセンスは両方 CC BY 4.0**（2026-10-05 決定）。手順は `docs/distribution.md`
+- **AI モデルの学習・蒸留：不可。** 生成物の本文・QA・図の説明は Claude の Output であり、Anthropic Usage Policy が「入力と出力を AI モデルの学習（model scraping・model distillation を含む）に用いること」を事前許可なしに禁じている（2026-10-06 決定）。`dataset/LICENSE`・`dataset/README.md`・`dataset/data-card.md` に明記する。**CC BY 4.0 第 2 条(a)(5)(B)が下流への追加制限を禁じているので、ライセンス条件ではなく「告知」として書く。「評価は学習ではない」を必ず併記する**（`docs/distribution.md` §7）
 - 実在法令：法令名のみ引用し、条番号は書かない
 - Python／パッケージ管理：Python 3.12／uv
 

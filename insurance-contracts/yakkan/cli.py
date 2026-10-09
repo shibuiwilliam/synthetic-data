@@ -629,6 +629,7 @@ def export(
     from yakkan.answer import load_answer
     from yakkan.eval.baseline import table as baseline_table
     from yakkan.export import (
+        RETIRED_SEARCH_ARTIFACTS,
         export_dataset,
         remove_retired,
         write_card,
@@ -638,6 +639,9 @@ def export(
         write_jsonl,
         write_license,
         write_qa_jsonl,
+        write_search_card,
+        write_search_license,
+        write_search_sha256sums,
     )
     from yakkan.search_set import build_passages, build_search_set, validate_search_set
 
@@ -718,12 +722,32 @@ def export(
         queries=queries,
         qrels=qrels,
         n_corpus_docs=len(per_content),
-        baseline_table=baseline_table(rows, query_rows, relevance),
         dataset_version=str(manifest.get("dataset_version") or ""),
     )
     console.print(
-        "[green]HF 配布物[/green] README.md / LICENSE / .gitattributes / "
+        "[green]HF 配布物（文書本体）[/green] README.md / LICENSE / .gitattributes / "
         f"qa.jsonl {n_qa_rows} 行 / documents.jsonl {n_doc_rows} 行"
+    )
+    # **検索評価セットは別のデータセットリポジトリとして配る**（docs/distribution.md §1）。
+    # `dataset/search/` をそのまま直下として上げるので、カード・LICENSE・SHA256SUMS を
+    # そのディレクトリに置く。構成は姉妹プロジェクト contracts と同じ（英語面＋日本語面）。
+    write_search_card(
+        search_dir,
+        passages=corpus,
+        queries=queries,
+        qrels=qrels,
+        n_corpus_docs=len(per_content),
+        baseline_table=baseline_table(rows, query_rows, relevance),
+        dataset_version=str(manifest.get("dataset_version") or ""),
+    )
+    write_search_license(search_dir)
+    for name in remove_retired(search_dir, RETIRED_SEARCH_ARTIFACTS):
+        console.print(f"[yellow]廃止した成果物を削除[/yellow] search/{name}")
+    # **SHA256SUMS は最後**（README.md と LICENSE を数えるため）
+    write_search_sha256sums(search_dir)
+    console.print(
+        "[green]HF 配布物（検索評価セット・別リポジトリ）[/green] "
+        f"{search_dir}/README.md / LICENSE / SHA256SUMS"
     )
     # 利用者向けのデータカード（規模・内訳・制限の全件）。**`dataset/` を測るだけ**なので安い。
     # ここで呼ぶことで「文書を足したら export」の既存の流れに自動更新が乗る（docs/data_card.md §5）

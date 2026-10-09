@@ -68,7 +68,7 @@ docs/
 | パス | 役目 |
 |---|---|
 | `yakkan/figure_graph.py` | 図 6 種を共通の有向グラフに正規化する（`docs/eval_dataset_plan.md` P1） |
-| `yakkan/export.py` | `elements.jsonl` / `passages.jsonl` / `dataset/README.md`（HF のデータセットカード）/ `LICENSE` / `.gitattributes` / `qa.jsonl` / `documents.jsonl` を書き出す（`docs/distribution.md`） |
+| `yakkan/export.py` | `elements.jsonl` / `passages.jsonl` / `qa.jsonl` / `documents.jsonl` と、**2 つの HF データセットの配布物**（本体の `dataset/README.md`・`LICENSE`・`.gitattributes` と、検索評価セットの `dataset/search/README.md`・`LICENSE`・`.gitattributes`）を書き出す（`docs/distribution.md`） |
 | `yakkan/datacard.py` | `dataset/data-card.md`（利用者向けデータカード）を実測から生成し、鮮度を検査する（`docs/data_card.md`） |
 | `yakkan/search_set.py` | 検索評価のパッセージ・クエリ・qrels を作る |
 | `yakkan/eval/metrics.py` | CER・F1・TEDS・Kendall τ・nDCG などの指標 |

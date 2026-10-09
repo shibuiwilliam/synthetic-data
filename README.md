@@ -53,13 +53,43 @@ cd structured-docs && cat CLAUDE.md       # 汎用化の仕様（docsynth）
 - **保険約款（yakkan-synth）**：Hugging Face Datasets
   `cvusk/synthetic-japanese-insurance-documents` として公開準備が完了（ライセンス CC BY 4.0）。
   アップロードは人手で行う。
-- **契約書（keiyaku-synth）**：Hugging Face Hub への公開形は整えたが、配布ライセンスは未決定。
-  アップロードは未実施。
+- **契約書（keiyaku-synth）**：Hugging Face Datasets
+  `cvusk/japanese-contract-document-understanding` として公開形が完成（ライセンス CC BY 4.0・
+  2026-10-06 決定）。アップロードは未実施。
 
 いずれも詳細は各プロジェクトの `docs/distribution.md` ／ `docs/publishing.md` を参照。
+
+### ⚠ AI モデルの学習・蒸留には使えない
+
+**配布するデータセットを LLM・VLM・その他 AI モデルの学習・ファインチューニング・蒸留・
+強化学習の素材に使ってはならない。**
+
+生成物の本文・表・図の説明・QA は、Claude Code セッション内で **Claude（Anthropic）が書いた
+Output** である（どのプロジェクトも外部 LLM API を使っていない）。Anthropic の Usage Policy は
+「入力と出力を AI モデルの学習（model scraping・model distillation を含む）に用いること」を
+**事前許可なしに禁じている**（<https://www.anthropic.com/legal/aup>）。
+この一項に「競合モデルに限る」という限定は無く、**読み取り専用の小さなモデルでも文面上は対象に入る。**
+学習に使う必要がある場合は、まず Anthropic の事前許可を得ること。
+
+**評価は学習ではない。** ドキュメント読み取り（OCR・レイアウト解析・VLM・構造化抽出）・検索／RAG・
+AI エージェントの**評価とベンチマークは、これらのデータセットが作られた目的そのもの**で、
+上の制限は一切かからない。テストフィクスチャ・few-shot の実例・推論時の検索コーパスとしての利用も
+同じく対象外である。**除かれるのはモデルの重みを更新する用途だけ。**
+
+なお、**これは告知であってライセンス条件ではない。** CC BY 4.0 は下流の受領者に追加の制限を課すことを
+禁じている（第 2 条(a)(5)(B)）ため、上の禁止を CC BY の付与条件として書くことはできず、書いてもいない。
+制限の出どころは Anthropic の Usage Policy であり、同ポリシーの適用を受ける者を縛る。
+**この制約は配布ライセンスの選択と独立**で、どれを選んでも消えない。
+
+成果物での書き方（どのファイルのどの節に出すか、文面の正本、テストで固定している内容）は
+`insurance-contracts/docs/distribution.md` §7 ／ `contracts/docs/publishing.md` §10 ／
+`structured-docs/docs/distribution.md` §6。
 
 ## ライセンス
 
 リポジトリのコード（このルートの `LICENSE`）は MIT。
 **生成されたデータセット（`dataset/` の PDF・JSON・PNG 等）の配布条件は各プロジェクトで別途定める**
 （上記「データセットの公開」を参照。プロジェクトごとに `pyproject.toml` の宣言が異なる場合がある）。
+
+配布条件とは別に、**生成データを AI モデルの学習・蒸留に使うことはできない**
+（上記「⚠ AI モデルの学習・蒸留には使えない」。評価・ベンチマークは対象外）。

@@ -71,6 +71,14 @@ macOS では `make` 経由で `DYLD_FALLBACK_LIBRARY_PATH` が自動で付く（
 **生成物は読み取り検証用のダミーであり、法的に有効な文書ではない。実務に使わないこと。**
 
 生成物（`dataset/`）の配布条件は**未決**（人間の判断待ち）。
-先行例として yakkan-synth は Hugging Face Datasets ＋ GitHub Releases・**CC BY 4.0** で配っている。
+先行例として yakkan-synth と keiyaku-synth はいずれも Hugging Face Datasets・**CC BY 4.0** で配っている。
 手順と注意点は `docs/distribution.md`。同梱フォントは SIL Open Font License 1.1（Noto 系）と
 IPA フォントライセンス v1.0（IPAex 系）で、いずれも再配布と埋め込みが認められている。
+
+**生成物を LLM・VLM・その他 AI モデルの学習・ファインチューニング・蒸留に使ってはならない。**
+本文・表・図の説明・QA は Claude Code セッション内で Claude（Anthropic）が書いた Output であり、
+Anthropic の Usage Policy が「入力と出力を AI モデルの学習（model scraping・model distillation を含む）に
+用いること」を**事前許可なしに禁じている**（<https://www.anthropic.com/legal/aup>）。
+**この制約は配布ライセンスの選択と独立**で、どれを選んでも消えない。
+一方、**読み取り・検索・AI エージェントの評価とベンチマークはこのデータの目的そのもの**で、
+上の制限は一切かからない（除かれるのはモデルの重みを更新する用途だけ）。詳細は `docs/distribution.md` §6。

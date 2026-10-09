@@ -846,6 +846,9 @@ def _count_table(rows: list[CountRow], label: str, *, with_documents: bool = Tru
 
 def render_card(stats: DataCardStats) -> str:
     """実測値から Markdown を組み立てる。**固定文に数値を書かない**。"""
+    # 配布先の ID は `yakkan/export.py` が正本（2 つのデータセットに分けて配る）
+    from yakkan.export import HF_REPO_ID, SEARCH_HF_REPO_ID
+
     scale, search, layout = stats.scale, stats.search, stats.layout
     parts: list[str] = []
     add = parts.append
@@ -1165,6 +1168,13 @@ def render_card(stats: DataCardStats) -> str:
         add("**未生成。** `uv run yakkan export` で作る。\n")
     else:
         add(
+            "**この評価セットは Hugging Face では文書本体とは別のデータセットとして配る**"
+            f"（`{SEARCH_HF_REPO_ID}`。2026-10-08 決定・`docs/distribution.md` §1）。"
+            "ローカルの置き場所は `dataset/search/` のままで、"
+            "そのディレクトリがそのまま別リポジトリの直下になる"
+            "（カード・LICENSE・`SHA256SUMS` も `yakkan export` がそこに書く）。\n\n"
+        )
+        add(
             _table(
                 ["項目", "実測値"],
                 [
@@ -1210,13 +1220,14 @@ def render_card(stats: DataCardStats) -> str:
             f"**{_n(search.truncated)} 件**{examples if search.truncated_examples else ''}で、"
             f"qrels に出なかった grade 1 は **{_n(search.truncated_items)} 件**。"
             "打ち切ると qrels に出ないので評価上は非適合と同じ扱いになる。"
-            "**この件数で Recall@k を解釈しない**（`dataset/README.md`）。\n"
+            "**この件数で Recall@k を解釈しない**（`dataset/search/README.md`）。\n"
         )
         add(
             "- **`filters` はクエリの一部である。** メタデータを索引しない検索器は `filtered` を"
             "構造的に解けないので、**何を索引したかを `search_run.json` の `index_setting` に申告する**"
             "（`docs/evaluation.md` §2）。\n"
-            "- **素朴な検索器 3 系統のベースライン**は `dataset/README.md` に実測値で入っている。"
+            "- **素朴な検索器 3 系統のベースライン**は `dataset/search/README.md`"
+            "（検索評価セット側のカード）に実測値で入っている。"
             "「この評価セットが簡単すぎないか」はそこで確認する。\n"
         )
         if search.missing_contents:
@@ -1352,12 +1363,23 @@ def render_card(stats: DataCardStats) -> str:
     families = {name.removesuffix("-Bold").replace("-", " ") for name in embedded}
     unused_fonts = [name for name in registered if name not in families]
     add(
-        "- **生成物（PDF・JSON・PNG）の配布条件は未決**である。リポジトリの `pyproject.toml` は "
-        "`Proprietary` を宣言しているが、これは**パッケージ（コード）の宣言**であって、"
-        "データセットとしての再配布条件を決めたものではない。配布条件は人間の決定事項で "
-        "`TASK.md` T11（「後日人間が決める」）・`HITL_TODO.md` H13 に起票してある。"
-        "**決定が入るまで `dataset/LICENSE` は作らず、AI はライセンスを選ばない。**\n"
-        "- 配布先は Hugging Face と GitHub と決まっている（`TASK.md` T7）が、**実行は人間が行う**。\n"
+        "- **生成物（PDF・JSON・PNG）の配布条件は CC BY 4.0**（`TASK.md` T11 で 2026-10-05 に決定）。"
+        "本文は `dataset/LICENSE`、要約は `dataset/README.md` の「ライセンス」節にある"
+        "（検索評価セットは別リポジトリなので `dataset/search/` にも同じ条件の控えを置く）。"
+        "リポジトリの `pyproject.toml` が宣言する `Proprietary` は**パッケージ（コード）の宣言**であって、"
+        "データセットの再配布条件ではない。\n"
+        "- **AI モデルの学習・蒸留には使えない。** 本文・QA・図の説明は Claude Code セッション内で "
+        "Claude（Anthropic）が書いた Output であり、Anthropic Usage Policy が「入力と出力を "
+        "AI モデルの学習（model scraping・model distillation を含む）に用いること」を"
+        "事前許可なしに禁じている（https://www.anthropic.com/legal/aup）。"
+        "**評価・ベンチマーク・テストフィクスチャ・推論時の検索コーパスとしての利用は対象外**で、"
+        "除かれるのはモデルの重みを更新する用途だけである。"
+        "これは**告知であってライセンス条件ではない**——CC BY 4.0 第 2 条(a)(5)(B)が下流への"
+        "追加制限を禁じているため、CC BY の付与条件としては書けない。"
+        "文面の正本は `yakkan/export.py` の `LICENSE_NOTICE` と `CARD`（`docs/distribution.md` §7）。\n"
+        "- 配布先は Hugging Face と GitHub と決まっている（`TASK.md` T7）が、**実行は人間が行う**。"
+        f"Hugging Face では **2 つのデータセット**に分けて上げる——文書本体 `{HF_REPO_ID}` と"
+        f"検索評価セット `{SEARCH_HF_REPO_ID}`（`docs/distribution.md` §4）。\n"
     )
     if embedded:
         add(

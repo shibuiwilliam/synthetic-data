@@ -773,6 +773,11 @@ def export(
         f"[green]公開用の面[/green] {dataset_dir}/ / views 文書 {result.views.documents}・"
         f"ページ {result.views.pages}・QA {result.views.qa}・配布 {result.files} ファイル"
     )
+    if result.search_repo:
+        console.print(
+            f"[green]検索評価セットは別データセット[/green] {result.search_repo} / "
+            f"{result.search_files} ファイル（本体には含めない。`docs/publishing.md` §12）"
+        )
     for line in result.blockers:
         console.print(f"[yellow]公開をふさいでいる条件[/yellow] {line}")
 
@@ -813,9 +818,12 @@ def publish(
             raise typer.Exit(code=1)
         console.print(f"[green]公開用の面は現在の {dataset_dir}/ と一致している[/green]")
         if not blocked:
+            repos = [spec.hub.repo_id]
+            if spec.search_split:
+                repos.append(spec.search_dataset.hub.repo_id)
             console.print(
-                f"[green]{spec.hub.repo_id}[/green] へ上げられる"
-                "（`uv run python scripts/upload_hf.py --dry-run` で中身を確認する）"
+                "[green]" + "・".join(repos) + "[/green] へ上げられる"
+                "（`uv run python scripts/upload_hf.py` で中身を確認する。既定は dry-run）"
             )
         return
 
@@ -828,6 +836,10 @@ def publish(
     table.add_row("views/qa.jsonl", f"{result.views.qa} 行")
     table.add_row("配布ファイル", f"{result.files:,}")
     table.add_row("容量", f"{result.bytes / 1024 / 1024:.1f} MiB")
+    if result.search_repo:
+        # 検索評価セットは**別のデータセット**として出す（`docs/publishing.md` §12）
+        table.add_row(f"検索 → {result.search_repo}", f"{result.search_files:,} ファイル")
+        table.add_row("検索の容量", f"{result.search_bytes / 1024 / 1024:.1f} MiB")
     table.add_row("license", result.license_id)
     console.print(table)
     console.print("書いたもの: " + "、".join(result.written))

@@ -65,6 +65,33 @@ class HubSpec(Model):
     revision: str = ""
 
 
+class SearchDatasetSpec(Model):
+    """検索評価セット（`dataset/search/`）を**別のデータセットとして公開する**宣言。
+
+    本体のデータセットは「文書（PDF・ページ画像・構造・QA）」で、検索評価セットは
+    「コーパス全体に 1 組だけある passages / queries / qrels」である。粒度も行数も
+    Viewer の見え方も違うので、Hub では 2 つのリポジトリに分ける（`docs/publishing.md` §12）。
+
+    `dir` が**そのリポジトリのルート**になる（`dataset/search/` をそのまま上げる）。
+    本体のリポジトリからはこのディレクトリを外す（二重配布を作らない）。
+    """
+
+    #: 切り出すか。`false` なら従来どおり本体のリポジトリに `search/` ごと入れる
+    enabled: bool = True
+    #: 切り出す対象（`dataset/` からの相対。このディレクトリが別リポジトリのルートになる）
+    dir: str = "search"
+    hub: HubSpec = Field(default_factory=lambda: HubSpec(repo_id=""))
+    pretty_name: str = "Japanese contract retrieval evaluation set (synthetic)"
+    pretty_name_ja: str = ""
+    task_categories: list[str] = Field(default_factory=list)
+    task_ids: list[str] = Field(default_factory=list)
+    tags: list[str] = Field(default_factory=list)
+
+    @property
+    def hub_url(self) -> str:
+        return f"https://huggingface.co/datasets/{self.hub.repo_id}" if self.hub.repo_id else ""
+
+
 class LicenseSpec(Model):
     #: Hub の license タグ。`undecided` のあいだは人間の判断待ち（H13）
     id: str = UNDECIDED
@@ -102,10 +129,30 @@ class PublishSpec(Model):
     exclude: list[str] = Field(default_factory=list)
     lfs: list[str] = Field(default_factory=list)
     citation: CitationSpec = Field(default_factory=CitationSpec)
+    #: 検索評価セットを別のデータセットとして公開する宣言（`docs/publishing.md` §12）
+    search_dataset: SearchDatasetSpec = Field(default_factory=SearchDatasetSpec)
 
     @property
     def hub_url(self) -> str:
         return f"https://huggingface.co/datasets/{self.hub.repo_id}"
+
+    @property
+    def search_split(self) -> bool:
+        """検索評価セットを別リポジトリに切り出しているか（本体から外す条件そのもの）。"""
+        return self.search_dataset.enabled and bool(self.search_dataset.dir)
+
+    @property
+    def search_ref_en(self) -> str:
+        """カードに書く公開先の指し方（未決なら URL を書かない）。"""
+        sd = self.search_dataset
+        if not sd.hub.repo_id:
+            return "(the companion repository name is not decided yet)"
+        return f"[`{sd.hub.repo_id}`]({sd.hub_url})"
+
+    @property
+    def search_ref_ja(self) -> str:
+        sd = self.search_dataset
+        return f"[`{sd.hub.repo_id}`]({sd.hub_url})" if sd.hub.repo_id else "（公開先は未決）"
 
 
 def default_spec() -> PublishSpec:
@@ -315,10 +362,25 @@ CONFIGS: tuple[tuple[str, str, str], ...] = (
     ("pages", f"{VIEWS_DIR}/pages.jsonl", "1 行 1 ページ（ページ本文と PNG の相対パス）"),
     ("qa", f"{VIEWS_DIR}/qa.jsonl", "1 行 1 問（45 問 × 文書数）"),
     ("elements", "*/elements.jsonl", "1 行 1 要素（本文・構造位置・bbox・表/図/列挙の位置）"),
-    ("passages", "search/passages.jsonl", "検索パッセージ"),
-    ("queries", "search/queries.jsonl", "検索クエリ"),
-    ("qrels", "search/qrels.jsonl", "適合判定（grade 2 / 1）"),
 )
+#: 検索評価セットの `configs`。**別リポジトリのルートからの相対**（`dataset/search/` が root）
+SEARCH_CONFIGS: tuple[tuple[str, str, str], ...] = (
+    ("passages", "passages.jsonl", "検索パッセージ"),
+    ("queries", "queries.jsonl", "検索クエリ"),
+    ("qrels", "qrels.jsonl", "適合判定（grade 2 / 1）"),
+)
+
+
+def main_configs(spec: PublishSpec) -> tuple[tuple[str, str, str], ...]:
+    """本体のリポジトリに出す `configs`。
+
+    検索評価セットを切り出していないときは、従来どおり `search/*.jsonl` も本体に出す
+    （**存在しないパスを `configs` に書くと Viewer が落ちる**。`docs/publishing.md` §11）。
+    """
+    if spec.search_split:
+        return CONFIGS
+    prefix = spec.search_dataset.dir or "search"
+    return CONFIGS + tuple((name, f"{prefix}/{path}", label) for name, path, label in SEARCH_CONFIGS)
 
 
 def _size_category(documents: int) -> str:
@@ -343,7 +405,7 @@ def frontmatter(spec: PublishSpec, stats: DataCardStats | None) -> str:
         "size_categories": [_size_category(stats.scale.documents if stats else 0)],
         "configs": [
             {"config_name": name, "data_files": [{"split": "train", "path": path}]}
-            for name, path, _ in CONFIGS
+            for name, path, _ in main_configs(spec)
         ],
     }
     if spec.license.decided:
@@ -359,16 +421,16 @@ def _n(value: int) -> str:
     return f"{value:,}"
 
 
-def _query_facts(dataset_dir: Path, queries: Sequence[Any]) -> tuple[int, int, str]:
+def _query_facts(dataset_dir: Path, queries: Sequence[Any], subdir: str = "search") -> tuple[int, int, str]:
     """grade 1 の打ち切り（qrels の解釈に直結する）を実測する。
 
-    渡されていなければ `dataset/search/queries.jsonl` から読む。**固定値を焼き込まない**
+    渡されていなければ `dataset/<subdir>/queries.jsonl` から読む。**固定値を焼き込まない**
     （以前 README に「1,944 クエリ中 28 件」と直書きされており、文書構成が変わっても
     更新されなかった）。
     """
     rows: list[Any] = list(queries)
     if not rows:
-        path = dataset_dir / "search" / "queries.jsonl"
+        path = dataset_dir / (subdir or "search") / "queries.jsonl"
         if path.is_file():
             rows = [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line]
 
@@ -482,6 +544,9 @@ def render_card(
         "- 150 dpi page images (`pages/*.png`) are included for OCR / VLM evaluation.\n"
         f"- {_license_line_en(spec)}\n\n"
     )
+    add("## \u26a0 Not for training AI models\n\n")
+    add(NO_TRAINING_EN.split("\n", 2)[2].strip() + "\n\n")
+
     add("## What it is for\n\n")
     add(
         "1. OCR / VLM text reading from page images or PDF.\n"
@@ -493,14 +558,22 @@ def render_card(
         "5. Document QA (extraction, reference following, and arithmetic).\n"
         "6. **Layout robustness**: the same contract body rendered in two different page layouts — "
         "content labels stay identical, only boxes and reading order change.\n"
-        "7. Retrieval / RAG evaluation (passages + queries + qrels under `search/`).\n\n"
     )
+    if spec.search_split:
+        add(
+            "7. Retrieval / RAG evaluation — the corpus-wide passages, queries and relevance "
+            f"judgements built from these documents are a **companion dataset**: {spec.search_ref_en}.\n\n"
+        )
+    else:
+        add("7. Retrieval / RAG evaluation (passages + queries + qrels under `search/`).\n\n")
     add("## What it is **not** for\n\n")
     add(
         "- **Any real-world legal use.** The clauses are dummies written for reading evaluation and "
         "have not been reviewed by a lawyer. The documents have no legal effect.\n"
         "- Reproducing real contract templates (only structure and layout conventions were studied; "
         "every sentence is original).\n"
+        "- **Training, fine-tuning or distilling any AI / ML model** (see the section above; "
+        "this is a restriction from Anthropic's Usage Policy, not from the dataset license).\n"
         "- Language-model pre-training (too small, deliberately narrow subject matter).\n"
         "- Scanned / photographed / handwritten document evaluation: these PDFs are born-digital, "
         "with no skew, shadow, noise or seal impressions.\n\n"
@@ -525,7 +598,7 @@ def render_card(
         "queries": "one retrieval query",
         "qrels": "one relevance judgement — grade 2 = answer-bearing, 1 = related",
     }
-    for name, path, _ in CONFIGS:
+    for name, path, _ in main_configs(spec):
         add(f"| `{name}` | {_n(counts.get(name, 0))} | {english[name]} | `{path}` |\n")
     add(
         "\n```python\nfrom datasets import load_dataset\nfrom huggingface_hub import snapshot_download\n\n"
@@ -540,18 +613,29 @@ def render_card(
         "`pages/*.png`); the three files under `views/` are flat projections for the viewer.\n\n"
     )
     add("## Files\n\n")
+    tree = [
+        "manifest.json          every document (pages, QA count, artifacts, checksums, status)",
+        f"{CARD_NAME}           full data card: measured scale, breakdown, QA, limits and biases",
+        "SHA256SUMS             checksums of everything distributed here",
+    ]
+    if not spec.search_split:
+        tree.append("search/                retrieval evaluation set (one layout per written contract)")
+    tree += [
+        "views/                 flat jsonl projections for the dataset viewer",
+        "licenses/              font licenses for the faces embedded in the PDFs",
+        "<content_id>--<style_id>/",
+        "  doc.pdf  pages/page-001.png …  source.json  layout.json  answer.json  qa.json",
+        "  elements.jsonl  passages.jsonl",
+    ]
+    add("```\n" + "\n".join(tree) + "\n```\n\n")
+    if spec.search_split:
+        add(
+            "The corpus-wide **retrieval evaluation set** (passages / queries / qrels) is published as a "
+            f"separate dataset: {spec.search_ref_en}. Its `passage_id` is `<doc_id>::<element_id>`, so it "
+            "joins back to the documents here. Each document directory still carries its own "
+            "`passages.jsonl`, so that set can be rebuilt or extended from this repository alone.\n\n"
+        )
     add(
-        "```\n"
-        "manifest.json          every document (pages, QA count, artifacts, checksums, status)\n"
-        f"{CARD_NAME}           full data card: measured scale, breakdown, QA, limits and biases\n"
-        "SHA256SUMS             checksums of everything distributed here\n"
-        "search/                retrieval evaluation set (one layout per written contract)\n"
-        "views/                 flat jsonl projections for the dataset viewer\n"
-        "licenses/              font licenses for the faces embedded in the PDFs\n"
-        "<content_id>--<style_id>/\n"
-        "  doc.pdf  pages/page-001.png …  source.json  layout.json  answer.json  qa.json\n"
-        "  elements.jsonl  passages.jsonl\n"
-        "```\n\n"
         f"Read **`{CARD_NAME}`** next: it is generated by measuring these files and holds the scale, "
         "the per-type breakdown, the label vocabulary, the quality-assurance results, and the known "
         "limits and biases.\n\n"
@@ -574,7 +658,16 @@ def render_card(
     )
     add(f"- {_license_line_ja(spec)}\n")
     add("- **実務の契約書としては使えない**（法律専門家の校閲を受けていないダミーである）。\n")
-    add("- 会社名・人物名・住所・金額・契約書番号はすべて架空で、実在のひな型を転載していない。\n\n")
+    add("- 会社名・人物名・住所・金額・契約書番号はすべて架空で、実在のひな型を転載していない。\n")
+    add("- **AI モデルの学習・蒸留には使えない**（次節）。評価・ベンチマークは対象外。\n")
+    if spec.search_split:
+        add(
+            "- **検索評価セット（passages / queries / qrels）は別のデータセットで配布している**："
+            f"{spec.search_ref_ja}。文書そのものはこのリポジトリにある。\n"
+        )
+    add("\n")
+    add("## \u26a0 AI モデルの学習・蒸留には使えない\n\n")
+    add(NO_TRAINING_JA + "\n\n")
     add("## 並び\n\n")
     add(
         "```\n"
@@ -584,11 +677,15 @@ def render_card(
         "（規模・内訳・作り方・品質保証・制限と偏り・ライセンス）\n"
         "  manifest.json            全文書の一覧（ページ数・QA 数・成果物・checksums・status）\n"
         f"  {SUMS_NAME}             配布するファイルの SHA256\n"
-        "  search/                  検索評価セット（コーパス全体。content ごとに 1 スタイル）\n"
-        "    passages.jsonl           検索エンジンに登録する単位\n"
-        "    queries.jsonl            クエリ（term / heading / scoped / qa）\n"
-        "    qrels.jsonl              適合判定（grade 2 = 答えがある / 1 = 関連する）\n"
-        f"  {VIEWS_DIR}/                   "
+        + (
+            ""
+            if spec.search_split
+            else "  search/                  検索評価セット（コーパス全体。content ごとに 1 スタイル）\n"
+            "    passages.jsonl           検索エンジンに登録する単位\n"
+            "    queries.jsonl            クエリ（term / heading / scoped / qa）\n"
+            "    qrels.jsonl              適合判定（grade 2 = 答えがある / 1 = 関連する）\n"
+        )
+        + f"  {VIEWS_DIR}/                   "
         "**Viewer と `load_dataset()` のための平らな面**（一次資料の射影）\n"
         "    documents.jsonl          1 行 1 文書\n"
         "    pages.jsonl              1 行 1 ページ（ページ本文と PNG の相対パス）\n"
@@ -618,8 +715,13 @@ def render_card(
         "| 列挙の「N 番目」 | `derived.enumerations` |\n"
         "| 読み順 | `layout.json` の `pages[].reading_order`"
         "（**内容の単位**。ラベルと本文の内訳は含まない） |\n"
-        "| 検索の評価 | `search/passages.jsonl` ＋ `queries.jsonl` ＋ `qrels.jsonl` |\n"
-        f"| 一覧・絞り込み（Viewer） | `{VIEWS_DIR}/documents.jsonl` / `pages.jsonl` / `qa.jsonl` |\n\n"
+        + (
+            f"| 検索の評価 | **別データセット** {spec.search_ref_ja}"
+            "（`passages.jsonl` ＋ `queries.jsonl` ＋ `qrels.jsonl`） |\n"
+            if spec.search_split
+            else "| 検索の評価 | `search/passages.jsonl` ＋ `queries.jsonl` ＋ `qrels.jsonl` |\n"
+        )
+        + f"| 一覧・絞り込み（Viewer） | `{VIEWS_DIR}/documents.jsonl` / `pages.jsonl` / `qa.jsonl` |\n\n"
     )
     add("## 注意点\n\n")
     add(
@@ -639,13 +741,18 @@ def render_card(
         f"- **`{VIEWS_DIR}/qa.jsonl` の答えは型ごとに列が分かれている**（`answer_text` / `answer_number` /\n"
         "  `answer_list`）。**採点に使う正本は各文書の `qa.json` の `answer`** で、views はその射影である\n"
         "  （Arrow が 1 列に複数の型を入れられないため。`docs/publishing.md` §4）。\n"
-        "- **qrels の grade 1 は 1 クエリ "
-        f"{_n(stats.search.related_cap) if stats and stats.search.related_cap else '一定件数'}"
-        " で打ち切ってある。** 打ち切ると qrels に出ないので\n"
-        "  評価上は非適合と同じ扱いになる。どのクエリで切ったかは `queries.jsonl` の\n"
-        f"  `related_truncated` と `n_related_total` でわかる（現行の生成では {_n(n_queries)} クエリ中\n"
-        f"  {_n(n_truncated)} 件{truncated_examples}）。**この件数で Recall@k を解釈しない。**\n"
-        "- すべて架空の会社・商品である（各文書の奥付に明記）。\n\n"
+        + (
+            f"- **qrels の扱い（grade 1 の打ち切りを含む）は別データセットのカードに書いてある**：\n"
+            f"  {spec.search_ref_ja}。\n"
+            if spec.search_split
+            else "- **qrels の grade 1 は 1 クエリ "
+            f"{_n(stats.search.related_cap) if stats and stats.search.related_cap else '一定件数'}"
+            " で打ち切ってある。** 打ち切ると qrels に出ないので\n"
+            "  評価上は非適合と同じ扱いになる。どのクエリで切ったかは `queries.jsonl` の\n"
+            f"  `related_truncated` と `n_related_total` でわかる（現行の生成では {_n(n_queries)} クエリ中\n"
+            f"  {_n(n_truncated)} 件{truncated_examples}）。**この件数で Recall@k を解釈しない。**\n"
+        )
+        + "- すべて架空の会社・商品である（各文書の奥付に明記）。\n\n"
     )
     fonts = _embedded_font_names(stats)
     if fonts:
@@ -682,11 +789,277 @@ def write_readme(
     spec = spec if spec is not None else load_spec()
     if stats is None and (dataset_dir / "manifest.json").is_file():
         stats = collect(dataset_dir)
-    n_queries, n_truncated, examples = _query_facts(dataset_dir, queries)
+    n_queries, n_truncated, examples = _query_facts(dataset_dir, queries, spec.search_dataset.dir)
     text = render_card(spec, stats, n_queries=n_queries, n_truncated=n_truncated, truncated_examples=examples)
     dataset_dir.mkdir(parents=True, exist_ok=True)
     path = dataset_dir / "README.md"
     path.write_text(text, encoding="utf-8")
+    return path
+
+
+# --- 検索評価セットのカード（別データセット） ---------------------------------
+
+
+def _md_table(header: Sequence[str], rows: Sequence[Sequence[str]]) -> str:
+    out = ["| " + " | ".join(header) + " |", "|" + "|".join("---" for _ in header) + "|"]
+    out += ["| " + " | ".join(row) + " |" for row in rows]
+    return "\n".join(out) + "\n"
+
+
+def _count_rows(rows: Sequence[Any]) -> list[list[str]]:
+    """`datacard.CountRow` の並びを「名前 / 件数」の表にする（**数は実測のまま**）。"""
+    return [[f"`{row.name}`", _n(row.items)] for row in rows]
+
+
+def jsonl_fields(path: Path) -> list[str]:
+    """jsonl の列名を**実測する**（スキーマを固定文字列で書くと生成器と食い違う）。"""
+    if not path.is_file():
+        return []
+    with path.open(encoding="utf-8") as handle:
+        for line in handle:
+            if line.strip():
+                return sorted(json.loads(line).keys())
+    return []
+
+
+def search_fields(search_dir: Path) -> dict[str, list[str]]:
+    return {name: jsonl_fields(search_dir / path) for name, path, _ in SEARCH_CONFIGS}
+
+
+def search_frontmatter(spec: PublishSpec, stats: DataCardStats | None) -> str:
+    """検索評価セットのカード冒頭の YAML。
+
+    `configs` は**このリポジトリのルートからの相対**（`dataset/search/` が root）。
+    `source_datasets` は本体のデータセットを指す（Hub の `extended|<repo_id>` の形）。
+    """
+    sd = spec.search_dataset
+    data: dict[str, Any] = {
+        "pretty_name": sd.pretty_name,
+        "language": list(spec.language),
+        "multilinguality": spec.multilinguality,
+        "annotations_creators": list(spec.annotations_creators),
+        "source_datasets": (
+            [f"extended|{spec.hub.repo_id}"] if spec.hub.repo_id else list(spec.source_datasets)
+        ),
+        "task_categories": list(sd.task_categories or spec.task_categories),
+        "task_ids": list(sd.task_ids),
+        "tags": list(sd.tags or spec.tags),
+        "size_categories": [_size_category(stats.search.passages if stats else 0)],
+        "configs": [
+            {"config_name": name, "data_files": [{"split": "train", "path": path}]}
+            for name, path, _ in SEARCH_CONFIGS
+        ],
+    }
+    if spec.license.decided:
+        data = {"license": spec.license.id, **data}
+    body = yaml.safe_dump(data, allow_unicode=True, sort_keys=False, default_flow_style=False, width=1000)
+    return f"---\n{body}---\n"
+
+
+def _search_citation(spec: PublishSpec) -> str:
+    sd = spec.search_dataset
+    key = (sd.hub.repo_id or "contract_retrieval").split("/")[-1].replace("-", "_")
+    authors = " and ".join(spec.citation.authors) or (
+        spec.hub.repo_id.split("/")[0] if spec.hub.repo_id else ""
+    )
+    url = sd.hub_url or spec.hub_url
+    return (
+        "```bibtex\n"
+        f"@misc{{{key},\n"
+        f"  title  = {{{sd.pretty_name}}},\n"
+        f"  author = {{{authors}}},\n"
+        f"  year   = {{{spec.citation.year or ''}}},\n"
+        "  howpublished = {Hugging Face Hub},\n"
+        f"  url    = {{{url}}}\n"
+        "}\n"
+        "```\n"
+    )
+
+
+def render_search_card(
+    spec: PublishSpec,
+    stats: DataCardStats | None,
+    fields: dict[str, list[str]],
+) -> str:
+    """`dataset/search/README.md`（= 検索評価セットのデータセットカード）を組み立てる。
+
+    数値・列名はすべて実測（`stats.search` と `fields`）から入れる。**焼き込まない。**
+    文書そのものは本体のデータセットにあるので、両方向の案内を必ず書く
+    （片方だけを見た人が `passage_id` の指す先を見つけられるようにする）。
+    """
+    sd = spec.search_dataset
+    search = stats.search if stats else None
+    parts: list[str] = [search_frontmatter(spec, stats)]
+    add = parts.append
+    passages = search.passages if search else 0
+    queries = search.queries if search else 0
+    qrels = search.qrels if search else 0
+    main_ref = f"[`{spec.hub.repo_id}`]({spec.hub_url})" if spec.hub.repo_id else "the document dataset"
+
+    # ---- 英語 ---------------------------------------------------------------
+    add(f"\n# {sd.pretty_name}\n\n")
+    add(
+        f"**A retrieval evaluation set over fully synthetic Japanese business contracts** — "
+        f"{_n(passages)} passages, {_n(queries)} queries and {_n(qrels)} relevance judgements. "
+        "The passages are cut along the real structure of each contract (article, paragraph, "
+        "table, figure, defined term), not by a fixed window, and the judgements are **derived "
+        "from the generator's ground truth**, not from human pooling.\n\n"
+    )
+    add(
+        f"- The documents themselves (PDF, 150 dpi page images, clause trees, tables, figures, QA) "
+        f"are in the companion dataset: {main_ref}.\n"
+        "- `passage_id` is `<doc_id>::<element_id>`, so every passage joins back to a document "
+        "and to its `elements.jsonl` row there.\n"
+        f"- The corpus takes **one layout per written contract** "
+        f"({_n(search.corpus_documents) if search else 0} documents / "
+        f"{_n(search.corpus_contents) if search else 0} contracts) — two renderings of the same "
+        "body would be duplicates for retrieval.\n"
+        f"- {_license_line_en(spec)}\n\n"
+    )
+    add("## \u26a0 Not for training AI models\n\n")
+    add(NO_TRAINING_EN.split("\n", 2)[2].strip() + "\n\n")
+
+    add("## What it is for\n\n")
+    add(
+        "1. Retrieval evaluation on Japanese legal/contract text (BM25, dense, hybrid, rerankers).\n"
+        "2. **RAG evaluation**: whether the passage that actually carries the answer is retrieved "
+        "(`grade 2`), as opposed to a merely related clause (`grade 1`).\n"
+        "3. Structure-aware retrieval: passages carry their citation (`第2章 第1条`), kind, pages, "
+        "parties, outgoing references and defined terms used, so recall can be sliced by structure.\n\n"
+    )
+    add("## What it is **not** for\n\n")
+    add(
+        "- **Any real-world legal use.** The clauses are dummies written for reading evaluation.\n"
+        "- **Training, fine-tuning or distilling any AI / ML model** (see the section above; this is a "
+        "restriction from Anthropic's Usage Policy, not from the dataset license).\n"
+        "- Measuring absolute retrieval difficulty: the corpus is small and deliberately homogeneous "
+        "(10 contract types, all synthetic, all born-digital Japanese text).\n\n"
+    )
+    add("## Configs\n\n")
+    counts = {"passages": passages, "queries": queries, "qrels": qrels}
+    english = {
+        "passages": "one retrieval unit — a clause, table, figure or defined term, with its citation",
+        "queries": "one query, with how many relevant passages it has",
+        "qrels": "one relevance judgement — grade 2 = answer-bearing, 1 = related",
+    }
+    add(
+        _md_table(
+            ["config", "rows", "what one row is", "file"],
+            [[f"`{name}`", _n(counts[name]), english[name], f"`{path}`"] for name, path, _ in SEARCH_CONFIGS],
+        )
+    )
+    add(
+        "\n```python\nfrom datasets import load_dataset\n\n"
+        f'passages = load_dataset("{sd.hub.repo_id}", "passages", split="train")\n'
+        f'queries  = load_dataset("{sd.hub.repo_id}", "queries",  split="train")\n'
+        f'qrels    = load_dataset("{sd.hub.repo_id}", "qrels",    split="train")\n'
+        "```\n\n"
+    )
+    add("## Fields\n\n")
+    add(
+        _md_table(
+            ["file", "columns (measured)"],
+            [
+                [f"`{path}`", ", ".join(f"`{c}`" for c in fields.get(name, [])) or "(not generated yet)"]
+                for name, path, _ in SEARCH_CONFIGS
+            ],
+        )
+    )
+    add("\n")
+    # 打ち切りは Recall@k の読み方を変えるので、英語面にも出す（日本語面だけに置かない）
+    add("## Caveats\n\n")
+    add(
+        f"- **`grade 1` is capped at {_n(search.related_cap) if search and search.related_cap else 0} "
+        "judgements per query.** Beyond the cap a related passage simply does not appear in `qrels`, "
+        "so scoring treats it as non-relevant. `queries.jsonl` carries `related_truncated` and "
+        f"`n_related_total`; {_n(search.truncated) if search else 0} of {_n(queries)} queries are "
+        "capped. **Do not read Recall@k as if the cap were not there** — use `grade 2` "
+        "(answer-bearing) for strict scoring.\n"
+        "- **One layout per written contract.** The document dataset renders some contracts in two "
+        "page layouts; retrieval would see them as duplicates, so only one is in this corpus.\n"
+        "- Queries are generated from the ground truth (defined terms, headings, scoped questions and "
+        "QA pairs), not written by human searchers, so phrasing is cleaner than real user queries.\n\n"
+    )
+
+    # ---- 日本語 -------------------------------------------------------------
+    add("\n---\n\n")
+    add("# 日本語版 — 検索評価セットの読み方\n\n")
+    if sd.pretty_name_ja:
+        add(f"**{sd.pretty_name_ja}**\n\n")
+    add(
+        "**このファイルは `keiyaku publish` が生成する。手で編集しない**（CLAUDE.md §0.4-3）。"
+        "仕様は `docs/publishing.md` §12、採点の指標は `docs/evaluation.md`。\n\n"
+    )
+    add(f"- {_license_line_ja(spec)}\n")
+    add("- **AI モデルの学習・蒸留には使えない**（次節）。評価・ベンチマークは対象外。\n")
+    add(
+        f"- **文書そのもの（PDF・ページ画像・構造・QA）は別のデータセットにある**：{main_ref}。"
+        "こちらはそのコーパスに対する passages / queries / qrels だけを持つ。\n\n"
+    )
+    add("## \u26a0 AI モデルの学習・蒸留には使えない\n\n")
+    add(NO_TRAINING_JA + "\n\n")
+    add("## 並び\n\n")
+    add(
+        "```\n"
+        "passages.jsonl   検索エンジンに登録する単位（条・項・表・図・定義語。構造の切れ目で切ってある）\n"
+        "queries.jsonl    クエリ（種別と、適合する件数）\n"
+        "qrels.jsonl      適合判定（grade 2 = 答えがある / 1 = 関連する）\n"
+        f"{SUMS_NAME}       このリポジトリで配布するファイルの SHA256\n"
+        "```\n\n"
+    )
+    if search and search.available:
+        add("## 実測（この版の中身）\n\n")
+        add(_md_table(["パッセージの種別", "件数"], _count_rows(search.passage_kinds)))
+        add("\n")
+        add(_md_table(["クエリの種別", "件数"], _count_rows(search.query_kinds)))
+        add("\n")
+        add(_md_table(["適合判定", "件数"], _count_rows(search.grades)))
+        add("\n")
+    add("## 注意点\n\n")
+    truncated_examples = (
+        "（" + "・".join(f"「{q}」" for q in search.truncated_examples) + "）"
+        if search and search.truncated_examples
+        else ""
+    )
+    add(
+        "- **`passage_id` は `<doc_id>::<element_id>`。** 本文・bbox・構造上の位置は文書側の\n"
+        f"  `elements.jsonl`（{main_ref}）と突き合わせて引く。\n"
+        "- **コーパスは content ごとに 1 スタイルだけ**採ってある。同じ本文を別の版面で描いた\n"
+        "  文書は検索では重複になるため入れていない（版面の頑健性は文書側のデータセットで見る）。\n"
+        f"- **grade 1 は 1 クエリ {_n(search.related_cap) if search and search.related_cap else '一定件数'}"
+        " 件で打ち切ってある。** 打ち切られた分は qrels に出ないので\n"
+        "  評価上は非適合と同じ扱いになる。どのクエリで切ったかは `queries.jsonl` の\n"
+        "  `related_truncated` と `n_related_total` でわかる（現行の生成では "
+        f"{_n(queries)} クエリ中 {_n(search.truncated) if search else 0} 件{truncated_examples}）。\n"
+        "  **この件数で Recall@k を解釈しない。**\n"
+        "- **grade 2 は「答えがある」パッセージ**で、grade 1 は「関連する」。"
+        "nDCG などの指標は\n  この 2 段階を前提にしている（`docs/evaluation.md`）。\n"
+        "- すべて架空の会社・契約である（文章は全文オリジナルで、実在のひな型を転載していない）。\n\n"
+    )
+    add("## 採点\n\n")
+    add(
+        "```\n"
+        "uv run keiyaku eval --search-run run.json   # recall@k / nDCG@k ほか（docs/evaluation.md §4）\n"
+        "```\n"
+    )
+    if spec.code_repo:
+        add(f"\n採点ハーネスを含む生成コード：{spec.code_repo}\n")
+    add("\n## Citation\n\n")
+    add(_search_citation(spec))
+    return "".join(parts)
+
+
+def write_search_card(
+    dataset_dir: Path, spec: PublishSpec, stats: DataCardStats | None = None
+) -> Path | None:
+    """`dataset/search/README.md` を書き出す（切り出していないときは作らない）。"""
+    if not spec.search_split:
+        return None
+    search_dir = dataset_dir / spec.search_dataset.dir
+    if not search_dir.is_dir():
+        return None
+    path = search_dir / "README.md"
+    path.write_text(render_search_card(spec, stats, search_fields(search_dir)), encoding="utf-8")
     return path
 
 
@@ -747,6 +1120,12 @@ def write_licenses(dataset_dir: Path, spec: PublishSpec, stats: DataCardStats | 
         "All sentences, tables, figures and party names are original and fictional; "
         "no real contract template is reproduced here.\n"
     )
+    notice.append(
+        "\n**AI モデルの学習・蒸留には使えない**（本文は Claude の Output であり、"
+        f"Anthropic Usage Policy が事前許可なしの学習を禁じている。{AUP_URL}）。"
+        "評価・ベンチマークは対象外。詳細は README.md と LICENSE。\n"
+        "**Not for training AI models** — see README.md and LICENSE. Evaluation is not training.\n"
+    )
     if spec.license.decided:
         notice.append(f"\n生成物のライセンス / dataset license: **{spec.license.id}**\n")
     else:
@@ -760,6 +1139,60 @@ def write_licenses(dataset_dir: Path, spec: PublishSpec, stats: DataCardStats | 
     return out
 
 
+#: 学習・蒸留の禁止の出どころ。本データセットの本文・QA・図の説明は Claude Code セッション内で
+#: Claude（Anthropic）が書いた Output であり、AUP は「入力と出力を AI モデルの学習
+#: （model scraping / model distillation を含む）に用いること」を事前許可なしに禁じている。
+AUP_URL = "https://www.anthropic.com/legal/aup"
+
+#: `dataset/LICENSE` と カードの英語面に出す禁止の告知。
+#: **ライセンス条件ではない。** CC BY 系は下流への追加制限を禁じている（CC BY 4.0 第 2 条(a)(5)(B)）
+#: ので、付与条件として書くと違反になる。出どころ（AUP）と拘束の相手を明示した「告知」にとどめる。
+#: **「評価は学習ではない」を必ず併記する**——落とすとこのデータセットの目的まで禁じられたように読める。
+NO_TRAINING_EN = f"""NOT FOR TRAINING AI MODELS
+--------------------------
+THIS DATASET MUST NOT BE USED TO TRAIN, FINE-TUNE, DISTILL, OR OTHERWISE DEVELOP
+ANY ARTIFICIAL INTELLIGENCE OR MACHINE LEARNING MODEL, INCLUDING LARGE LANGUAGE
+MODELS (LLMs) AND VISION-LANGUAGE MODELS (VLMs).
+
+The clauses, tables, figure descriptions and QA pairs in this dataset were written
+by Claude (Anthropic) inside a Claude Code session; they are Outputs of that
+service. Anthropic's Usage Policy prohibits "Utilization of inputs and outputs to
+train an AI model (e.g., 'model scraping' or 'model distillation') without prior
+authorization from Anthropic" ({AUP_URL}).
+
+EVALUATION IS NOT TRAINING. Benchmarking or evaluating document-reading systems
+(OCR, layout analysis, VLMs, structured extraction), retrieval and RAG pipelines,
+or AI agents against this dataset is the purpose it was built for, and nothing
+above restricts it. Neither does using it as test fixtures, as few-shot examples,
+or as a retrieval corpus at inference time. What is excluded is updating model
+weights from it.
+
+This is a NOTICE, not an additional condition of the license above. CC BY 4.0
+Section 2(a)(5)(B) forbids imposing further restrictions on downstream recipients,
+so this statement is not offered as a term of that grant and does not narrow it.
+It tells you about a restriction that arises from Anthropic's Usage Policy and
+that binds everyone subject to that policy. If you need to train on data of this
+kind, obtain prior authorization from Anthropic first."""
+
+#: カードの日本語面に出す同じ告知。英語面（`NO_TRAINING_EN`）と**対で直す**。
+NO_TRAINING_JA = f"""**本データセットを LLM・VLM・その他 AI モデルの学習・ファインチューニング・蒸留・
+強化学習の素材に使ってはならない。**
+
+本データセットの条文・表・図の説明・QA は、Claude Code セッション内で **Claude（Anthropic）が
+書いた Output** である。Anthropic の Usage Policy は「入力と出力を AI モデルの学習
+（model scraping・model distillation を含む）に用いること」を**事前許可なしに禁じている**
+（{AUP_URL}）。学習に使う必要がある場合は、まず Anthropic の事前許可を得ること。
+
+**評価は学習ではない。** ドキュメント読み取り（OCR・レイアウト解析・VLM・構造化抽出）・
+検索／RAG・AI エージェントの**評価とベンチマークは、このデータセットが作られた目的そのもの**で、
+上の制限は一切かからない。テストフィクスチャとしての利用、few-shot の実例、
+推論時の検索コーパスとしての利用も同じく対象外である。**除かれるのはモデルの重みを更新する用途だけ。**
+
+なお、**この節は告知であってライセンス条件ではない。** CC BY 4.0 は下流の受領者に追加の制限を
+課すことを禁じている（第 2 条(a)(5)(B)）ため、上の禁止を CC BY の付与条件として書くことはできず、
+書いてもいない。制限の出どころは Anthropic の Usage Policy であり、同ポリシーの適用を受ける者を縛る。"""
+
+
 #: 既知のライセンス本文への案内（Hub の license タグ → URL）
 LICENSE_URLS: dict[str, str] = {
     "cc-by-4.0": "https://creativecommons.org/licenses/by/4.0/legalcode",
@@ -771,8 +1204,14 @@ LICENSE_URLS: dict[str, str] = {
 }
 
 
-def write_license_file(dataset_dir: Path, spec: PublishSpec) -> Path | None:
-    """`dataset/LICENSE`。**決まっていなければ作らない**（嘘の条件を置かない）。"""
+def write_license_file(
+    dataset_dir: Path, spec: PublishSpec, *, title: str = "", fonts: bool = True
+) -> Path | None:
+    """`<repo>/LICENSE`。**決まっていなければ作らない**（嘘の条件を置かない）。
+
+    検索評価セットのリポジトリ（`fonts=False`）には PDF が無いので、
+    フォントの案内（存在しない `licenses/NOTICE.md` への参照）を書かない。
+    """
     path = dataset_dir / "LICENSE"
     if not spec.license.decided:
         if path.is_file():
@@ -780,20 +1219,23 @@ def write_license_file(dataset_dir: Path, spec: PublishSpec) -> Path | None:
         return None
     holder = f"Copyright (c) {spec.license.year} {spec.license.holder}".strip()
     url = LICENSE_URLS.get(spec.license.id, "")
+    kinds = "PDF, JSON, JSONL, PNG" if fonts else "JSONL"
     lines = [
-        f"{spec.pretty_name}",
+        title or spec.pretty_name,
         "",
         holder,
         "",
-        "The generated files in this repository (PDF, JSON, JSONL, PNG) are licensed under "
-        f"{spec.license.id}.",
+        f"The generated files in this repository ({kinds}) are licensed under {spec.license.id}.",
     ]
     if url:
         lines.append(f"Full license text: {url}")
-    lines += [
-        "",
-        "The PDFs embed subsets of third-party fonts; see licenses/NOTICE.md for their terms.",
-    ]
+    lines.append("")
+    if fonts:
+        lines += [
+            "The PDFs embed subsets of third-party fonts; see licenses/NOTICE.md for their terms.",
+            "",
+        ]
+    lines.append(NO_TRAINING_EN)
     if spec.license.note:
         lines += ["", spec.license.note]
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
@@ -805,29 +1247,56 @@ def _excluded(rel: str, patterns: Sequence[str]) -> bool:
     return any(fnmatch.fnmatch(name, p) or fnmatch.fnmatch(rel, p) for p in patterns)
 
 
-def distributed_files(dataset_dir: Path, spec: PublishSpec) -> list[Path]:
-    """配布するファイル（`exclude` と `SHA256SUMS` 自身を除く）。並びは決定論。"""
+def _files_under(root: Path, spec: PublishSpec, skip_dirs: Sequence[str] = ()) -> list[Path]:
     out: list[Path] = []
-    for path in sorted(dataset_dir.rglob("*")):
+    for path in sorted(root.rglob("*")):
         if not path.is_file():
             continue
-        rel = _rel(path, dataset_dir)
+        rel = _rel(path, root)
         if rel == SUMS_NAME or _excluded(rel, spec.exclude):
+            continue
+        if rel.split("/", 1)[0] in skip_dirs:
             continue
         out.append(path)
     return out
 
 
-def checksums(dataset_dir: Path, spec: PublishSpec) -> str:
-    """`sha256sum` と同じ書式（`<hex>  <path>`）。"""
+def distributed_files(dataset_dir: Path, spec: PublishSpec) -> list[Path]:
+    """本体のリポジトリで配布するファイル（`exclude` と `SHA256SUMS` 自身を除く）。並びは決定論。
+
+    検索評価セットを切り出しているときは、その**ディレクトリごと除く**
+    （別リポジトリで配るので、二重に配らない。`docs/publishing.md` §12）。
+    """
+    skip = (spec.search_dataset.dir,) if spec.search_split else ()
+    return _files_under(dataset_dir, spec, skip)
+
+
+def search_distributed_files(dataset_dir: Path, spec: PublishSpec) -> list[Path]:
+    """検索評価セットのリポジトリで配布するファイル（`dataset/search/` がそのルート）。"""
+    if not spec.search_split:
+        return []
+    search_dir = dataset_dir / spec.search_dataset.dir
+    return _files_under(search_dir, spec) if search_dir.is_dir() else []
+
+
+def _checksum_lines(root: Path, files: Sequence[Path]) -> str:
+    """`sha256sum` と同じ書式（`<hex>  <path>`）。パスは `root` からの相対。"""
     lines: list[str] = []
-    for path in distributed_files(dataset_dir, spec):
+    for path in files:
         digest = hashlib.sha256()
         with path.open("rb") as handle:
             for chunk in iter(lambda: handle.read(1 << 20), b""):
                 digest.update(chunk)
-        lines.append(f"{digest.hexdigest()}  {_rel(path, dataset_dir)}")
+        lines.append(f"{digest.hexdigest()}  {_rel(path, root)}")
     return "\n".join(lines) + "\n" if lines else ""
+
+
+def checksums(dataset_dir: Path, spec: PublishSpec) -> str:
+    return _checksum_lines(dataset_dir, distributed_files(dataset_dir, spec))
+
+
+def search_checksums(dataset_dir: Path, spec: PublishSpec) -> str:
+    return _checksum_lines(dataset_dir / spec.search_dataset.dir, search_distributed_files(dataset_dir, spec))
 
 
 # --- まとめ -------------------------------------------------------------------
@@ -838,6 +1307,10 @@ class PublishResult(Model):
     files: int = 0
     bytes: int = 0
     license_id: str = UNDECIDED
+    #: 検索評価セットを別データセットとして出した場合の公開先と量（切り出していなければ空）
+    search_repo: str = ""
+    search_files: int = 0
+    search_bytes: int = 0
     #: 公開をふさいでいる条件（人間の判断待ちなど）。**空でなければアップロードしない**
     blockers: list[str] = Field(default_factory=list)
     written: list[str] = Field(default_factory=list)
@@ -855,6 +1328,11 @@ def blockers(spec: PublishSpec) -> list[str]:
         out.append(
             "公開先が無い（`specs/publish.yaml` の `hub.repo_id` を `owner/name` の形で書く。"
             "宣言そのものが無ければ既定で動いている）"
+        )
+    if spec.search_split and "/" not in spec.search_dataset.hub.repo_id:
+        out.append(
+            "検索評価セットの公開先が無い（`specs/publish.yaml` の `search_dataset.hub.repo_id` を "
+            "`owner/name` の形で書く。別データセットとして出すと決めたので本体には入らない）"
         )
     return out
 
@@ -878,6 +1356,23 @@ def publish(
     license_path = write_license_file(dataset_dir, spec)
     if license_path:
         written.append("LICENSE")
+    # 検索評価セットは**別のデータセット**として出す（`dataset/search/` がそのルート）。
+    # 本体の SHA256SUMS より先に作る——あちらはこのディレクトリを数えないので順序に依存しないが、
+    # 自分の SHA256SUMS は自分のカードと LICENSE を含める必要がある（`docs/publishing.md` §12）。
+    search_files: list[Path] = []
+    if spec.search_split:
+        search_dir = dataset_dir / spec.search_dataset.dir
+        card = write_search_card(dataset_dir, spec, stats)
+        if card:
+            written.append(_rel(card, dataset_dir))
+            search_license = write_license_file(
+                search_dir, spec, title=spec.search_dataset.pretty_name, fonts=False
+            )
+            if search_license:
+                written.append(_rel(search_license, dataset_dir))
+            (search_dir / SUMS_NAME).write_text(search_checksums(dataset_dir, spec), encoding="utf-8")
+            written.append(f"{spec.search_dataset.dir}/{SUMS_NAME}")
+            search_files = search_distributed_files(dataset_dir, spec)
     # SHA256SUMS は**最後**に作る（上で書いたファイルを含めるため）
     (dataset_dir / SUMS_NAME).write_text(checksums(dataset_dir, spec), encoding="utf-8")
     written.append(SUMS_NAME)
@@ -887,6 +1382,9 @@ def publish(
         files=len(files) + 1,
         bytes=sum(p.stat().st_size for p in files),
         license_id=spec.license.id,
+        search_repo=spec.search_dataset.hub.repo_id if spec.search_split else "",
+        search_files=len(search_files) + 1 if search_files else 0,
+        search_bytes=sum(p.stat().st_size for p in search_files),
         blockers=blockers(spec),
         written=written,
     )
@@ -914,7 +1412,7 @@ def check(dataset_dir: Path, spec: PublishSpec | None = None) -> tuple[list[str]
             **dict(
                 zip(
                     ("n_queries", "n_truncated", "truncated_examples"),
-                    _query_facts(dataset_dir, ()),
+                    _query_facts(dataset_dir, (), spec.search_dataset.dir),
                     strict=True,
                 )
             ),
@@ -922,6 +1420,11 @@ def check(dataset_dir: Path, spec: PublishSpec | None = None) -> tuple[list[str]
         ".gitattributes": gitattributes(spec),
         ".gitignore": gitignore(spec),
     }
+    search_dir = dataset_dir / spec.search_dataset.dir
+    if spec.search_split and search_dir.is_dir():
+        expected[f"{spec.search_dataset.dir}/README.md"] = render_search_card(
+            spec, stats, search_fields(search_dir)
+        )
     for name, text in expected.items():
         path = dataset_dir / name
         if not path.is_file():
@@ -941,16 +1444,25 @@ def check(dataset_dir: Path, spec: PublishSpec | None = None) -> tuple[list[str]
         elif path.read_text(encoding="utf-8") != fresh:
             problems.append(f"{path} が現在の dataset/ と一致しない（{len(rows)} 行で作り直す）")
 
-    license_path = dataset_dir / "LICENSE"
-    if spec.license.decided and not license_path.is_file():
-        problems.append(f"{license_path} が無い（ライセンスが決まっているので作る）")
-    if not spec.license.decided and license_path.is_file():
-        problems.append(f"{license_path} があるが `license.id` は未決（どちらかが古い）")
+    license_paths = [dataset_dir / "LICENSE"]
+    if spec.search_split and search_dir.is_dir():
+        license_paths.append(search_dir / "LICENSE")
+    for license_path in license_paths:
+        if spec.license.decided and not license_path.is_file():
+            problems.append(f"{license_path} が無い（ライセンスが決まっているので作る）")
+        if not spec.license.decided and license_path.is_file():
+            problems.append(f"{license_path} があるが `license.id` は未決（どちらかが古い）")
 
-    sums = dataset_dir / SUMS_NAME
-    if not sums.is_file():
-        problems.append(f"{sums} が無い（`keiyaku publish update` を実行する）")
+    # 本体と検索評価セットは別リポジトリなので SHA256SUMS も別々に持つ
+    sums_targets: list[tuple[Path, str]] = [(dataset_dir / SUMS_NAME, checksums(dataset_dir, spec))]
+    if spec.search_split and search_dir.is_dir():
+        sums_targets.append((search_dir / SUMS_NAME, search_checksums(dataset_dir, spec)))
+    for sums, _ in sums_targets:
+        if not sums.is_file():
+            problems.append(f"{sums} が無い（`keiyaku publish update` を実行する）")
     # README 等が古いと必ず SHA256SUMS も古いので、そちらを先に直す（二重報告を避ける）
-    elif not problems and sums.read_text(encoding="utf-8") != checksums(dataset_dir, spec):
-        problems.append(f"{sums} が現在の dataset/ と一致しない")
+    if not problems:
+        for sums, fresh in sums_targets:
+            if sums.read_text(encoding="utf-8") != fresh:
+                problems.append(f"{sums} が現在の dataset/ と一致しない")
     return (problems, blockers(spec))

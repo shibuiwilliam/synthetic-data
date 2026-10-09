@@ -130,7 +130,8 @@ uv run keiyaku eval --all --oracle          # 全文書・全指標が満点に�
 | `qa.json` | 問答（自動生成 30 問＋執筆 15 問） |
 | `render.html` | デバッグ用の中間 HTML（配布対象外） |
 
-全文書の一覧は `dataset/manifest.json`、検索評価セットは `dataset/search/`、
+全文書の一覧は `dataset/manifest.json`、検索評価セット（passages / queries / qrels）は
+`dataset/search/`（**公開時は別のデータセットとして上げる**。下記）、
 実測値入りの概要は `dataset/README.md`、規模・作り方・品質保証・制限と偏りをまとめた
 **データカードは `dataset/data-card.md`**（いずれも `keiyaku export` が実測して生成する）。
 正解 JSON の各フィールドの意味は `docs/schema.md`、読み取り予測の形と採点は `docs/evaluation.md`。
@@ -143,10 +144,17 @@ uv run keiyaku eval --all --oracle          # 全文書・全指標が満点に�
 平らな射影）・`.gitattributes`（PDF・PNG を LFS）・`licenses/`（PDF に埋め込まれているフォントの本文）・
 `SHA256SUMS` が付く。`render.html` は配布しない。
 
+**上げ先は 2 つある。** 文書のデータセット（`dataset/`）と、**検索評価セットのデータセット**
+（`dataset/search/` がそのリポジトリのルート。passages / queries / qrels の 3 本と、自分のカード・
+`LICENSE`・`SHA256SUMS`）。粒度の違うものを 1 つの Dataset Viewer に混ぜず、検索だけを使う人が
+PDF と PNG を取らずに済むようにしてある（`docs/publishing.md` §12）。両方のカードが相互に案内し、
+`passage_id` は `<doc_id>::<element_id>` なので文書側と突き合わせられる。
+
 ```
-uv run keiyaku publish check                   # 公開用の面の鮮度と、公開をふさいでいる条件
+uv run keiyaku publish check                   # 公開用の面の鮮度と、公開をふさいでいる条件（両方）
 uv run python scripts/verify_views.py          # views が parquet に落ちるかの検査
 uv run python scripts/upload_hf.py             # 何が上がるかを数えるだけ（既定。通信しない）
+uv run python scripts/upload_hf.py --only search   # 検索評価セットのリポジトリだけを扱う
 ```
 
 公開先・名義・除外などの**決定は `specs/publish.yaml`**（`specs/` で唯一コミットするファイル）。
@@ -174,7 +182,18 @@ uv run python scripts/upload_hf.py             # 何が上がるかを数える�
 - **同梱フォント**（`assets/fonts/`）：SIL Open Font License 1.1（Noto 系）と
   IPA フォントライセンス v1.0（IPAex 系）。いずれも再配布と埋め込みが認められている。
   出典・版・SHA256 は `assets/fonts/SOURCES.md`。
-- **生成物**（`dataset/` の PDF・JSON・PNG）の配布条件は**未決**。
-  決まるまで外部配布しない。公開（Hugging Face）の準備は済んでいるが、
-  `specs/publish.yaml` の `license.id` が `undecided` のあいだ、カードは「未決」と表示し、
-  frontmatter に `license` を出さず、`scripts/upload_hf.py` は**アップロードを拒否する**。
+- **生成物**（`dataset/` の PDF・JSON・PNG）：**CC BY 4.0**（2026-10-06 決定）。
+  本文と帰属の書き方は `dataset/LICENSE`、宣言の正本は `specs/publish.yaml` の `license.id`。
+  公開先は Hugging Face Datasets `cvusk/japanese-contract-document-understanding`（まだ上げていない）。
+  `license.id` が `undecided` のあいだはカードが「未決」と表示し、frontmatter に `license` を出さず、
+  `scripts/upload_hf.py` が**アップロードを拒否する**という安全弁はそのまま残してある。
+
+- **AI モデルの学習・蒸留には使えない。** 生成物の本文・QA・図の説明は Claude Code セッション内で
+  **Claude（Anthropic）が書いた Output** であり、Anthropic の Usage Policy が「入力と出力を
+  AI モデルの学習（model scraping・model distillation を含む）に用いること」を**事前許可なしに
+  禁じている**（<https://www.anthropic.com/legal/aup>）。
+  **読み取り・検索・AI エージェントの評価とベンチマークはこのデータの目的そのもの**で、
+  上の制限は一切かからない（除かれるのはモデルの重みを更新する用途だけ）。
+  これは **CC BY 4.0 の条件ではなく告知**である（CC BY 4.0 第 2 条(a)(5)(B)が下流への追加制限を
+  禁じているため、条件としては書けない）。文面は `dataset/LICENSE` と `dataset/README.md`、
+  仕様は **`docs/publishing.md` §10**。

@@ -19,16 +19,53 @@ hub:
   # 上げ先のリビジョン（空なら main）
   revision: ""
 
+# 検索評価セット（passages / queries / qrels）は**別のデータセットとして公開する**
+# （2026-10-08 のユーザー指示。`docs/publishing.md` §12）。
+# `dataset/search/` がそのリポジトリのルートになり、**本体のリポジトリには入れない**
+# （二重配布を作らない。本体の configs・SHA256SUMS・アップロードから外れる）。
+#
+# **リポジトリ名は未決**（HITL_TODO.md H17）。本体と対で見つかるように接尾辞を足してある。
+search_dataset:
+  enabled: true
+  dir: search
+  hub:
+    repo_id: cvusk/japanese-contract-document-understanding-retrieval
+    repo_type: dataset
+    private: true
+    revision: ""
+  pretty_name: "Japanese Contract Retrieval Evaluation Set (synthetic, derived ground truth)"
+  pretty_name_ja: "日本語契約書の検索評価セット（合成・passages / queries / qrels）"
+  # Hub のタスク分類。こちらは検索専用（本体は読み取り・QA も覆う）
+  task_categories:
+    - text-retrieval
+  task_ids:
+    - document-retrieval
+  tags:
+    - japanese
+    - contracts
+    - legal
+    - synthetic
+    - retrieval
+    - rag-evaluation
+    - information-retrieval
+    - bm25
+    - reranking
+    - beir
+
 # Hub のカードに出す表示名
 pretty_name: "Japanese Contract Document Understanding (synthetic, with full ground truth)"
 pretty_name_ja: "日本語契約書の構造読み取り評価セット（合成・完全な正解つき）"
 
 license:
-  # ---- 人間の判断待ち（HITL_TODO.md H13）----------------------------------
-  # 決まったら Hub の license タグ（SPDX 風の識別子）を入れる。候補：
-  #   cc-by-4.0 / cc0-1.0 / cc-by-sa-4.0 / cc-by-nc-4.0 / apache-2.0 / other
-  # `undecided` のあいだは frontmatter に license キーを出さず、カード本文に「未決」と書く。
-  id: undecided
+  # 2026-10-06 に人間が決定（HITL_TODO.md H13 を閉じた）。姉妹の yakkan-synth と同条件に揃える。
+  #   `undecided` のあいだは frontmatter に license キーを出さず、カード本文に「未決」と書く。
+  #
+  # **あわせて「AI モデルの学習・蒸留には使えない」を成果物に明記する**（docs/publishing.md §10）。
+  # 本文は Claude の Output であり、Anthropic Usage Policy が入力と出力を AI モデルの学習に
+  # 用いることを事前許可なしに禁じているため。ただしこれは**告知であってライセンス条件ではない**
+  # （CC BY 4.0 第 2 条(a)(5)(B)が下流への追加制限を禁じている）。文面は keiyaku/publish.py の
+  # NO_TRAINING_EN / NO_TRAINING_JA が正本で、ここに書かない。
+  id: cc-by-4.0
   # 著作権表示（CC BY 系では必須）。親リポジトリの LICENSE（MIT）の表記に合わせてある
   #   ../LICENSE: "Copyright (c) 2026 shibuiwilliam"
   holder: "shibuiwilliam"

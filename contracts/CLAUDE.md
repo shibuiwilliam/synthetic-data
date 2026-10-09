@@ -61,8 +61,9 @@ JSON が唯一の真実（single source of truth）であり、PDF はその決�
   **`../insurance-contracts/docs/gotchas.md` の全項目は本プロジェクトでも有効**として扱う（§14）。
 - 本ファイルは **350 行／35KB 以内を目安**とする（yakkan 240 行・28KB、docsynth 288 行・27KB。本プロジェクトは
   doctype が 10 種あり §4・§8・§15 の表が長い）。超えそうなら docs へ移す。ただし §0・§2・§8・§12・§15 は
-  要約せずに残す。**現状は 398 行・37KB で目安を超えている**（`docs/decisions.md` 26）。
-  次に足すときは §8 の lint 表を `docs/lint_rules.md` へ全面移送して戻す。
+  要約せずに残す。**2026-10-08 に §8 の lint 一覧表を `docs/lint_rules.md` §1 へ全面移送した**
+  （`docs/decisions.md` 164）。**現状は 393 行で、まだ目安を超えている**（`docs/decisions.md` 26）。
+  次に足すときは §4 の doctype 表を `docs/doctypes.md` へ移す。
 
 ### 0.4 絶対に守ること（Hard rules）
 1. **転載禁止**：`samples/` に集めた実在のひな型・標準契約書・モデル契約書の文章を、部分的にも、語順を変えた
@@ -99,7 +100,8 @@ JSON が唯一の真実（single source of truth）であり、PDF はその決�
 `answer.json`（ページ別期待テキスト＋outline。source/layout は内包せず `load_answer` で結合）／`qa.json`／
 `elements.jsonl`（1 行 1 要素の平索引）／`doc.pdf`（テキスト層あり）／`pages/page-*.png`（150dpi）／
 `render.html`（デバッグ用・配布対象外）。全体では `dataset/manifest.json`・`dataset/search/`
-（passages/queries/qrels）・`dataset/README.md`（読み方 ＝ **Hugging Face のデータセットカード**。
+（passages/queries/qrels。**公開時は別データセット**として上げる。`docs/publishing.md` §12）・
+`dataset/README.md`（読み方 ＝ **Hugging Face のデータセットカード**。
 frontmatter つき）・`dataset/views/*.jsonl`（Viewer 用の平らな射影）・`dataset/licenses/`・
 `dataset/SHA256SUMS`（以上は `keiyaku publish` の生成物。`docs/publishing.md`）・**`dataset/data-card.md`**
 （データカード＝規模・内訳・作り方・品質保証・制限と偏り・ライセンス）。**`dataset/README.md` と
@@ -246,23 +248,14 @@ yakkan-synth の 8 原則を**そのまま継承**する：
 
 ## 8. 整合性ルール（`keiyaku lint`）
 
-**yakkan の最終形 L00–L18 を番号・意味とも互換で継承し、L19〜L21 を新設**（実装位置は `docs/lint_rules.md`）。
+**yakkan の最終形 L00–L18 を番号・意味とも互換で継承し、L19〜L26 を新設**。
 
-| # | ルール | 重大度 |
-|---|---|---|
-| L00–L09 | スキーマ検証（**執筆物への `derived` 混入**・doctype の存在）／id 一意と `{ref:}`・`anchor`・`evidence` の参照先存在（**空文字に解決される参照も error**）／脚注の双方向対応と**配置**（`{fn:n}` より前に描かれない）／**番号ラベルと当事者呼称の直書き禁止**（検出パターンは numbering YAML＋`meta.parties` の alias から生成）／blueprint の必須要素（**構造で縛り、semantic_type で題材を縛らない**）／表の格子・`records` 整合／図の端点・複雑度・alt/facts／フォント被覆（☑ □ ㎡ を含む）／denylist・ドメイン・電話番号／推定ページ数 ≤ `page_limit` | error（L09 の目標超過のみ warn） |
-| L10–L15 | 文体（常体・`digit_style`）／数値整合（金額・日数・期間が本文・表・頭書・図で一致。`meta.constants`＋`{const:}`）／定義語の未定義使用・未使用定義・**定義文が紙面に現れない**／disclaimer と meta 必須／QA 整合（evidence 存在・extract 系の answer 包含・図の答えの実在）／類似度 >30% | warn（L13・L14 は error） |
-| L16 | 執筆 QA の件数と観点の配分（15 問・表 3・図 2・apply 2 以上。blueprint で変更可） | error |
-| L17 | 表の `header_cols` が行見出し（`role: stub`）の列を覆っている（**`header_cols == 0` も error**） | error |
-| L18 | 列挙用に組んだ表（`semantic_type: enumeration/exclusions`）に `caption` を付けない | error |
-| **L19** | **当事者整合**：`{party:}` の key が `meta.parties` に存在し、当事者表示・前文・本文・記名押印欄で呼称と名称が一致 | error |
-| **L20** | **契約書の骨格**：`preamble` が body 先頭に 1 つ、`signature` が back_matter に 1 つ、記名欄が `meta.parties` の全当事者を覆う、収入印紙欄は `signature` の中だけ | error |
-| **L21** | **逐条解説**：`commentary` は対象条の `anchor` を持ち、対象が実在する（anchor 欠落は error／本文との文の重複は warn） | error/warn |
-| **L22** | **表・図の配置**：`table` / `figure` / `formula` は**導入文を持つ項**の `blocks` に付ける（`article` や `chapter` の直下に置くと第1項より前に描画される） | error |
-| **L23** | **列挙の入れ子**：同じ親の下に号（`item`）の並びが 2 組以上あるなら、号は**導入する項の `children`** に入れる（兄弟に並べると条の中で通し番号になる） | error |
-| **L24** | **置き去りの part**：`parts/*.json` はすべて `doc.json` の `parts` から参照されていること（書き直しの置き去りは未執筆のまま誰にも見えない） | error |
-| **L25** | **Markdown の名残**：本文に `**` `__` `` ` `` を書かない（強調は `{b:}` `{u:}`。`**` はそのまま紙面に印字される） | error |
-| **L26** | **位置で指す言い方**：番号を持つ表・図は `{ref:}` で指す（「下表」は版面が変われば嘘になる。番号の無い列挙表は対象外） | warn |
+- **ルールの一覧（番号・内容・重大度）と実装位置は `docs/lint_rules.md`**（§0.3 の表のとおり、
+  lint を触る作業では着手前に読む）。本ファイルには一覧を置かない——2 か所に書くと必ず食い違う。
+- 執筆者が**書いてはいけないもの**（番号ラベル・当事者呼称・表/図/別紙番号・`derived`・目次・ページ番号）は
+  §0.4-8 と §7。検出パターンは numbering YAML と `meta.parties` の alias から**生成する**（手書きしない）。
+- ルールを足すときは `keiyaku/lint/base.py` の `@rule("L##", "説明")` で登録し、
+  **`docs/lint_rules.md` の一覧と実装マップの両方**を更新する。
 
 ---
 
@@ -392,7 +385,9 @@ render / layout / verify を触る前に必ず読む。とくに：
 | `content/`・`specs/` のコミット | **コミットしない**（2026-10-05・ユーザー指示。`docs/decisions.md` 152）。公開後の第三者は独自に生成する前提 | 確定 |
 | ライセンス | 同梱フォントは OFL 1.1 / IPA FL v1.0（再配布可）。**コードの宣言（`pyproject.toml` の `Proprietary`）が親リポジトリの `LICENSE`（MIT）と食い違っている**。生成物の配布条件とあわせて決める | 未決 |
 | データセットの公開先 | **Hugging Face Hub**（`specs/publish.yaml` が宣言。2026-10-05 のユーザー指示。アカウント `cvusk`）。`dataset/` をそのまま上げられる形に `keiyaku publish` が整える（`docs/publishing.md`）。**リポジトリ名・可視性・実行者、および公開時の名義は未決** | 準備完了・公開は未実施 |
-| 生成物の配布条件 | **未決**。`specs/publish.yaml` の `license.id` が `undecided` のあいだ、カードは「未決」と書き frontmatter に `license` を出さず、`scripts/upload_hf.py` は**アップロードを拒否する** | 未決 |
+| 検索評価セットの公開 | **本体とは別のデータセットとして出す**（2026-10-08 のユーザー指示）。`dataset/search/` がそのリポジトリのルートで、本体のリポジトリからは外れる（`specs/publish.yaml` の `search_dataset`・`docs/publishing.md` §12）。**検索側のリポジトリ名は未決**（`HITL_TODO.md` H17） | 確定（名前は未決） |
+| 生成物の配布条件 | **CC BY 4.0**（2026-10-06 に人間が決定。`specs/publish.yaml` の `license.id: cc-by-4.0`。`HITL_TODO.md` H13 を閉じた）。姉妹 yakkan-synth と同条件 | 確定 |
+| **AI モデルの学習・蒸留** | **不可。** 生成物の条文・表・図の説明・QA は Claude の Output であり、Anthropic Usage Policy が「入力と出力を AI モデルの学習（model scraping・model distillation を含む）に用いること」を事前許可なしに禁じている。`LICENSE`・カード（英日）・`licenses/NOTICE.md`・データカード §12 の 4 か所に明記する。**ただし CC BY 4.0 第 2 条(a)(5)(B)が下流への追加制限を禁じているので、ライセンス条件ではなく「告知」として書く**（`docs/publishing.md` §10）。**「評価は学習ではない」を必ず併記する** | 確定 |
 | Python／パッケージ管理 | Python 3.12 ／ uv | 確定 |
 
 新たな未決事項が出たら**既定値で進めたうえで** `docs/decisions.md` に「仮決め」として記録する。

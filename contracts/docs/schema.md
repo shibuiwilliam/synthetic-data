@@ -357,7 +357,7 @@ ref_resolution: { article_with_title: true, no_chapter_prefix: false }
 
 ## 9. lint 規則
 
-**yakkan の最終形 L00–L18 を番号・意味とも互換で継承し、L19–L21 を新設**する（一覧は CLAUDE.md §8、
+**yakkan の最終形 L00–L18 を番号・意味とも互換で継承し、L19–L21 を新設**する（一覧は `docs/lint_rules.md` §1、
 実装位置と検査ロジックは `docs/lint_rules.md`）。基底仕様からの実装上の変更点：
 
 - **L00**：`doctype` の存在検証（`blueprints/<doctype>.yaml` があること）、semantic_type の 2 層語彙検証。

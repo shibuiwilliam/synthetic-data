@@ -1,12 +1,14 @@
 """`keiyaku/publish.py` — 公開（Hugging Face Hub）用の面（仕様は `docs/publishing.md`）。
 
-ここで縛るのは 5 つ：
+ここで縛るのは 6 つ：
 
 - **Arrow に落ちる形を崩さない**（1 列に型を混ぜない。混ぜると Dataset Viewer が落ちる）。
 - **人間の決定を代行しない**（ライセンス未決なら frontmatter に `license` を出さず `LICENSE` も作らない）。
 - **配布しないものを配らない**（`render.html`・`.DS_Store` は一覧に出さない）。
 - **決定論**（2 回書いてバイト一致）。
 - **鮮度**（古くなれば `check` が気づく。ただし未決のライセンスは `make check` を赤くしない）。
+- **検索評価セットは別のデータセット**（`dataset/search/` がそのルート。本体には入れない。
+  `docs/publishing.md` §12）。
 """
 
 from __future__ import annotations
@@ -16,6 +18,7 @@ from pathlib import Path
 
 from keiyaku.manifest import DocumentEntry
 from keiyaku.publish import (
+    AUP_URL,
     PROTECTED_HINT,
     PublishSpec,
     blockers,
@@ -24,9 +27,12 @@ from keiyaku.publish import (
     document_rows,
     frontmatter,
     load_spec,
+    main_configs,
     page_rows,
     publish,
     qa_rows,
+    search_distributed_files,
+    search_frontmatter,
     write_license_file,
 )
 from tests.unit.test_datacard import _write_doc, _write_manifest
@@ -114,9 +120,66 @@ def _dataset(tmp_path: Path) -> Path:
     return dataset_dir
 
 
+#: 検索評価セットの最小の中身（`passage_id` は `<doc_id>::<element_id>`）
+SEARCH_ROWS: dict[str, list[dict]] = {
+    "passages": [
+        {
+            "passage_id": "nda-0001--ct-a4-1col-mincho::a1",
+            "doc_id": "nda-0001--ct-a4-1col-mincho",
+            "content_id": "nda-0001",
+            "kind": "article",
+            "citation": "第1条",
+            "text": "秘密保持の条文。",
+        }
+    ],
+    "queries": [
+        {
+            "query_id": "q_term_0001",
+            "kind": "term",
+            "query": "秘密情報",
+            "n_relevant": 1,
+            "n_related_total": 1,
+            "related_truncated": False,
+        },
+        # 打ち切られたクエリ（qrels の読み方が変わるので、カードが実測して書く）
+        {
+            "query_id": "q_term_0002",
+            "kind": "term",
+            "query": "本件業務",
+            "n_relevant": 1,
+            "n_related_total": 99,
+            "related_truncated": True,
+        },
+    ],
+    "qrels": [
+        {
+            "query_id": "q_term_0001",
+            "passage_id": "nda-0001--ct-a4-1col-mincho::a1",
+            "grade": 2,
+        }
+    ],
+}
+
+
+def _write_search(dataset_dir: Path) -> Path:
+    """`dataset/search/` を作る（**別データセットとして公開する対象**）。"""
+    search_dir = dataset_dir / "search"
+    search_dir.mkdir(exist_ok=True)
+    for name, rows in SEARCH_ROWS.items():
+        (search_dir / f"{name}.jsonl").write_text(
+            "".join(json.dumps(r, ensure_ascii=False, sort_keys=True) + "\n" for r in rows),
+            encoding="utf-8",
+        )
+    return search_dir
+
+
 def _spec(license_id: str = "undecided") -> PublishSpec:
     spec = load_spec()
     return spec.model_copy(update={"license": spec.license.model_copy(update={"id": license_id})})
+
+
+def _rel_posix(path: Path, root: Path) -> str:
+    return path.relative_to(root).as_posix()
 
 
 def _column_types(rows: list[dict]) -> dict[str, set[str]]:
@@ -246,6 +309,165 @@ def test_checkは古さを検出し未決は落とさない(tmp_path: Path) -> N
 
 def test_ライセンスが決まればふさぐ条件が消える() -> None:
     assert blockers(_spec()) and not blockers(_spec("cc-by-4.0"))
+
+
+def test_LICENSEが学習と蒸留の禁止を明記する(tmp_path: Path) -> None:
+    """本文は Claude の Output なので、Anthropic Usage Policy の制限を受領者に伝える。
+
+    **告知であってライセンス条件ではない**ことも書く——CC BY 4.0 第 2 条(a)(5)(B)が
+    下流への追加制限を禁じているので、条件として書くと CC BY 違反になる。
+    """
+    dataset_dir = tmp_path / "dataset"
+    dataset_dir.mkdir()
+    path = write_license_file(dataset_dir, _spec("cc-by-4.0"))
+    assert path is not None
+    text = path.read_text(encoding="utf-8")
+    assert "NOT FOR TRAINING AI MODELS" in text
+    for word in ("TRAIN", "FINE-TUNE", "DISTILL", "LLM", "VLM"):
+        assert word in text, word
+    assert AUP_URL in text, "制限の出どころへのリンクが無いと確かめようがない"
+    assert "EVALUATION IS NOT TRAINING" in text, "評価が除かれることを書かないと目的を潰す"
+    assert "NOTICE, not an additional condition" in text
+    assert "2(a)(5)(B)" in text
+
+
+def test_カードが学習と蒸留の禁止を両言語の目立つ節で明記する(tmp_path: Path) -> None:
+    """カードは Hub 上の唯一の説明面。英語・日本語の両面に、ライセンスの案内より前に出す。"""
+    dataset_dir = _dataset(tmp_path)
+    publish(dataset_dir, spec=_spec("cc-by-4.0"))
+    text = (dataset_dir / "README.md").read_text(encoding="utf-8")
+    en = "## \u26a0 Not for training AI models"
+    ja = "## \u26a0 AI モデルの学習・蒸留には使えない"
+    assert en in text and ja in text
+    assert text.index(en) < text.index("## What it is for"), "英語面は用途の説明より前に置く"
+    assert text.index(ja) < text.index("## 並び"), "日本語面は読み方の本体より前に置く"
+    assert "EVALUATION IS NOT TRAINING" in text and "評価は学習ではない" in text
+    assert "告知であってライセンス条件ではない" in text
+    assert AUP_URL in text
+    notice = (dataset_dir / "licenses" / "NOTICE.md").read_text(encoding="utf-8")
+    assert "Not for training AI models" in notice and "学習・蒸留には使えない" in notice
+
+
+def test_検索評価セットは別のデータセットとして出す(tmp_path: Path) -> None:
+    """粒度の違うものを 1 つの Viewer に混ぜない。**本体には入れない**（`docs/publishing.md` §12）。"""
+    dataset_dir = _dataset(tmp_path)
+    search_dir = _write_search(dataset_dir)
+    spec = _spec("cc-by-4.0")
+    assert spec.search_split, "specs/publish.yaml が検索評価セットを切り出す宣言を持っていない"
+    result = publish(dataset_dir, spec=spec)
+
+    # 検索側は自分のカード・LICENSE・SHA256SUMS を持つ（1 つのリポジトリとして完結する）
+    assert (search_dir / "README.md").is_file()
+    assert (search_dir / "LICENSE").is_file()
+    assert (search_dir / "SHA256SUMS").is_file()
+    assert result.search_repo == spec.search_dataset.hub.repo_id
+    own = {p.name for p in search_distributed_files(dataset_dir, spec)}
+    assert {"passages.jsonl", "queries.jsonl", "qrels.jsonl", "README.md", "LICENSE"} == own
+
+    # 本体からは**ディレクトリごと**外れる（二重配布を作らない）
+    main = {_rel_posix(p, dataset_dir) for p in distributed_files(dataset_dir, spec)}
+    assert not any(rel.startswith("search/") for rel in main), sorted(main)[:5]
+    sums = (dataset_dir / "SHA256SUMS").read_text(encoding="utf-8")
+    assert "search/" not in sums
+    assert "passages.jsonl" not in (dataset_dir / "README.md").read_text(encoding="utf-8").split("---")[1]
+
+    # 検索側の SHA256SUMS は**自分のルートからの相対**（`search/` を頭に付けない）
+    own_sums = (search_dir / "SHA256SUMS").read_text(encoding="utf-8")
+    assert "  passages.jsonl" in own_sums and "search/passages.jsonl" not in own_sums
+    assert "SHA256SUMS" not in own_sums
+
+
+def test_configsは配る面だけを指す(tmp_path: Path) -> None:
+    """**存在しないパスを `configs` に書くと Viewer が落ちる**（`docs/publishing.md` §11）。"""
+    split = _spec("cc-by-4.0")
+    assert [name for name, _, _ in main_configs(split)] == ["documents", "pages", "qa", "elements"]
+    search = search_frontmatter(split, None)
+    assert "path: passages.jsonl" in search and "search/passages.jsonl" not in search
+    assert f"extended|{split.hub.repo_id}" in search, "本体のデータセットを source_datasets で指す"
+
+    # 切り出さない宣言なら従来どおり本体に入る（戻せることを縛る）
+    merged = split.model_copy(
+        update={"search_dataset": split.search_dataset.model_copy(update={"enabled": False})}
+    )
+    assert not merged.search_split
+    paths = [path for _, path, _ in main_configs(merged)]
+    assert "search/passages.jsonl" in paths and "search/qrels.jsonl" in paths
+
+
+def test_切り出さない宣言なら検索のカードを作らない(tmp_path: Path) -> None:
+    dataset_dir = _dataset(tmp_path)
+    search_dir = _write_search(dataset_dir)
+    spec = _spec("cc-by-4.0")
+    merged = spec.model_copy(
+        update={"search_dataset": spec.search_dataset.model_copy(update={"enabled": False})}
+    )
+    result = publish(dataset_dir, spec=merged)
+    assert not (search_dir / "README.md").exists()
+    assert result.search_repo == ""
+    sums = (dataset_dir / "SHA256SUMS").read_text(encoding="utf-8")
+    assert "search/passages.jsonl" in sums, "本体で配るなら本体の SHA256SUMS に入る"
+
+
+def test_検索のカードは実測値と学習禁止と打ち切りを書く(tmp_path: Path) -> None:
+    """片方だけを見た人が迷子にならないよう、両方向の案内と qrels の読み方を必ず出す。"""
+    dataset_dir = _dataset(tmp_path)
+    search_dir = _write_search(dataset_dir)
+    spec = _spec("cc-by-4.0")
+    publish(dataset_dir, spec=spec)
+    card = (search_dir / "README.md").read_text(encoding="utf-8")
+    assert "1 passages, 2 queries and 1 relevance judgements" in card  # 実測（焼き込みでない）
+    assert "2 クエリ中 1 件（「本件業務」）" in card, "打ち切りの実測を書く（件数も例も）"
+    assert "1 of 2 queries are capped" in card, "英語面にも出す（Recall@k の読み方が変わる）"
+    assert "`passage_id`" in card and spec.hub.repo_id in card, "文書側のデータセットへ案内する"
+    assert "## \u26a0 Not for training AI models" in card
+    assert "## \u26a0 AI モデルの学習・蒸留には使えない" in card
+    assert "EVALUATION IS NOT TRAINING" in card and "評価は学習ではない" in card
+    assert AUP_URL in card
+    assert "Recall@k" in card, "grade 1 の打ち切りを書かないと qrels を読み違える"
+    # 列名はファイルから実測する（スキーマを焼き込まない）
+    assert "`passage_id`, `text`" in card or "`passage_id`" in card
+    assert "`related_truncated`" in card
+    # PDF の無いリポジトリなので、存在しない licenses/NOTICE.md を案内しない
+    license_text = (search_dir / "LICENSE").read_text(encoding="utf-8")
+    assert "licenses/NOTICE.md" not in license_text
+    assert "NOT FOR TRAINING AI MODELS" in license_text
+
+
+def test_検索の公開先が無ければふさぐ(tmp_path: Path) -> None:
+    """本体に入れないと決めたのに公開先が無いと、検索評価セットが誰にも届かない。"""
+    spec = _spec("cc-by-4.0")
+    assert not blockers(spec)
+    nameless = spec.model_copy(
+        update={
+            "search_dataset": spec.search_dataset.model_copy(
+                update={"hub": spec.search_dataset.hub.model_copy(update={"repo_id": ""})}
+            )
+        }
+    )
+    assert any("検索評価セットの公開先" in line for line in blockers(nameless))
+
+
+def test_checkは検索のカードの古さも見る(tmp_path: Path) -> None:
+    dataset_dir = _dataset(tmp_path)
+    search_dir = _write_search(dataset_dir)
+    spec = _spec("cc-by-4.0")
+    publish(dataset_dir, spec=spec)
+    assert check(dataset_dir, spec)[0] == []
+    # クエリを足せば件数が変わる → カードと SHA256SUMS が古くなる
+    with (search_dir / "queries.jsonl").open("a", encoding="utf-8") as handle:
+        handle.write(json.dumps({"query_id": "q_term_0003", "kind": "term", "query": "本件物件"}) + "\n")
+    stale, _ = check(dataset_dir, spec)
+    assert any("search/README.md" in line for line in stale), stale
+
+
+def test_publishは検索のカードも決定論(tmp_path: Path) -> None:
+    dataset_dir = _dataset(tmp_path)
+    _write_search(dataset_dir)
+    watch = ("README.md", "SHA256SUMS", "search/README.md", "search/SHA256SUMS")
+    publish(dataset_dir, spec=_spec("cc-by-4.0"))
+    first = {name: (dataset_dir / name).read_bytes() for name in watch}
+    publish(dataset_dir, spec=_spec("cc-by-4.0"))
+    assert {name: (dataset_dir / name).read_bytes() for name in watch} == first
 
 
 def test_掃除から守るディレクトリに公開用の面が入っている() -> None:

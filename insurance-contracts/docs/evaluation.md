@@ -141,7 +141,7 @@ uv run yakkan eval dataset/auto-0001--nl-a4-2col-mincho --pred pred.json --out s
 **grade 1 は 1 クエリ 20 件で打ち切る**（`MAX_RELATED`）。打ち切ると qrels に出ないので、
 評価上は非適合と同じ扱いになる。どのクエリで何件落としたかは
 `related_truncated` / `n_related_total` でわかる。正確な件数は文書構成が変わるたびに動くため
-ここには固定値を書かない（`dataset/README.md` が実測値を埋め込んで生成される）。
+ここには固定値を書かない（`dataset/search/README.md` が実測値を埋め込んで生成される）。
 
 | kind | 作り方 | gold | 何を測るか |
 |---|---|---|---|
@@ -197,7 +197,8 @@ uv run yakkan eval --oracle                 # 満点の並びで自己評価
 `no_answer` の行は `ndcg` 等が 0.0 と表示されるが、これは**その kind では測れない**という意味で、
 読むべきは `false_positive_rate` だけである。
 
-**評価セットが簡単すぎないかの目安**として、`dataset/README.md` に素朴な検索器 3 系統
+**評価セットが簡単すぎないかの目安**として、`dataset/search/README.md`
+（検索評価セット側のデータセットカード）に素朴な検索器 3 系統
 （`title` 完全一致・文字 2-gram BM25・文字 unigram TF-IDF）のスコア表が
 `yakkan export` のたびに実測されて埋め込まれる。**nDCG@1 が 0.85 を超え、かつ 3 系統の差が
 0.2 未満の kind は、順位の良し悪しを測る分解能が無い**ので印が付く。

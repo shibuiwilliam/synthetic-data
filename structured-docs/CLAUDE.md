@@ -349,7 +349,8 @@ macOS の DYLD パス等）**は本プロジェクトでも有効。** render/la
 | v1 規模 | 5 ファミリー・26 doctype。**content を足して増やし、style を重ねて数を増やさない** | 仮決め |
 | `apply` QA の確定手順 | 機械検算 → 読み幅の明示 → 人間の承認（keiyaku H5 の手順） | 確定 |
 | 外部サービスへの送信 | しない（商用 OCR / VLM API を使わない） | 仮決め |
-| 生成物の配布条件 | **未決**。先例は yakkan の Hugging Face ＋ CC BY 4.0（`docs/distribution.md`） | 未決（人間の判断待ち） |
+| 生成物の配布条件 | **未決**。先例は yakkan・keiyaku の Hugging Face ＋ CC BY 4.0（`docs/distribution.md`） | 未決（人間の判断待ち） |
+| **AI モデルの学習・蒸留** | **不可**（配布条件の選択と独立に決まる）。生成物の本文・表・図の説明・QA は Claude の Output であり、Anthropic Usage Policy が「入力と出力を AI モデルの学習（model scraping・model distillation を含む）に用いること」を事前許可なしに禁じている。`LICENSE`・カード・データカードに明記する。**CC BY 系は下流への追加制限を禁じているので（CC BY 4.0 第 2 条(a)(5)(B)）、ライセンス条件ではなく「告知」として書く。「評価は学習ではない」を必ず併記する**（`docs/distribution.md` §6。両姉妹 2026-10-06 の決定を継承） | 確定 |
 | Python／パッケージ管理 | Python 3.12／uv | 確定 |
 
 新たな未決事項が出たら既定値で進めたうえで `docs/decisions.md` に「仮決め」として記録する。

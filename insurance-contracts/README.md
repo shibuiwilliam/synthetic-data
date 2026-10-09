@@ -222,7 +222,7 @@ uv run yakkan eval --search-run run.json               # 検索の採点
 
 検索クエリは 10 種（`term` `heading` `scoped` `filtered` `enumeration` `qa`
 `definition_masked` `multi_hop` `situational` `no_answer`）。素朴な文字 2-gram BM25 で
-飽和する kind（`term`・`heading`）には `dataset/README.md` のベースライン表で印を付けてある。
+飽和する kind（`term`・`heading`）には `dataset/search/README.md` のベースライン表で印を付けてある。
 設計の経緯は `docs/search_query_design.md`、実測は `docs/search_query_plan.md`。
 
 ## ライセンスと架空性
@@ -234,8 +234,19 @@ uv run yakkan eval --search-run run.json               # 検索の採点
 - **コード・仕様・執筆成果（`yakkan/` `docs/` `content/` ほか）**：親リポジトリの `LICENSE`（MIT）。
 - **同梱フォント**：OFL / IPA フォントライセンス。出典・版・SHA256 は `assets/fonts/SOURCES.md`。
 - **生成データセット（`dataset/`）**：**CC BY 4.0**（2026-10-05 決定）。
-  本文と帰属の書き方は `dataset/LICENSE`。配布先は Hugging Face Datasets
-  `cvusk/synthetic-japanese-insurance-documents`（控えを GitHub Releases）。
-  手順は **`docs/distribution.md`**。
+  本文と帰属の書き方は `dataset/LICENSE`。配布先は Hugging Face Datasets の **2 つ**——
+  文書本体 `cvusk/synthetic-japanese-insurance-documents` と
+  検索評価セット `cvusk/synthetic-japanese-insurance-search`（`dataset/search/` の中身。
+  2026-10-08 に分離）。控えを GitHub Releases。手順は **`docs/distribution.md`**。
   なお `doc.pdf` には描画に使った字形の**サブセットが埋め込まれている**（OFL / IPA）。
   フォントファイル自体はデータセットに含まれない。
+
+- **AI モデルの学習・蒸留には使えない。** 生成物の本文・QA・図の説明は Claude Code セッション内で
+  **Claude（Anthropic）が書いた Output** であり、Anthropic の Usage Policy が「入力と出力を
+  AI モデルの学習（model scraping・model distillation を含む）に用いること」を**事前許可なしに
+  禁じている**（<https://www.anthropic.com/legal/aup>）。
+  **読み取り・検索・AI エージェントの評価とベンチマークはこのデータの目的そのもの**で、
+  上の制限は一切かからない（除かれるのはモデルの重みを更新する用途だけ）。
+  これは **CC BY 4.0 の条件ではなく告知**である（CC BY 4.0 第 2 条(a)(5)(B)が下流への追加制限を
+  禁じているため、条件としては書けない）。文面は `dataset/LICENSE` と `dataset/README.md`、
+  仕様は **`docs/distribution.md` §7**。

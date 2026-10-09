@@ -46,7 +46,7 @@
 | 4 内訳 | doctype 別／style 別（実測フォントつき）／文書別（**全件**）の表と、**骨格・体裁の覆い**（条文型・様式型・頭書・章立て・目次・逐条解説ほか） | `manifest.json`＋`source.json`＋`doc.pdf` |
 | 5 正解の中身 | 構造（ノード種別）・表（意味種別・セル数）・図（種別・ノード・辺・経路）・参照・定義語・QA（種別／出所／答えの型） | `source.json` の `derived`＋本体、`qa.json` |
 | 6 版面 | 判型・段数・領域別の行数・renderer と版・PNG の dpi・**PDF に実際に埋め込まれていたフォント**（`layout.renderer.fonts` は描画に登録した候補で、使われたものとは違う） | `layout.json` ＋ `doc.pdf`（pdfplumber で実測） |
-| 7 検索評価セット | パッセージ（種別別）・クエリ（種別別）・qrels（grade 別）・打ち切りクエリ | `dataset/search/*.jsonl` |
+| 7 検索評価セット | パッセージ（種別別）・クエリ（種別別）・qrels（grade 別）・打ち切りクエリ・**配布は別データセット**（`docs/publishing.md` §12） | `dataset/search/*.jsonl` ＋ `specs/publish.yaml` の `search_dataset` |
 | 8 生成方法 | JSON→HTML→PDF・決定論・seed・執筆の役割分担・外部 LLM API を使わないこと | 固定文＋`layout.json` の renderer |
 | 9 架空性と転載 | ハードルール（架空・転載禁止・法令の条番号を書かない）・奥付の disclaimer | 固定文＋`source.json` の `meta.disclaimer` |
 | 10 品質保証 | lint（L00–L26）・verify・`manifest check`・`eval --all --oracle`・検証の階段 V-A〜V-F | 固定文＋`manifest.json` の `status` |

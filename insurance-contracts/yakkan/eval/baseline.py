@@ -47,7 +47,8 @@ def _indexed(passage: dict[str, Any]) -> str:
 class TitleExact:
     """B1：クエリと `title` が正規化後に一致するパッセージだけを返す。"""
 
-    name = "B1 title一致"
+    # 表示名は**カードの英語面に出る**ので英語にする（2026-10-09）
+    name = "B1 title-exact"
 
     def __init__(self, passages: list[dict[str, Any]]) -> None:
         self.by_title: dict[str, list[str]] = collections.defaultdict(list)
@@ -161,21 +162,48 @@ def score(
     }
 
 
+#: 表の見出しと判定の文言。**カードの英語面に載せるので既定は英語**
+#: （`dataset/search/README.md` の `How hard is it?`。2026-10-09）。
+#: 日本語で出したいところ（docs・端末）からは `lang="ja"` で呼ぶ。
+_TABLE_LABELS = {
+    "en": {
+        "queries": "queries",
+        "spread": "spread",
+        "verdict": "verdict",
+        "saturated": "**no resolving power (saturated)**",
+        "fpr_kind": "measures false positives",
+    },
+    "ja": {
+        "queries": "クエリ数",
+        "spread": "スプレッド",
+        "verdict": "判定",
+        "saturated": "**弁別力なし（飽和）**",
+        "fpr_kind": "偽陽性を測る kind",
+    },
+}
+
+
 def table(
     passages: list[dict[str, Any]],
     queries: list[dict[str, Any]],
     qrels: dict[str, dict[str, int]],
+    *,
+    lang: str = "en",
 ) -> str:
-    """kind ごとのベースライン表（Markdown）。`dataset/README.md` に埋め込む。
+    """kind ごとのベースライン表（Markdown）。`dataset/search/README.md` に埋め込む。
 
     **統計値は固定文字列で焼き込まない**（コミット 42f58b3 の教訓）。
+    見出しの言語だけ `lang` で切り替える（カードの英語面に載せるので既定は英語）。
     """
+    label = _TABLE_LABELS[lang]
     engines = retrievers(passages)
     scored = {engine.name: score(passages, queries, qrels, engine) for engine in engines}  # type: ignore[attr-defined]
     counts = collections.Counter(q["kind"] for q in queries)
     names = list(scored)
     lines = [
-        "| kind | クエリ数 | " + " | ".join(f"{n} nDCG@1" for n in names) + " | スプレッド | 判定 |",
+        f"| kind | {label['queries']} | "
+        + " | ".join(f"{n} nDCG@1" for n in names)
+        + f" | {label['spread']} | {label['verdict']} |",
         "|---|---:|" + "---:|" * len(names) + "---:|---|",
     ]
     for kind in sorted(counts):
@@ -183,10 +211,10 @@ def table(
         fpr = [scored[n].get(kind, {}).get("false_positive_rate") for n in names]
         if any(f is not None for f in fpr):
             shown = " | ".join(f"FPR {f:.3f}" if f is not None else "—" for f in fpr)
-            lines.append(f"| `{kind}` | {counts[kind]:,} | {shown} | — | 偽陽性を測る kind |")
+            lines.append(f"| `{kind}` | {counts[kind]:,} | {shown} | — | {label['fpr_kind']} |")
             continue
         spread = max(values) - min(values)
-        verdict = "**弁別力なし（飽和）**" if max(values) > SATURATED_NDCG1 and spread < 0.2 else ""
+        verdict = label["saturated"] if max(values) > SATURATED_NDCG1 and spread < 0.2 else ""
         lines.append(
             f"| `{kind}` | {counts[kind]:,} | "
             + " | ".join(f"{v:.3f}" for v in values)

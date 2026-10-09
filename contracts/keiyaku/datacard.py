@@ -379,6 +379,26 @@ def _search(dataset_dir: Path, contents: set[str]) -> SearchStats:
     return stats
 
 
+def _search_distribution_note() -> str:
+    """検索評価セットの**配布の形**を宣言から書く（`specs/publish.yaml`）。
+
+    Hugging Face では文書のデータセットと検索評価セットを別のリポジトリに分けている
+    （`docs/publishing.md` §12）。名前はここに焼き込まず宣言から読む。
+    """
+    from keiyaku.publish import load_spec
+
+    spec = load_spec()
+    if not spec.search_split:
+        return ""
+    name = spec.search_dataset.hub.repo_id or "（公開先は未決）"
+    return (
+        "**配布は本体と別のデータセットで行う**（Hugging Face: "
+        f"`{name}`）。生成の場所は `dataset/search/` のままで、"
+        "公開時だけ `dataset/search/` をそのリポジトリのルートとして上げる"
+        "（粒度も行数も違うものを 1 つの Viewer に混ぜない。`docs/publishing.md` §12）。\n\n"
+    )
+
+
 def collect(dataset_dir: Path) -> DataCardStats:
     """`dataset/` を走査して実測値を集める（**書き出しはしない**）。"""
     from keiyaku.blueprints import available_doctypes
@@ -664,10 +684,22 @@ def _license_paragraph() -> str:
     if spec is not None and spec.license.decided:
         holder = f"（著作権表示：© {spec.license.year} {spec.license.holder}）" if spec.license.holder else ""
         note = f" {spec.license.note}" if spec.license.note else ""
+        from keiyaku.publish import AUP_URL
+
         return (
             f"- **生成物（PDF・JSON・PNG）は `{spec.license.id}` で配布する**{holder}。"
             f"条件の正本は `specs/publish.yaml`、本文は公開物の `LICENSE`。"
             f"公開先は {spec.hub_url}（`docs/publishing.md`）。{note}\n"
+            "- **AI モデルの学習・蒸留には使えない。** 条文・表・図の説明・QA は Claude Code "
+            "セッション内で Claude（Anthropic）が書いた Output であり、Anthropic Usage Policy が"
+            "「入力と出力を AI モデルの学習（model scraping・model distillation を含む）に"
+            f"用いること」を事前許可なしに禁じている（{AUP_URL}）。"
+            "**評価・ベンチマーク・テストフィクスチャ・推論時の検索コーパスとしての利用は対象外**で、"
+            "除かれるのはモデルの重みを更新する用途だけである。"
+            "これは**告知であってライセンス条件ではない**——CC BY 系は下流への追加制限を"
+            "禁じているため（CC BY 4.0 第 2 条(a)(5)(B)）、付与条件としては書けない。"
+            "文面の正本は `keiyaku/publish.py` の `NO_TRAINING_EN` / `NO_TRAINING_JA`"
+            "（`docs/publishing.md` §10）。\n"
         )
     return (
         "- **生成物（PDF・JSON・PNG）の配布条件は未決**である。リポジトリの `pyproject.toml` は "
@@ -901,6 +933,7 @@ def render_card(stats: DataCardStats) -> str:
     )
 
     add("\n## 7. 検索評価セット（`dataset/search/`）\n\n")
+    add(_search_distribution_note())
     if not search.available:
         add("**未生成。** `uv run keiyaku export` で作る。\n")
     else:

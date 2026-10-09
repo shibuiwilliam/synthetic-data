@@ -13,11 +13,17 @@
 - 本体は `ruff format --check`、`ruff check`、`pytest` が全緑（**533 passed**）。
   `contracts-calculation` の関連テストは **21 passed**。`make check` 全体には、本件より前からある
   `contracts-calculation/DESIGN.md` と `examples/*/calc/programs/*.py` の formatting 違反だけが残る。
-- HITL の依頼中は **H12・H13・H14・H15・H16**（H9 は 2026-10-05 に決定済み）。
+- HITL の依頼中は **H12・H14・H15・H16・H17**（H9・H13 は決定済み）。
 - **2026-10-05：`dataset/` を Hugging Face Hub で公開できる形に整えた**（T15。`docs/publishing.md`・
   `keiyaku/publish.py`・`specs/publish.yaml`）。**アップロードは未実施**——配布条件（**H13**）が未決で、
   リポジトリ名・可視性・実行者（**H15**）と名義（**H16**）も人間の判断待ち。
   `uv run keiyaku publish check` と `uv run python scripts/upload_hf.py`（既定 dry-run）で状態が見える。
+- **2026-10-08：検索評価セット（`dataset/search/`）を本体とは別の Hugging Face データセットに分けた**
+  （ユーザー指示。`docs/publishing.md` §12・`docs/decisions.md` 160〜163）。上げ先は 2 つになり、
+  本体の `configs`・`SHA256SUMS`・アップロードから `search/` が外れ、検索側は自分のカード・`LICENSE`・
+  `SHA256SUMS` を持つ（`dataset/search/` がそのリポジトリのルート）。**生成の場所と `keiyaku eval
+  --search-run` のパスは変えていない。** 検索側のリポジトリ名は **H17** で判断待ち（仮置きで動く）。
+  pytest **555 passed**。
 - **2026-10-05：`contracts/` 本体を git に載せた**（H9 の決定。`contracts-calculation/` は含めず別扱い・
   タグは打たない）。公開に向けて整理した内容は `docs/decisions.md` 147〜151。
   `make check` は**本体だけを見るようになり全緑**——`pyproject.toml` の ruff に
@@ -27,10 +33,10 @@
 
 ### 次の 3 タスク
 
-1. **H14**（拡張で増えた `apply` QA 60 問の算出値）の決定を仰ぐ。材料は `HITL_apply_review.md` の
-   「検算メモの無い 60 件」。決まるまで v1 系のタグは打たない。
-2. **H13**（生成物の配布条件と、`pyproject.toml` の `Proprietary` ↔ 親リポジトリの `LICENSE`（MIT）の
-   食い違い）の決定を仰ぐ。
+1. **H15・H17**（2 つのデータセットのリポジトリ名・可視性・実行者）の決定を仰ぐ。決まれば
+   `specs/publish.yaml` の 2 行＋`keiyaku publish update`＋`scripts/upload_hf.py --yes` で公開できる。
+2. **H14**（拡張で増えた `apply` QA 60 問の算出値）の決定を仰ぐ。材料は `HITL_apply_review.md` の
+   「検算メモの無い 60 件」。
 3. **`contracts-calculation/` のコミット**（本体とは別に。サブの `HITL.md` HC-1 により人間の操作）。
 
 ### 旧 v1 スナップショット（履歴）
@@ -69,6 +75,40 @@
   （decisions 126〜130）。採点側の穴も 1 件（表の対応づけ）直した。
 - **単調性の検査に図の多い文書ができた**：`sys-0002` に図を 2 点足して 3 点（ノード 24・辺 24・経路 9）。
   これまで全文書が図 1 点で、図の指標は「反応を要求しない」扱いだった（`docs/evaluation.md` §6 の条件 2）。
+
+## 2026-10-08 検索評価セットを別の Hugging Face データセットに分けた
+
+**指示**：「`dataset/search/` を Hugging Face 登録時に新しいデータセットへ移す」。
+
+**やったこと**（`docs/decisions.md` 160〜163・`docs/publishing.md` §12）：
+
+- `specs/publish.yaml` に **`search_dataset`** を新設（`enabled` / `dir` / `hub` / `pretty_name` /
+  `pretty_name_ja` / `task_categories` / `task_ids` / `tags`）。**公開の決定は宣言だけに置く。**
+- `keiyaku/publish.py`：`CONFIGS` を本体 4 件（`documents` / `pages` / `qa` / `elements`）と
+  `SEARCH_CONFIGS` 3 件に分け、`main_configs()` が切り出しの有無で出すものを変える。
+  検索側のカード（`render_search_card()` / `search_frontmatter()` / `write_search_card()`）、
+  配布一覧とチェックサム（`search_distributed_files()` / `search_checksums()`）を追加。
+  `distributed_files()` は切り出した `search/` を**ディレクトリごと**外す。
+- `scripts/upload_hf.py` は 2 リポジトリを上げる（`--only main|search`）。本体の `upload_folder` には
+  `search/` を `ignore_patterns` で渡す——**`dataset/` を丸ごと上げると二重に入る。**
+- `blockers()` に「検索評価セットの公開先が無い」を追加。**本体に入れないと決めたのに公開先が無いと、
+  検索評価セットがどこにも出ない。**
+- 実測：本体 **1,367 ファイル・365.8 MiB**／検索側 **5 ファイル・2.9 MiB**。
+  `publish check` は両方の鮮度を見て緑。pytest **555 passed**。
+
+**踏んだこと**：
+
+- **検索側の `LICENSE` に `licenses/NOTICE.md` を案内してはいけない。** あちらのリポジトリに PDF は
+  無く、フォントのライセンス本文も入らない（存在しないファイルを指す案内になる）。
+  `write_license_file(..., fonts=False)` で分けた。
+- **`SHA256SUMS` のパスは自分のルートからの相対**にする（`search/passages.jsonl` ではなく
+  `passages.jsonl`）。別リポジトリとして clone した人が `sha256sum -c` を使えなくなる。
+- **grade 1 の打ち切りの説明が本体のカードから消える。** 検索側のカードに移し、
+  **英語面（`## Caveats`）にも出した**——検索の利用者は英語面しか読まないことが多く、
+  キャップを知らずに Recall@k を読むと誤解する。
+- `tests/unit/test_export.py` の 2 本は「本体のカードがクエリ数を実測する」ことを縛っていたが、
+  その数は検索側のカードへ移った。**検査を緩めず**、同梱設定（`enabled: false`）で縛り直し、
+  切り出し時は「公開先への案内が出ていること」を別に縛った。
 
 ## 2026-10-05 データセットを Hugging Face で公開できる形に整えた（T15）
 

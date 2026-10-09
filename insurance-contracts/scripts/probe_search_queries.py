@@ -325,7 +325,7 @@ def report_spread(corpus: Corpus, kinds: tuple[str, ...]) -> None:
     """3 つの素朴な検索器のスコア差（スプレッド）。差が出ない kind は弁別力が無い。"""
     print("\n## 6. 素朴な検索器 3 種のスプレッド（nDCG@1）")
     engines = {
-        "B1 title一致": TitleExact(corpus.passages),
+        "B1 title-exact": TitleExact(corpus.passages),
         "B2 2gram BM25": Bm25(corpus.passages),
         "B3 unigram TFIDF": Tfidf(corpus.passages),
     }

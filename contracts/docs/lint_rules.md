@@ -1,12 +1,33 @@
 # lint_rules.md — `keiyaku lint` の実装マップ
 
-> CLAUDE.md §8 の一覧表に対応する実装マップと補足。ルールの重大度・一言説明は CLAUDE.md §8、
-> 意味の定義は `docs/schema.md` §9 を見る。本ファイルは「**どのファイルのどの関数が検査しているか**」
-> 「**実装上の注意点**」を持つ。
+> **`keiyaku lint` のルール一覧（§1）と実装マップ（§2 以降）の正本**。
+> 意味の定義は `docs/schema.md` §9 を見る。
 > 新しいルールは `keiyaku/lint/base.py` の `@rule("L##", "説明")` デコレータで登録し、
-> **本ファイルと CLAUDE.md §8 の両方を更新する**。
+> **§1 の一覧と実装マップの両方**を更新する（CLAUDE.md §8 は本ファイルを指すだけで一覧を持たない。
+> 2026-10-08 に移送した。`docs/decisions.md` 164）。
 
-## 実装ファイル対応表
+## 1. ルール一覧（重大度つき）
+
+L00–L18 は yakkan の最終形を番号・意味とも互換で継承したもの。L19–L26 は契約書のために新設した。
+
+| # | ルール | 重大度 |
+|---|---|---|
+| L00–L09 | スキーマ検証（**執筆物への `derived` 混入**・doctype の存在）／id 一意と `{ref:}`・`anchor`・`evidence` の参照先存在（**空文字に解決される参照も error**）／脚注の双方向対応と**配置**（`{fn:n}` より前に描かれない）／**番号ラベルと当事者呼称の直書き禁止**（検出パターンは numbering YAML＋`meta.parties` の alias から生成）／blueprint の必須要素（**構造で縛り、semantic_type で題材を縛らない**）／表の格子・`records` 整合／図の端点・複雑度・alt/facts／フォント被覆（☑ □ ㎡ を含む）／denylist・ドメイン・電話番号／推定ページ数 ≤ `page_limit` | error（L09 の目標超過のみ warn） |
+| L10–L15 | 文体（常体・`digit_style`）／数値整合（金額・日数・期間が本文・表・頭書・図で一致。`meta.constants`＋`{const:}`）／定義語の未定義使用・未使用定義・**定義文が紙面に現れない**／disclaimer と meta 必須／QA 整合（evidence 存在・extract 系の answer 包含・図の答えの実在）／類似度 >30% | warn（L13・L14 は error） |
+| L16 | 執筆 QA の件数と観点の配分（15 問・表 3・図 2・apply 2 以上。blueprint で変更可） | error |
+| L17 | 表の `header_cols` が行見出し（`role: stub`）の列を覆っている（**`header_cols == 0` も error**） | error |
+| L18 | 列挙用に組んだ表（`semantic_type: enumeration/exclusions`）に `caption` を付けない | error |
+| **L19** | **当事者整合**：`{party:}` の key が `meta.parties` に存在し、当事者表示・前文・本文・記名押印欄で呼称と名称が一致 | error |
+| **L20** | **契約書の骨格**：`preamble` が body 先頭に 1 つ、`signature` が back_matter に 1 つ、記名欄が `meta.parties` の全当事者を覆う、収入印紙欄は `signature` の中だけ | error |
+| **L21** | **逐条解説**：`commentary` は対象条の `anchor` を持ち、対象が実在する（anchor 欠落は error／本文との文の重複は warn） | error/warn |
+| **L22** | **表・図の配置**：`table` / `figure` / `formula` は**導入文を持つ項**の `blocks` に付ける（`article` や `chapter` の直下に置くと第1項より前に描画される） | error |
+| **L23** | **列挙の入れ子**：同じ親の下に号（`item`）の並びが 2 組以上あるなら、号は**導入する項の `children`** に入れる（兄弟に並べると条の中で通し番号になる） | error |
+| **L24** | **置き去りの part**：`parts/*.json` はすべて `doc.json` の `parts` から参照されていること（書き直しの置き去りは未執筆のまま誰にも見えない） | error |
+| **L25** | **Markdown の名残**：本文に `**` `__` `` ` `` を書かない（強調は `{b:}` `{u:}`。`**` はそのまま紙面に印字される） | error |
+| **L26** | **位置で指す言い方**：番号を持つ表・図は `{ref:}` で指す（「下表」は版面が変われば嘘になる。番号の無い列挙表は対象外） | warn |
+
+## 2. 実装ファイル対応表
+
 
 L00〜L18 は yakkan から移植したもの（`../insurance-contracts/docs/lint_rules.md` が基底）。
 「改造」列は P2 で契約書向けに手を入れる箇所。

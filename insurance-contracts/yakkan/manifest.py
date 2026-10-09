@@ -144,9 +144,21 @@ def build(dataset_dir: Path | None = None, *, verify: bool = True) -> tuple[Mani
         entry = scan_document(doc_dir, verify=verify)
         if entry is not None:
             entries.append(entry)
+    # `search/` は **それ自体が 1 つの Hugging Face データセットリポジトリ**として上げる
+    # （docs/distribution.md §1。2026-10-08 決定）。そのためカード・LICENSE・
+    # SHA256SUMS がこのディレクトリの直下にも居る（`.gitattributes` は LFS 対象が
+    # 無いので置かない＝姉妹プロジェクト contracts と同じ。2026-10-09）。
     corpus = [
         f"search/{name}"
-        for name in ("passages.jsonl", "queries.jsonl", "qrels.jsonl", "id_map.json")
+        for name in (
+            "passages.jsonl",
+            "queries.jsonl",
+            "qrels.jsonl",
+            "id_map.json",
+            "README.md",
+            "LICENSE",
+            "SHA256SUMS",
+        )
         if (base / "search" / name).is_file()
     ]
     # コーパス直下の成果物。`README.md` は **Hugging Face のデータセットカード**でもある
