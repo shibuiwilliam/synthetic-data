@@ -676,6 +676,10 @@ def render_card(
     add(f"- {_license_line_ja(spec)}\n")
     add("- **実務の契約書としては使えない**（法律専門家の校閲を受けていないダミーである）。\n")
     add("- 会社名・人物名・住所・金額・契約書番号はすべて架空で、実在のひな型を転載していない。\n")
+    add(
+        "  これらの固有名詞は可能な限り実在しないものを選ぶよう努めているが、"
+        "万が一実在する名称・住所等と偶然一致していることが判明した場合は、該当箇所を修正する。\n"
+    )
     add("- **AI モデルの学習・蒸留には使えない**（次節）。評価・ベンチマークは対象外。\n")
     if spec.search_split:
         add(
@@ -1073,7 +1077,9 @@ def render_search_card(
         "  **この件数で Recall@k を解釈しない。**\n"
         "- **grade 2 は「答えがある」パッセージ**で、grade 1 は「関連する」。"
         "nDCG などの指標は\n  この 2 段階を前提にしている（`docs/evaluation.md`）。\n"
-        "- すべて架空の会社・契約である（文章は全文オリジナルで、実在のひな型を転載していない）。\n\n"
+        "- すべて架空の会社・契約である（文章は全文オリジナルで、実在のひな型を転載していない）。\n"
+        "  固有名詞は可能な限り実在しないものを選ぶよう努めているが、万が一実在する名称等と"
+        "偶然一致していることが判明した場合は、該当箇所を修正する。\n\n"
     )
     add("## 採点\n\n")
     add(
@@ -1158,9 +1164,13 @@ def write_licenses(dataset_dir: Path, spec: PublishSpec, stats: DataCardStats | 
         )
     notice.append(
         "\n本文・表・図・当事者名はすべてオリジナルに書いた架空の文章であり、"
-        "実在の契約書ひな型・標準契約書・モデル契約書を転載していない。\n"
+        "実在の契約書ひな型・標準契約書・モデル契約書を転載していない。"
+        "固有名詞は可能な限り実在しないものを選ぶよう努めているが、"
+        "万が一実在する名称等と偶然一致していることが判明した場合は、該当箇所を修正する。\n"
         "All sentences, tables, figures and party names are original and fictional; "
-        "no real contract template is reproduced here.\n"
+        "no real contract template is reproduced here. Every effort is made to avoid names "
+        "that exist in the real world; if a coincidental match with a real name is found, "
+        "the affected part will be corrected.\n"
     )
     notice.append(
         "\n**AI モデルの学習・蒸留には使えない**（本文は Claude の Output であり、"

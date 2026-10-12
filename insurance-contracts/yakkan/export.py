@@ -254,6 +254,10 @@ FICTITIOUS_JA = """## ⚠ すべて架空である
 電話番号はゼロ埋め（`0120-000-000`）、ドメインは `example.jp` / `example.co.jp` /
 `example.com` のみ。各文書の奥付に免責を明記してある。
 
+これらの固有名詞は、可能な限り実在しないものを選ぶよう努めている。
+万が一、実在する社名・商品名・人物名等と偶然一致していることが判明した場合は、
+該当箇所を修正する。
+
 **実在の約款の文章は、部分的にも、語順を変えただけでも含まれていない。**
 参考にしたのは構造・要素の種類・レイアウト慣行のみである。
 
@@ -396,7 +400,9 @@ sentence is copied from a real policy.
   evaluation; they have not been reviewed by an insurance or legal professional.
   Do not use them as policy terms, for product comparison, or as a legal reference.
 - Reproducing real policies (only structure and layout conventions were studied;
-  every sentence is original).
+  every sentence is original). Every effort is made to avoid company, product and
+  person names that exist in the real world; if a coincidental match with a real
+  name is found, the affected part will be corrected.
 - **Training, fine-tuning or distilling any AI / ML model** (see the section above;
   this is a restriction from Anthropic's Usage Policy, not from the dataset license).
 - Language-model pre-training (too small, deliberately narrow subject matter).
