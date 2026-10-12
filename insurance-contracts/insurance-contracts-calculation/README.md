@@ -34,8 +34,8 @@
 ## 現在の状態
 
 計算条項、正解プログラム、テストデータの生成と、検証ゲート G1〜G12 を実装済みです。
-Hugging Face 向けの公開パッケージも作成できますが、ライセンスは仮設定であり、
-公開作業はまだ行っていません。
+Hugging Face Datasets で公開済みです（public・CC BY 4.0。2026-10-12）。
+[`cvusk/japanese-insurance-document-understanding-calculation`](https://huggingface.co/datasets/cvusk/japanese-insurance-document-understanding-calculation)
 
 ## 前提条件
 
@@ -174,11 +174,12 @@ Hugging Face 向けの公開パッケージは、次のコマンドで作成で�
 PYTHONPATH=src uv run --project .. \
     python -m insurance_contracts_calculation.cli \
     package dataset --format hf --out dist/hf --version v2.3 \
-    --license cc-by-4.0 --repo-id <account>/yakkan-calc
+    --license cc-by-4.0 --repo-id cvusk/japanese-insurance-document-understanding-calculation
 ```
 
-ライセンスは `cc-by-4.0` で仮設定しています。公開前に確定してください。
-詳しい手順と確認項目は `docs/hf_publication.md` を参照してください。
+ライセンスは **CC BY 4.0**（2026-10-12 決定）です。公開済みリポジトリは
+[`cvusk/japanese-insurance-document-understanding-calculation`](https://huggingface.co/datasets/cvusk/japanese-insurance-document-understanding-calculation)
+です。詳しい手順と確認項目は `docs/hf_publication.md` を参照してください。
 
 評価時には、正解プログラムや期待値を評価対象の学習データに混ぜないでください。
 公開対象と非公開対象の分離は、エクスポート処理が機械的に行います。
@@ -186,7 +187,9 @@ PYTHONPATH=src uv run --project .. \
 ## ライセンス
 
 コードには、ルートディレクトリの [`LICENSE`](../../LICENSE) に記載された MIT License が適用されます。
-生成物の配布ライセンスは公開前に確定する必要があります。
+生成物の配布ライセンスは **CC BY 4.0**（2026-10-12 決定）で、
+[`cvusk/japanese-insurance-document-understanding-calculation`](https://huggingface.co/datasets/cvusk/japanese-insurance-document-understanding-calculation)
+として公開しています。
 
 ### AI モデルの学習・蒸留について
 

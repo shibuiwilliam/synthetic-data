@@ -228,8 +228,11 @@ uv run python scripts/upload_hf.py --only search
 - **同梱フォント**：SIL Open Font License 1.1 または IPA フォントライセンス v1.0
 - **生成データセット**：CC BY 4.0（2026-10-06 決定）
 
-生成データセットの公開先は
-`cvusk/japanese-contract-document-understanding` ですが、まだアップロードしていません。
+生成データセットは Hugging Face Datasets で公開しています（public）。
+
+- 文書本体：[`cvusk/japanese-contract-document-understanding`](https://huggingface.co/datasets/cvusk/japanese-contract-document-understanding)
+- 検索評価セット：[`cvusk/japanese-contract-document-understanding-retrieval`](https://huggingface.co/datasets/cvusk/japanese-contract-document-understanding-retrieval)
+
 ライセンス宣言の正本は `specs/publish.yaml` の `license.id` です。
 
 ### AI モデルの学習・蒸留について

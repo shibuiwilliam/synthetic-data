@@ -213,9 +213,12 @@ uv run --project .. python -m contracts_calculation.cli \
 コード（`src/`、`scripts/`、`tests/`）には、ルートディレクトリの
 [`LICENSE`](../../LICENSE) に記載された MIT License が適用されます。
 
-生成物の配布条件は未決定で、本体プロジェクトの決定に従います。Hugging Face 向けの
-公開形式と公開前ゲートは実装済みですが、ライセンスは `other` / `undecided` として出力されます。
-アップロードは人が実行します。
+生成物の配布条件は **CC BY 4.0**（2026-10-12 決定）です。Hugging Face Datasets で
+公開しています（public）。
+
+- [`cvusk/japanese-contract-document-understanding-calculation`](https://huggingface.co/datasets/cvusk/japanese-contract-document-understanding-calculation)
+
+詳しくは `docs/hf_publish.md` を参照してください。
 
 ### AI モデルの学習・蒸留について
 

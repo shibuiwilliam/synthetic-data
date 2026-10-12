@@ -25,13 +25,13 @@ export DYLD_FALLBACK_LIBRARY_PATH=/opt/homebrew/lib
 
 PYTHONPATH=src uv run --project .. python -m insurance_contracts_calculation.cli \
     package dataset --format hf --out dist/hf --version v2.3 \
-    --license cc-by-4.0 --repo-id <account>/yakkan-calc
+    --license cc-by-4.0 --repo-id cvusk/japanese-insurance-document-understanding-calculation
 ```
 
 | 引数 | 既定 | 意味 |
 |---|---|---|
 | `--license` | `cc-by-4.0`（**仮決め**） | データセットカードの `license:` タグと `LICENSE` の中身 |
-| `--repo-id` | `<your-account>/yakkan-calc` | カードの `load_dataset()` の例文に出る |
+| `--repo-id` | `cvusk/japanese-insurance-document-understanding-calculation` | カードの `load_dataset()` の例文に出る |
 | `--no-png` | （付けない） | ページ画像を外す。**2,064MB → 341MB** |
 | `--version` | `v2.0` | 配布物の版。カードと `index.json` に出る |
 
@@ -125,10 +125,10 @@ PNG はラスタライズ済みでフォントのデータを含まない。
 
 ```bash
 hf auth login
-hf upload <account>/yakkan-calc dist/hf --repo-type dataset
+hf upload cvusk/japanese-insurance-document-understanding-calculation dist/hf --repo-type dataset
 # もしくは private で先に作ってから中身を確かめる
-hf repo create <account>/yakkan-calc --repo-type dataset --private
-hf upload <account>/yakkan-calc dist/hf --repo-type dataset
+hf repo create cvusk/japanese-insurance-document-understanding-calculation --repo-type dataset --private
+hf upload cvusk/japanese-insurance-document-understanding-calculation dist/hf --repo-type dataset
 ```
 
 4. **上げたあとに確かめる。**
@@ -136,8 +136,8 @@ hf upload <account>/yakkan-calc dist/hf --repo-type dataset
 ```python
 from datasets import load_dataset
 
-load_dataset("<account>/yakkan-calc")  # documents が既定で読める
-load_dataset("<account>/yakkan-calc", "cases")  # 正解のビュー
+load_dataset("cvusk/japanese-insurance-document-understanding-calculation")  # documents が既定で読める
+load_dataset("cvusk/japanese-insurance-document-understanding-calculation", "cases")  # 正解のビュー
 ```
 
 ## 7. 正解を公開することの扱い

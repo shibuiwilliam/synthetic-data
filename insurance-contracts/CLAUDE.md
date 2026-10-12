@@ -234,7 +234,7 @@ uv run pytest -q ; uv run ruff check . ; make check
 - PDFのタグ付け（tagged PDF）：作らない
 - QAの言語・件数：日本語、自動生成30問＋執筆15問／文書
 - 正解bboxの座標系：pt・原点左上を主とし、正規化[0,1]を併記
-- 配布形式：`dataset/` ディレクトリ ＋ `manifest.json`。**配布先は Hugging Face Datasets の 2 つ——文書本体 `cvusk/synthetic-japanese-insurance-documents` と検索評価セット `cvusk/synthetic-japanese-insurance-search`（`dataset/search/` の中身。2026-10-08 に分離）**（控えを GitHub Releases）。**ライセンスは両方 CC BY 4.0**（2026-10-05 決定）。手順は `docs/distribution.md`
+- 配布形式：`dataset/` ディレクトリ ＋ `manifest.json`。**配布先は Hugging Face Datasets の 2 つ——文書本体 `cvusk/japanese-insurance-document-understanding` と検索評価セット `cvusk/japanese-insurance-document-understanding-retrieval`（`dataset/search/` の中身。2026-10-08 に分離）**（控えを GitHub Releases）。**ライセンスは両方 CC BY 4.0**（2026-10-05 決定）。手順は `docs/distribution.md`
 - **AI モデルの学習・蒸留：不可。** 生成物の本文・QA・図の説明は Claude の Output であり、Anthropic Usage Policy が「入力と出力を AI モデルの学習（model scraping・model distillation を含む）に用いること」を事前許可なしに禁じている（2026-10-06 決定）。`dataset/LICENSE`・`dataset/README.md`・`dataset/data-card.md` に明記する。**CC BY 4.0 第 2 条(a)(5)(B)が下流への追加制限を禁じているので、ライセンス条件ではなく「告知」として書く。「評価は学習ではない」を必ず併記する**（`docs/distribution.md` §7）
 - 実在法令：法令名のみ引用し、条番号は書かない
 - Python／パッケージ管理：Python 3.12／uv

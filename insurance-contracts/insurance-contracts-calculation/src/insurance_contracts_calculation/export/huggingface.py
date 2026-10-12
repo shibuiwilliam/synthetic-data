@@ -60,6 +60,32 @@ LICENSES: dict[str, tuple[str, str]] = {
 #: 既定のライセンス。**仮決めである**（`HITL.md` H11。人が決めたら `--license` で上書きする）
 DEFAULT_LICENSE = "cc-by-4.0"
 
+#: Anthropic Usage Policy の URL（学習・蒸留禁止の告知が引く）
+AUP_URL = "https://www.anthropic.com/legal/aup"
+
+#: 学習・蒸留の禁止（告知）。親プロジェクト `yakkan/export.py` の `NO_TRAINING_JA` と同じ設計・同じ文面。
+#: **ライセンス条件ではなく告知**として書く（CC BY 4.0 第2条(a)(5)(B)が下流への追加制限を禁じているため）。
+NO_TRAINING_JA = """## ⚠ AI モデルの学習・蒸留には使えない
+
+**本データセットを LLM・VLM・その他 AI モデルの学習・ファインチューニング・蒸留・
+強化学習の素材に使ってはならない。**
+
+本データセットの約款の条文・表・図の説明・設例は、Claude Code セッション内で **Claude（Anthropic）が
+書いた Output** である。Anthropic の Usage Policy は「入力と出力を AI モデルの学習
+（model scraping・model distillation を含む）に用いること」を**事前許可なしに禁じている**
+（{aup_url}）。学習に使う必要がある場合は、まず Anthropic の事前許可を得ること。
+
+**評価は学習ではない。** ドキュメント読み取り（OCR・レイアウト解析・VLM・構造化抽出）・
+計算規定の読解・正解プログラムの生成能力の**評価とベンチマークは、このデータセットが作られた
+目的そのもの**で、上の制限は一切かからない。テストフィクスチャとしての利用、few-shot の実例、
+推論時の検索コーパスとしての利用も同じく対象外である。**除かれるのはモデルの重みを更新する用途だけ。**
+
+なお、**この節は告知であってライセンス条件ではない。** 選んだライセンスが CC BY 系であれば、
+下流の受領者に追加の制限を課すことを禁じている（第 2 条(a)(5)(B)）ため、上の禁止をその付与条件として
+書くことはできず、書いてもいない。制限の出どころは Anthropic の Usage Policy であり、
+同ポリシーの適用を受ける者を縛る。
+"""
+
 #: 埋め込みフォントのライセンス本文。本体の `assets/fonts/` から複写する（読むだけ）
 FONT_LICENSES = (
     ("LICENSE-NotoSansJP.txt", "Noto Sans JP", "SIL Open Font License 1.1"),
@@ -87,8 +113,14 @@ class Options:
     generator_version: str
     license_id: str = DEFAULT_LICENSE
     include_png: bool = True
-    repo_id: str = "<your-account>/yakkan-calc"
-    pretty_name: str = "yakkan-calc: 合成日本語保険約款＋計算規定の正解データ"
+    repo_id: str = "cvusk/japanese-insurance-document-understanding-calculation"
+    pretty_name: str = (
+        "Japanese Insurance Document Understanding — Calculation "
+        "(synthetic, with ground-truth programs and test cases)"
+    )
+    #: カード・LICENSE・引用に出る名前。親プロジェクト（yakkan-synth）と揃える（2026-10-12 決定）
+    copyright_holder: str = "Yusuke Shibui (shibuiwilliam)"
+    copyright_year: str = "2026"
 
 
 # --------------------------------------------------------------------------- 組み立て
@@ -134,7 +166,14 @@ def build(dataset_dir: Path, out_dir: Path, opts: Options) -> dict:
     _write_font_licenses(dataset_dir, out_dir / "licenses-fonts")
     (out_dir / ".gitattributes").write_text(_gitattributes(), encoding="utf-8")
     (out_dir / "LICENSE").write_text(_license(opts), encoding="utf-8")
-    (out_dir / "README.md").write_text(_card(index, opts), encoding="utf-8")
+    sample_case_row = None
+    cases_jsonl = out_dir / "views" / "cases.jsonl"
+    if cases_jsonl.is_file():
+        for line in cases_jsonl.read_text(encoding="utf-8").splitlines():
+            if line.strip():
+                sample_case_row = json.loads(line)
+                break
+    (out_dir / "README.md").write_text(_card(index, opts, sample_case_row), encoding="utf-8")
 
     # `index.json` 自身は外す。ハッシュを書き込んだ時点で中身が変わり、記録が嘘になる
     index["files"] = file_hashes(out_dir, skip=("index.json",))
@@ -466,7 +505,10 @@ def _license(opts: Options) -> str:
     name, url = LICENSES[opts.license_id]
     head = f"# ライセンス\n\n**{name}**"
     if url:
-        head += f"（`{opts.license_id}`）\n\n本文: {url}"
+        head += (
+            f"（`{opts.license_id}`）\n\n本文: {url}\n\n"
+            f"Copyright (c) {opts.copyright_year} {opts.copyright_holder}"
+        )
     else:
         head += (
             f"（`{opts.license_id}`）\n\n"
@@ -501,12 +543,24 @@ def _yaml(value: str) -> str:
     return json.dumps(str(value), ensure_ascii=False)
 
 
-def _card(index: dict, opts: Options) -> str:
+def _sample_toggle(row: dict | None) -> str:
+    """1 行ぶんの実データを `<details>` で折りたたんで見せる（姉妹プロジェクトと同じ設計）。
+
+    **先頭行を決定的に採る**（乱数も時刻も使わない）。`row` が無ければ節自体を省く。
+    """
+    if not row:
+        return ""
+    body = json.dumps(row, ensure_ascii=False, indent=2, sort_keys=False)
+    return f"<details>\n<summary><b>casesのサンプル1件</b></summary>\n\n```json\n{body}\n```\n\n</details>"
+
+
+def _card(index: dict, opts: Options, sample_case_row: dict | None = None) -> str:
     """HF のデータセットカード（`README.md`）。数値はすべて `index` の実測から書く。"""
     t = index["totals"]
     v = index["views"]
     name, url = LICENSES[opts.license_id]
     license_note = f"[{name}]({url})" if url else f"{name}"
+    sample_case = _sample_toggle(sample_case_row)
 
     # 軸 A の「渡してよい」一覧から、公開物に入れていないものを除く
     shipped_public = [f for f in PUBLIC if f not in EXCLUDE]
@@ -548,6 +602,8 @@ def _card(index: dict, opts: Options) -> str:
 正解は**1 文書に 1 組**で、体裁が変わっても変わりません（レイアウト頑健性の評価に使えます）。
 {png_note}。
 
+Released under **{opts.license_id}** © {opts.copyright_year} {opts.copyright_holder}. See `LICENSE`.
+
 ## ⚠ 先に読んでください：正解が入っています
 
 このリポジトリには**正解（計算仕様・正解プログラム・正解表・全テストケース）が入っています**。
@@ -564,6 +620,8 @@ def _card(index: dict, opts: Options) -> str:
 ```
 {index["canary"]}
 ```
+
+{NO_TRAINING_JA.format(aup_url=AUP_URL)}
 
 ## 使い方
 
@@ -588,6 +646,8 @@ import json
 row = cases["train"][0]
 json.loads(row["inputs_json"]), json.loads(row["expected_json"])
 ```
+
+{sample_case}
 
 ### 原本を読む
 
@@ -668,10 +728,23 @@ icc generate --base <既定の約款> --out out --seed <seed> --profile <profile
 
 ## ライセンス
 
-{license_note}（`LICENSE`）。
+{license_note}（`LICENSE`）。Copyright (c) {opts.copyright_year} {opts.copyright_holder}
 
 **PDF に埋め込まれたフォント**は別条件です。Noto 系は SIL Open Font License 1.1、
 IPAex 系は IPA フォントライセンス v1.0 に従います（`licenses-fonts/`）。
+
+## Citation
+
+```bibtex
+@misc{{yakkan_calc,
+  title  = {{{opts.pretty_name}}},
+  author = {{{opts.copyright_holder}}},
+  year   = {{{opts.copyright_year}}},
+  howpublished = {{Hugging Face Hub}},
+  url    = {{https://huggingface.co/datasets/{opts.repo_id}}},
+  note   = {{Version {opts.version}. Licensed under {opts.license_id}.}}
+}}
+```
 """
 
 

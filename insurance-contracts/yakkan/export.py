@@ -206,7 +206,7 @@ def export_dataset(dataset_dir: Path) -> dict[str, int]:
 #: **HF はリポジトリ直下の `README.md` だけをデータセットカードとして読む**ので、
 #: 配布面の要約も本文も 1 枚にまとめてある（旧 `DATASET_CARD.md` は廃止。
 #: docs/decisions.md 2026-10-05）。
-HF_REPO_ID = "cvusk/synthetic-japanese-insurance-documents"
+HF_REPO_ID = "cvusk/japanese-insurance-document-understanding"
 
 #: 検索評価セット（`dataset/search/`）の Hugging Face データセット ID。
 #: **文書本体とは別のリポジトリとして配る**（2026-10-08 決定。docs/decisions.md）。
@@ -214,7 +214,7 @@ HF_REPO_ID = "cvusk/synthetic-japanese-insurance-documents"
 #: カードも「読み取りの説明」と「検索の説明」が混ざる。評価セットは JSONL 4 本・19 MiB。
 #: **ローカルの置き場所は `dataset/search/` のまま**で、そのディレクトリを別リポジトリの
 #: 直下として上げる（`yakkan eval --search-run` の既定パスと docs の参照を壊さないため）。
-SEARCH_HF_REPO_ID = "cvusk/synthetic-japanese-insurance-search"
+SEARCH_HF_REPO_ID = "cvusk/japanese-insurance-document-understanding-retrieval"
 
 #: 配布ライセンス。`TASK.md` T11 で 2026-10-05 に **CC BY 4.0** と決まった。
 #: 変えるときは `LICENSE` の本文（`LICENSE_NOTICE`）と対で変える。
@@ -230,7 +230,7 @@ LICENSE_LEGALCODE_URL = "https://creativecommons.org/licenses/by/4.0/legalcode"
 #: 禁じているので、CC BY の付与条件としては書けない（書くと CC BY 違反になる）。
 #: `LICENSE`（英語）とカード（日本語）で同じことを言う。**表現を変えるときは両方を直す。**
 AUP_URL = "https://www.anthropic.com/legal/aup"
-COPYRIGHT_HOLDER = "shibuiwilliam"
+COPYRIGHT_HOLDER = "Yusuke Shibui (shibuiwilliam)"
 COPYRIGHT_YEAR = "2026"
 
 #: カード・LICENSE・帰属・引用に出る名前。2 つのデータセットで**別の名前**を持つ。
@@ -428,6 +428,7 @@ for the viewer. `elements.jsonl` is **one row per element** — text, structural
 citation, page, bounding boxes — and is the file an evaluation script should read
 first.
 
+{sample_qa}
 ## Files
 
 ```
@@ -775,6 +776,7 @@ qrels    = load_dataset("{search_hf_repo_id}", "qrels",    split="train")
 `id_map.json` (old id → new id, for runs made against v6 or earlier) is a plain
 file — take it with `huggingface_hub.hf_hub_download`.
 
+{sample_passage}
 ## Fields
 
 | file | columns (measured) |
@@ -1107,6 +1109,21 @@ def _fmt(value: object) -> str:
     return f"{value:,}" if isinstance(value, int) else str(value)
 
 
+def _sample_toggle(title_en: str, title_ja: str, row: dict[str, Any] | None) -> str:
+    """1 行ぶんの実データを `<details>` で折りたたんで見せる（姉妹プロジェクト contracts と同じ設計）。
+
+    **先頭行を決定的に採る**（乱数も時刻も使わない。CLAUDE.md §0.4-4）。
+    `row` が無ければ節自体を省く。
+    """
+    if not row:
+        return ""
+    body = json.dumps(row, ensure_ascii=False, indent=2, sort_keys=False)
+    return (
+        f"<details>\n<summary><b>Sample {title_en} row</b> / {title_ja}のサンプル1件</summary>\n\n"
+        f"```json\n{body}\n```\n\n</details>\n"
+    )
+
+
 def write_card(
     dataset_dir: Path,
     *,
@@ -1140,9 +1157,17 @@ def write_card(
 
     docs = [d for d in rows(documents) if d.get("status") == "ready"]
     query_rows = rows(queries)
+    sample_qa: dict[str, Any] | None = None
+    qa_jsonl_path = dataset_dir / "qa.jsonl"
+    if qa_jsonl_path.is_file():
+        for line in qa_jsonl_path.read_text(encoding="utf-8").splitlines():
+            if line.strip():
+                sample_qa = json.loads(line)
+                break
     path = dataset_dir / "README.md"
     path.write_text(
         CARD.format(
+            sample_qa=_sample_toggle("qa", "qa", sample_qa),
             license_id=LICENSE_ID,
             license_name=LICENSE_NAME,
             license_url=LICENSE_URL,
@@ -1211,6 +1236,7 @@ def write_search_card(
     search_dir.mkdir(parents=True, exist_ok=True)
     path.write_text(
         SEARCH_CARD.format(
+            sample_passage=_sample_toggle("passage", "passage", passage_rows[0] if passage_rows else None),
             license_id=LICENSE_ID,
             license_name=LICENSE_NAME,
             license_url=LICENSE_URL,

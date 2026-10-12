@@ -112,7 +112,7 @@ P2 は**個人情報の漏洩を止める最後の網**である。弱めない�
 
 ```
 contracts-calc publish --data dataset --out dist/hf                 # 未決のまま組み立てる
-contracts-calc publish --data dataset --out dist/hf --license cc-by-4.0 --repo-id <owner>/<name>
+contracts-calc publish --data dataset --out dist/hf --license cc-by-4.0 --repo-id cvusk/japanese-contract-document-understanding-calculation
 contracts-calc publish --data dataset --out dist/hf --no-answers    # 出題の入力だけ
 ```
 

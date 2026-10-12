@@ -8,6 +8,7 @@
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 
 from yakkan.export import (
@@ -28,6 +29,15 @@ from yakkan.export import (
     write_search_license,
     write_search_sha256sums,
 )
+
+
+def _without_fenced_code(text: str) -> str:
+    """フェンス付きコードブロック（```json のサンプルや ```bibtex）を取り除く。
+
+    **未展開の `.format()` プレースホルダ**（カードが壊れている証拠）を検査するための前処理。
+    JSON サンプルや BibTeX は中に生の `{`/`}` を持つ正当な内容なので、プレースホルダ検査の対象外にする。
+    """
+    return re.sub(r"```.*?```", "", text, flags=re.DOTALL)
 
 
 def _queries(n_truncated: int = 1, n_total: int = 3) -> list[dict]:
@@ -108,7 +118,7 @@ def test_cardはqueriesの実測値を埋め込む(tmp_path: Path) -> None:
     text = path.read_text(encoding="utf-8")
     assert path.name == "README.md", "HF は直下の README.md だけをカードとして読む"
     assert "クエリ **3**" in text
-    assert "{" not in text.split("```bibtex")[0].replace("{{", ""), "未展開のプレースホルダが残っている"
+    assert "{" not in _without_fenced_code(text).replace("{{", ""), "未展開のプレースホルダが残っている"
 
 
 def test_cardはqueriesが空でも書ける(tmp_path: Path) -> None:
@@ -180,7 +190,7 @@ def test_search_cardはそれ自体がHFのカードになる(tmp_path: Path) ->
         for split in config["data_files"]:
             assert "/" not in split["path"], "リポジトリ直下に置くので相対パスにしない"
     assert HF_REPO_ID in text, "文書本体への案内が無いと紙面に辿れない"
-    assert "{" not in text.split("```bibtex")[0].replace("{{", ""), "未展開のプレースホルダが残っている"
+    assert "{" not in _without_fenced_code(text).replace("{{", ""), "未展開のプレースホルダが残っている"
 
 
 def test_search_cardが検索固有の実測値と注意点を持つ(tmp_path: Path) -> None:

@@ -421,6 +421,21 @@ def _n(value: int) -> str:
     return f"{value:,}"
 
 
+def _sample_toggle(title_en: str, title_ja: str, row: dict[str, Any] | None) -> str:
+    """1 行ぶんの実データを `<details>` で折りたたんで見せる。
+
+    **先頭行を決定的に採る**（乱数も時刻も使わない。`CLAUDE.md` 守ること 3）。
+    `row` が無ければ何も出さない（カードが崩れた本文を持つより、節自体を省くほうがよい）。
+    """
+    if not row:
+        return ""
+    body = json.dumps(row, ensure_ascii=False, indent=2, sort_keys=False)
+    return (
+        f"<details>\n<summary><b>Sample {title_en} row</b> / {title_ja}のサンプル1件</summary>\n\n"
+        f"```json\n{body}\n```\n\n</details>\n\n"
+    )
+
+
 def _query_facts(dataset_dir: Path, queries: Sequence[Any], subdir: str = "search") -> tuple[int, int, str]:
     """grade 1 の打ち切り（qrels の解釈に直結する）を実測する。
 
@@ -511,6 +526,7 @@ def render_card(
     n_queries: int,
     n_truncated: int,
     truncated_examples: str,
+    sample_qa: dict[str, Any] | None = None,
 ) -> str:
     """`dataset/README.md`（= Hub のデータセットカード）を組み立てる。
 
@@ -612,6 +628,7 @@ def render_card(
         "(`source.json`, `layout.json`, `answer.json`, `qa.json`, `elements.jsonl`, `doc.pdf`, "
         "`pages/*.png`); the three files under `views/` are flat projections for the viewer.\n\n"
     )
+    add(_sample_toggle("qa", "qa", sample_qa))
     add("## Files\n\n")
     tree = [
         "manifest.json          every document (pages, QA count, artifacts, checksums, status)",
@@ -790,7 +807,16 @@ def write_readme(
     if stats is None and (dataset_dir / "manifest.json").is_file():
         stats = collect(dataset_dir)
     n_queries, n_truncated, examples = _query_facts(dataset_dir, queries, spec.search_dataset.dir)
-    text = render_card(spec, stats, n_queries=n_queries, n_truncated=n_truncated, truncated_examples=examples)
+    qa = qa_rows(dataset_dir)
+    sample_qa = qa[0] if qa else None
+    text = render_card(
+        spec,
+        stats,
+        n_queries=n_queries,
+        n_truncated=n_truncated,
+        truncated_examples=examples,
+        sample_qa=sample_qa,
+    )
     dataset_dir.mkdir(parents=True, exist_ok=True)
     path = dataset_dir / "README.md"
     path.write_text(text, encoding="utf-8")
@@ -820,6 +846,17 @@ def jsonl_fields(path: Path) -> list[str]:
             if line.strip():
                 return sorted(json.loads(line).keys())
     return []
+
+
+def jsonl_first_row(path: Path) -> dict[str, Any] | None:
+    """jsonl の**先頭の非空行**を 1 件返す（サンプル表示用。決定的）。"""
+    if not path.is_file():
+        return None
+    with path.open(encoding="utf-8") as handle:
+        for line in handle:
+            if line.strip():
+                return json.loads(line)
+    return None
 
 
 def search_fields(search_dir: Path) -> dict[str, list[str]]:
@@ -880,6 +917,7 @@ def render_search_card(
     spec: PublishSpec,
     stats: DataCardStats | None,
     fields: dict[str, list[str]],
+    sample_passage: dict[str, Any] | None = None,
 ) -> str:
     """`dataset/search/README.md`（= 検索評価セットのデータセットカード）を組み立てる。
 
@@ -955,6 +993,7 @@ def render_search_card(
         f'qrels    = load_dataset("{sd.hub.repo_id}", "qrels",    split="train")\n'
         "```\n\n"
     )
+    add(_sample_toggle("passage", "passage", sample_passage))
     add("## Fields\n\n")
     add(
         _md_table(
@@ -1059,7 +1098,10 @@ def write_search_card(
     if not search_dir.is_dir():
         return None
     path = search_dir / "README.md"
-    path.write_text(render_search_card(spec, stats, search_fields(search_dir)), encoding="utf-8")
+    sample_passage = jsonl_first_row(search_dir / "passages.jsonl")
+    path.write_text(
+        render_search_card(spec, stats, search_fields(search_dir), sample_passage), encoding="utf-8"
+    )
     return path
 
 
@@ -1404,11 +1446,13 @@ def check(dataset_dir: Path, spec: PublishSpec | None = None) -> tuple[list[str]
             blockers(spec),
         )
     stats = collect(dataset_dir)
+    qa = qa_rows(dataset_dir)
 
     expected: dict[str, str] = {
         "README.md": render_card(
             spec,
             stats,
+            sample_qa=qa[0] if qa else None,
             **dict(
                 zip(
                     ("n_queries", "n_truncated", "truncated_examples"),
@@ -1423,7 +1467,7 @@ def check(dataset_dir: Path, spec: PublishSpec | None = None) -> tuple[list[str]
     search_dir = dataset_dir / spec.search_dataset.dir
     if spec.search_split and search_dir.is_dir():
         expected[f"{spec.search_dataset.dir}/README.md"] = render_search_card(
-            spec, stats, search_fields(search_dir)
+            spec, stats, search_fields(search_dir), jsonl_first_row(search_dir / "passages.jsonl")
         )
     for name, text in expected.items():
         path = dataset_dir / name

@@ -57,14 +57,18 @@ cd structured-docs && cat CLAUDE.md       # 汎用化の仕様（docsynth）
 
 ## データセットの公開
 
-- **保険約款（yakkan-synth）**：Hugging Face Datasets の
-  `cvusk/synthetic-japanese-insurance-documents` として公開する準備が完了しています。
-  ライセンスは CC BY 4.0 です。アップロードは手動で行います。
-- **契約書（keiyaku-synth）**：Hugging Face Datasets の
-  `cvusk/japanese-contract-document-understanding` として公開できる状態です。
-  ライセンスは CC BY 4.0（2026-10-06 決定）で、アップロードはまだ行っていません。
+6 つのデータセットすべてを Hugging Face Datasets で公開しています（public・CC BY 4.0）。
 
-詳しくは、各プロジェクトの `docs/distribution.md` または `docs/publishing.md` を参照してください。
+| プロジェクト | 公開データセット |
+|---|---|
+| 保険約款（yakkan-synth） | [`cvusk/japanese-insurance-document-understanding`](https://huggingface.co/datasets/cvusk/japanese-insurance-document-understanding)（文書本体）／[`cvusk/japanese-insurance-document-understanding-retrieval`](https://huggingface.co/datasets/cvusk/japanese-insurance-document-understanding-retrieval)（検索評価セット） |
+| 契約書（keiyaku-synth） | [`cvusk/japanese-contract-document-understanding`](https://huggingface.co/datasets/cvusk/japanese-contract-document-understanding)（文書本体）／[`cvusk/japanese-contract-document-understanding-retrieval`](https://huggingface.co/datasets/cvusk/japanese-contract-document-understanding-retrieval)（検索評価セット） |
+| 保険約款＋計算（yakkan-calc） | [`cvusk/japanese-insurance-document-understanding-calculation`](https://huggingface.co/datasets/cvusk/japanese-insurance-document-understanding-calculation) |
+| 契約書＋計算（keiyaku-calc） | [`cvusk/japanese-contract-document-understanding-calculation`](https://huggingface.co/datasets/cvusk/japanese-contract-document-understanding-calculation) |
+
+詳しくは、各プロジェクトの `docs/distribution.md` または `docs/publishing.md`、計算式データセットは
+`insurance-contracts/insurance-contracts-calculation/docs/hf_publication.md` または
+`contracts/contracts-calculation/docs/hf_publish.md` を参照してください。
 
 ### AI モデルの学習・蒸留について
 

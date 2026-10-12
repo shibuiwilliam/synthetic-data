@@ -29,6 +29,56 @@ GITATTRIBUTES_NAME = ".gitattributes"
 UNDECIDED_LICENSE = "other"
 UNDECIDED_LICENSE_NAME = "undecided"
 
+#: Anthropic Usage Policy の URL（学習・蒸留禁止の告知が引く）
+AUP_URL = "https://www.anthropic.com/legal/aup"
+
+#: カード・LICENSE・NOTICE・引用に出る名前。親プロジェクト（keiyaku-synth。HITL_TODO.md H16）と
+#: 揃える（2026-10-12 決定）
+COPYRIGHT_HOLDER = "Yusuke Shibui (shibuiwilliam)"
+COPYRIGHT_YEAR = "2026"
+
+#: 英語面の pretty_name。親 4 リポジトリと同じ "Japanese <domain> Document Understanding"
+#: の命名規則に揃える（本文の日本語見出しは別に持つ）
+PRETTY_NAME_EN = (
+    "Japanese Contract Document Understanding — Calculation "
+    "(synthetic, with ground-truth programs and test cases)"
+)
+
+#: 学習・蒸留の禁止（告知。日本語面）。親プロジェクト `keiyaku/publish.py` の `NO_TRAINING_JA` と
+#: 同じ設計・同じ文面。**ライセンス条件ではなく告知**として書く
+#: （CC BY 系を選んだ場合、第2条(a)(5)(B)が下流への追加制限を禁じているため）。
+NO_TRAINING_JA = f"""## ⚠ AI モデルの学習・蒸留には使えない
+
+**本データセットを LLM・VLM・その他 AI モデルの学習・ファインチューニング・蒸留・
+強化学習の素材に使ってはならない。**
+
+本データセットの契約書の条文・頭書・別紙・計算仕様の説明は、Claude Code セッション内で
+**Claude（Anthropic）が書いた Output** である。Anthropic の Usage Policy は「入力と出力を
+AI モデルの学習（model scraping・model distillation を含む）に用いること」を**事前許可なしに
+禁じている**（{AUP_URL}）。学習に使う必要がある場合は、まず Anthropic の事前許可を得ること。
+
+**評価は学習ではない。** 契約書の読み取り・計算条項の発見・正解プログラムの生成能力の
+**評価とベンチマークは、このデータセットが作られた目的そのもの**で、上の制限は一切かからない。
+テストフィクスチャとしての利用、few-shot の実例、推論時の検索コーパスとしての利用も同じく
+対象外である。**除かれるのはモデルの重みを更新する用途だけ。**
+
+なお、**この節は告知であってライセンス条件ではない。** 選んだライセンスが CC BY 系であれば、
+下流の受領者に追加の制限を課すことを禁じている（第 2 条(a)(5)(B)）ため、上の禁止をその付与条件として
+書くことはできず、書いてもいない。制限の出どころは Anthropic の Usage Policy であり、
+同ポリシーの適用を受ける者を縛る。
+"""
+
+#: 同上・英語面。
+NO_TRAINING_EN = f"""**Not for training AI models.** This dataset must not be used to train,
+fine-tune, distill, or otherwise develop any AI/ML model (including LLMs and VLMs). The contract
+clauses, calculation-spec explanations and task cards were written by Claude (Anthropic) inside a
+Claude Code session; they are Outputs of that service, and Anthropic's Usage Policy prohibits
+using inputs/outputs to train a model without prior authorization ({AUP_URL}). Evaluation is not
+training — benchmarking systems against this dataset, using it as test fixtures, few-shot
+examples, or a retrieval corpus at inference time is unrestricted; what is excluded is updating
+model weights from it. This is a notice, not a license condition.
+"""
+
 #: 1 文書から `inputs/` へ持っていくもの（出題に渡すもの）
 #: (出力名, dataset/<cid> からの相対パスの候補を返す関数のキー)
 _INPUT_FILES = (
@@ -104,6 +154,26 @@ def _input_sources(doc_dir: Path) -> dict[str, Path | None]:
 def _dumps(value) -> str:
     """自由形式の値を JSON 文字列の列にする（Arrow の型推論が行ごとに揺れないように）。"""
     return json.dumps(value, ensure_ascii=False, sort_keys=True)
+
+
+def _sample_toggle(title: str, row: dict | None) -> list[str]:
+    """1 行ぶんの実データを `<details>` で折りたたんで見せる。
+
+    **先頭行を決定的に採る**（乱数も時刻も使わない。`CLAUDE.md` 守ること 3）。
+    `row` が無ければ空リストを返す（カードが崩れた本文を持つより、節自体を省くほうがよい）。
+    """
+    if not row:
+        return []
+    body = json.dumps(row, ensure_ascii=False, indent=2, sort_keys=False)
+    return [
+        "",
+        f"<details>\n<summary><b>{title}のサンプル1件</b></summary>",
+        "",
+        f"```json\n{body}\n```",
+        "",
+        "</details>",
+        "",
+    ]
 
 
 def _write_jsonl(path: Path, rows: list[dict]) -> None:
@@ -246,7 +316,7 @@ def _frontmatter(facts: CardFacts, g: Agg, *, license_id: str, include_answers: 
     size_cat = _size_category(n_rows)
     L = ["---"]
     L += [
-        "pretty_name: 日本語契約書の計算・判定条項データセット（合成）",
+        f"pretty_name: {json.dumps(PRETTY_NAME_EN, ensure_ascii=False)}",
         "language:",
         "- ja",
         f"license: {license_id}",
@@ -284,7 +354,13 @@ def _frontmatter(facts: CardFacts, g: Agg, *, license_id: str, include_answers: 
 
 
 def _card_body(
-    facts: CardFacts, g: Agg, *, license_id: str, include_answers: bool, repo_id: str
+    facts: CardFacts,
+    g: Agg,
+    *,
+    license_id: str,
+    include_answers: bool,
+    repo_id: str,
+    sample_case: dict | None = None,
 ) -> list[str]:
     gen = "／".join(g.versions) or "?"
     profiles = "、".join(f"{k} {v} 件" for k, v in sorted(g.profiles.items()))
@@ -303,6 +379,13 @@ def _card_body(
         "計算仕様が唯一の正であり、契約書の文言・正解プログラム・テストの期待値は**同じ仕様から",
         "機械的に生成**している。文言と式を別々に書いていないので三者はずれず、出力前に機械検査で",
         "一致を確かめてある。",
+        "",
+        (
+            f"生成物は **{license_id}** で配布する（著作権表示：© {COPYRIGHT_YEAR} {COPYRIGHT_HOLDER}）。"
+            "本文は `LICENSE`。"
+            if license_id != UNDECIDED_LICENSE
+            else "配布条件は未決である（下の「ライセンス」）。"
+        ),
         "",
         "<details>",
         "<summary><b>English summary</b></summary>",
@@ -331,8 +414,10 @@ def _card_body(
         "development and evaluation, not for real-world use or legal advice. See the license",
         "section below — redistribution terms are still undecided.",
         "",
+        NO_TRAINING_EN,
         "</details>",
         "",
+        NO_TRAINING_JA,
         "## 規模（実測）",
         "",
         f"- 文書数 **{g.n_docs}**（難易度プロファイル: {profiles}）",
@@ -360,7 +445,9 @@ def _card_body(
         "落ちないよう **JSON 文字列の列**（`*_json`）で持たせている。`json.loads` で復元する。",
         "",
         "契約書そのもの（JSON・PDF）は `inputs/` に、正解は `answers/` にファイルとして置いてある。",
-        "",
+    ]
+    L += _sample_toggle("cases", sample_case)
+    L += [
         "## 構成",
         "",
         "```",
@@ -468,7 +555,7 @@ def _license_section(g: Agg, *, license_id: str) -> list[str]:
         ]
     else:
         L += [
-            f"データセット全体は `{license_id}` で提供する。",
+            f"データセット全体は `{license_id}` で提供する。Copyright (c) {COPYRIGHT_YEAR} {COPYRIGHT_HOLDER}",
             "",
             "正解プログラムと同梱テスト（`answers/*/programs/`・`answers/*/tests/`）は生成された",
             "Python コードであり、同じ条件で利用できる。",
@@ -494,10 +581,24 @@ def _license_section(g: Agg, *, license_id: str) -> list[str]:
     return L
 
 
-def render_card(facts: CardFacts, *, license_id: str, include_answers: bool, repo_id: str) -> str:
+def render_card(
+    facts: CardFacts,
+    *,
+    license_id: str,
+    include_answers: bool,
+    repo_id: str,
+    sample_case: dict | None = None,
+) -> str:
     g = aggregate(facts)
     lines = _frontmatter(facts, g, license_id=license_id, include_answers=include_answers)
-    lines += _card_body(facts, g, license_id=license_id, include_answers=include_answers, repo_id=repo_id)
+    lines += _card_body(
+        facts,
+        g,
+        license_id=license_id,
+        include_answers=include_answers,
+        repo_id=repo_id,
+        sample_case=sample_case,
+    )
     lines += _license_section(g, license_id=license_id)
     lines += [
         "## 詳しい素性",
@@ -506,6 +607,22 @@ def render_card(facts: CardFacts, *, license_id: str, include_answers: bool, rep
         "（実測だけから生成したデータカード）。",
         "",
     ]
+    if license_id != UNDECIDED_LICENSE:
+        lines += [
+            "## Citation",
+            "",
+            "```bibtex",
+            "@misc{keiyaku_calc,",
+            f"  title  = {{{PRETTY_NAME_EN}}},",
+            f"  author = {{{COPYRIGHT_HOLDER}}},",
+            f"  year   = {{{COPYRIGHT_YEAR}}},",
+            "  howpublished = {Hugging Face Hub},",
+            f"  url    = {{https://huggingface.co/datasets/{repo_id}}},",
+            f"  note   = {{Licensed under {license_id}.}}",
+            "}",
+            "```",
+            "",
+        ]
     return "\n".join(lines) + "\n"
 
 
@@ -563,6 +680,7 @@ def render_notice(facts: CardFacts, *, license_id: str) -> str:
         "",
         "参考にした実在の契約書ひな型の文章は、部分的にも、語順を変えただけのものも含まない。",
         "",
+        NO_TRAINING_JA,
         "## 埋め込みフォント",
         "",
     ]
@@ -586,7 +704,10 @@ def render_notice(facts: CardFacts, *, license_id: str) -> str:
     if license_id == UNDECIDED_LICENSE:
         L += ["配布条件は**未決**である（作成者側 `HITL.md` HC-3）。決定が入るまで外部配布しない。", ""]
     else:
-        L += [f"データセット全体は `{license_id}` で提供する。", ""]
+        L += [
+            f"データセット全体は `{license_id}` で提供する。Copyright (c) {COPYRIGHT_YEAR} {COPYRIGHT_HOLDER}",
+            "",
+        ]
     return "\n".join(L) + "\n"
 
 
@@ -738,7 +859,7 @@ def build(
     out_root: Path,
     *,
     license_id: str | None = None,
-    repo_id: str = "<owner>/<dataset>",
+    repo_id: str = "cvusk/japanese-contract-document-understanding-calculation",
     include_answers: bool = True,
     calc_root: Path | None = None,
 ) -> PublishResult:
@@ -800,8 +921,15 @@ def build(
         _write_jsonl(out_root / "data" / name, rows_by_name[name])
 
     # カード・表示・LFS 設定・詳細データカード
+    cases_rows = rows_by_name["cases.jsonl"]
     (out_root / README_NAME).write_text(
-        render_card(facts, license_id=lic, include_answers=include_answers, repo_id=repo_id),
+        render_card(
+            facts,
+            license_id=lic,
+            include_answers=include_answers,
+            repo_id=repo_id,
+            sample_case=cases_rows[0] if include_answers and cases_rows else None,
+        ),
         encoding="utf-8",
     )
     (out_root / NOTICE_NAME).write_text(render_notice(facts, license_id=lic), encoding="utf-8")

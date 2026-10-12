@@ -245,10 +245,12 @@ uv run yakkan eval --search-run run.json
 - **同梱フォント**：SIL Open Font License または IPA フォントライセンス
 - **生成データセット**：CC BY 4.0（2026-10-05 決定）
 
-生成データセットの公開先は、文書本体
-`cvusk/synthetic-japanese-insurance-documents` と、検索評価セット
-`cvusk/synthetic-japanese-insurance-search` の 2 つです。詳しい配布手順は
-`docs/distribution.md` を参照してください。
+生成データセットは Hugging Face Datasets で公開しています（public）。
+
+- 文書本体：[`cvusk/japanese-insurance-document-understanding`](https://huggingface.co/datasets/cvusk/japanese-insurance-document-understanding)
+- 検索評価セット：[`cvusk/japanese-insurance-document-understanding-retrieval`](https://huggingface.co/datasets/cvusk/japanese-insurance-document-understanding-retrieval)
+
+詳しい配布手順は `docs/distribution.md` を参照してください。
 
 ### AI モデルの学習・蒸留について
 

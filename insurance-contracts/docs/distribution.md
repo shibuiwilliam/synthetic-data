@@ -6,8 +6,8 @@
 >
 > - 版: 1.1（2026-10-05 新設 / **2026-10-08 検索評価セットを別データセットに分離**）
 > - 配布先: Hugging Face Datasets の **2 つのリポジトリ**
->   - 文書本体 `cvusk/synthetic-japanese-insurance-documents`
->   - 検索評価セット `cvusk/synthetic-japanese-insurance-search`（`dataset/search/` の中身）
+>   - 文書本体 `cvusk/japanese-insurance-document-understanding`
+>   - 検索評価セット `cvusk/japanese-insurance-document-understanding-retrieval`（`dataset/search/` の中身）
 > - ライセンス: **CC BY 4.0**（`TASK.md` T11 で 2026-10-05 に決定）。**両方に同じ条件**
 > - **AI モデルの学習・蒸留は不可**（§7。ライセンス条件ではなく告知として書く）
 > - 実装: `yakkan/export.py`（`write_card` / `write_license` / `write_gitattributes` /
@@ -24,8 +24,8 @@
 
 | | ローカル | HF リポジトリ | 大きさ |
 |---|---|---|---:|
-| 文書本体 | `dataset/`（`search/` と `*/render.html` を除く） | `cvusk/synthetic-japanese-insurance-documents` | 845.8 MiB / 2,235 ファイル |
-| 検索評価セット | `dataset/search/` | `cvusk/synthetic-japanese-insurance-search` | 18.9 MiB / 7 ファイル |
+| 文書本体 | `dataset/`（`search/` と `*/render.html` を除く） | `cvusk/japanese-insurance-document-understanding` | 845.8 MiB / 2,235 ファイル |
+| 検索評価セット | `dataset/search/` | `cvusk/japanese-insurance-document-understanding-retrieval` | 18.9 MiB / 7 ファイル |
 
 ### 1.1 文書本体
 
@@ -134,14 +134,14 @@
 宣言している。**`datasets` で実際に読めることを確認済み**
 （2026-10-05・datasets 5.0.1 / pyarrow 25.0.1。2026-10-08 に分離後の 2 枚で再確認）。
 
-文書本体（`cvusk/synthetic-japanese-insurance-documents`）：
+文書本体（`cvusk/japanese-insurance-document-understanding`）：
 
 | config | ファイル | 行数 | 列数 |
 |---|---|---:|---:|
 | `documents`（既定） | `documents.jsonl` | 113 | 14 |
 | `qa` | `qa.jsonl` | 5,085 | 14 |
 
-検索評価セット（`cvusk/synthetic-japanese-insurance-search`）：
+検索評価セット（`cvusk/japanese-insurance-document-understanding-retrieval`）：
 
 | config | ファイル | 行数 | 列数 |
 |---|---|---:|---:|
@@ -207,8 +207,8 @@ PY
 pip install -U "huggingface_hub[cli]"
 hf auth login                                   # 書き込み権のあるトークン
 
-hf repo create cvusk/synthetic-japanese-insurance-documents --repo-type dataset --private
-hf repo create cvusk/synthetic-japanese-insurance-search    --repo-type dataset --private
+hf repo create cvusk/japanese-insurance-document-understanding --repo-type dataset --private
+hf repo create cvusk/japanese-insurance-document-understanding-retrieval    --repo-type dataset --private
 ```
 
 **コマンド名は `huggingface_hub` の `hf` CLI（旧 `huggingface-cli`）**。
@@ -231,14 +231,14 @@ HF が新規リポジトリに置く既定の `.gitattributes` は `*.png` / `*.
 cd insurance-contracts
 
 # ① LFS の宣言とカードだけを先に上げる
-hf upload cvusk/synthetic-japanese-insurance-documents \
+hf upload cvusk/japanese-insurance-document-understanding \
   dataset . \
   --repo-type dataset \
   --include ".gitattributes" "README.md" "LICENSE" \
   --commit-message "LFS の宣言とデータセットカード"
 
 # ② 残りを全部上げる（render.html と search/ は除外）
-hf upload cvusk/synthetic-japanese-insurance-documents \
+hf upload cvusk/japanese-insurance-document-understanding \
   dataset . \
   --repo-type dataset \
   --exclude "*/render.html" "search/*" \
@@ -257,7 +257,7 @@ hf upload cvusk/synthetic-japanese-insurance-documents \
 リポジトリの直下になる。LFS 対象が無いので 2 段に分ける必要は無い。
 
 ```bash
-hf upload cvusk/synthetic-japanese-insurance-search \
+hf upload cvusk/japanese-insurance-document-understanding-retrieval \
   dataset/search . \
   --repo-type dataset \
   --commit-message "yakkan-synth search v7: 9,456 passages / 8,824 queries / 25,435 qrels"
@@ -283,8 +283,8 @@ print(len(rel), "→", len(kept))  # render.html 113 件と search/ 7 件だけ�
 **HF 側にリビジョンのタグを打つ**と利用者が版を固定できる。
 
 ```bash
-hf repo tag create cvusk/synthetic-japanese-insurance-documents v7 --repo-type dataset
-hf repo tag create cvusk/synthetic-japanese-insurance-search    v7 --repo-type dataset
+hf repo tag create cvusk/japanese-insurance-document-understanding v7 --repo-type dataset
+hf repo tag create cvusk/japanese-insurance-document-understanding-retrieval    v7 --repo-type dataset
 ```
 
 ローカル git のタグ（`dataset-v7`）は別物で、こちらも**人間が打つ**（`TASK.md` T8）。
@@ -295,16 +295,16 @@ hf repo tag create cvusk/synthetic-japanese-insurance-search    v7 --repo-type d
 2. **データセットビューアが全 config で動くか**（本体 2 件・検索 3 件）。動かない config が
    あれば `configs:` の `path` と実ファイルを突き合わせる。
 3. `README.md` のライセンス表示が `cc-by-4.0` になっているか（両方）。
-4. `load_dataset("cvusk/synthetic-japanese-insurance-documents", "qa")` と
-   `load_dataset("cvusk/synthetic-japanese-insurance-search", "queries")` が通るか。
+4. `load_dataset("cvusk/japanese-insurance-document-understanding", "qa")` と
+   `load_dataset("cvusk/japanese-insurance-document-understanding-retrieval", "queries")` が通るか。
 5. **互いへのリンクが生きているか**（本体 → 検索、検索 → 本体）。
    片方だけ public にするとリンクが 404 になるので、**public にするのは 2 つ同時**。
 6. 本体に `search/` が混ざっていないか（`hf repo ls` で確認）。
 7. 問題がなければ public にする。
 
 ```bash
-hf repo settings cvusk/synthetic-japanese-insurance-documents --repo-type dataset --no-private
-hf repo settings cvusk/synthetic-japanese-insurance-search    --repo-type dataset --no-private
+hf repo settings cvusk/japanese-insurance-document-understanding --repo-type dataset --no-private
+hf repo settings cvusk/japanese-insurance-document-understanding-retrieval    --repo-type dataset --no-private
 ```
 
 ## 5. GitHub での配布（`TASK.md` T7 のもう半分）

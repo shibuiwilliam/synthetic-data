@@ -64,8 +64,9 @@
 - 決定済みで再検討しないもの：(1) 読み幅のある apply 型 QA 47 問中 15 問の読みを承認済み、(2) 遅延損害金は一義に読める
   8 件を include・起算が曖昧な 2 件は記録つき除外（`docs/m4_bindings.md`）、(3) 外部読取システムでの
   実測は見送り（評価対象システムが現れたら `eval` CLI で測る）。
-- 依頼中：生成物の配布条件（ライセンス）。決まるまで外部配布・アップロードはしない。人間の決定を待ち、
-  依頼中の判断を AI が代行しない。
+- 配布条件（ライセンス）：**2026-10-12 決定・CC BY 4.0**（`HITL.md` HC-3）。Hugging Face
+  `cvusk/japanese-contract-document-understanding-calculation` に private でアップロード済み（HC-4。ユーザーが個別に許可した範囲で AI が実行）。
+  public 化は別途の判断。
 - **Git 操作は全て人間が行う。** AI はコミットしない。
 - 調査・レビュー・決定の記録は `docs/` に集約した（索引 `docs/README.md`。設計に影響する決定は
   `docs/decisions.md` に 1 行足す）。
