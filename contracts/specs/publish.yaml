@@ -66,9 +66,9 @@ license:
   # （CC BY 4.0 第 2 条(a)(5)(B)が下流への追加制限を禁じている）。文面は keiyaku/publish.py の
   # NO_TRAINING_EN / NO_TRAINING_JA が正本で、ここに書かない。
   id: cc-by-4.0
-  # 著作権表示（CC BY 系では必須）。親リポジトリの LICENSE（MIT）の表記に合わせてある
-  #   ../LICENSE: "Copyright (c) 2026 shibuiwilliam"
-  holder: "shibuiwilliam"
+  # 著作権表示（CC BY 系では必須）。2026-10-12 に人間が決定（HITL_TODO.md H16 を閉じた）：
+  # 本名とハンドル名を両方併記する
+  holder: "Yusuke Shibui (shibuiwilliam)"
   year: "2026"
   # 生成物とコードでライセンスが違う場合の補足（カードに出す）
   note: ""
@@ -124,9 +124,8 @@ lfs:
   - "*.png"
 
 citation:
-  # **要確認（HITL_TODO.md H14）**：公開時の著者名の表記。親リポジトリの LICENSE と同じ
-  # ハンドル名を置いてある（本名表記にするかは人間の判断）。
+  # 2026-10-12 に人間が決定（HITL_TODO.md H16 を閉じた）：本名とハンドル名を両方併記する
   authors:
-    - "shibuiwilliam"
+    - "Yusuke Shibui (shibuiwilliam)"
   title: "Japanese Contract Document Understanding: a fully synthetic Japanese business-contract dataset with complete ground truth"
   year: 2026
