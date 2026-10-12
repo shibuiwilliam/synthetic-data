@@ -6,7 +6,7 @@
 
 このリポジトリは、次の原則に基づいています。
 
-- **正解 JSON を唯一の情報源（Single Source of Truth）**とし、PDF は正解 JSON から
+- **正解 JSON を唯一の情報源（Single Source of Truth）** とし、PDF は正解 JSON から
   決定論的に描画します（JSON → HTML → PDF）。そのため、正解データと紙面の内容が
   食い違うことは設計上ありません。
 - 会社名、商品名、人物名、連絡先、URL はすべて架空です。URL には `example.jp` 系の

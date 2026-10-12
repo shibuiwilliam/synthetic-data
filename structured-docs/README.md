@@ -9,7 +9,7 @@ OCR、レイアウト解析、VLM、構造化抽出などの文書読み取り�
 
 ## 特長
 
-- **正解 JSON を唯一の情報源（Single Source of Truth）**とし、PDF は正解 JSON から
+- **正解 JSON を唯一の情報源（Single Source of Truth）** とし、PDF は正解 JSON から
   決定論的に描画します（JSON → HTML → PDF）。
 - コア（`docsynth/`）はドメインに依存しません。契約書や保険約款などのドメイン知識は、
   **ファミリー**（`families/`）としてプラグイン化します。
