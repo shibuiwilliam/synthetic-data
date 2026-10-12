@@ -1,175 +1,231 @@
-# contracts-calculation — 計算・判定条項と正解プログラムの同時生成
+# contracts-calculation — 契約書の計算・判定条項生成
 
-日本語ビジネス契約書の合成データ生成基盤 [`contracts`](../)（keiyaku-synth。以下「本体」）の拡張。
-既定の契約書 JSON に **計算や判定を要する条項**（本文・頭書・別紙の表・図）を追加または紐づけし、
-その **正解プログラム（Python）** と **ユニットテスト用の評価データ** を、同じ計算仕様から同時に生成する。
+ビジネス契約書の合成データ生成基盤 [`contracts`](../)（keiyaku-synth。以下「本体」）を
+拡張するプロジェクトです。
 
-用途は、契約書から「計算式・判定式が必要な条項を見つけ、実装し、テストする」システム（以下、評価対象
-システム）を採点するための正解データづくりである。読み取り評価そのものを強化する目的も兼ねる。
+既存の契約書 JSON に**計算・判定条項**（本文、頭書、別紙の表、図）を追加するか、
+既存条項に計算仕様を関連付け、その内容に対応する**正解プログラム**（Python）と
+**評価用テストデータ**を生成します。
 
-**計算仕様（CalcSpec）が唯一の正**であり、文言・プログラム・テストはそこから機械的に作る。文言と式を
-別々に書かないので三者は構成上ずれず、出力前に機械検査で一致を確かめる。
+契約書から計算や判定を必要とする条項を見つけ、実装し、テストするシステムの評価に利用できます。
+文書読み取り自体の評価データとしても使用できます。
 
-```
-計算仕様 ──┬─▶ 契約書 JSON への追加（条・項・号、頭書の行、別紙の表、図）──▶ 本体で索引の再計算・PDF 化
+## 特長
+
+- **計算仕様（CalcSpec）を唯一の情報源（Single Source of Truth）**とします。
+- 契約書の文言、正解プログラム、テストの期待値を同じ仕様から生成します。
+- 参照インタプリタと生成した Python の結果が、すべてのテストケースで一致することを検査します。
+- 追加モードと付与モードの 2 種類を提供します。
+- 同じ基準契約書、seed、プロファイルからは、同じ内容を決定論的に生成します。
+
+```text
+計算仕様 ──┬─▶ 契約書 JSON への追加・関連付け ─▶ 本体で索引を再計算し、PDF を生成
 （唯一の正）├─▶ 正解プログラム（Python）
-           ├─▶ テストケース（入力と期待値）＋ pytest
-           └─▶ 正解表（どの単位がどのルールの根拠か）
+           ├─▶ テストケース（入力と期待値）と pytest
+           └─▶ 正解表（ルールと根拠となる文書要素の対応）
 ```
 
-運用規則は [`CLAUDE.md`](CLAUDE.md)。
+プロジェクトの規則は [`CLAUDE.md`](CLAUDE.md) にまとめています。
 
-## 本体への依存（重要）
+## 現在の状態
 
-このディレクトリは**単体では動かない**。本体 `contracts/` の直下に置かれていることを前提に、
+開発フェーズ M0〜M6 は完了し、現在は運用段階です。計算・判定パターンは
+K01〜K31 の 31 種類です。
 
-- 既定の契約書を本体の `../content/<content_id>/` から読む（**読むだけ**。本体は変更しない）、
-- lint・索引の再計算・PDF 描画は本体の `keiyaku` CLI を呼ぶ（呼び出しは `base_adapter.py` だけに閉じる）、
-- Python 環境も本体の uv プロジェクトを借りる（`uv run --project ..`）。
+生成物には、次の 2 系統があります。
 
-生成器自身の実行時依存は**標準ライブラリだけ**である（`pyproject.toml` の `dependencies` は空）。
-本体を呼ぶのは PDF 化・lint の工程だけで、そこだけ WeasyPrint などの本体の依存が要る。
+- **v1**：`data/<profile>/<content_id>/` に配置する、4 プロファイル × 20 基準契約のデータ
+- **Hugging Face 公開用**：`dataset/` に配置する 100 文書のデータ
+
+公開用データセットは、`standard`、`hard`、`basic`、`challenge` の各プロファイルと、
+`calc_seed` 1〜6 を組み合わせています。
+
+規模、内訳、品質保証、制限、偏りについては、各出力先の `data-card.md` を確認してください。
+データカードと説明書は実測値から生成され、生成物の追加に応じて更新されます。
+
+## 前提条件
+
+このプロジェクトは**単体では動作しません**。`contracts/` の直下に配置し、
+本体の環境とコンテンツを利用します。
+
+- 基準となる契約書を `../content/<content_id>/` から読み込みます。本体のファイルは変更しません。
+- lint、索引の再計算、PDF 描画には、本体の `keiyaku` CLI を使用します。
+- Python 環境には本体の uv プロジェクトを使用します（`uv run --project ..`）。
+
+生成器自体の実行時依存は Python の標準ライブラリだけです。WeasyPrint などの依存関係が必要になるのは、
+本体を呼び出して PDF を生成するときだけです。本体への呼び出しは `base_adapter.py` に集約しています。
 
 ## セットアップ
 
-本体の手順（`../README.md`）で `uv sync` と Pango の導入を済ませてから、
+先に本体の [`README.md`](../README.md) に従って、`uv sync` と Pango の導入を完了してください。
 
 ```bash
 cd contracts/contracts-calculation
-uv run --project .. python -m pytest -q     # 生成器自身のテスト（約 90 秒）
+
+# 生成器のテスト
+uv run --project .. python -m pytest -q
+
+# 静的解析
 uv run --project .. ruff check src tests scripts
 ```
 
-macOS で本体の描画を呼ぶときは `DYLD_FALLBACK_LIBRARY_PATH=/opt/homebrew/lib` が要る。
-`base_adapter` が自動で付けるので、素手で `uv run keiyaku render` を叩くときだけ注意する。
+macOS で本体の描画コマンドを直接実行する場合は、
+`DYLD_FALLBACK_LIBRARY_PATH=/opt/homebrew/lib` が必要です。
+`base_adapter.py` から実行する場合は自動的に設定されます。
 
-## コマンド
+## 使い方
 
-コンソールスクリプトは登録していない。`python -m contracts_calculation.cli`（表示名 `contracts-calc`）で呼ぶ。
+コンソールスクリプトは登録していません。
+`python -m contracts_calculation.cli`（表示名 `contracts-calc`）として実行します。
 
 ```bash
 cd contracts/contracts-calculation
 export PYTHONPATH=src
 
-# 追加モード：既定の契約書に計算条項を足して「計算パック」を作る
+# 追加モード：基準契約書に計算条項を追加
 uv run --project .. python -m contracts_calculation.cli generate \
     --base ../content/ots-0001 --calc-seed 1 --profile standard --out data --png
 uv run --project .. python -m contracts_calculation.cli generate \
     --all-bases --calc-seed 1 --profile standard --out data/standard
 
-# 付与モード：既定の契約書にある計算条項へ仕様を紐づける（追加はしない）
-uv run --project .. python -m contracts_calculation.cli bind --all-bases --out data_bind --no-render
+# 付与モード：既存の計算条項に仕様を関連付ける
+uv run --project .. python -m contracts_calculation.cli bind \
+    --all-bases --out data_bind --no-render
 
-# 検証・採点・点検
+# 生成物を検証
 uv run --project .. python -m contracts_calculation.cli verify data/ots-0101
-uv run --project .. python -m contracts_calculation.cli eval --data data --oracle   # 満点になることの検査
-uv run --project .. python -m contracts_calculation.cli lint-base                   # 既定の契約書の計算条項を点検
 
-# データセットの説明書とデータカード（実測だけから生成する。手で書かない）
+# 正解プログラムを提出結果として評価し、満点になることを確認
+uv run --project .. python -m contracts_calculation.cli eval --data data --oracle
+
+# 基準契約書の計算条項を検査
+uv run --project .. python -m contracts_calculation.cli lint-base
+```
+
+プロファイルは難易度ごとの出現割合を定義し、`basic`、`standard`、`hard`、
+`challenge` の 4 種類があります。`challenge` には、意図的な欠落や例外的な条件を含めます。
+詳しくは `config.py` を参照してください。
+
+### データカードを生成・検査する
+
+```bash
+# 説明書とデータカードを実測値から生成
 uv run --project .. python -m contracts_calculation.cli datasheet --data dataset
+
+# データカードの鮮度を検査
 uv run --project .. python -m contracts_calculation.cli datacard check --data dataset
-uv run --project .. python scripts/verify_data_card.py --data dataset   # 測り方の独立検算
 
-# Hugging Face 公開形を組み立てる（dataset/ は読むだけ。アップロードはしない）
-uv run --project .. python -m contracts_calculation.cli publish --data dataset --out dist/hf
+# 別の計測経路で独立検算
+uv run --project .. python scripts/verify_data_card.py --data dataset
 ```
 
-**`dataset/` をそのままアップロードしてはいけない。** `_render/*/render.html` の全 102 ファイルに
-ローカルの絶対パスと実行ユーザー名が入っており、ほかに中間生成物と重複が約 85 MB ある。`publish` が
-許可リスト方式で公開形を組み立て、公開前ゲート P1〜P6（絶対パスの漏れ・副産物・実在名称・
-カードの妥当性）を全ファイルに掛ける。仕様は `docs/hf_publish.md`。
+### Hugging Face 向けの公開形式を作成する
 
-プロファイルは難易度の軸ごとの出現割合で、`basic` / `standard` / `hard` / `challenge` の 4 種
-（`config.py`。`challenge` は欠落・異例をわざと含む）。
-
-## 1 文書の出力（計算パック）
-
+```bash
+uv run --project .. python -m contracts_calculation.cli \
+    publish --data dataset --out dist/hf
 ```
+
+このコマンドは公開用ファイルを組み立てるだけで、アップロードは行いません。
+
+**`dataset/` をそのままアップロードしないでください。** `_render/*/render.html` には
+ローカルの絶対パスや実行ユーザー名が含まれ、中間生成物や重複ファイルもあります。
+`publish` は許可リスト方式で公開対象を選び、公開前ゲート P1〜P6 によって、
+絶対パス、副産物、実在名称、データカードなどを検査します。
+
+詳しい仕様は `docs/hf_publish.md` を参照してください。
+
+## 生成物
+
+```text
 <out>/
-├── README.md                  # データセットの説明書（datasheet。実測から生成）
-├── data-card.md               # データカード（実測から生成）
-├── oracle_report.json         # 正解プログラムを提出とみなした採点結果（満点であること）
-└── <content_id>/              # 計算パック 1 文書ぶん
-    ├── contract.json          # 計算条項を足した契約書（本体スキーマ。PDF の元）
+├── README.md                  # 実測値から生成するデータセット説明書
+├── data-card.md               # 実測値から生成するデータカード
+├── oracle_report.json         # 正解プログラムを使った評価結果
+└── <content_id>/              # 1 文書分の計算パック
+    ├── contract.json          # 計算条項を追加した契約書
     ├── <content_id>--<style_id>.pdf
-    ├── _render/               # 本体の描画の生成物（source.json・layout.json・render.html・doc.pdf）
+    ├── _render/               # source.json、layout.json、render.html、doc.pdf
     └── calc/
-        ├── spec.json          # 計算仕様（唯一の正）
-        ├── patch.json         # 既定の契約書に対して行った追加操作
-        ├── answer_key.json    # 正解表：ルールと根拠単位の対応・表現手段・難易度
-        ├── manifest.json      # 生成の記録・選んだパターン・ゲートの結果・ハッシュ
-        ├── calendar.json      # その文書が使う祝日の固定版
-        ├── cases.jsonl        # テストケース（入力と期待値）
-        ├── tasks.jsonl        # 評価対象システムへの出題（関数名と入出力の契約）
-        ├── programs/calc_<cid>.py   # 正解プログラム
-        └── tests/             # 同梱 pytest（`--impl` で提出実装に差し替えられる）
+        ├── spec.json          # 計算仕様。唯一の情報源
+        ├── patch.json         # 基準契約書に対する変更内容
+        ├── answer_key.json    # ルール、根拠、表現方法、難易度の対応
+        ├── manifest.json      # 生成条件、パターン、ゲート結果、ハッシュ
+        ├── calendar.json      # 使用する祝日の固定データ
+        ├── cases.jsonl        # 入力と期待値
+        ├── tasks.jsonl        # 評価対象システムへのタスク
+        ├── programs/calc_<cid>.py
+        └── tests/             # 提出実装へ差し替え可能な pytest
 ```
 
 ## 検証
 
-生成した文書は**全ゲートを通ったものだけ**を出す。
+すべての必須ゲートを通過した文書だけを出力します。
 
-| | 検査 |
+| ゲート | 検査内容 |
 |---|---|
-| G1–G2 | 仕様のスキーマ・型・単位。仕様の引用が契約書の単位に逐語で存在する |
-| G3–G4 | 明示すべき事項に対応する文がある。本文・頭書・別紙から読み直した値が仕様と一致する |
-| G5–G6 | 契約書に書いた計算例が参照インタプリタと一致する。参照インタプリタと正解プログラムが全ケースで一致する |
-| G7–G8 | 生成したテストが変異をすべて検出する。日付を扱うルールに暦の境界ケースが入っている |
-| G9–G10 | 既存の条項・定数・定義語・別紙番号と衝突しない。本体の lint・索引再計算・描画が成功する |
-| G11–G12 | 根拠単位が言い回しと構造で発見できる。同じ seed で再生成してハッシュが一致する |
-| G13 | （任意）基準となるシステムが H2 のヒントで合格する。2026-10-04 に見送り決定 |
+| G1〜G2 | 仕様のスキーマ、型、単位を検査し、仕様の引用が契約書に存在することを確認 |
+| G3〜G4 | 必要な説明文が存在し、本文、頭書、別紙から読み取った値が仕様と一致することを確認 |
+| G5〜G6 | 契約書内の計算例、参照インタプリタ、正解プログラムの結果が一致することを確認 |
+| G7〜G8 | テストがすべての変異を検出し、日付規則に暦の境界ケースが含まれることを確認 |
+| G9〜G10 | 既存の条項、定数、定義語、別紙番号と衝突せず、本体の lint、索引再計算、描画が成功することを確認 |
+| G11〜G12 | 根拠となる文書要素を発見でき、同じ seed で再生成したハッシュが一致することを確認 |
+| G13 | 基準システムが H2 のヒントで合格することを確認する任意ゲート。2026-10-04 に導入を見送り |
 
-意味論の正本は `spec/interp.py`（参照インタプリタ）で、生成した Python との一致を G6 と
-`eval --oracle` が全ケースで確かめる。
+意味論の正本は `spec/interp.py` の参照インタプリタです。G6 と `eval --oracle` が、
+生成した Python と参照インタプリタの一致を全テストケースで確認します。
 
-## ディレクトリ
+## ディレクトリ構成
 
-```
-src/contracts_calculation/   # 生成器本体
-packs/                       # パラメータ候補・入力概念の語彙・祝日の固定版（JSON）
-tests/                       # 生成器自身のテスト
-examples/                    # 回帰基準の 3 文書（生成物。scripts/update_examples.py で更新）
-docs/                        # 調査・レビュー・決定の記録（索引は docs/README.md）
-scripts/                     # 祝日の作成・examples の更新・データカードの独立検算
-```
-
-生成したデータセット（`data/`・`data_bind/`・`dataset/`）は**コミットしない**。決定的に再生成できる。
-
-## 文書
-
-| 文書 | 役割 |
+| パス | 内容 |
 |---|---|
-| [`CLAUDE.md`](CLAUDE.md) | プロジェクト憲章。守ること（規則 1〜13）・現状・コマンド |
-| [`docs/hf_publish.md`](docs/hf_publish.md) | Hugging Face 公開形の仕様（許可リスト・公開前ゲート） |
+| `src/contracts_calculation/` | 生成器本体 |
+| `packs/` | パラメータ候補、入力概念の語彙、祝日の固定データ |
+| `tests/` | 生成器のテスト |
+| `examples/` | 回帰基準となる 3 文書 |
+| `docs/` | 調査、レビュー、設計判断の記録 |
+| `scripts/` | 祝日データ、回帰基準、データカードの管理スクリプト |
+
+`data/`、`data_bind/`、`dataset/` は生成物のため、このリポジトリでは追跡しません。
+
+## ドキュメント
+
+| ファイル | 内容 |
+|---|---|
+| [`CLAUDE.md`](CLAUDE.md) | プロジェクト憲章と運用規則 |
+| [`docs/hf_publish.md`](docs/hf_publish.md) | Hugging Face 向け公開形式と公開前ゲート |
 | [`docs/data_card.md`](docs/data_card.md) | データカードの生成仕様 |
-| [`docs/README.md`](docs/README.md) | 調査・レビュー・決定の記録の索引 |
+| [`docs/README.md`](docs/README.md) | 調査、レビュー、設計判断の記録への索引 |
 
-実装と文書が食い違ったら、**実装ではなく文書を先に直す**。
+実装と文書に相違がある場合は、先に文書を更新してください。
 
-## 現況
+## 利用上の注意
 
-開発フェーズ（M0〜M6）は完了し、運用モードにある。計算・判定のパターンは **K01〜K31 の 31 種**。
-生成物は用途によって 2 系統ある：**v1**（`data/<profile>/<cid>/`。4 プロファイル × 20 基準契約）と、
-Hugging Face 公開用に積んだ**100 文書セット**（`dataset/`。standard・hard・basic・challenge の混成、
-calc_seed 1〜6）。
-
-規模・内訳・品質保証・制限と偏りは、各生成物側の **`<data>/data-card.md`（データカード）** を見る。
-データカードと説明書は実測だけから生成するので、データを足せば自動で更新される（固定文字列に統計値を
-焼き込まない）。
-
-## 制限と注意
-
-- 生成物は**完全に架空**の契約書である。会社名・人物名・金額・日付はすべて合成で、実在のひな型の文章は
-  一切含まない。**法的に有効な契約書ではなく、実務に使えない**。
-- 税率・法定利率・祝日は法令の実装ではない。契約書に書かれた値か、外部からの入力として扱う。
-- 祝日は 2026〜2033 年の固定版（`packs/calendar/holidays_jp.json`）。実行時に外部へ取りに行かない。
-- 生成の経路で LLM を呼ばない。生成は決定的である（同じ seed なら同じ出力）。
+- 会社名、人物名、金額、日付などはすべて架空です。
+- 実在するひな型の文章は転載していません。
+- 生成物は文書読み取りの検証用データです。法的に有効な契約書ではなく、実務には利用できません。
+- 税率、法定利率、祝日は法令の実装ではありません。契約書内の値または外部入力として扱います。
+- 祝日は 2026〜2033 年の固定データ（`packs/calendar/holidays_jp.json`）を使用します。
+- 生成処理中に LLM や外部サービスを呼び出しません。
 
 ## ライセンス
 
-コード（`src/`・`scripts/`・`tests/`）はリポジトリ直下の [`LICENSE`](../../LICENSE)（MIT）に従う。
+コード（`src/`、`scripts/`、`tests/`）には、ルートディレクトリの
+[`LICENSE`](../../LICENSE) に記載された MIT License が適用されます。
 
-生成物（契約書 JSON・PDF・仕様・正解プログラム・テスト）の**配布条件は未決**である（本体プロジェクトの
-決定に従属する）。決まるまで外部配布はしない。Hugging Face 公開形（`publish` の出力）は組み上げ済みで
-公開前ゲートも通っているが、`license: other`／`undecided` のままカードに出力され、アップロードの実行は
-人間が行う。
+生成物の配布条件は未決定で、本体プロジェクトの決定に従います。Hugging Face 向けの
+公開形式と公開前ゲートは実装済みですが、ライセンスは `other` / `undecided` として出力されます。
+アップロードは人が実行します。
+
+### AI モデルの学習・蒸留について
+
+**生成物を、LLM、VLM、その他の AI モデルの学習、ファインチューニング、蒸留、
+強化学習に利用することはできません。**
+
+生成物の本文や QA には、Claude Code のセッション内で Claude（Anthropic）が生成した出力が含まれます。
+Anthropic の Usage Policy では、入力と出力を AI モデルの学習に使用すること
+（model scraping、model distillation を含む）が、事前の許可なく禁止されています
+（<https://www.anthropic.com/legal/aup>）。
+
+一方、文書読み取り、検索、AI エージェントの評価やベンチマークには利用できます。
+上記の制限が適用されるのは、モデルの重みを更新する用途です。

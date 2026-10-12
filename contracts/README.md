@@ -1,199 +1,249 @@
 # keiyaku-synth — 日本語ビジネス契約書の合成データ生成基盤
 
-実在の契約書そっくりだが **完全に架空** の日本語契約書（PDF）と、その **完全な正解データ**（JSON）を
-対で生成する。ドキュメント読み取りシステム（OCR / レイアウト解析 / VLM / 構造化抽出）と
-検索エンジンの開発検証用。
+**完全に架空でありながら、本物に近い日本語のビジネス契約書**（PDF）と、その内容に対応する
+**正解データ**（JSON）を生成するプロジェクトです。
 
-## なぜ作るのか
+OCR、レイアウト解析、VLM、構造化抽出などの文書読み取りシステムや、
+検索・RAG システムの開発・検証を主な用途としています。
 
-契約書の読み取りを開発するとき、手元にある契約書はどれも使えない。
+## 開発の背景
 
-- **本物の契約書**は当事者名・金額・取引条件が入っており、社外に出せない。
-- **公開されているひな型**（公的機関のモデル契約書・法律事務所のサンプル）は第三者の著作物で、
-  データセットとして再配布できない。
-- どちらにも「**どこに何が書いてあるか**」の正解が付いていない。第4条第2項の本文はどこからどこまでか、
-  この表のセルはどの行見出し × どの列見出しに属するか、「別紙1」はどの別紙を指すか——人手で付けるしかない。
+契約書の読み取りシステムを開発する際、実在する文書には次のような課題があります。
 
-そこで **構造的特徴だけを実在契約書から学び、文章は全部オリジナルに書いた合成契約書**と、
-**機械が生成した完全な正解**を対で作る。正解 JSON が唯一の真実で、PDF はその決定論的な描画結果
-（JSON → HTML → PDF）なので、正解と紙面が食い違うことが原理的に起きない。
+- 実際の契約書には当事者名、金額、取引条件などの機密情報が含まれ、社外に出せません。
+- 公開されているひな型は第三者の著作物であり、データセットとして再配布できるとは限りません。
+- 文書内の構造、表の意味、参照関係などを示す正解データが付属していません。
 
-先行プロジェクト [`../insurance-contracts/`](../insurance-contracts/)（yakkan-synth）が保険約款で
-この方式を成立させ、規則ベース読み取り器・VLM・**構築経緯を知らない盲検エージェント**の3段で
-「外部の読み手が使えるデータセットである」ことまで実証している。本プロジェクトはその実装を
-**契約書ドメインに特化して転用**したものである。
+このプロジェクトでは、実在する契約書から構造やレイアウトの特徴だけを参考にし、
+文章をすべて独自に作成します。**正解 JSON を唯一の情報源（Single Source of Truth）**とし、
+PDF を正解 JSON から決定論的に描画するため（JSON → HTML → PDF）、
+正解データと紙面の内容が食い違うことは設計上ありません。
 
-## 何ができるか
+先行プロジェクトの [`../insurance-contracts/`](../insurance-contracts/)（yakkan-synth）は、
+同じ方式を保険約款で実証しています。本プロジェクトは、その設計と評価方法を
+ビジネス契約書向けに拡張したものです。
 
-- 10 種類の契約書（秘密保持・業務委託・準委任・コンサルティング・売買・賃貸借・ライセンス・
-  システム開発・請負・雇用）を、doctype ごとの骨格・必須要素・文体の宣言から生成する。
-- 同じ内容を別のレイアウト（判型・フォント・罫線・様式型の版面）で描き直せる。
-  内容の正解は不変で、bbox と読み順だけが変わる——**レイアウト頑健性の検証データが安価に増える**。
-- 6 観点の正解：テキスト／条項構造／表／図／参照関係（`{ref:}`・別紙・当事者呼称）／QA。
-- 読み取り精度の採点（13 指標）と検索の採点（7 指標）をコマンド 1 本で行える。
+## 特長
 
-## 状態
+- 秘密保持、業務委託、準委任、コンサルティング、売買、賃貸借、ライセンス、
+  システム開発、請負、雇用の 10 文書種別を生成できます。
+- 文書種別ごとの構造、必須要素、文体を宣言ファイルで管理します。
+- 同じ内容を異なる判型、フォント、罫線、版面で描画できます。
+- テキスト、条項構造、表、図、参照関係、QA の 6 観点で正解データを提供します。
+- 文書読み取りと検索の評価ハーネスを備えています。
 
-**データセット v1 完成（2026-10-05 時点）。** 10 doctype × 5 content ＝ **50 本の契約書**を
-1〜2 レイアウトで描いた **100 文書**（657 ページ・表 247・図 104・QA 4,500 問）。
-`eval --all --oracle` は 100 文書 × 18 指標すべて満点、全 content が lint（類似度込み）error 0 / warn 0、
-全文書が verify・qa とも error 0。規則ベース読み取り・VLM・**構築経緯を知らない盲検エージェント 5 本**まで
-検証済み（`docs/validation_plan.md` の V-A〜V-F）。
+## 現在の状態
 
-進捗の詳しい経緯は `docs/progress.md`。
+**データセット v1 は 2026-10-05 に完成しました。**
 
-`dataset/` は生成物なのでリポジトリに入れていない。下の手順で再生成する。
+| 項目 | 実測値 |
+|---|---:|
+| 文書種別 | 10 |
+| コンテンツ | 50 |
+| 文書 | 100 |
+| ページ | 657 |
+| 表 | 247 |
+| 図 | 104 |
+| QA | 4,500 問 |
+
+100 文書に対する `eval --all --oracle` は、18 指標すべてで満点です。
+全コンテンツが類似度検査を含む lint で error 0 / warn 0、全文書が verify と QA の検査で
+error 0 となっています。規則ベースの読み取り、VLM、開発経緯を知らないエージェントによる
+盲検評価も実施済みです。
+
+詳しい検証内容は `docs/validation_plan.md`、進捗の経緯は `docs/progress.md` を参照してください。
+`dataset/` は生成物のため、このリポジトリでは追跡していません。
 
 ## セットアップ
 
-必要なもの：[uv](https://docs.astral.sh/uv/)（Python 3.12 を入れる）、Pango。
+必要な環境は Python 3.12、[uv](https://docs.astral.sh/uv/)、Pango です。
 
 ```bash
 # macOS
 brew install pango
+
 # Ubuntu
 sudo apt install libpango-1.0-0 libpangoft2-1.0-0 libharfbuzz0b libffi-dev
 
-uv sync            # 依存の導入（= make setup）
-make doctor        # 環境の検査（Python / WeasyPrint / Pango / フォント / pypdfium2）
-make check         # ruff + pytest + manifest とデータカードの鮮度
+uv sync            # 依存関係をインストール（make setup と同じ）
+make doctor        # Python、WeasyPrint、Pango、フォント、pypdfium2 を検査
+make check         # ruff、pytest、manifest とデータカードの鮮度を検査
 make smoke         # 動作確認用の PDF と PNG を scratch/smoke/ に生成
 ```
 
-macOS では Homebrew の dylib が dyld の既定検索パスに無いため、素の `uv run` では WeasyPrint の
-import が失敗する。`make` 経由なら `DYLD_FALLBACK_LIBRARY_PATH=/opt/homebrew/lib` が自動で渡る。
-直接叩くときは自分で付ける。他の落とし穴は `docs/gotchas.md`。
+### macOS での注意
 
-## 1 文書を作る
+Homebrew の動的ライブラリは、dyld の既定の検索パスに含まれていません。そのため、
+`uv run` を直接実行すると WeasyPrint のインポートに失敗する場合があります。
+
+`make` を経由すると、`DYLD_FALLBACK_LIBRARY_PATH=/opt/homebrew/lib` が自動的に設定されます。
+詳しくは `docs/gotchas.md` を参照してください。
+
+## 1 文書を生成する
 
 ```bash
-uv run keiyaku scaffold --doctype nda --content-id nda-0001 --seed 42   # 執筆用スケルトン
-#  … content/nda-0001/parts/*.json を執筆 …
-make doc CONTENT=nda-0001 STYLE=ct-a4-1col-mincho    # lint → build → render → verify → qa
-uv run keiyaku review dataset/nda-0001--ct-a4-1col-mincho   # 全ページ PNG を目視（必須）
+# 執筆用のスケルトンを作成
+uv run keiyaku scaffold --doctype nda --content-id nda-0001 --seed 42
+
+# content/nda-0001/parts/*.json に本文を記述
+
+# lint → build → render → verify → qa を実行
+make doc CONTENT=nda-0001 STYLE=ct-a4-1col-mincho
+
+# 全ページの PNG を目視確認
+uv run keiyaku review dataset/nda-0001--ct-a4-1col-mincho
 ```
 
-## データセットを丸ごと再生成する
+レイアウトの崩れは自動検査だけでは検出できない場合があるため、ページ画像の目視確認は必須です。
 
-`content/`（執筆物）・`specs/`（バッチ定義）・`dataset/`（生成物）はコミットしていない
-（2026-10-05 決定。`docs/decisions.md` 152）。このリポジトリにコミットしてあるのは宣言
-（`blueprints/` `numbering/` `styles/` `library/`）と実装（`keiyaku/`）だけなので、第三者は
-`content/`・`specs/` を自分で用意する必要がある。
+## データセットを再生成する
+
+`content/`（執筆内容）、`specs/`（バッチ定義）、`dataset/`（生成物）は
+このリポジトリでは追跡しません。追跡対象は、`blueprints/`、`numbering/`、`styles/`、
+`library/` などの宣言と、`keiyaku/` の実装です。
+
+データセットを再生成するには、利用者が `content/` と `specs/` を用意する必要があります。
 
 ```bash
-# 1. 各 doctype ごとに執筆用スケルトンを作り、本文を書く（CLAUDE.md §7 の執筆プロトコル）
+# 1. スケルトンを作成し、本文を執筆
 uv run keiyaku scaffold --doctype nda --content-id nda-0001 --seed 42
-#  … content/nda-0001/parts/*.json を執筆 …
 uv run keiyaku lint content/nda-0001
 
-# 2. バッチ定義（specs/*.yaml）を自分で書き、まとめて生成する
+# 2. specs/*.yaml にバッチ定義を作成し、一括生成
 uv run keiyaku batch specs/my_batch.yaml
-uv run keiyaku manifest update && uv run keiyaku manifest check
-uv run keiyaku export                       # elements.jsonl / search / README / data-card.md
-uv run keiyaku eval --all --oracle          # 全文書・全指標が満点になること
+uv run keiyaku manifest update
+uv run keiyaku manifest check
+uv run keiyaku export
+uv run keiyaku eval --all --oracle
 ```
 
-## ドキュメント
+執筆手順は `CLAUDE.md` §7 を参照してください。
 
-| ファイル | 中身 |
+## 生成物
+
+`dataset/<doc_id>/` が 1 文書分の生成物です。`doc_id` は
+`<content_id>--<style_id>` の形式です。同じ内容を別のレイアウトで描画した文書は、
+`content_id` が同じで `style_id` が異なります。
+
+| ファイル | 内容 |
 |---|---|
-| `CLAUDE.md` | **プロジェクト憲章**：ハードルール・設計原則・doctype 一覧・lint（L00–L26）・マイルストーン P0–P8 |
-| `docs/architecture.md` | yakkan からの移植方針・モジュール棚卸し表・コアと宣言の境界 |
-| `docs/schema.md` | 正解 JSON のデータモデル（yakkan 基底仕様への差分＋契約書の追加要素） |
-| `docs/doctypes.md` | 10 doctype のカタログ（必須要素・variants）・番号方式・style プリセット |
-| `docs/rendering.md` | レンダリングと検証（WeasyPrint・確定済み描画規約・契約書固有の描画・要probe） |
-| `docs/style_guide.md` | 執筆ガイド（架空化・転載の指紋・文体・密度要件・QA の型） |
-| `docs/authoring_checklist.md` | **lint が通っても残る欠陥**の一覧（執筆前に必読） |
-| `docs/reference_structures.md` | `samples/` の構造分析の進め方（転載禁止）・課題カタログ CT1〜 |
-| `docs/evaluation.md` | 評価設計（成果物・指標・**予測に使う語彙**・合格条件） |
-| `docs/data_card.md` | データカード（`dataset/data-card.md`）の仕様と自動更新 |
-| `docs/publishing.md` | **データセットの公開（Hugging Face Hub）**：カードの frontmatter・Viewer 用の `views/`・LFS・手順 |
-| `docs/validation_plan.md` | 検証・硬化計画（oracle → misread → 規則ベース → VLM → 盲検 → HITL） |
-| `docs/plan.md` | 実行計画とタスク分解（WBS） |
-| `docs/lint_rules.md` | lint 各ルールの実装位置と検査ロジック |
-| `docs/repo_layout.md` | ディレクトリ構成と運用ルール |
-| `docs/decisions.md` `progress.md` `gotchas.md` | 運用ログ（設計変更履歴／進捗／環境の癖） |
+| `doc.pdf` | フォント埋め込み済み、テキスト層あり、タグなしの PDF |
+| `pages/page-NNN.png` | 150 dpi のページ画像 |
+| `source.json` | 内容と意味を保持する、レイアウト非依存の正解データ |
+| `layout.json` | ページや要素ごとの bbox、読み順、ヘッダ、フッタ |
+| `answer.json` | ページ別の期待テキストとアウトライン |
+| `elements.jsonl` | 1 行 1 要素の平坦な索引。評価スクリプトで最初に利用するファイル |
+| `qa.json` | 自動生成 30 問と執筆 QA 15 問 |
+| `render.html` | デバッグ用の中間 HTML。配布対象外 |
 
-## データセットの読み方
+`answer.json` は `source.json` と `layout.json` の内容を重複して保持しません。
+3 ファイルをまとめて読み込む場合は、`keiyaku.answer.load_answer(dir)` を使用してください。
 
-`dataset/<doc_id>/` が 1 文書ぶん。`doc_id` は `<content_id>--<style_id>`
-（同じ内容を別レイアウトで描いたものは `content_id` が同じで `style_id` が違う）。
+`dataset/` 直下には、次のデータセット全体のファイルがあります。
 
-| ファイル | 中身 |
+- `manifest.json`：全文書の一覧
+- `README.md`：Hugging Face 用のデータセットカード
+- `data-card.md`：規模、作成方法、品質保証、制限、偏りをまとめたデータカード
+- `views/*.jsonl`：Dataset Viewer と `load_dataset()` 向けの平坦なデータ
+- `search/`：passages、queries、qrels を含む検索評価セット
+
+これらは `keiyaku export` が実測値から生成します。手作業で変更しないでください。
+正解 JSON の各フィールドは `docs/schema.md`、予測形式と採点方法は
+`docs/evaluation.md` を参照してください。
+
+## 評価
+
+`keiyaku eval` では、文書読み取りと検索・RAG を評価できます。
+`--oracle` を使用すると満点の予測を生成できるため、評価処理自体の検証にも利用できます。
+
+評価対象には、テキスト、アウトライン、構造位置、表、図、読み順、QA、検索順位などが含まれます。
+詳しい指標と予測 JSON の形式は `docs/evaluation.md` を参照してください。
+
+## Hugging Face Hub 向けの公開形式
+
+`keiyaku export` または `keiyaku publish update` を実行すると、`dataset/` を
+Hugging Face のデータセットリポジトリとして公開できる形式に整えます。
+
+文書本体と検索評価セットは、別々のデータセットとして公開します。
+
+- 文書本体：`dataset/`
+- 検索評価セット：`dataset/search/`
+
+検索評価セットを分離することで、検索だけを利用する場合に PDF や PNG を取得する必要がなくなります。
+`passage_id` は `<doc_id>::<element_id>` の形式で、文書本体と対応付けられます。
+
+```bash
+uv run keiyaku publish check
+uv run python scripts/verify_views.py
+uv run python scripts/upload_hf.py
+uv run python scripts/upload_hf.py --only search
+```
+
+`scripts/upload_hf.py` は、既定ではアップロードせず、対象ファイルの数だけを確認します。
+公開先、名義、除外設定は `specs/publish.yaml` で管理します。詳しくは
+`docs/publishing.md` を参照してください。
+
+## ディレクトリ構成とドキュメント
+
+| ファイル | 内容 |
 |---|---|
-| `doc.pdf` | 生成 PDF。フォント埋め込み・テキスト層あり・タグ無し |
-| `pages/page-NNN.png` | 150dpi のページ画像（画像ベースの読み取り検証用） |
-| `source.json` | 内容と意味。**レイアウト非依存**（判型・フォントを変えても不変） |
-| `layout.json` | 描画結果。ページ・要素ごとの bbox・読み順・ヘッダ／フッタ |
-| `answer.json` | ページ別の期待テキストとアウトライン。**`source` と `layout` は内包しない**（同じ場所に実体がある。3 つまとめて扱うときは `keiyaku.answer.load_answer(dir)`） |
-| `elements.jsonl` | 1 行 1 要素の平らな索引。**評価スクリプトはまずこれを読む** |
-| `qa.json` | 問答（自動生成 30 問＋執筆 15 問） |
-| `render.html` | デバッグ用の中間 HTML（配布対象外） |
+| `CLAUDE.md` | プロジェクト憲章：必須ルール、設計原則、文書種別、lint、マイルストーン |
+| `docs/architecture.md` | yakkan-synth からの移植方針とコア・宣言の境界 |
+| `docs/schema.md` | 正解 JSON のデータモデル |
+| `docs/doctypes.md` | 10 文書種別、番号体系、スタイルの仕様 |
+| `docs/rendering.md` | WeasyPrint を使った描画と検証 |
+| `docs/style_guide.md` | 架空化、転載防止、文体、密度、QA の執筆ガイド |
+| `docs/authoring_checklist.md` | lint だけでは検出できない欠陥の確認項目 |
+| `docs/reference_structures.md` | 参考文書の構造分析方法と課題カタログ |
+| `docs/evaluation.md` | 評価対象、指標、予測形式、合格条件 |
+| `docs/data_card.md` | `dataset/data-card.md` の生成仕様 |
+| `docs/publishing.md` | Hugging Face Hub 向けの公開仕様と手順 |
+| `docs/validation_plan.md` | 評価・検証・品質強化の計画 |
+| `docs/plan.md` | 実行計画と作業分解（WBS） |
+| `docs/lint_rules.md` | lint の各規則と検査ロジック |
+| `docs/repo_layout.md` | ディレクトリ構成と運用規則 |
+| `docs/decisions.md`、`docs/progress.md`、`docs/gotchas.md` | 設計変更、進捗、環境固有の注意事項 |
 
-全文書の一覧は `dataset/manifest.json`、検索評価セット（passages / queries / qrels）は
-`dataset/search/`（**公開時は別のデータセットとして上げる**。下記）、
-実測値入りの概要は `dataset/README.md`、規模・作り方・品質保証・制限と偏りをまとめた
-**データカードは `dataset/data-card.md`**（いずれも `keiyaku export` が実測して生成する）。
-正解 JSON の各フィールドの意味は `docs/schema.md`、読み取り予測の形と採点は `docs/evaluation.md`。
+## 参考文書の取り扱い
 
-### 公開（Hugging Face Hub）
+`samples/` には、構造分析に使用する 10 カテゴリ、36 種類の参考文書があります。
+出典は `samples/SOURCES.md` に記録しています。
 
-`keiyaku export`（または `keiyaku publish update`）は、`dataset/` を **Hugging Face の
-データセットリポジトリとしてそのまま上げられる形**にする：`dataset/README.md` は frontmatter つきの
-データセットカードになり、`views/{documents,pages,qa}.jsonl`（Dataset Viewer と `load_dataset()` 用の
-平らな射影）・`.gitattributes`（PDF・PNG を LFS）・`licenses/`（PDF に埋め込まれているフォントの本文）・
-`SHA256SUMS` が付く。`render.html` は配布しない。
+参考文書は第三者の著作物です。見出し階層、条文構成、別紙の有無、表の形式など、
+構造やレイアウトのみを参考にし、文章は生成物へ転載しません。PDF 本体は
+`.gitignore` で除外し、リポジトリにはコミットしません。
 
-**上げ先は 2 つある。** 文書のデータセット（`dataset/`）と、**検索評価セットのデータセット**
-（`dataset/search/` がそのリポジトリのルート。passages / queries / qrels の 3 本と、自分のカード・
-`LICENSE`・`SHA256SUMS`）。粒度の違うものを 1 つの Dataset Viewer に混ぜず、検索だけを使う人が
-PDF と PNG を取らずに済むようにしてある（`docs/publishing.md` §12）。両方のカードが相互に案内し、
-`passage_id` は `<doc_id>::<element_id>` なので文書側と突き合わせられる。
+詳しい運用規則は `docs/reference_structures.md` §0 を参照してください。
 
-```
-uv run keiyaku publish check                   # 公開用の面の鮮度と、公開をふさいでいる条件（両方）
-uv run python scripts/verify_views.py          # views が parquet に落ちるかの検査
-uv run python scripts/upload_hf.py             # 何が上がるかを数えるだけ（既定。通信しない）
-uv run python scripts/upload_hf.py --only search   # 検索評価セットのリポジトリだけを扱う
-```
+## 利用上の注意
 
-公開先・名義・除外などの**決定は `specs/publish.yaml`**（`specs/` で唯一コミットするファイル）。
-**配布条件（ライセンス）が未決のあいだアップロードは拒否される**（下記を参照）。
-仕様は `docs/publishing.md`。
+- 会社名、屋号、人物名、住所、連絡先、契約書番号、物件名はすべて架空です。
+- 各文書の末尾には、架空の文書であることを明記します。
+- 生成物は文書読み取りの検証用データです。法的に有効な契約書ではなく、実務には利用できません。
 
-## 参考サンプル（`samples/`）
+## ライセンス
 
-10 カテゴリ・36 種の実在ひな型（公的機関・業界団体・法律事務所が公開しているもの）を
-構造分析のために集めてある。出典の一覧は `samples/SOURCES.md`。
+- **コード**：`pyproject.toml` の `Proprietary` と、ルートディレクトリの
+  [`LICENSE`](../LICENSE) に記載された MIT License が一致していません。公開前に統一する必要があります。
+- **同梱フォント**：SIL Open Font License 1.1 または IPA フォントライセンス v1.0
+- **生成データセット**：CC BY 4.0（2026-10-06 決定）
 
-> **これらは第三者の著作物である。** 参考にしてよいのは構造（見出し階層・条文構成・別紙の有無・
-> 表の形式）だけで、**文章は 1 文も生成物に持ち込まない**。「公的機関のひな型だから著作権はない」と
-> 判断しない。PDF 本体はリポジトリにコミットしない（`.gitignore` で除外。`SOURCES.md` だけ残す）。
-> 運用の詳細は `docs/reference_structures.md` §0。
+生成データセットの公開先は
+`cvusk/japanese-contract-document-understanding` ですが、まだアップロードしていません。
+ライセンス宣言の正本は `specs/publish.yaml` の `license.id` です。
 
-## ライセンスと架空性
+### AI モデルの学習・蒸留について
 
-生成される文書の会社名・屋号・人物名・住所・連絡先・契約書番号・物件名はすべて架空で、
-参考にした実在ひな型からは**構造のみ**を採っている。各文書の末尾に架空である旨を明記する。
-**生成物は読み取り検証用のダミーであり、法的に有効な契約書ではない。実務に使わないこと。**
+**生成物を、LLM、VLM、その他の AI モデルの学習、ファインチューニング、蒸留、
+強化学習に利用することはできません。**
 
-- **コード**：`pyproject.toml` の宣言は `Proprietary`。親リポジトリ直下の `LICENSE`（MIT）と
-  食い違っているので、公開の前にどちらかへ揃える（未決）。
-- **同梱フォント**（`assets/fonts/`）：SIL Open Font License 1.1（Noto 系）と
-  IPA フォントライセンス v1.0（IPAex 系）。いずれも再配布と埋め込みが認められている。
-  出典・版・SHA256 は `assets/fonts/SOURCES.md`。
-- **生成物**（`dataset/` の PDF・JSON・PNG）：**CC BY 4.0**（2026-10-06 決定）。
-  本文と帰属の書き方は `dataset/LICENSE`、宣言の正本は `specs/publish.yaml` の `license.id`。
-  公開先は Hugging Face Datasets `cvusk/japanese-contract-document-understanding`（まだ上げていない）。
-  `license.id` が `undecided` のあいだはカードが「未決」と表示し、frontmatter に `license` を出さず、
-  `scripts/upload_hf.py` が**アップロードを拒否する**という安全弁はそのまま残してある。
+本文、QA、図の説明は、Claude Code のセッション内で Claude（Anthropic）が生成した出力です。
+Anthropic の Usage Policy では、入力と出力を AI モデルの学習に使用すること
+（model scraping、model distillation を含む）が、事前の許可なく禁止されています
+（<https://www.anthropic.com/legal/aup>）。
 
-- **AI モデルの学習・蒸留には使えない。** 生成物の本文・QA・図の説明は Claude Code セッション内で
-  **Claude（Anthropic）が書いた Output** であり、Anthropic の Usage Policy が「入力と出力を
-  AI モデルの学習（model scraping・model distillation を含む）に用いること」を**事前許可なしに
-  禁じている**（<https://www.anthropic.com/legal/aup>）。
-  **読み取り・検索・AI エージェントの評価とベンチマークはこのデータの目的そのもの**で、
-  上の制限は一切かからない（除かれるのはモデルの重みを更新する用途だけ）。
-  これは **CC BY 4.0 の条件ではなく告知**である（CC BY 4.0 第 2 条(a)(5)(B)が下流への追加制限を
-  禁じているため、条件としては書けない）。文面は `dataset/LICENSE` と `dataset/README.md`、
-  仕様は **`docs/publishing.md` §10**。
+一方、文書読み取り、検索、AI エージェントの評価やベンチマークには利用できます。
+上記の制限が適用されるのは、モデルの重みを更新する用途です。
+
+これは CC BY 4.0 の条件ではなく、Anthropic の Usage Policy に基づく告知です。
+詳しくは `dataset/LICENSE`、`dataset/README.md`、`docs/publishing.md` §10 を参照してください。
